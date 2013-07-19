@@ -6,7 +6,7 @@ require 'rack-rewrite'
 $root = ::File.dirname(__FILE__)
 
 use Rack::Rewrite do
-  r301 '/blog/2013/07/19/centos-6-dot-4-server-setup-with-ruby-on-rails-comma-nginx-comma-and-postgresql/', '/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql/'
+  r301 %r{^/blog/2013/07/19/centos-6-dot-4-server-setup-with-ruby-on-rails-comma-nginx-comma-and-postgresql/?$}, 'http://karolgalanciak.com/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql/'
 end
 
 class SinatraStaticServer < Sinatra::Base
