@@ -185,10 +185,10 @@ gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-remi
 ```
 
-<p>Now, you are going to install some packages, like RVM (Ruby Version Manager Dependiencies) and other stuff.</p>
+<p>Now, you are going to install some packages, like RVM dependencies and other stuff.</p>
 
 ``` bash
-yum install git-core openssl openssl-devel subversion curl curl-devel gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel  make bzip2 autoconf automake libtool bison sqlite-devel libxml2 libxml2-devel libxslt libxslt-devel libtool
+sudo yum install git-core openssl openssl-devel subversion curl curl-devel gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel  make bzip2 autoconf automake libtool bison sqlite-devel libxml2 libxml2-devel libxslt libxslt-devel libtool
 ```
 
 <h2>RVM, Ruby and Rails</h2>
