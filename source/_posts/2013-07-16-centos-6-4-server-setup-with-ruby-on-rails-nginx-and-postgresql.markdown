@@ -542,7 +542,7 @@ export PATH=$PATH:/usr/local/bin
 convert -version
 ```
 
-<p>You should get output similar this:</p>
+<p>You should get output similar to this:</p>
 
 ``` bash
 Version: ImageMagick 6.8.6-6 2013-07-18 Q16 http://www.imagemagick.org
