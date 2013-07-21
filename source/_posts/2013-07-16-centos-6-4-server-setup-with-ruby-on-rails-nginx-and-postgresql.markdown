@@ -26,7 +26,7 @@ adduser deploy
 ``` bash
 passwd deploy
 ```
-<p>You shouldn't use root user often, but you will need root privileges for performing many tasks, like installing stuff. So it quite useful to edit sudo configuration - it will give deploy user an ability to perform all tasks which require root privileges by preceding command with sudo. Run:</p>
+<p>You shouldn't use root user often, but you will need root privileges for performing many tasks, like installing stuff, so it is quite useful to edit sudo configuration - it will give deploy user an ability to perform all tasks which require root privileges by preceding command with sudo. Run:</p>
 
 ``` bash
 visudo
@@ -134,7 +134,7 @@ The key's randomart image is:
 +-----------------+
 ```
 
-<p>What about the passphrase? It's up to you. If you leave it blank, you can ssh on your server by just entering: ssh server-name and that's all. Pretty nice, but if your local machine gets stolen, something really bad may happen with your server. So you should enter a passphrase, at least on your laptop. The only downside of passphrase is that you will be asked to enter it on each login.</p>
+<p>What about the passphrase? It's up to you. If you leave it blank, you can ssh on your server by just entering: ssh server-name and that's all. Pretty nice, but if your local machine gets stolen, something really bad may happen with your server. So, you should enter a passphrase, at least on your laptop. The only downside of passphrase is that you will be asked to enter it on each login.</p>
 
 <p>To finish setup on your server, enter the following commands:</p>
 
@@ -213,13 +213,13 @@ source ~/.bashrc
 PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
 ```
 
-<p>To check if everything was installed properly, enter:</p>
+<p>To check if everything was installed properly enter:</p>
 
 ``` bash
 type rvm | head -1
 ```
 
-<p>It should return something like: rvm is a function. If not, reload terminal session (simply logout and login again).</p>
+<p>It should return something like: rvm is a function. If not, reload terminal session (simply log out and log in again).</p>
 
 
 <p>And now you can install specified Ruby Version:</p>
@@ -534,7 +534,7 @@ make check
 
 ``` bash
 export PATH=$PATH:/usr/local/bin
-``` bash
+``` 
 
 <p>And check if everything works:</p>
 
