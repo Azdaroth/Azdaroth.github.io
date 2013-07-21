@@ -358,7 +358,7 @@ http {
     passenger_enabled on;
     rails_env production;
 
-    location ~ ^/(assets|images|javascripts|stylesheets|system|ads)/ {
+    location ~ ^/(assets|images|javascripts|stylesheets|system)/ {
       expires max;
       add_header Cache-Control public;
     }
