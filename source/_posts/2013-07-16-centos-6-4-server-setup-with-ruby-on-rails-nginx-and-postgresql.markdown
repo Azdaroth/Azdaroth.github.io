@@ -493,12 +493,12 @@ sudo chmod +x /etc/init.d/nginx
 <p>Now you can control Nginx by few commands:</p>
 
 ``` bash
-sudo /etc/init.d/nginx start
-sudo /etc/init.d/nginx stop
-sudo /etc/init.d/nginx reload
-sudo /etc/init.d/nginx restart
-sudo /etc/init.d/nginx status
-sudo /etc/init.d/nginx configtest
+sudo service nginx start
+sudo service nginx stop
+sudo service nginx reload
+sudo service nginx restart
+sudo service nginx status
+sudo service nginx configtest
 ```
 
 <p>To add Nginx to the default run levels, enter:</p>
