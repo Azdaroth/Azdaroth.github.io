@@ -42,7 +42,7 @@ gem 'therubyracer', platforms: :ruby
 
 <h2>Is my app secure?</h2>
 
-<p>Well, it depends. If you are the only person working on it, then you are safe. But if you aren't, then your session secret is available to other people, which makes your app vulnerable to <a href="http://robertheaton.com/2013/07/22/how-to-hack-a-rails-app-using-its-secret-token/">carefully crafted attacks</a> and you should exclude it from your code repository. Initialize git repository in your application:</p>
+<p>Well, it depends. If you are the only person working on it, then you are safe. But if you aren't, then your session secret is available to other people, which makes your app vulnerable to <a href="http://robertheaton.com/2013/07/22/how-to-hack-a-rails-app-using-its-secret-token/" target="_blank">carefully crafted attacks</a> and you should exclude it from your code repository. Initialize git repository in your application:</p>
 
 ``` bash
 git init
@@ -90,7 +90,6 @@ staging:
 
 <p>There is one extra thing in this config: the staging environment. We are going to use pre-production environment for testing purposes. If you want to share the same database between production and staging, then leave this config as it is.</p>
 
-<p>Don't forget to to create specified databases for all environments.</p>
 
 <p>You should also exclude database.yml from your code repository, not only for keeping your passwords secret, but also to prevent overriding local configuration when fetching code from repository - add to .gitignore file:</p>
 
@@ -104,7 +103,7 @@ staging:
 cp config/environments/production.rb config/environments/staging.rb
 ```
 
-<p>Capistrano configuration</p>
+<h2>Capistrano configuration</h2>
 
 <p>To create configuration files, run</p>
 
@@ -182,7 +181,7 @@ before 'deploy:assets:precompile', 'deploy:symlink_db' # callback: run this task
 before 'deploy:assets:precompile', 'deploy:symlink_secret_token' # # callback: run this task before deploy:assets:precompile
 after "deploy", "deploy:cleanup" # delete old releases
 ```
-<p>Now, create <i>deploy</i> directory in <i>config</i> directory and add production.rb and staging.rb files there. You have to specify paths, where the production and staging app instance will be deployled. Let's edit the production.rb file:</p>
+<p>Now, create <i>deploy</i> directory in <i>config</i> directory and add production.rb and staging.rb files there. You have to specify paths, where the production and staging app instance will be deployed. Let's edit the production.rb file:</p>
 
 ``` ruby config/deploy/production.rb
 set :deploy_to, "/home/deploy/rails_projects/dummy_app"
@@ -195,7 +194,7 @@ set :deploy_to, "/home/deploy/rails_projects/dummy_app"
 set :deploy_to, "/home/deploy/rails_projects/dummy_app_staging"
 ```
 
-<p>That's a basic configuration that should be sufficient in most cases. But Capistrano is a really sophisticated tool, you can specify diffrent servers for staging and production environment, diffrent git branches, diffrent repositories and many more. Just specify diffrent settings in production.rb and staging.rb if you need to.</p>
+<p>That's a basic configuration that should be sufficient in most cases. But Capistrano is a really sophisticated tool, you can specify diffrent servers for staging and production environment, diffrent git branches, diffrent repositories and many more. Just specify different settings in production.rb and staging.rb if you need to.</p>
 
 <h2>Deployment</h2>
 
@@ -216,7 +215,7 @@ git remote add origin ssh://deploy@your.ip.goes.here:port/home/deploy/repos/dumm
 git push origin master
 ```
 
-<p>You are ready to deploy our application, but before that you need to setup databases and http server configuration. If you have any problem, check <a hre"http://karolgalanciak.com/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql/">this one</a> out (remember about specifying appropriate rails_env). Firstly, let the Capistrano deal with creating all the neccessary directories in both staging and production environments:</p>
+<p>You are ready to deploy our application, but before that you need to setup databases and http server configuration. If you have any problem, check <a href="http://karolgalanciak.com/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql/" target="_blank">this one</a> out (remember about specifying appropriate rails_env). Firstly, let the Capistrano deal with creating all the neccessary directories in both staging and production environments:</p>
 
 ``` bash
 cap deploy:setup
@@ -289,7 +288,7 @@ set httpd port 2812 and
   allow @monit
 ```
 
-<p>There are a lot of available Monit recipies, e.g. <a href="http://mmonit.com/wiki/Monit/ConfigurationExamples">here</a>, so it is quite easy do setup. When you finish, restart Monit:</p>
+<p>There are a lot of available Monit recipies, e.g. <a href="http://mmonit.com/wiki/Monit/ConfigurationExamples" target="_blank">here</a>, so it is quite easy to setup. When you finish, restart Monit:</p>
 
 ``` bash
 sudo monit reload
@@ -369,7 +368,7 @@ server {
 <li><b>compress</b> - compress logs with gzip</li>
 <li><b>notifempty</b> - leave file if the logs are empty</li>
 <li><b>delaycompress</b> - postpone compression of the file to the next cycle</li>
-<li><b>sharedscripts</b> - tell only once that the logs have been rotated, not rach time for every group</a></li>
+<li><b>sharedscripts</b> - tell only once that the logs have been rotated, not several times for every group</a></li>
 <li><b>copytruncate</b> - copy the log file and and truncate the original one</li>
 <li><b>postrotate [ ! -f /var/run/nginx.pid ] || kill -USR1 `cat /var/run/nginx.pid` endscript</b> - tell Nginx that the logs have been rotated and use the new ones.</li>
 </ul>
