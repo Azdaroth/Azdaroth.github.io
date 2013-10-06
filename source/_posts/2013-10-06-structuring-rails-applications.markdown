@@ -6,20 +6,20 @@ comments: true
 categories: [OOP, Rails, Design Patterns, Callbacks, Refactoring]
 ---
 
-<p>There've been a lot of discussions recently about applying Object Oriented Programming in Rails applications, how ActiveRecord callbacks make testing painful and how Rails makes it hard to do OOP the right way. Is it really true? Rails makes everything easy - you can easily write terrible code, which will be a maintenance nightmare, but is also easy to apply good practices, especially with available gems. So what is the good way to extract logic in Rails applications and the best place to put it?</p>
+<p>There've been a lot of discussions recently about applying Object Oriented Programming in Rails applications, how ActiveRecord callbacks make testing painful and how Rails makes it hard to do OOP the right way. Is it really true? Rails makes everything easy - you can easily write terrible code, which will be a maintenance nightmare, but is also easy to apply good practices, especially with available gems. What is the good way then to extract logic in Rails applications and the best place to put it?</p>
 
 <h2>Standard structure</h2>
 
-<p>By default we have four directories, where we can put our code: models, views, controllers and helpers. The basic explanation of them is following:</p>
+<p>By default we have four directories where we can put our code: models, views, controllers and helpers. The basic explanation of them is following:</p>
 
 <ul>  
   <li>Models - dealing with database, validations, repository, persistence.</li>
-  <li>Controllers - parsing requests, sessions, rendering views etc.</li>
+  <li>Controllers - parsing requests, sessions, rendering views etc.</li> 
   <li>Views - user interface, data presenting.</li>
   <li>Helpers - place to put reusable methods for views.</li>
 </ul>
 
-<p>Does it mean this is the only place where you can put your code? No! It's just a default structure with basic parts of your application. You can easily extend it by creating new directories and then adding them to autoload paths, e.g.: </p>
+<p>Does it mean these are the only places where you can put your code? No! It's just a default structure with basic parts of your application. You can easily extend it by creating new directories and then adding them to autoload paths, e.g.: </p>
 
 ``` ruby
   config.autoload_paths += Dir["#{AppName::Application.config.root}/app/usecases"]
@@ -27,7 +27,7 @@ categories: [OOP, Rails, Design Patterns, Callbacks, Refactoring]
 
 <h2>How about lib directory?</h2>
 
-<p>Unless you are extracting something to a gem, I would discourage you from putting anything there. Some developers put in the lib all the code that does't belong to models/controllers/helpers, but if something is part of your application, why not add it to the app directory?</p>
+<p>Unless you are extracting something to a gem, I would discourage you from putting anything there. Some developers put in the lib all the code that doesn't belong to models/controllers/helpers, but if something is part of your application why not add it to the app directory?</p>
 
 <h2>Skinny controllers, fat models</h2>
 
@@ -35,17 +35,17 @@ categories: [OOP, Rails, Design Patterns, Callbacks, Refactoring]
 
 <h2>Is ActiveRecord evil?</h2>
 
-<p>ActiveRecord is a wonderful ORM, which indeed makes everythings easy. But with great power comes great responsibility. Think about callbacks: you can add new logic in a blink of an eye and it does the job. So you keep adding other callbacks until you discover that there are some cases, where you don't want them to be executed. So you add conditionals or bypass-like methods. After some time, the logic in callbacks is so complexed that you waste few hours with other developers to understand, why something was executed at all. If other developers join the project, it is even harder for them to understand, what model class really does. But it isn't the worst part. Think about some gems and their integration with Rails. Often it means extending models with another callbacks. Here are some real world problems:
+<p>ActiveRecord is a wonderful ORM, which indeed makes everythings easy. But with great power comes great responsibility. Think about callbacks: you can add new logic in a blink of an eye and it does the job. So you keep adding other callbacks until you discover that there are some cases where you don't want them to be executed. So you add conditionals or bypass-like methods. After some time, the logic in callbacks is so complexed that you waste few hours with other developers to understand why something was executed at all. If other developers join the project, it is even harder for them to understand what model class really does. But it isn't the worst part. Think about some gems and their integration with Rails. Often it means extending models with another callbacks. Here are some real world problems:
 
-<p>Imagine the situation, where you need to implement the ability for admin to register other users and the application uses Devise gem for authentication. Furthermore, the Confirmable module is included in the User class. Accidentally, you forgot to pass a date to :confirmed_at field or use confirm! method. What happens then? The confirmation email is sent to all registered users. Oops, welcome to the wonderful world of callbacks. I don't want to criticize Devise, because it is a great gem, which I use almost in every project, but I am not sure if sending emails being directly coupled to the model layer was a good design decision. In docs you can read about the skip_confirmation! method and if you use external gem for such a critical part of your application, you should read the entire docs, but it can be really suprising, that the confirmation email is sent in all cases, even if you create user from Rails Console. Oh, and guess what happens if you want to change one's email from the console and reconfirmable option is enabled? The confirmation email is sent... Well, remember about reading docs, especially when the gem may include callbacks.</p>
+<p>Imagine the situation where you need to implement the ability for admin to register other users and the application uses Devise gem for authentication. Furthermore, the <code> Confirmable</code> module is included in the <code>User</code>  class. Accidentally, you forgot to pass a date to <code>:confirmed_at</code> field or use <code>confirm!</code>  method. What happens then? The confirmation email is sent to all registered users. Oops, welcome to the wonderful world of callbacks. I don't want to criticize Devise, because it is a great gem, which I use in almost every project, but I am not sure if sending emails being directly coupled to the model layer was a good design decision. In docs you can read about the <code>skip_confirmation!</code> method and if you use external gem for such a critical part of your application, you should read the entire docs, but it can be really suprising, that the confirmation email is sent in all cases, even if you create user from Rails Console. Oh, and guess what happens if you want to change one's email from the console and <code> reconfirmable</code> option is enabled? The confirmation email is sent... Well, remember about reading docs, especially when the gem may include callbacks.</p>
 
-<p>Any other examples? Of course. So, you want to implement a generic forum. There is a gem called Forem, which provides you with basic forum functionality. And one day you want to change state of some posts to be approved. So you enter Rails Console and using update or update_attributes you perform the update. What happens then? There is callback in Forem::Post model:</p>
+<p>Any other examples? Of course. So, you want to implement a generic forum. There is a gem called Forem, which provides you with basic forum functionality. And one day you want to change state of some posts to be approved. So you enter Rails Console and using <code> update</code>  or <code>update_attributes</code> you perform the update. What happens then? There is a callback in <code>Forem::Post</code>  model:</p>
 
 ``` ruby
   after_save :email_topic_subscribers, :if => Proc.new { |p| p.approved? && !p.notified? }
 ```
 
-<p>A lot of emails have been just sent! That was really unexpected. If you are used to  skipping callbacks in such situatons by using update_columns method or any other way, you are safe, but callbacks are so tighly coupled to models, that you cannot be sure if you are safe, even in console. What is the conslusion? Beware of callbacks. And read docs and code of the gems you use :).</p>
+<p>A lot of emails have been just sent! That was really unexpected. If you are used to  skipping callbacks in such situatons by using <code>update_columns</code> method or any other way, you are safe, but callbacks are so tighly coupled to models, that you cannot be sure if you are safe, even in console. What is the conslusion? Beware of callbacks. And read docs and code of the gems you use :).</p>
 
 <p>So, how to avoid unexpected situations and have clean and understandable code?</p>
 
@@ -55,7 +55,7 @@ categories: [OOP, Rails, Design Patterns, Callbacks, Refactoring]
 
 <h3>Models</h3>
 
-<p>I use models for: factory methods, queries, scopes, general validations, which are always applicable e.g. presence and uniqueness validations for fields with null: false and / or unique: true constraints, also "domain constraints", especially with many-to-many associations. The example of domain constraint is assigning users, who belong to the same organization, to some subgroups - assigning users from other organizations is prohibited. Putting this kind of logic in controllers' before_filters or permission classes is not enough for me, I want to ensure the integrity of the data and make it impossible to bypass this restriction. Here is an example: we have User model and Group model and the many-to-many relationship between them, which is established by has_many , through: macro with GroupsUsers join model. Also, users and groups belong to Organization. Here is a validation for creating relation in join model:</p> 
+<p>I use models for: factory methods, queries, scopes, general validations, which are always applicable e.g. presence and uniqueness validations for fields with <code>null: false</code>  and / or <code>unique: true</code> constraints, also "domain constraints", especially with many-to-many associations. The example of domain constraint is assigning users, who belong to the same organization, to some subgroups - assigning users from other organizations is prohibited. Putting this kind of logic in controllers' before_filters or permission classes is not enough for me, I want to ensure the integrity of the data and make it impossible to bypass this restriction. Here is an example: we have <code>User</code>  model and <code>Group</code> model and the many-to-many relationship between them, which is established by <code>has_many , through: </code> macro with <code>GroupsUsers</code>  join model. Also, users and groups belong to <code>Organization</code>. Here is a validation for creating relation in join model:</p> 
 
 ``` ruby
 class GroupsUsers < ActiveRecord::Base
@@ -70,8 +70,8 @@ class GroupsUsers < ActiveRecord::Base
   private
 
     def ensure_valid_organization
-      unless user.organization == group.organization
-        raise InvalidOrganization, "User's organization does not match Group's organization."
+      if user.organization == group.organization
+        raise InvalidOrganizationError, "User's organization does not match Group's organization."
       end
     end
 
@@ -87,7 +87,7 @@ after_save    :calculate_statistics
 after_destroy :calculate_statistics
 ```
 
-<p>Pretty easy to understand: everytime the record is saved, I want to have parameterized form of name, e.g. for a slug. Also, after the record is saved or destroyed, I want the statistics to be updated. For instance, in real estate search engine application, investment has many apartments and I want to keep track of total count of apartments, average price, minimum and maximum price etc. without performing calculations each time. And one more callback concerning associations: dependent: :destroy option. It is pretty useful and keeps the integrity of data, but you have to be sure when using it. If you think for a moment, these are "low-level" callbacks - they don't concern business logic and are something that you would like to have on a database level. It can be also achieved by using trigger functions in the database, but Rails callbacks are much easier to handle.</p>
+<p>Pretty easy to understand: everytime the record is saved, I want to have parameterized form of name, e.g. for a slug. Also, after the record is saved or destroyed, I want the statistics to be updated. For instance, in real estate search engine application, investment has many apartments and I want to keep track of total count of apartments, average price, minimum and maximum price etc. without performing calculations each time. And one more callback concerning associations: <code>dependent: :destroy</code>  option. It is pretty useful and keeps the integrity of data, but you have to be sure when using it. If you think for a moment, these are "low-level" callbacks - they don't concern business logic and are something that you would like to have on a database level. It can be also achieved by using trigger functions in the database, but Rails callbacks are much easier to handle.</p>
 
 <p>This is not the only right way for using callbacks, if you are absolutely sure that something should really be executed as callback, feel free to use them, but please, don't send notifications, don't connect with Facebook API or download files from Dropbox in callbacks. You will be safe, the logic will be easy to understand and testing will be much easier.</p>
 
@@ -103,7 +103,7 @@ class Article < ActiveRecord::Base
 end
 ```
 
-<p>It is a great way to have a flexibility in publishing articles - by dependency injection we can control, how it is being published - just pass publisher class as a strategy. Having default publisher makes it easy to use: just call article.publish. Also, calling article.publish in e.g. controller feels much better than calling DefaultPublisher(article).publish.If you have very simple logic, like this one:</p>
+<p>It is a great way to have a flexibility in publishing articles - by dependency injection we can control, how it is being published - just pass publisher class as a strategy. Having default publisher makes it easy to use: just call <code>article.publish</code> . Also, calling <code>article.publish</code> in e.g. controller feels much better than calling <code>DefaultPublisher(article).publish</code>. If you have very simple logic, like this one:</p>
 
 ``` ruby
 def publish
@@ -117,7 +117,7 @@ end
 
 <h3>Controllers</h3>
 
-<p>Everything related to parsing requests, sessions, rendering templates, redirecting and flash messages should be put in controllers. What about application logic? In most cases it should be limited to a control flow, for example:</p>
+<p>Everything related to parsing requests, sessions, rendering templates, redirecting and flash messages should be put in controllers. What about application logic? In most cases it should be limited to a control-flow, for example:</p>
 
 ``` ruby
 class ArticlesController < ApplicationController
@@ -170,7 +170,7 @@ end
 
 ```
 
-<p>It is still good, such control-flow can take place in a controller, but order processing logic cannot. But what should be done with creating articles and sending notification or logging action? If it is only one additional line of code with method call like Tracker.register("create", @article) or NewArticleNotfier.delay.notify, for example:</p>
+<p>It is still good, such control-flow can take place in a controller, but order processing logic cannot. But what should be done with creating articles and sending notification or logging action? If it is only one additional line of code with method call like <code>Tracker.register("create", @article)</code> or <code>NewArticleNotfier.delay.notify</code>, for example:</p>
 
 ``` ruby
 
@@ -241,7 +241,7 @@ def section_marker(text)
 end
 ```
 
-Before each section I had to insert header with nested icon and some text, so instead of writing the same thing several times, I extracted it to a helper, which is much cleaner. It doesn't belong to any model, so helper is a good place to put this kind of code. If you use Boostrap a lot, you may consider writing modal_activator method:
+<p>Before each section I had to insert header with nested icon and some text, so instead of writing the same thing several times, I extracted it to a helper, which is much cleaner. It doesn't belong to any model, so helper is a good place to put this kind of code. If you use Boostrap a lot, you may consider writing <code>modal_activator</code> method:</p>
 
 ```ruby
 def modal_activator(text, path, options)
@@ -251,7 +251,7 @@ end
 
 <h3>Presenters/Decorators</h3>
 
-<p>Helpers aren't the best place to extract logic related to models - the code in helpers tends to be messy and difficult to maintain and test. The good solution would be to use Presenters - objects that encapsulate presentation logic in a neat way. There's a gem that is perfect for this kind of problems: Draper. Just create a decorator class, like UserDecorator: </p>
+<p>Helpers aren't the best place to extract logic related to models - the code in helpers tends to be messy and difficult to maintain and test. The good solution would be to use Presenters - objects that encapsulate presentation logic in a neat way. There's a gem that is perfect for this kind of problems: Draper. Just create a decorator class, like <code>UserDecorator</code>: </p>
 
 ``` ruby
 class UserDecorator < Draper::Base
@@ -278,18 +278,18 @@ end
 ```
 
 <p>Looks great! You don't have to keep presentation logic in helpers or even worse in models.
-You have an access to Rails helpers via h, also all method calls are delegated to model if it isn't implemented in a decorator. To decorate model just use .decorate method:</p>
+You have an access to Rails helpers via h, also all method calls are delegated to model if it isn't implemented in a decorator. To decorate model just use <code>decorate</code> method:</p>
 
 ``` ruby
 @user = User.find(params[:id]).decorate
 ```
 
-<p>You can also decorate collection by using .decorate method.</p>
+<p>You can also decorate collection by using <code>decorate</code> method.</p>
 
 
 <h3>Forms</h3>
 
-<p>Imagine a situation, where you need a form concerning more than one model. Also, some conditional validation is required. What would you do? Probably use nested attributes and add some complex validations, which would make model messy and maybe cause some bugs. There's much better way to do it: use form object and Reform gem. Then you can create following objects:</p>
+<p>Imagine a situation where you need a form concerning more than one model. Also, some conditional validation is required. What would you do? Probably use nested attributes and add some complex validations, which would make model messy and maybe cause some bugs. There's much better way to do it: use form object and Reform gem. Then you can create following objects:</p>
 
 ``` ruby
 require 'reform/form/coercion'
@@ -334,7 +334,7 @@ end
 
 ```
 
-<p>By using Reform gem, you can easily create clean form objects, which would deal with validations, coercions (thanks to Virtus) and persisting data concerning multiple models. Also, you can put some form interface logic here - consider countries_collection method: instead of passing: collection: Country.all.pluck(:id, :name) to the select field, you can just pass form_object.countries_collection. This example is trivial, but if you had some filtering and ordering logic needed to display collection, then it would be great way to keep everything clean. Using form objects doesn't change control flow in controllers:</p>
+<p>By using Reform gem, you can easily create clean form objects, which would deal with validations, coercions (thanks to Virtus) and persisting data concerning multiple models. Also, you can put some form interface logic here - consider <code>countries_collection</code> method: instead of passing: <code>collection: Country.all.pluck(:id, :name)</code> to the select field, you can just pass <code>form_object.countries_collection</code>. This example is trivial, but if you had some filtering and ordering logic needed to display collection, then it would be great way to keep everything clean. Using form objects doesn't change control-flow in controllers:</p>
 
 ``` ruby
 class UsersController < ApplicationController
@@ -367,11 +367,11 @@ class UsersController < ApplicationController
 end
 ```
 
-<p>Form objects are also great way to extract search forms and logic related to filtering. Reform can deal with has_many associations and nested collections, so it is pretty powerful. However, there are some cases, where you would still want to use accepts_nested_attributes_for - when you need funcionality provided by nested_form gem. It is not really clean to use accepts_nested_attributes_for macro, but the benefits are great. In other cases, form object is a way to go.</p>
+<p>Form objects are also great way to extract search forms and logic related to filtering. Reform can deal with <code>has_many</code> associations and nested collections, so it is pretty powerful. However, there are some cases where you would still want to use <code>accepts_nested_attributes_for</code> - when you need funcionality provided by nested_form gem. It is not really clean to use <code>accepts_nested_attributes_for</code> macro, but the benefits are great. In other cases, form object is a way to go.</p>
 
 <h3>Uploaders</h3>
 
-<p>For file uploading I use Carrierwave, where the uploaders' configuration is kept in the /uploaders directory. That's a really good approach, because thumb-processing strategy etc. has nothing to do with ActiveRecord model, so there's no reason to keep this kind of information there. Here is an example of general uploader:</p>
+<p>For file uploading I use Carrierwave where the uploaders' configuration is kept in the /uploaders directory. That's a really good approach, because thumb-processing strategy etc. has nothing to do with ActiveRecord model, so there's no reason to keep this kind of information there. Here is an example of general uploader:</p>
 
 ``` ruby
 class ApplicationUploader < CarrierWave::Uploader::Base
@@ -462,7 +462,7 @@ end
 
 <h3>Usecases</h3>
 
-<p>This is a place, where most of the business logic should be extracted - almost everything that would be in models, according to "skinny controllers, far models". The benefits of using usecase objects / service objects are great - they area easy to undestand and maintain, testing is simple and don't lead to unexpected actions (like the ones I pointed out in callbacks). Let's take a look again at the user registration process from form object, the implementation of UserRegistration could be following:</p>
+<p>This is a place where most of the business logic should be extracted - almost everything that would be in models, according to "skinny controllers, far models". The benefits of using usecase objects / service objects are great - they area easy to undestand and maintain, testing is simple and don't lead to unexpected actions (like the ones I pointed out in callbacks). Let's take a look again at the user registration process from form object, the implementation of <code>UserRegistration</code> could be following:</p>
 
 ``` ruby
 
@@ -503,7 +503,7 @@ end
 
 ```
 
-<p>Let's discuss some design choices here: in the constructor I added a possibility to inject some notifiers and provide reasonable defaults using Hash#fetch method to avoid nils. In #register method I wrap the persistence process in ActiveRecord::Base.transaction, to ensure that user is not created without the profile if any error occurs (notice the bang methods), if it fails, the exception is raised. Then, some notifiers are called, one is a mailer, the other one connects with an external service and does some stuff. They should be executed asynchronously, in Delayed Job, Resque or Sidekiq to make sure they are completed if failure occurs - there might be a temporary problem with connecting to Gmail, Facebook, Twitter etc. but it's not a reason for an entire registration process to fail.</p>
+<p>Let's discuss some design choices here: in the constructor I added a possibility to inject some notifiers and provide reasonable defaults using <code>Hash#fetch</code> method to avoid nils. In <code>register</code> method I wrap the persistence process in <code>ActiveRecord::Base.transaction</code>, to ensure that user is not created without the profile if any error occurs (notice the bang methods), if it fails, the exception is raised. Then, some notifiers are called, one is a mailer, the other one connects with an external service and does some stuff. They should be executed asynchronously, in Delayed Job, Resque or Sidekiq to make sure they are completed if failure occurs - there might be a temporary problem with connecting to Gmail, Facebook, Twitter etc. but it's not a reason for an entire registration process to fail.</p>
 
 
 <h3>Policies</h3>
@@ -549,7 +549,7 @@ end
 
 ```
 
-<p>In the constructor I pass an investment and the clock, which by default is DateTime. I had some issues with concept of time, especially in policy objects, where I had to implement own Clock, because DateTime was not sufficient, so just to be on a safe side, I add a possibility for a dependency injection. It doesn't increase a complexity of the class and I wouldn't consider it as a premature optimization. Then we have some methods that encapsulate promotion logic and one that returns proper status. You will probably use policy objects in many cases - e.g. promotion_status method looks like it could be used in a presenter, which would display proper content, depending on the returned status and the promoted? method could be used in the usecases or in a model class method that would return promoted investments. You can use policy objects in many ways: inject into a model and delegate method calls:</p>
+<p>In the constructor I pass an investment and the clock, which by default is <code>DateTime</code>. I had some issues with concept of time, especially in policy objects where I had to implement own <code>Clock</code>, because <code>DateTime</code> was not sufficient, so just to be on a safe side, I add a possibility for a dependency injection. It doesn't increase a complexity of the class and I wouldn't consider it as a premature optimization. Then we have some methods that encapsulate promotion logic and one that returns proper status. You will probably use policy objects in many cases - e.g. <code>promotion_status</code> method looks like it could be used in a presenter, which would display proper content, depending on the returned status and the <code>promoted?</code> method could be used in the usecases or in a model class method that would return promoted investments. You can use policy objects in many ways: inject into a model and delegate method calls:</p>
 
 ``` ruby
 
@@ -571,9 +571,9 @@ end
 
 <p>In the same way you can use them in presenters if you don't want to keep it in the model layer. They can also be injected as a dependency into a usecase. Choose whatever suits you better and the complexity of the application.</p>
 
-<h3>Values</h3>
+<h3>Value objects</h3>
 
-<p>In many applications you may encounter a situation, where a concept deserves own abstraction and whose equality isn't based on identity but on the value, some examples would be Ruby's Date or Money concept, typical for e-commerce applications. Extraction to a value object (or domain model) is a great convenience. Imagine a situation, where you have a hierarchy of roles of users - you will probably want to compare the roles if one is "greater" than another to decide, if some action can be performed - the RoleRank would solve this problem:</p>
+<p>In many applications you may encounter a situation where a concept deserves own abstraction and whose equality isn't based on identity but on the value, some examples would be Ruby's <code>Date</code> or <code>Money</code> concept, typical for e-commerce applications. Extraction to a value object (or domain model) is a great convenience. Imagine a situation where you have a hierarchy of roles of users - you will probably want to compare the roles if one is "greater" than another to decide, if some action can be performed - the <code>RoleRank</code> would solve this problem:</p>
 
 ``` ruby
 
@@ -645,9 +645,9 @@ user = User.new(permission_level: "superadmin")
 other_user = User.new(permission_level: "admin")
 user.role > other_user.role => true
 ```
-<h3>How about Observers and Concerns?</h3>
+<h3>What about Observers and Concerns?</h3>
 
-<p>There are two more ways to extract logic "the standard way": observers (removed from Rails 4) and concerns. Observers aren't really different from callbacks, except they are more difficult to deal with - you will probably forget that you've used them and debugging or following the application logic would be even harder than in callbacks and I'm glad they were removed. And the new thing in Rails 4: concerns. They are great, expecially for shared behaviour. When you need to parameterize field name in several models, you can extract it to a module in concerns, and then include Parameterizable concern, some custom finders and factory methods also can be extracted into concerns. If you use the same before_filters in more than controller, extracting them to the concerns would be a good idea. In Presenters, such concern as Presenters::Publishable would be beneficial when you have articles, posts and some other models that act in a similar way, so introducing concerns and encouragement to extract similar behaviour was definitely a good idea.</p>
+<p>There are two more ways to extract logic "the standard way": observers (removed from Rails 4) and concerns. Observers aren't really different from callbacks, except they are more difficult to deal with - you will probably forget that you've used them and debugging or following the application logic would be even harder than in callbacks and I'm glad they were removed. And the new thing in Rails 4: concerns. They are great, expecially for shared behaviour. When you need to parameterize field name in several models, you can extract it to a module in concerns, and then include Parameterizable concern, some custom finders and factory methods also can be extracted into concerns. If you use the same before_filters in more than controller, extracting them to the concerns would be a good idea. In Presenters, such concern as <code>Presenters::Publishable</code> would be beneficial when you have articles, posts and some other models that act in a similar way, so introducing concerns and encouragement to extract similar behaviour was definitely a good idea.</p>
 
 <h3>Any other application layers?</h3>
 
