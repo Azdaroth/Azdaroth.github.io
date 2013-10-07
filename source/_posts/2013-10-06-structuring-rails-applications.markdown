@@ -70,7 +70,7 @@ class GroupsUsers < ActiveRecord::Base
   private
 
     def ensure_valid_organization
-      if user.organization == group.organization
+      if user.organization != group.organization
         raise InvalidOrganizationError, "User's organization does not match Group's organization."
       end
     end
