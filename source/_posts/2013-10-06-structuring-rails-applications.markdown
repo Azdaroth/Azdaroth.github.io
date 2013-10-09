@@ -148,12 +148,12 @@ class OrdersController < ApplicationController
 
     begin
       payment_processor.pay
-    rescue BooksOrderProcessor::InsufficientFounds
-      flash.now[:error] = "You have run out of funds."
-      render :action
     rescue BooksOrderProcessor::InsufficientAmount
       flash.now[:error] = "Not enough books are available."
       render :action
+    rescue BooksOrderProcessor::InsufficientFounds
+      flash[:error] = "You have run out of funds."
+      redirect_to profiles_path(current_user)
     else
       flash[:notice] = "You have bought a book."
       redirect_to books_path
@@ -469,7 +469,7 @@ end
 class UserRegistration
   
   attr_reader :admin_notifier, :external_service_notifier
-  def initialize(user, profile, notifiers = {})
+  def initialize(notifiers = {})
     @admin_notifier = notifiers.fetch(:admin_notifier) { AdminNotifier.new }
     @external_service_notifier = notifiers.fetch(:external_service_notifier) { ExternalServiceNotifier.new }
   end
@@ -579,6 +579,8 @@ end
 
 class RoleRank
   
+  include Comparable
+
   ROLES = %w(superadmin admin junior_admin user guest)
 
   attr_reader :value
@@ -587,24 +589,8 @@ class RoleRank
     @value = value
   end
 
-  def >(other_role)
-    ROLES.index(value) < ROLES.index(other_role.value)
-  end
-
-  def <(other_role)
-    ROLES.index(value) > ROLES.index(other_role.value)
-  end
-
-  def >=(other_role)
-    self>(other_role) || self==(other_role)
-  end
-
-  def <=(other_role)
-    self<(other_role) || self==(other_role)
-  end
-
-  def ==(other_role)
-    ROLES.index(value) == ROLES.index(other_role.value)
+  def <=>(other_role)
+    ROLES.index(other_role.value) < ROLES.index(value)
   end
 
   def to_s
@@ -626,7 +612,7 @@ end
 
 ```
 
-<p>Looks great. You can add a method with ranked role to the user model: </p>
+<p>Looks great. The <code>Comparable</code> module and <code><=></code> takes care of implementing comparison operators. You can add a method with ranked role to the user model: </p>
 
 ``` ruby
 class User < ActiveRecord::Base
@@ -666,4 +652,7 @@ user.role > other_user.role => true
   <li><a href="http://blog.steveklabnik.com/posts/2011-09-06-the-secret-to-rails-oo-design" target="_blank">The Secret to Rails OO Design</a></li>
   <li><a href="http://objectsonrails.com" target="_blank">Objects On Rails</a></li>
   <li><a href="http://solnic.eu/2011/08/01/making-activerecord-models-thin.html" target="_blank">Making ActiveRecord Models Thin</a></li>
+  <li><a href="http://blog.arkency.com/2013/09/services-what-they-are-and-why-we-need-them/" target="_blank">Services - what are they and why we need them?</a></li>
 </ul>
+
+<p class="meta small-p">Changelog: 09-10-2013 - Use <code>Comparable</code> module and <code><=></code> method for implementing comparison operators in RankedRole. Provide better example in <code>OrdersController</code>. Thanks <a href="http://www.reddit.com/user/yxhuvud" rel="nofollow" target="_blank">yxhuvud</a> for suggestions.</p>
