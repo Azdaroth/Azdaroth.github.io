@@ -136,7 +136,7 @@ class ArticlesController < ApplicationController
 end
 ```
 
-<p>Depending on the action, it could be much more complexed. Consider the following:</p>
+<p>Depending on the action, it could be much more complex. Consider the following:</p>
 
 ``` ruby
 
@@ -150,7 +150,7 @@ class OrdersController < ApplicationController
       payment_processor.pay
     rescue BooksOrderProcessor::InsufficientAmount
       flash.now[:error] = "Not enough books are available."
-      render :action
+      render :new
     rescue BooksOrderProcessor::InsufficientFounds
       flash[:error] = "You have run out of funds."
       redirect_to profiles_path(current_user)
