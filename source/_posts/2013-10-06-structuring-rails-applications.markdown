@@ -153,7 +153,7 @@ class OrdersController < ApplicationController
       render :new
     rescue BooksOrderProcessor::InsufficientFounds
       flash[:error] = "You have run out of funds."
-      redirect_to profiles_path(current_user)
+      redirect_to profile_path(current_user)
     else
       flash[:notice] = "You have bought a book."
       redirect_to books_path
