@@ -26,7 +26,7 @@ adduser deploy
 ``` bash
 passwd deploy
 ```
-<p>You shouldn't use root user often, but you will need root privileges for performing many tasks, like installing stuff, so it is quite useful to edit sudo configuration - it will give deploy user an ability to perform all tasks which require root privileges by preceding command with sudo. Run:</p>
+<p>You shouldn't use root user often, but you will need root privileges for performing many tasks, like installing stuff, so it is quite useful to edit sudo configuration - it will give deploy user an ability to perform all tasks which require root privileges by preceding command with <code>sudo</code>. Run:</p>
 
 ``` bash
 visudo
@@ -44,7 +44,7 @@ root    ALL=(ALL)       ALL
 deploy    ALL=(ALL)       ALL
 ```
 
-<p>If you are not familiar with Vi editor, you have to press a, and then you can type :). When you finish hit escape and type :wq! .</p>
+<p>If you are not familiar with Vi editor, you have to press <code>a</code>, and then you can type :). When you finish hit escape and type <code>:wq!</code>.</p>
 
 <h2>Enhance security - configure SSH</h2>
 
@@ -63,7 +63,7 @@ vi /etc/ssh/sshd_config
 
 <p>Default 22 port for SSH is not insecure, but changing it to some other value will make it more difficult to compromise your server by automated attacks. Pick any number less than 65536 and uncomment this line.</p>
 
-<p>Another option is PermitRootLogin - change it to no to disable logging as root through ssh. You have root privileges by using sudo, so you don't need to login as root anyway.</p>
+<p>Another option is <code>PermitRootLogin</code> - change it to no to disable logging as root through ssh. You have root privileges by using <code>sudo</code>, so you don't need to login as root anyway.</p>
 
 <p>If you are going to create some more users, but you don't want them to login through ssh, add following line:</p>
 
@@ -85,7 +85,7 @@ ssh -p new-port deploy@your-ip
 
 <h2>Uhh, what was that IP?</h2>
 
-<p>You can avoid typing your IP number on every login by using named hosts, which is quite simple: create or edit ~/.ssh/config (on your local machine, not server) and add:</p>
+<p>You can avoid typing your IP number on every login by using named hosts, which is quite simple: create or edit <code>~/.ssh/config</code> (on your local machine, not server) and add:</p>
 
 ``` bash
 Host some-awesome-server-name
@@ -145,7 +145,7 @@ chmod 700 ~/.ssh
 chmod 600 ~/.ssh/authorized_key
 ```
 
-<p>Setting these permissions is essential and ssh will stop working if StrictModes is set in configuration (and probably is by default). Now, copy your <b>PUBLIC</b> key to authorized_keys file on your server:</p>
+<p>Setting these permissions is essential and ssh will stop working if <code>StrictModes</code> is set in configuration (and probably is by default). Now, copy your <b>PUBLIC</b> key to authorized_keys file on your server:</p>
 
 ``` bash
   cat ~/.ssh/id_rsa.pub | ssh server-name "cat >> ~/.ssh/authorized_keys"
@@ -173,7 +173,7 @@ sudo rpm -Uvh remi-release-6*.rpm epel-release-6*.rpm
 sudo vi /etc/yum.repos.d/remi.repo
 ```
 
-<p>In [remi] section set the enabled option to 1.</p>
+<p>In <code>[remi]</code> section set the enabled option to 1.</p>
 
 ``` bash 
 [remi]
@@ -193,7 +193,7 @@ sudo yum install git-core openssl openssl-devel subversion curl curl-devel gcc-c
 
 <h2>RVM, Ruby and Rails</h2>
 
-<p>Now you can proceed to installing Ruby. We will use RVM - command-line tool, which makes managing multiple Ruby versions really easy. Some developers prefer Rbenv, but I've never had any issues with RVM. To install RVM enter:</p>
+<p>Now you can proceed to installing Ruby. We will use RVM - command-line tool, which makes managing multiple Ruby versions really easy. To install RVM enter:</p>
 
 ``` bash
 \curl -L https://get.rvm.io | bash -s stable
@@ -206,7 +206,7 @@ source /home/deploy/.rvm/scripts/rvm
 source ~/.bashrc
 ```
 
-<p>Make sure you have following lines in your ~/.bashrc file :</p>
+<p>Make sure you have following lines in your <code>~/.bashrc</code> file :</p>
 
 ``` bash
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm"
@@ -219,7 +219,7 @@ PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
 type rvm | head -1
 ```
 
-<p>It should return something like: rvm is a function. If not, reload terminal session (simply log out and log in again).</p>
+<p>It should return something like: <code>rvm is a function</code>. If not, reload terminal session (simply log out and log in again).</p>
 
 
 <p>And now you can install specified Ruby Version:</p>
@@ -257,7 +257,7 @@ rvmsudo passenger-install-nginx-module
 
 <p>Choose the recommended install mode.</p>
 
-<p>Now, open the Nginx configuration file (/opt/nginx/cong/nginx.conf if you haven't changed it during installation).</p>
+<p>Now, open the Nginx configuration file (<code>/opt/nginx/cong/nginx.conf</code> if you haven't changed it during installation).</p>
 
 
 ``` bash
@@ -530,7 +530,7 @@ sudo ldconfig /usr/local/lib
 make check
 ``` 
 
-<p>Export PATH variable:</p>
+<p>Export <code>PATH</code> variable:</p>
 
 ``` bash
 export PATH=$PATH:/usr/local/bin
@@ -553,13 +553,13 @@ Delegates: bzlib freetype jng jp2 jpeg png ps tiff xml zlib
 
 <h2>PostgreSQL</h2>
 
-<p>So, the last step is installing PostgreSQL. Firstly, you have to modify /etc/yum.repos.d/CentOS-Base.repo file:</p>
+<p>So, the last step is installing PostgreSQL. Firstly, you have to modify <code>/etc/yum.repos.d/CentOS-Base.repo</code> file:</p>
 
 ``` bash
 sudo vi /etc/yum.repos.d/CentOS-Base.repo
 ```
 
-<p>and in both [base] and [updates] sections add the following line:</p>
+<p>and in both <code>[base]</code> and <code>[updates]</code> sections add the following line:</p>
 
 ``` bash
 exclude=postgresql*
@@ -595,7 +595,7 @@ psql
 ``` bash
 alter user postgres with password 'postgres-user-password';
 ```
-<p>Logout from postgres user and modify /var/lib/pgsql/9.2/data/pg_hba.conf:</p>
+<p>Logout from postgres user and modify <code>/var/lib/pgsql/9.2/data/pg_hba.conf</code>:</p>
 
 ``` bash
 sudo vi /var/lib/pgsql/9.2/data/pg_hba.conf

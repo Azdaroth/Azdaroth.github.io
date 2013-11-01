@@ -21,7 +21,7 @@ categories: [Capistrano, Deployment]
 rails new dummy_app
 ```
 
-<p>add capistrano, capistrano-ext, rvm-capistrano (for RVM integration) and pg gems(for Postgres database) to your Gemfile:</p>
+<p>add <code>capistrano</code>, <code>capistrano-ext</code>, <code>rvm-capistrano</code> (for RVM integration) and <code>pg</code> gems(for Postgres database) to your Gemfile:</p>
 
 ``` ruby Gemfile
 gem 'pg'
@@ -48,7 +48,7 @@ gem 'therubyracer', platforms: :ruby
 git init
 ``` 
 
-<p>And add to your .gitignore file the following line:</p>
+<p>And add to your <code>.gitignore</code> file the following line:</p>
 
 ``` bash .gitignore
 /config/initializers/secret_token.rb
@@ -56,7 +56,7 @@ git init
 
 <h2>Database and staging environment config</h2>
 
-<p>Now, edit database configuration file (config/database.yml), so it looks similar to this:</p>
+<p>Now, edit database configuration file (<code>config/database.yml</code>), so it looks similar to this:</p>
 
 ``` yaml config/database.yml
 development:
@@ -91,7 +91,7 @@ staging:
 <p>There is one extra thing in this config: the staging environment. We are going to use pre-production environment for testing purposes. If you want to share the same database between production and staging, then leave this config as it is.</p>
 
 
-<p>You should also exclude database.yml from your code repository, not only for keeping your passwords secret, but also to prevent overriding local configuration when fetching code from repository - add to .gitignore file:</p>
+<p>You should also exclude <code>database.yml</code> from your code repository, not only for keeping your passwords secret, but also to prevent overriding local configuration when fetching code from repository - add to <code>.gitignore</code> file:</p>
 
 ``` bash
 /config/database.yml
@@ -111,13 +111,13 @@ cp config/environments/production.rb config/environments/staging.rb
 capify .
 ```
 
-<p>It will create two files: config/deploy.rb and Capfile. Start with editing Capfile and uncomment this line:</p>
+<p>It will create two files: <code>config/deploy.rb</code> and <code>Capfile</code>. Start with editing <code>Capfile</code> and uncomment this line:</p>
 
 ``` ruby Capfile
 load 'deploy/assets'
 ```
 
-<p>Next, open the deploy.rb remove the default content, copy & paste the script below and adjust it according to the comments.</p>
+<p>Next, open the <code>deploy.rb</code> remove the default content, copy & paste the script below and adjust it according to the comments.</p>
 
 ``` ruby config/deploy.rb
 require "bundler/capistrano"
@@ -181,24 +181,24 @@ before 'deploy:assets:precompile', 'deploy:symlink_db' # callback: run this task
 before 'deploy:assets:precompile', 'deploy:symlink_secret_token' # # callback: run this task before deploy:assets:precompile
 after "deploy", "deploy:cleanup" # delete old releases
 ```
-<p>Now, create <i>deploy</i> directory in <i>config</i> directory and add production.rb and staging.rb files there. You have to specify paths, where the production and staging app instance will be deployed. Let's edit the production.rb file:</p>
+<p>Now, create <code>deploy</code> directory in <code>config</code> directory and add <code>production.rb</code> and <code>staging.rb</code> files there. You have to specify paths, where the production and staging app instance will be deployed. Let's edit the <code>production.rb</code> file:</p>
 
 ``` ruby config/deploy/production.rb
 set :deploy_to, "/home/deploy/rails_projects/dummy_app"
 ```
 
-<p>and staging.rb:</p>
+<p>and <code>staging.rb</code>:</p>
 
 
 ``` ruby config/deploy/production.rb
 set :deploy_to, "/home/deploy/rails_projects/dummy_app_staging"
 ```
 
-<p>That's a basic configuration that should be sufficient in most cases. But Capistrano is a really sophisticated tool, you can specify diffrent servers for staging and production environment, diffrent git branches, diffrent repositories and many more. Just specify different settings in production.rb and staging.rb if you need to.</p>
+<p>That's a basic configuration that should be sufficient in most cases. But Capistrano is a really sophisticated tool, you can specify diffrent servers for staging and production environment, diffrent git branches, diffrent repositories and many more. Just specify different settings in <code>production.rb</code> and <code>staging.rb</code> if you need to.</p>
 
 <h2>Deployment</h2>
 
-<p>Before deploying your app, you have to setup git repository. We will create just an empty repo in <i>/home/deploy/repos</i> directory on remote server: </p>
+<p>Before deploying your app, you have to setup git repository. We will create just an empty repo in <code>/home/deploy/repos</code> directory on remote server: </p>
 
 ``` bash 
 ssh your-server "mkdir /home/deploy/repos && mkdir /home/deploy/repos/dummy_app.git  && git init --bare /home/deploy/repos/dummy_app.git"
@@ -230,7 +230,7 @@ cap production deploy:check
 
 <p>In both cases you should have output ending with: <i>You appear to have all necessary dependencies installed.</i></p>
 
-<p>The last thing before deployment: we haven't included <i>secret_token.rb</i> and <i>database.yml</i> files in repo, so we have to copy them on remote server:</p>
+<p>The last thing before deployment: we haven't included <code>secret_token.rb</code> and <code>database.yml</code> files in repo, so we have to copy them on remote server:</p>
 
 ``` bash
 scp config/database.yml you-server:/home/deploy && scp config/initializers/secret_token.rb your-server:/home/deploy
@@ -240,18 +240,18 @@ ssh you_server "cp /home/deploy/database.yml /home/deploy/rails_projects/dummy_a
 ssh you_server "cp /home/deploy/secret_token.rb /home/deploy/rails_projects/dummy_app/shared/config/initializers/secret_token.rb && mv /home/deploy/secret_token.rb /home/deploy/rails_projects/dummy_app_staging/shared/config/initializers/secret_token.rb"
 ```
 
-<p>And you can deploy your application. Instead of cap deploy, use cap deploy:cold and cap production deploy:cold - it will deploy the app, run all migrations and run deploy start instead of cap:restart.</p>
+<p>And you can deploy your application. Instead of <code>cap deploy</code>, use <code>cap deploy:cold</code> and <code>cap production deploy:cold</code> - it will deploy the app, run all migrations and run deploy start instead of <code>cap:restart</code>.</p>
 
 ``` bash
 cap deploy:cold
 cap production deploy:cold
 ```
 
-<p>Done! You have just deployed your application. Next time use cap deploy or cap deploy:migrations to run migrations.</p>
+<p>Done! You have just deployed your application. Next time use cap deploy or <code>cap deploy:migrations</code> to run migrations.</p>
 
 <h2>Monitoring with Monit</h2>
 
-<p>How do you know if everything is running correctly after deployment? Well, you don't know, unless you install a monitoring tool. Monit is a great and easy to configure utility for managing and monitoring processes. Let's start with installing Monit on remote server (I use CentOS Linux, there are some differences between distros, so the location of the files might be diffrent, e.g. on Debian, the configuration file is in /etc/monit/monit.rc):</p>
+<p>How do you know if everything is running correctly after deployment? Well, you don't know, unless you install a monitoring tool. Monit is a great and easy to configure utility for managing and monitoring processes. Let's start with installing Monit on remote server (I use CentOS Linux, there are some differences between distros, so the location of the files might be diffrent, e.g. on Debian, the configuration file is in <code>/etc/monit/monit.rc</code>):</p>
 
 ``` bash
 sudo yum install monit
@@ -326,7 +326,7 @@ server {
 
 <h2>Logrotate</h2>
 
-<p>After some time your Rails app logs and especially Nginx logs might be really large, so it is a good idea to somehow manage them. Fortunately, you can use system-built utility called Logrotate. Just open <i>/etc/logrotate.conf</i> and paste the configuration below (remember about changing path to your application):</p>
+<p>After some time your Rails app logs and especially Nginx logs might be really large, so it is a good idea to somehow manage them. Fortunately, you can use system-built utility called Logrotate. Just open <code>/etc/logrotate.conf</code> and paste the configuration below (remember about changing path to your application):</p>
 
 
 ``` bash

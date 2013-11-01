@@ -590,7 +590,7 @@ class RoleRank
   end
 
   def <=>(other_role)
-    ROLES.index(other_role.value) < ROLES.index(value)
+    ROLES.index(other_role.value) <=> ROLES.index(value)
   end
 
   def to_s
