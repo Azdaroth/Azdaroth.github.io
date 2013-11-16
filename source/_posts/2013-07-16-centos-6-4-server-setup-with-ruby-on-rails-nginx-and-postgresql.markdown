@@ -142,7 +142,7 @@ The key's randomart image is:
 mkdir ~/.ssh
 touch ~/.ssh/authorized_keys
 chmod 700 ~/.ssh
-chmod 600 ~/.ssh/authorized_key
+chmod 600 ~/.ssh/authorized_keys
 ```
 
 <p>Setting these permissions is essential and ssh will stop working if <code>StrictModes</code> is set in configuration (and probably is by default). Now, copy your <b>PUBLIC</b> key to authorized_keys file on your server:</p>
