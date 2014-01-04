@@ -36,7 +36,7 @@ Before discussing arguments for and against mocks and stubs, I should explain di
 
 describe SomeUsecase do
 
-#some code with initializing object under the test () and setting collaborators
+# some code with initializing object under the test and setting collaborators
 
   context “user is an admin “ do
     it “sends a notification” do
@@ -57,14 +57,13 @@ describe SomeUsecase do
 end
 
 ```
-<p>In this usecase, a <code>user</code> has predetermined response when the :admin? message is sent – this is stub. Depending on the response, the  :deliver message is sent to the<code>notifier</code> or not –which is a mock. By using mocks, you discover how the objects interact with its’ collaborators and ensure that proper expectations are met.</p>
+<p>In this usecase, a <code>user</code> has predetermined response when the <code>:admin?</code> message is sent – this is stub. Depending on the response, the  <code>:deliver</code> message is sent to the<code>notifier</code> or not – which is a mock. By using mocks, you discover how the objects interact with its’ collaborators and ensure that proper expectations are met.</p>
 
-<p>There are many arguments for using mocks and stubs, but also there are some valid issues against them. The most significant is that it can make your tests brittle, especially when you stub non-existent method (or mock). Because of that, many developers prefer to stay with integration tests using real objects. Fortunately, there are some solutions to prevent this problem. Since RSpec 3.0 (at time of writing this post the current version is beta1) the functionality of rspec-fire is merged into the core of the framework, which provides safe stubs that will inform you about stubbing non-exiting method. You can also check bogus <a href="https://www.relishapp.com/bogus/bogus/v/0-1-4/docs/getting-started" target="_blank">bogus</a> gem that provides similar functionality.</p>
+<p>There are many arguments for using mocks and stubs, but also there are some valid issues against them. The most significant is that it can make your tests brittle, especially when you stub non-existent method (or mock). Because of that, many developers prefer to stay with integration tests using real objects. Fortunately, there are some solutions to prevent this problem. Since RSpec 3.0 (at time of writing this post the current version is beta1) the functionality of rspec-fire is merged into the core of the framework, which provides safe stubs that will inform you about stubbing non-existent method. You can also check <a href="https://www.relishapp.com/bogus/bogus/v/0-1-4/docs/getting-started" target="_blank">bogus</a> gem that provides similar functionality.</p>
 
 <p>What are the benefits of using mock objects? You can test in isolation, which will make your test-suite running much faster – you don’t have to talk to the database, send notifications, connect to an external API etc. – slow test suite can be really discouraging. And the other important aspect of using mock objects is the design: if you use real objects, you won’t get much feedback about your code design. Mock objects force you to write a clean and OOP code – if you don’t, tests will simply get really ugly, which is the symptom of bad design choices.</p>
 
 <p>While mocking there is an important rule to follow: only mock collaborators (peers), not the internals (like private methods – it’s an implementation detail) of the object  – if you think about doing so, then you should redesign your class. One more rule, which I don’t dogmatically follow, but is also important: only mock types you own. When you don’t own the API, you can’t be absolutely certain that the code will work in the future. It looks reasonable, but why would I treat more it like a suggestion? Consider ActiveRecord API – why wouldn’t you mock it? It is pretty stable and I can trust it won’t change, at least in the nearest future. If possible, you should implement own domain methods and treat ActiveRecord as an implementation detail – instead of calling <code>user.update(active: true)</code> in service object, you should use <code>activate</code> method: <code>user.activate</code> and define this method in the model layer, however, <code>update</code> might be sometimes the thing you need and then you can mock it.</p> 
-
 
 <h2>TDD rules and cycle</h2>
 
@@ -78,7 +77,7 @@ end
 
 <h3>Do not test ActiveRecord and friends</h3>
 
-<p>This may seem strange at first, but I’ve seen many tests having no real value and seemed as if ActiveRecord or ActiveModel cannot be trusted. Consider the following User model example:</p>
+<p>This may seem strange at first, but I’ve seen many tests having no real value and seemed as if ActiveRecord or ActiveModel cannot be trusted. Consider the following <code>User</code> model example:</p>
 
 ``` ruby
 
@@ -94,7 +93,7 @@ end
 
 
 ```
-<p>What kind of value does this test provide? The only scenario when this test might fail is when the model lacks of presence validation for name attribute. So either you are writing test for ActiveModel::Validations (believe me, it is already tested) or for the presence of the line of code with:</p>
+<p>What kind of value does this test provide? The only scenario when this test might fail is when the model lacks of presence validation for name attribute. So either you are writing test for <code>ActiveModel::Validations</code> (believe me, it is already tested) or for the presence of the line of code with:</p>
   
 ``` ruby
   validates :name, presence: true
@@ -181,6 +180,7 @@ end
 <p>It’s a typical easy CRUD Rails controller, where you don’t even need to read the code to know, what it does. It is so generic that you could DRY it up with some metaprogramming and naming conventions, or simply use <a href="https://github.com/josevalim/inherited_resources" target="_blank">Inherited Resources</a> gem. In many Rails testing tutorials you can find a section with controllers’ testing, which look basically like that:</p>
 
 ``` ruby
+
 describe "#create" do
   
   context "valid attributes" do
@@ -216,7 +216,8 @@ describe "#create" do
 end
 
 ```
-<p>And add tests for the remaining six actions. How much value do these tests provide? It does everything what is expected from simple controller and the only reason it may fail is making a typo. The same thing applies to tests with mocks and stubs in controllers testing. Basically I see no point at all in writing tests for CRUD controllers. To make things easier and make sure it works, you can provide some generic solution like inherited_resources gem or use Rails scaffolding.</p>
+
+<p>And add tests for the remaining six actions. How much value do these tests provide? It does everything what is expected from simple controller and the only reason it may fail is making a typo. The same thing applies to tests with mocks and stubs in controllers testing. Basically I see no point at all in writing tests for CRUD controllers. To make things easier and make sure it works, you can provide some generic solution like <a href="https://github.com/josevalim/inherited_resources" target="_blank">Inherited Resources</a> gem or use Rails scaffolding.</p>
 
 <p>The important thing is: you need to test controllers, but don’t do it for typical CRUD. Otherwise, you should thoroughly test your code, especially before_filters with some authorization and domain related logic.</p>
 
@@ -253,7 +254,7 @@ end
 
 <p>Write tests for not trivial scopes, especially when you write raw complex SQL queries – some of them might be quite difficult to follow is much more convenient to verify query through tests, not e.g. in Rails Console or dbconsole.</p>
 
-<p>Scopes with some database specific queries should be tested – e.g. hstore or arrays in PostgreSQL. Some operators like hstore ?& text[] (which means: does hstore contain all specified keys?) might look mystical at first glance. It is quite beneficial to test drive this kind of functionality. Sometimes it is not that obvious, how to use this kind of scopes and what result can be expected, even with nice, descriptive name and tests can help as a documentation.</p>
+<p>Scopes with some database specific queries should be tested – e.g. hstore or arrays in PostgreSQL. Some operators like <code>hstore ?& text[]</code> (which means: does hstore contain all specified keys?) might look mystical at first glance. It is quite beneficial to test drive this kind of functionality. Sometimes it is not that obvious, how to use this kind of scopes and what result can be expected, even with nice, descriptive name and tests can help as a documentation.</p>
 
 <p>Write tests for some domain methods  - when you have for instance User model, with attribute :active which can be either false or true, you can provide the following method:</p>
 
@@ -284,7 +285,7 @@ end
 
 <h3>Controllers</h3>
 
-<p>Basically everything beyond the CRUD requires testing, especially some authorization-related logic. Consider the ArticlesController and the feature, when we don’t want to render inactive article for non-admin user:</p>
+<p>Basically everything beyond the CRUD requires testing, especially some authorization-related logic. Consider the <code>ArticlesController</code> and the feature, when we don’t want to render inactive article for non-admin user:</p>
 
 ``` ruby
 
@@ -372,7 +373,7 @@ end
 
 <h3>Presenters</h3>
 
-<p>Most of the time tests are not that essential for the presenters – they contain presentation logic, often related to nice formatting and, unless it is somehow business-critical, you don’t have to test it. If you have some complex logic, consider moving it to a separate class and write test for the new object (maybe <code>DateFormatter</code>?). Personally I write tests for methods, where few scenarios are possible (i.e. the contain conditionals) – it serves as a nice documentation and gives instant information how it works.</p>
+<p>Most of the time tests are not that essential for the presenters – they contain presentation logic, often related to nice formatting and, unless it is somehow business-critical, you don’t have to test it. If you have some complex logic, consider moving it to a separate class and write test for the new object (maybe <code>DateFormatter</code>?). Personally I write tests for methods, where few scenarios are possible (i.e. they contain conditionals) – it serves as a nice documentation and gives instant information how it works.</p>
 
 <p>I wouldn’t write test for the following usecase:</p>
 
