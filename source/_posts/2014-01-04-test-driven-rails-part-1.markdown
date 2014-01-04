@@ -244,7 +244,7 @@ end
 
 <p>Cucumber seems to have significant popularity among developers. One argument for using Cucumber is that it helps non-technical people read and write tests and, e.g. sit with the client and let him/her write some scenarios. Yeah, right. Honestly, how many clients have you met who wrote any tests? Was it worth adding additional layer of complexity and maintaining it?</p>
 
-<p>Cucumber makes you duplicating your intentions – firstly, you write some scenarios in and then implement in RSpec. Why not to implement them in RSpec alone, when Capybara DSL is extremely expressive? Cucumber is the most overrated tool and in most cases it is simple waste of time with no benefits at all. If you use Cucumber in everyday testing, then take some time and think if you really need it and how valuable are these tests for you. If you haven’t tried Cucumber yet, don’t bother.</p>
+<p>Cucumber makes you duplicating your intentions – firstly, you write some scenarios and then implement in RSpec. Why not to implement them in RSpec alone, when Capybara DSL is extremely expressive? <del>Cucumber is the most overrated tool and in most cases it is simple waste of time with no benefits at all. If you use Cucumber in everyday testing, then take some time and think if you really need it and how valuable are these tests for you. If you haven’t tried Cucumber yet, don’t bother.</del>  If you use Cucumber in everyday testing, then take some time and think if you really need it and how valuable these tests are for you. If you haven’t tried Cucumber yet, make sure it solves your actual problems.</p>
 
 <h2>What needs to be tested</h2>
 
