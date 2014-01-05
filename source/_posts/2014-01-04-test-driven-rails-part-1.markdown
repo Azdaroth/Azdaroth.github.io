@@ -46,7 +46,7 @@ describe SomeUsecase do
     end
   end
 
-  context “user is not admin admin” do
+  context “user is not an admin” do
     it “doesn’t send a notification” do
       allow(user).to receive(:admin?).and_return(false) 
       expect(notifier).not_to receive(:deliver)
