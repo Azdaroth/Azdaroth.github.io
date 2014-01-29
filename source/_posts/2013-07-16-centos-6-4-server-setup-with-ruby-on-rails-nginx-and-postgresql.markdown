@@ -225,14 +225,14 @@ type rvm | head -1
 <p>And now you can install specified Ruby Version:</p>
 
 ``` bash
-rvm install 2.0.0
+rvm install 2.1.0
 ```
 
 <p>Use installed Ruby version as the default one:</p>
 
 ``` bash
-rvm use 2.0.0
-rvm use 2.0.0 --default
+rvm use 2.1.0
+rvm use 2.1.0 --default
 ```
 
 <p>Nice! You've successfully installed Ruby. Now, you can install Bundler and Rails.</p>
@@ -310,8 +310,8 @@ events {
 
 
 http {
-  passenger_root /home/azdaroth/.rvm/gems/ruby-2.0.0-p247/gems/passenger-4.0.10;
-  passenger_ruby /home/azdaroth/.rvm/wrappers/ruby-2.0.0-p247/ruby;
+  passenger_root /home/azdaroth/.rvm/gems/ruby-2.1.0/gems/passenger-4.0.35;
+  passenger_ruby /home/azdaroth/.rvm/wrappers/ruby-2.1.0/ruby;
 
   include       mime.types;
   default_type  application/octet-stream;
@@ -522,7 +522,7 @@ sudo yum install libjpeg libjpeg-devel libpng-devel libpng-devel freetype freety
 ``` bash
 wget http://www.imagemagick.org/download/ImageMagick.tar.gz
 tar xvfz ImageMagick.tar.gz
-cd ImageMagick-6.8.6-6
+cd ImageMagick-6.8.8-2
 ./configure
 make 
 sudo make install
@@ -545,7 +545,7 @@ convert -version
 <p>You should get output similar to this:</p>
 
 ``` bash
-Version: ImageMagick 6.8.6-6 2013-07-18 Q16 http://www.imagemagick.org
+Version: ImageMagick 6.8.8-2 2013-07-18 Q16 http://www.imagemagick.org
 Copyright: Copyright (C) 1999-2013 ImageMagick Studio LLC
 Features: DPC OpenMP
 Delegates: bzlib freetype jng jp2 jpeg png ps tiff xml zlib
@@ -567,21 +567,21 @@ exclude=postgresql*
 <p>Now, install  PostgreSQL repository and PostgreSQL itself:</p>
 
 ``` bash
-sudo rpm -Uvh http://yum.postgresql.org/9.2/redhat/rhel-6-x86_64/pgdg-redhat92-9.2-7.noarch.rpm
-sudo yum install postgresql92 postgresql92-devel postgresql92-server postgresql92-libs postgresql92-contrib 
+sudo rpm -Uvh http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.noarch.rpm
+sudo yum install postgresql93 postgresql93-devel postgresql93-server postgresql93-libs postgresql93-contrib 
 ```
 
 <p>You have to initialize database cluster before doing anything:</p>
 
 ``` bash
-sudo /etc/init.d/postgresql-9.2 initdb
+sudo /etc/init.d/postgresql-9.3 initdb
 ```
 
 <p>And you can start Postgres and add it do default run levels:</p>
 
 ``` bash
-sudo service postgresql-9.2 start
-sudo chkconfig --levels 235 postgresql-9.2 on
+sudo service postgresql-9.3 start
+sudo chkconfig --levels 235 postgresql-9.3 on
 ```
 
 <p>The very first thing you should do with Postgres is setting password for postgres user:</p>
@@ -595,10 +595,10 @@ psql
 ``` bash
 alter user postgres with password 'postgres-user-password';
 ```
-<p>Logout from postgres user and modify <code>/var/lib/pgsql/9.2/data/pg_hba.conf</code>:</p>
+<p>Logout from postgres user and modify <code>/var/lib/pgsql/9.3/data/pg_hba.conf</code>:</p>
 
 ``` bash
-sudo vi /var/lib/pgsql/9.2/data/pg_hba.conf
+sudo vi /var/lib/pgsql/9.3/data/pg_hba.conf
 ```
 
 <p>At the bottom of the file change authentication method to md5:</p>
@@ -617,7 +617,7 @@ host    all             all             ::1/128                 md5
 <p>and restart Postgres:</p>
 
 ``` bash
-sudo service postgresql-9.2 restart
+sudo service postgresql-9.3 restart
 ```
 
 <p>To run psql console as deploy user just enter:</p>

@@ -147,7 +147,7 @@ class OrdersController < ApplicationController
     order_proccesor = BooksOrderProcessor.new(order, current_user)
 
     begin
-      payment_processor.pay
+      order_processor.pay
     rescue BooksOrderProcessor::InsufficientAmount
       flash.now[:error] = "Not enough books are available."
       render :new
