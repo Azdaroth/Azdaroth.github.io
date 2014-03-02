@@ -475,10 +475,11 @@ class UserRegistration
   end
 
   def register!(user, profile)
+    profile.user = user
     ActiveRecord::Base.transaction do
       begin
         user.save!
-        profile.save!(user: user)
+        profile.save!
       rescue
         raise UserRegistration::RegistrationFailed
       end

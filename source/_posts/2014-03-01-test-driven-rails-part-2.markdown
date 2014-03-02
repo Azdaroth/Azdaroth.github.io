@@ -3,7 +3,7 @@ layout: post
 title: "Test Driven Rails - Part 2"
 date: 2014-03-01 09:56
 comments: true
-categories: [TDD, BDD, Testing, Rails, OOP]
+categories: [TDD, BDD, Testing, Rails, OOP, Design Patterns]
 ---
 
 <p>Last time, in part 1, I was giving some advice about testing - why to test at all, which tests are valuable and which are not, when to write acceptance tests and in what cases aim for the maximum code coverage. And why in most cases you won't need Cucumber :). It brought about some serious discussion about testing ideas and if you haven't read yet, you should probably check it out (<a href="http://karolgalanciak.com/blog/2014/01/04/test-driven-rails-part-1/#disqus_thread" target="_blank">http://karolgalanciak.com/blog/2014/01/04/test-driven-rails-part-1/#disqus_thread</a>). Giving some general point of view about such broad topic like TDD/BDD is definetely not enough, so I will try to apply these techniques by implementing a concrete feature. I wanted to choose some popular usecase, so that most developers will some opinion how they would approach it. In most applications you will probably need:</p>
