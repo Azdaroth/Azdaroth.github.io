@@ -20,7 +20,7 @@ categories: [TDD, BDD, Testing, Rails, OOP]
 
 <p>To make it even better, let's assume that we will create both <code>User</code> and <code>UserProfile</code> during registration: <code>User</code> will have just an <code>email</code> and <code>encrypted_password</code> attributes, <code>UserProfile</code> will have <code>country</code> and <code>age</code> attributes. User will also have to accept some policy to register. If we want to have confirmation, we will also need some attributes for <code>confirmation_token</code>, confirmation date (<code>confirmed_at</code>) and let's add <code>confirmation_instructions_sent_at</code> just to know, when the instructions were sent. These are just registration-specific attributes and we won't need them in most cases, so let's extract them to <code>UserRegistrationProfile</code></p>
 
-<p>Note: when writing the implementation and the tests, the following gems were used: <code>rails (4.0.3)</code>, <code>database_cleaner (1.2.0)</code>, <code>simple_form (3.0.1)</code> with <code>country_select (1.3.1)</code>, <code>reform (0.2.4)</code>, <code>bcrypt (3.1.6)</code>, <code>rspec-rails (3.0.0.beta1)</code>, <code>factory_girl_rails (4.3.0)<code> and <code>capybara (2.2.1)</code>.</p>
+<p>Note: when writing the implementation and the tests, the following gems were used: <code>rails (4.0.3)</code>, <code>database_cleaner (1.2.0)</code>, <code>simple_form (3.0.1)</code> with <code>country_select (1.3.1)</code>, <code>reform (0.2.4)</code>, <code>bcrypt (3.1.6)</code>, <code>rspec-rails (3.0.0.beta1)</code>, <code>factory_girl_rails (4.3.0)</code> and <code>capybara (2.2.1)</code>.</p>
 
 <h2>Start with acceptance tests</h2>
 
