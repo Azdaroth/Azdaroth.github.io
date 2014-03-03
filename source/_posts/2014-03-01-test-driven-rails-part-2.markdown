@@ -6,17 +6,17 @@ comments: true
 categories: [TDD, BDD, Testing, Rails, OOP, Design Patterns]
 ---
 
-<p>Last time, in part 1, I was giving some advice about testing - why to test at all, which tests are valuable and which are not, when to write acceptance tests and in what cases aim for the maximum code coverage. It brought about some serious discussion about testing ideas and if you haven't read yet, you should probably check (<a href="http://karolgalanciak.com/blog/2014/01/04/test-driven-rails-part-1/#disqus_thread" target="_blank"></a>) it out. Giving some general point of view about such broad topic like Test Driven Development / Behavior Driven Development is definetely not enough so I will try to apply these techniques by implementing a concrete feature. I wanted to choose some popular usecase so that most developers will some opinion how they would approach it. In most applications you will probably need:</p>
+<p>Last time, in part 1, I was giving some advice about testing - why to test at all, which tests are valuable and which are not, when to write acceptance tests and in what cases aim for the maximum code coverage. It brought about some serious discussion about testing ideas and if you haven't read it yet, you should probably check (<a href="http://karolgalanciak.com/blog/2014/01/04/test-driven-rails-part-1/#disqus_thread" target="_blank"></a>) it out. Giving some general point of view about such broad topic like Test Driven Development / Behavior Driven Development is definetely not enough so I will try to apply these techniques by implementing a concrete feature. I wanted to choose some popular usecase so that most developers will have an opinion how they would approach it. In most applications you will probably need:</p>
 
 <h2>User Registration</h2>
 
-<p>It is quite common feature and it can be approached in many ways. The most popular approach is to some authentication gem, like Devise, which is the probably the safest and the fastest way. However, Devise might be an overkill for some cases or maybe you need highly customizable solution. How would you write an implementation fot that usecase then?</p>
+<p>It is quite common feature and it can be approached in many ways. The most popular is to some authentication gem, like Devise, which is the probably the safest and the fastest way. However, Devise might be an overkill for some cases or maybe you need highly customizable solution. How would you write an implementation fot that usecase then?</p>
 
 <p>Note: the implementation below doesn't aim to be the most secure approach for that feature, it's rather for demonstration purposes. I made some non-standard design decisions for the Rails application, you may want to read one of my <a href="http://karolgalanciak.com/blog/2013/10/06/structuring-rails-applications/" target="_blank">previous posts</a> to get more details why this way of designing code might be beneficial.</p>
 
 <h2>Specification</h2>
 
-<p>We now that we want to implent user registration. Let's say that we want user to confirm his/her account before signing in so we will need to send some confirmation instructions. Also, let's add some admin notifications about new user being registered to make it more interesting.</p>
+<p>We know that we want to implent user registration. Let's say that we want user to confirm his/her account before signing in so we will need to send some confirmation instructions. Also, let's add some admin notifications about new user being registered to make it more interesting.</p>
 
 <p>To make it even better, let's assume that we will create both <code>User</code> and <code>UserProfile</code> during registration: <code>User</code> will have just an <code>email</code> and <code>encrypted_password</code> attributes, <code>UserProfile</code> will have <code>country</code> and <code>age</code> attributes. User will also have to accept some policy to register. If we want to have confirmation, we will also need some attributes for <code>confirmation_token</code>, confirmation date (<code>confirmed_at</code>) and let's add <code>confirmation_instructions_sent_at</code> just to know, when the instructions were sent. These are just registration-specific attributes and we won't need them in most cases so let's extract them to <code>UserRegistrationProfile</code></p>
 
@@ -24,7 +24,7 @@ categories: [TDD, BDD, Testing, Rails, OOP, Design Patterns]
 
 <h2>Start with acceptance tests</h2>
 
-<p>When writing new feature we should start from acceptance tests - we will make sure that the feature works from the higher level: from the user perspective and some side effects like sending emails. So the good start will be covering: user creation and sending emails to admin and to the user. Let's write some Capybara tests:</p>
+<p>When writing new feature we should start from acceptance tests - we will make sure that the feature works from the higher level: from the user perspective and some side effects like sending emails. So the good start will be covering user creation and sending emails to an admin and to the user. Let's write some Capybara tests:</p>
 
 ``` ruby spec/features/user_registration_spec.rb
 
@@ -58,7 +58,7 @@ feature "User Registration" do
           register
         end
 
-        scenario "confimarmation email is sent to the uset" do
+        scenario "confirmation email is sent to the user" do
           expect(all_email_addresses).to include email
         end
 
@@ -271,7 +271,7 @@ end
 
 
 ```
-<p>Reform is not (yet) that popular in the Rails community so some things requires explanation (check also the <a href="https://github.com/apotonick/reform" target="_blank">docs</a> out). The <code>Reform::Form::ActiveRecord</code> module is required for uniqueness validation and the <code>Composition</code> is for... composition - some properties are mapped to user and other to profile. There is also a mystical mapping with <code>on: :nil</code> - these are "virtual" properties like <code>password</code>, <code>password_confirmation</code> and <code>policy</code> - all properties must be mapped to a resource so just to satisfy Reform API I use <code>on: :nil</code> as a convention, also the <code>empty: true</code> option is for virtual attributes that won't be processed. And where does the email validation come from? From our custom validator, let's write some specs, but before we should add /forms (and /usecases for business logic) directories to be autoloaded:</p>
+<p>Reform is not (yet) that popular in the Rails community so some things require explanation (check also the <a href="https://github.com/apotonick/reform" target="_blank">docs</a> out). The <code>Reform::Form::ActiveRecord</code> module is for uniqueness validation and the <code>Composition</code> is for... composition - some properties are mapped to user and other to profile. There is also a mystical mapping with <code>on: :nil</code> - these are "virtual" properties like <code>password</code>, <code>password_confirmation</code> and <code>policy</code> - all properties must be mapped to a resource so just to satisfy Reform API I use <code>on: :nil</code> as a convention, also the <code>empty: true</code> option is for virtual attributes that won't be processed. And where does the email validation come from? From our custom validator, let's write some specs but before we should add /forms (and /usecases for business logic) directories to be autoloaded:</p>
 
 ``` ruby config/application.rb
 config.autoload_paths += %W(#{config.root}/app/usecases)
@@ -321,7 +321,7 @@ end
 
 ```
 
-<p>You can probably come up with some more examples to cover email validation, but these are sufficient cases. I've introduced <code>DummyModel</code> here, to have a generic object that can be validated so the <code>ActiveModel::Validations</code> module is needed and an accessor for an email. Let's implement the actual validation:</p>
+<p>You can probably come up with some more examples to cover email validation but these are sufficient cases. I've introduced <code>DummyModel</code> here to have a generic object that can be validated so the <code>ActiveModel::Validations</code> module is needed and an accessor for an email. Let's implement the actual validation:</p>
 
 ``` ruby usecases/email_validator.rb 
 
@@ -337,7 +337,7 @@ end
 
 ```
 
-<p>The regexp for email validation comes from Rails guides:). It won't probably cover all possibilities, but the <a href="http://www.ex-parrot.com/pdw/Mail-RFC822-Address.html" target="_blank">actual format</a> of the email is an overkill.</p>
+<p>The regexp for email validation comes from Rails guides:). It won't cover all the possibilities but the <a href="http://www.ex-parrot.com/pdw/Mail-RFC822-Address.html" target="_blank">actual format</a> of the email is an overkill.</p>
 
 <p>I don't fell the need to write tests for other validations and composition for <code>UserRegistrationForm</code>: it's just using very descriptive DSL, the validation are already tested in Rails.</p>
 
@@ -364,11 +364,12 @@ end
 
 ```
 
-<p>I added also validations in models. These may seem like a duplication because form object already implements validations, but these are validations always applicable do these models so it is a good idea to have them in models.</p>
+<p>I added also validations in models. These may seem like a duplication because form object already implements them but these are validations always applicable do these models so it is a good idea to have them in models.</p>
 
-<p>Let's concentrate on <code>UsersController</code> and <code>create</code> action. I don't really like testing controllers, especially for CRUD-like stuff, user creation still feels like CRUD, but not that typical in Rails, especially when using dedicated form object. So let's test drive registration process: we are going to use <code>UserRegistrationForm</code> for data aggregation and validation, if the data is valid, the user will be created by <code>UserRegistration</code> service object with redirection to root path, otherwise it will render <code>new</code> template.</p>
+<p>Let's concentrate on <code>UsersController</code> and <code>create</code> action. I don't really like testing controllers, especially for CRUD-like stuff, user creation still feels like CRUD but not that typical in Rails, especially when using dedicated form object. So let's test drive registration process: we are going to use <code>UserRegistrationForm</code> for data aggregation and validation - if the data is valid, the user will be created by <code>UserRegistration</code> service object with redirection to root path, otherwise it will render <code>new</code> template.</p>
 
 ``` ruby spec/controllers/users_controller_spec.rb
+
 require 'spec_helper'
 
 describe UsersController do
@@ -427,7 +428,9 @@ end
 
 
 ```
-<p>Well, it is not really clear, that's the problem with testing controllers and they should be as thin as possible. We need to implement the <code>assign_attributes</code> method in form object to fill populate models' attributes with params and implement the actual <code>UserRegistration</code> usecase. In tests I use <code>instance_double</code> instead of simple <code>double</code> to make sure I'm not stubbing non-existent methods or with wrong number of arguments - that's a great feature introduced in RSpec 3, which comes from <a href="https://github.com/xaviershay/rspec-fire" target="_blank">rspec-fire</a> gem. Also, I'm stubbing responses so that I can spy on them using <code>have_received</code> method - It's much cleaner and easier to read. Compare these two examples:</p>
+<p>Well, it is not really clear, that's the problem with testing controllers and they should be as thin as possible. We need to implement the <code>assign_attributes</code>
+ method in form object to fill models' attributes with params and implement the actual <code>UserRegistration</code> usecase. In tests I use <code>instance_double</code> 
+ instead of simple <code>double</code> to make sure I'm not stubbing non-existent methods or with wrong number of arguments - that's a great feature introduced in RSpec 3, which comes from <a href="https://github.com/xaviershay/rspec-fire" target="_blank">rspec-fire</a> gem. Also, I'm stubbing responses so that I can spy on them using <code>have_received</code> method - It's much cleaner and easier to read. Compare these two examples:</p>
 
 ``` ruby
 
@@ -467,7 +470,7 @@ end
 
 <p>I really encourage you to spy on a stubbed method, I will make your tests much more readable and DRY them up.</p>
 
-<p> I made also some non-standard design decisions here: why not to implement the persistence logic in form object and use it like:</p>
+<p> I made also some non-standard design decisions here: why not to implement the persistence logic in the form object and use it like:</p>
 
 ``` ruby
 if @registration_form.persist(user_params) # populate data, perform validation and persist data if is valid
@@ -477,9 +480,10 @@ else
 end
 ```
 
-<p>For simple persistence logic I would probably go with that approach, but we will also need to send some confirmation instructions, notify admin etc., I'm not really comfortable with the idea of form object knowing something about sending notifications, persistence alone would be ok, it would be quite convenient to use, but this is too complex, let's leave form object for data aggregation and validation. Let's write code for controller:</p>
+<p>For simple persistence logic I would probably go with that approach but we will also need to send some confirmation instructions, admin notifications etc., I'm not really comfortable with the idea of form object knowing something about sending notifications, persistence alone would be ok, it would be quite convenient to use but this is too complex, I would leave form object for data aggregation and validation. Let's write code for the controller:</p>
 
 ``` ruby app/controllers/users_controller.rb
+
 class UsersController < ApplicationController
 
   def create
@@ -503,7 +507,7 @@ end
 
 ```
 
-<p>We need to implement <code>assign_attributes</code> method (we have nice failure message thanks to <code>instance_double</code>:</p>
+<p>We need to implement <code>assign_attributes</code> method (we have nice failure message thanks to <code>instance_double</code> that informs us about it):</p>
 
 ``` ruby
 Failure/Error: allow(registration_form).to receive(:assign_attributes)
@@ -561,7 +565,7 @@ end
 
 ```
 
-<p>It uses some Reform::Form private methods that I found in source code so this implementation might not be stable, but fortunately we have it covered in tests so we will know breaking changes if it happens in next versions. And there's a gotcha here: The keys in hash must be stringified, symbols won't work (applies to 0.2.4 version of Reform).</p>
+<p>It uses some Reform::Form private methods that I found in source code so this implementation might not be stable but fortunately we have it covered in tests so we will know breaking changes if it happens in next versions. And there's a gotcha here: The keys in hash must be stringified, symbols won't work (applies to 0.2.4 version of Reform).</p>
 
 <p>Let's write some minimal implementation for <code>UserRegistration</code> to satisfy controller's specs:</p>
 
@@ -644,7 +648,7 @@ end
 
 <p>Note: keep in mind that you should write one test and then write minimal implementation to make it pass and then another test. I gave the several tests and the actual <code>UserRegistration</code> in advance, just to make it easier to read and follow.</p>
 
-<p>It is quite clear from the tests what should be expected from this class: creation of user, profile, registration profile and assigning encrypted password. Data aggregate (<code>form</code>) is just a <code>double</code> with profile and user, we don't care what it actually is, it should just implement the stubbed interface. I also use FactoryGirl and <code>build_stubbed</code> method for initializing models - I find it more convenient that to use <code>instance_double</code> because instance doubles don't cover attributes from database tables.</p>
+<p>It is quite clear from the tests what should be expected from this class: creation of user, profile, registration profile and assigning encrypted password. Data aggregate (<code>form</code>) is just a <code>double</code> with profile and user, we don't care what it actually is, it should just implement the stubbed interface. I also use FactoryGirl and <code>build_stubbed</code> method for initializing models - I find it more convenient than to use <code>instance_double</code> because instance doubles don't cover attributes from database tables.</p>
 
 <p>The factories for User and profiles would look like that:</p>
 
@@ -714,9 +718,9 @@ end
 
 ```
 
-<p>Let's discuss some design decisions: the constructor accepts options hash so that we can inject dependencies like <code>encryption</code> and to provide defaults if it not injected. The persistence logic is wrapped in transaction block so that e.g. user won't be created if profile creation fails. If it fails, <code>RegistrationFailed</code> error is raised with a descriptive message. Also, the <code>encryption</code> is private: we don't need it to be public.</p>
+<p>Let's discuss some design decisions: the constructor accepts options hash so that we can inject dependencies like <code>encryption</code> and to provide defaults if it's injected. The persistence logic is wrapped in transaction block so that e.g. user won't be created if profile creation fails. If it fails, <code>RegistrationFailed</code> error is raised with a descriptive message. Also, the <code>encryption</code> is private: we don't need it to be public.</p>
 
-<p>To satisfy tests, the <code>create_registration_profile!</code> must be implemented and <code>generate password for encryption</code>. Fortunately, we just need to setup associations for <code>UserRegistrationProfile</code> to have <code>create_registration_profile!</code> implemented. But we need to generate the model first:</p>
+<p>To satisfy tests, the <code>create_registration_profile!</code> must be implemented and <code>generate_password</code> for encryption. Fortunately, we just need to setup associations for <code>UserRegistrationProfile</code> to have <code>create_registration_profile!</code> implemented. But we need to generate the model first:</p>
 
 ``` ruby
 rails generate model UserRegistrationProfile confirmed_at:datetime confirmation_instructions_sent_at:datetime confirmation_token user_id:integer
@@ -808,7 +812,7 @@ end
 
 ```
 
-<p>The <code>encrypted_password</code> doesn't have to be that long, but looks more genuine that way. The BCrypt::Password is also a class double so that we make sure we don't stub a non-existent method. And the implementation of <code>Encryption</code> class:</p>
+<p>The <code>encrypted_password</code> doesn't have to be that long but looks more genuine that way. The BCrypt::Password is also a class double so that we make sure we don't stub a non-existent method. And the implementation of <code>Encryption</code> class:</p>
 
 ``` ruby app/usecases/encryption.rb
 
@@ -831,7 +835,7 @@ end
 
 <p>The pattern for constructor is similar to the one from <code>UserRegistration</code>. The <code>password_generator</code> is also made private - the rule of thumb is that everything should be private unless it needs to be public, just to keep the interfaces clean.</p>
 
-<p>Now we have the basic implementation for user creation with it's profiles. Still, we need confirmation stuff and notification to an admin. It is beyond the <code>UserRegistration</code> responsibilities, we also don't need always to send admin notification or confirmation instructions or to confirm user at all, just to have the interface flexible enough. Maybe we will have some additional things that will take place during registration - like third party API notification. To keep the responsibilities separate and <code>UserRegistration</code> easy to use, we can implement all the additional actions as the listeners that are being passed to the constructor of <code>UserRegistration</code>. Let's write specs for it first:</p>
+<p>Now we have the basic implementation for user creation with it's profiles. Still, we need confirmation stuff and notification to tje admin. It is beyond the <code>UserRegistration</code> responsibilities, we also don't need always to a notification or confirmation instructions or to confirm user at all, just to have the interface flexible enough. Maybe we will have some additional things that will take place during registration - like third party API notification. To keep the responsibilities separate and <code>UserRegistration</code> easy to use, we can implement all the additional actions as the listeners that are being passed to the constructor of <code>UserRegistration</code>. Let's write specs for it first:</p>
 
 ``` ruby spec/usecases/user_registration_spec.rb
 
@@ -932,7 +936,7 @@ end
 
 ```
 
-<p>These changes are not that noticeable, but they are huge. The constructor now takes some listeners (splat) - we can pass one listener, several or none, it will always be an array. Also, the options is now a keyword argument introduced in Ruby 2.0, which makes the changes really smooth. And the new method: <code>notify_listeners</code> which sends <code>notify</code> message to all the listeners with user argument.</p>
+<p>These changes are not that noticeable but they are huge. The constructor now takes some listeners (splat) - we can pass one listener, several or none, it will always be an array. Also, the options is now a keyword argument introduced in Ruby 2.0 which makes the changes really smooth. And the new method: <code>notify_listeners</code> which sends <code>notify</code> message to all the listeners with <code>user</code> argument.</p>
 
 <p>To handle the user confirmation stuff we will need, well, <code>UserConfirmation</code> and <code>UserRegistrationAdminNotification</code> to handle the notifcations.</p>
 
@@ -1001,7 +1005,7 @@ end
 
 ```
 
-<p>As before, we should start with one test, make it pass and then write the next one. Here is the implementation for it:</p>
+<p>Like before, we should start with one test, make it pass and then write the next one. Here is the implementation for it:</p>
 
 ``` ruby app/usecases/user_confirmation.rb
 
@@ -1035,7 +1039,7 @@ end
 
 ```
 
-<p>The pattern for constructor is similar to the previous ones: provide the way to inject dependencies and some defaults if they are not specified so it is more flexible, less coupled and the testing becomes easier as a bonus. We have while loop to ensure the confirmation token is unique amongst users. The <code>find_by_attribute</code> methods are deprecated since Rails 4.0.0 and the <code>activerecord-deprecated_finders</code> will be removed from dependencies in 4.1.0 so we have to implement our own finder method. Here are also some important design decisions - we assign both <code>confirmation_instructions_sent_at</code> and <code>confirmation_token</code> to the user, not the registration profile. How is that? The important question is: do we need to expose that the user has registration profile? What if we change our mind and decide to put this data in "normal" profile, not registration profile? Or we didn't make a decision to create a registration profile at all in a first place and these attributes belonged to the user since the beginning and we later decided to move the to separated table? From the <code>UserConfirmation</code> perspective, it is just an implementation detail. The <code>save_with_profiles!</code> is provided to make user's data persistence more convenient. We need to implement mailer as well, but let's start with user's related stuff.</p>
+<p>The pattern for constructor is similar to the previous ones: provide the way to inject dependencies and some defaults if they are not specified so it is more flexible, less coupled and the testing becomes easier as a bonus. We have while loop to ensure the confirmation token is unique amongst users. The <code>find_by_attribute</code> methods are deprecated since Rails 4.0.0 and the <code>activerecord-deprecated_finders</code> will be removed from dependencies in 4.1.0 so we have to implement our own finder method. Here are also some important design decisions - we assign both <code>confirmation_instructions_sent_at</code> and <code>confirmation_token</code> to the user, not the registration profile. How is that? The important question is: do we need to expose that the user has registration profile? What if we change our mind and decide to put this data in "normal" profile, not registration profile? Or we didn't make a decision to create a registration profile at all in a first place and these attributes belonged to the user since the beginning and we later decided to move them to a separated table? From the <code>UserConfirmation</code> perspective, it is just an implementation detail. The <code>save_with_profiles!</code> is provided to make user's data persistence more convenient. We need to implement mailer as well but let's start with user's related stuff.</p>
 
 ``` ruby spec/models/user.rb
 
@@ -1171,7 +1175,7 @@ end
 
 ```
 
-<p>The setup with FactoryGirl may seem to be complex, but I like doing this kind of setup manually, not to rely on predefined attributes for the factory so that I know where the data comes from. We also assume that there will be some controller action for confirmations so we will need to define routes to make the tests pass:</p>
+<p>The setup with FactoryGirl may seem to be complex but I like doing this kind of setup manually, not to rely on predefined attributes for the factory so that I know where the data comes from. We also assume that there will be some controller action for confirmations so we will need to define routes to make the tests pass:</p>
 
 ``` ruby app/mailers/user_confirmation_mailer.rb
 
@@ -1189,7 +1193,7 @@ end
 ```
 
 
-``` ruby app/views/user_confirmation_mailer/send_confirmation_instructions
+``` html app/views/user_confirmation_mailer/send_confirmation_instructions.html.erb
 
 <p>To complete the registration process, click the link below:</p>
 <%= link_to "Confirm", user_confirmation_path(token: @user.confirmation_token) %>
@@ -1370,7 +1374,7 @@ end
 
 ```
 
-<p>Hell yeah, all tests are happy now, we have completed the user registration feature. Let's add account confirmation feature and simple sign in. We don't need acceptance test or integration test in controller for that feature, it's pretty simple and unit test for controller would be enough. We probably need to find user by confirmation token, confirm the account and redirect to some page. Also, we should return 404 error if there's no match for confirmation token. In a real world application it would probably need some expiration date for token and other features, but keep in a mind it's just for demonstration purposes, not writing the complete devise-like solution.</p>
+<p>Hell yeah, all tests are happy now, we have completed the user registration feature. Let's add account confirmation feature and simple sign in. We don't need acceptance test or integration test in controller for that feature, it's pretty simple and unit test for controller would be enough. We probably need to find user by confirmation token, confirm the account and redirect to some page. Also, we should return 404 error if there's no match for confirmation token. In a real world application it would probably need some expiration date for token and other features but keep in a mind it's just for demonstration purposes, not writing the complete devise-like solution.</p>
 
 ``` ruby spec/controllers/confirmations_controller_spec.rb
 
@@ -1402,7 +1406,7 @@ end
 
 ```
 
-<p>We find the user with bang method so, by convention, it raises ActiveRecord::RecordNotFound if the resource is not found so we won't write test for failure path, use <code>confirm!</code> method, which needs to be implemented and redirect to root path. The implementation for the controller it is the following:</p> 
+<p>We find the user with bang method so, by convention, it raises ActiveRecord::RecordNotFound if the resource is not found - we won't write test for the failure path. Then the  <code>confirm!</code> method is used which needs to be implemented and redirect to root path. The implementation for the controller is the following:</p> 
 
 ``` ruby app/controllers/confirmations_controller.rb
 
@@ -1490,7 +1494,7 @@ end
 
 <p>It's another method in <code>User</code> model, shouldn't the models be thin? Well, it's not business logic involving some complex actions, these are just domain methods for user to handle it's own state (or the profile's state which is rather an implementation detail in this case), it looks like a model's responsibility so it's a right place to add this kind of logic, much better than using e.g. <code>update</code> method on registration profile outside the models.</p>
 
-<p>We completed another feature: user can confirm his/her account. There's only one feature left: sign in. Let's test drive it starting from acceptance test again: when the user exists and is confirmed, we let the user sign in, if exists but is not confirmed yet we render proper info and if the email/password combination is invalid, we also want to display proper info. Capybara test for these specs may look like this:</p>
+<p>We completed another feature: user can confirm his/her account. There's only one feature left: sign in. Let's test drive it starting from acceptance test again: when the user exists and is confirmed, we let the user sign in, if exists but is not confirmed yet we render proper info and if the email/password combination is invalid we also want to display proper info. Capybara test for these specs may look like this:</p>
 
 ``` ruby spec/features/sign_in_spec.rb
 
@@ -1571,7 +1575,7 @@ end
 
 ```
 
-<p>The structure is similar to the one from registration process: there some helper methods for filling forms and signing in. For the happy path, we also want to verify that the user is actually signed in so we will display it's email. This test will work because in <code>User</code> factory in <code>spec/factories.rb</code>, the <code>encrypted_password</code> value is an encrypted form of "password" phrase. Let's start from defining routes and creating controller for the user signin:</p>
+<p>The structure is similar to the one from registration process: there are some helper methods for filling forms and signing in. For the happy path, we also want to verify that the user is actually signed in so we will display it's email. This test will work because in <code>User</code> factory in <code>spec/factories.rb</code> the <code>encrypted_password</code> value is an encrypted form of "password" phrase. Let's start from defining routes and creating controller for the user signin:</p>
 
 ``` ruby config/routes.rb
 
@@ -1752,7 +1756,7 @@ end
 
 ```
 
-<p> I don't need to create an instance of <code>Authentication</code>, there is no need to make it a class. And to make all the tests green we need just to implement compatison of passwords using Bcrypt:</p>
+<p> I don't need to create an instance of <code>Authentication</code>, there is no need to make it a class. And to make all the tests green we just need to implement comparison of passwords using Bcrypt:</p>
 
 ``` ruby app/usecases/authentication.rb
 
@@ -1769,6 +1773,6 @@ end
 
 <h2>Wrapping up</h2>
 
-<p>That's all! All the tests now pass. And the run pretty fast (on Ruby 2.1.0), about 1.6 s. That was pretty long: the user registration, confirmation and sign in features have been test drived, and some not obvious design decisions were made. That gives some basic ideas how I apply Test Driven Development / Behavior Driven Development techniques in everyday Rails programming. The aim of these tests wasn't to have 100% coverage (e.g. I didn't test ActiveModel validations, using Reform DSL to make <code>UserRegistrationForm</code> composition, delegations in <code>User</code> model), but they give me sufficient level of confidence to assume that the application works correctly and they helped with some design choices, which is a great advantage of unit tests. When TDDing, keep in mind what Kent Beck says about his way of writing tests: 
-  <blockquote>I get paid for code that works, not for tests so my philosophy is to test as little as possible to reach a given level of confidence (I suspect this level of confidence is high compared to industry standards, but that could just be hubris). If I don't typically make a kind of mistake (like setting the wrong variables in a constructor), I don't test for it.</blockquote>
+<p>That's all! All the tests now pass. And they run pretty fast (on Ruby 2.1.0), about 1.6 s. That was quite long: the user registration, confirmation and sign in features have been test drived and some not obvious design decisions were made. That gives some basic ideas how I apply Test Driven Development / Behavior Driven Development techniques in everyday Rails programming. The aim of these tests wasn't to have 100% coverage (e.g. I didn't test ActiveModel validations, using Reform DSL to make <code>UserRegistrationForm</code> composition, delegations in <code>User</code> model) but they give me sufficient level of confidence to assume that the application works correctly and they helped with some design choices, which is a great advantage of unit tests. When TDDing, keep in mind what Kent Beck says about his way of writing tests: 
+  <blockquote>I get paid for code that works, not for tests so my philosophy is to test as little as possible to reach a given level of confidence (I suspect this level of confidence is high compared to industry standards but that could just be hubris). If I don't typically make a kind of mistake (like setting the wrong variables in a constructor), I don't test for it.</blockquote>
 </p>
