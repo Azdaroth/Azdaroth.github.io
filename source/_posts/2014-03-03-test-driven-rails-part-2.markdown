@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Test Driven Rails - Part 2"
-date: 2014-03-01 09:56
+date: 2014-03-03 19:52
 comments: true
 categories: [TDD, BDD, Testing, Rails, OOP, Design Patterns]
 ---
