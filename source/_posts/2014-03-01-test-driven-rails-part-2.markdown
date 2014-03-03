@@ -12,7 +12,7 @@ categories: [TDD, BDD, Testing, Rails, OOP, Design Patterns]
 
 <p>It is quite common feature and it can be approached in many ways. The most popular approach is to some authentication gem, like Devise, which is the probably the safest and the fastest way. However, Devise might be an overkill for some cases or maybe you need highly customizable solution. How would you write an implementation fot that usecase then?</p>
 
-<p>Note: the implementation below doesn't aim to be the most secure approach for that feature, it's rather for demonstration purposes. I made some non-standard design decisions for the Rails application, you may want to read one of my <a href="http://octopress.dev/blog/2013/10/06/structuring-rails-applications/" target="_blank">previous posts</a> to get more details why this way of designing code might be beneficial.</p>
+<p>Note: the implementation below doesn't aim to be the most secure approach for that feature, it's rather for demonstration purposes. I made some non-standard design decisions for the Rails application, you may want to read one of my <a href="http://karolgalanciak.com/blog/2013/10/06/structuring-rails-applications/" target="_blank">previous posts</a> to get more details why this way of designing code might be beneficial.</p>
 
 <h2>Specification</h2>
 
