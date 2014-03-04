@@ -1284,6 +1284,27 @@ end
 
 ```
 
+<p>The implementation:</p>
+
+``` ruby app/usecases/user_registration_admin_notification.rb
+
+class UserRegistrationAdminNotification
+  
+  attr_reader :mailer
+  private :mailer
+
+  def initialize(args={})
+    @mailer = args.fetch(:mailer, NewUserAdminNotificationMailer)
+  end
+
+  def notify(user)
+    mailer.notify(user).deliver
+  end
+
+end
+
+```
+
 <p>We also need to generate the mailer with <code>notify</code> method (yes, the same as for the listener but it is good enough here):</p>
 
 ``` ruby
@@ -1776,3 +1797,6 @@ end
 <p>That's all! All the tests now pass. And they run pretty fast (on Ruby 2.1.0), about 1.6 s. That was quite long: the user registration, confirmation and sign in features have been test drived and some not obvious design decisions were made. That gives some basic ideas how I apply Test Driven Development / Behavior Driven Development techniques in everyday Rails programming. The aim of these tests wasn't to have 100% coverage (e.g. I didn't test ActiveModel validations, using Reform DSL to make <code>UserRegistrationForm</code> composition, delegations in <code>User</code> model) but they give me sufficient level of confidence to assume that the application works correctly and they helped with some design choices, which is a great advantage of unit tests. When TDDing, keep in mind what Kent Beck says about his way of writing tests: 
   <blockquote>I get paid for code that works, not for tests so my philosophy is to test as little as possible to reach a given level of confidence (I suspect this level of confidence is high compared to industry standards but that could just be hubris). If I don't typically make a kind of mistake (like setting the wrong variables in a constructor), I don't test for it.</blockquote>
 </p>
+
+
+<p class="meta small-p">Changelog: 04-03-2013 - Add missing code for <code>UserRegistrationAdminNotification</code> implementation.</p>
