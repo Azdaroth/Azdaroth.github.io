@@ -3,11 +3,11 @@
 # ----------------------- #
 
 url: http://karolgalanciak.com
-title: Karol Galanciak - Ruby On Rails developer from Łódź, Poland
-main_header: Karol Galanciak - Ruby On Rails developer from Poland
+title: Karol Galanciak - Ruby on Rails developer from Łódź, Poland
+main_header: Karol Galanciak - Ruby on Rails developer from Poland
 author: Karol Galanciak
 simple_search: http://google.com/search
-description: Ruby On Rails, Unix and other geekery stuff
+description: Ruby on Rails, Unix and other geekery stuff
 
 # Default date format is "ordinal" (resulting in "July 22nd 2007")
 # You can customize the format as defined in
