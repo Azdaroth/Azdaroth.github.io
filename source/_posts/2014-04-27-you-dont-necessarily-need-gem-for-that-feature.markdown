@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "You don't (necessarily) need gem for that feature"
-date: 2014-04-26 15:02
+date: 2014-04-27 17:02
 comments: true
 categories: [Rails, TDD, Design Patterns, Testing, Architecture]
 ---
