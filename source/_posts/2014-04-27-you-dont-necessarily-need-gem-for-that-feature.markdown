@@ -7,13 +7,13 @@ categories: [Rails, TDD, Design Patterns, Testing, Architecture]
 ---
 
 
-<p>You are working currently on that awesome app and just started thinking about implementing new feature, let's call it feature X. What's the first thing you do? Rolling your own solution or... maybe checking if there's a magical gem that can help you solve that problem? Ok, it turns out there's already a gem Y that does what you expect. It does tons of other things and is really complex. After some time your app breaks, something is definitively not working and it seems that gem Y is responsible for that. So you read all the issues on Github, pull requests and even read the source code and finally find a little bug. You managed to do some monkeypatching first and then send pull request for a small fix and solved a problem, which took you a few hours. Looks like a problem is solved. And then, you try to update Rails to the current version. Seems like there's a dependency problem - gem Y depends on previous version of Rails...</p>
+<p>You are working currently on that awesome app and just started thinking about implementing new feature, let's call it feature X. What's the first thing you do? Rolling your own solution or... maybe checking if there's a magical gem that can help you solve that problem? Ok, it turns out there's already a gem Y that does what you expect. Also, it does tons of other things and is really complex. After some time your app breaks, something is definitively not working and it seems that gem Y is responsible for that. So you read all the issues on Github, pull requests and even read the source code and finally find a little bug. You managed to do some monkeypatching first and then send pull request for a small fix and solved a problem, which took you a few hours. Looks like a problem is solved. And then, you try to update Rails to2 the current version. Seems like there's a dependency problem - gem Y depends on previous version of Rails...</p>
 
 <p>Does it sound somehow familiar to you, especially when updating Rails? If it's caused by "big" gem that solves a lot of problems and is still maintained, it's not that bad. How about these "small" gems, which come in handy and look quite complex but you could roll your own solution to that particular problem within half an hour?</p>
 
 <p>I've seen this many times where first thing when implementing new feature is searching for a gem that solves this problem. We need really basic polymorphic tags? Let's use <a href="https://github.com/mbleigh/acts-as-taggable-on" target="_blank">acts-as-taggable-on</a>, we don't need half of the features provided and setting up a few migrations and associations would take 10 minutes anyway but there's no need to reinvent the wheel. Client asked for a simple admin panel with some CRUD stuff involving several models. Let's use <a href="https://github.com/gregbell/active_admin" target="_blank">active_admin</a> or <a href="https://github.com/sferik/rails_admin" target="_blank">rails_admin</a> for that! Simple searching / filtering where several fields in one model are involved? <a href="https://github.com/activerecord-hackery/ransack" target="_blank">Ransack</a> is an obvious choice!</p>
 
-<p>More gems mean: slower boot time of your application, more dependencies (don't look only at Gemfile, Gemfile.lock is the real deal), more things that can break, more issues to take care of when updating Rails and the gem itself (reading Changelogs, issues etc.).</p>
+<p>More gems mean: slower boot time of your application, more dependencies (don't look only at Gemfile, Gemfile.lock is the real deal), more things that can break, more issues to take care of when updating Rails and the gem itself (reading changelogs, issues etc.).</p>
 
 <h2>When to use third party gem when implementing feature X?</h2>
 
@@ -34,12 +34,12 @@ categories: [Rails, TDD, Design Patterns, Testing, Architecture]
 <p>How much work does it really take to reimplement a gem? Let's take a look at something popular - <a href="https://github.com/drapergem/draper" target="_blank">draper</a> gem. Draper is a pretty good solution for decorators/presenters for your models in Rails apps. I've been using it for quite long a time, had some issues but managed to solve them rather quickly. Unfortunately, the source code looks quite complex, especially extracting view_context with a bit global-variable-like RequestStore. And there are some other complex parts that I don't really use. Let's write custom presenter and call it DecentPresenter. What kind of interface and conventions would I expect from it?</p>
 
 <ul>
-  <li>Include some module in controllers (ApplicationController) - I want to be explicit here, without including it automatically on Rails app boot. Also I don't want to include it in models - model doesn't have to know that it can be presented in one way or another</li>
-  <li>Establish naming convention: default presenter for User would be UserPresenter</li>
-  <li>Call <code>present(user)</code> in controller which would wrap user by UserPresenter and present(User.all) which would handle collections</li>
-  <li>Ability to specify other presenter than the default one - present(user, with: OtherPresenter)</li>
+  <li>Include some module in controllers (ApplicationController) - I want to be explicit here, without including it automatically on Rails app boot. Also, I don't want to include it in models - model doesn't have to know that it can be presented in one way or another</li>
+  <li>Establish naming convention: default presenter for User would be <code>UserPresenter</code></li>
+  <li>Call <code>present(user)</code> in controller which would wrap user by <code>UserPresenter</code> and <code>present(User.all)</code> which would handle collections</li>
+  <li>Ability to specify other presenter than the default one - <code>present(user, with: OtherPresenter)</code></li>
   <li>Have access to helpers within presenters</li>
-  <li>Presenters will inherit from some base class (DecentPresenter::Base)</li>
+  <li>Presenters will inherit from some base class (<code>DecentPresenter::Base</code>)</li>
 </ul>
 
 <p>Doesn't really look that hard. Getting access to Rails helpers might seem difficult but we can get it from <code>view_context</code> in controllers. Let's start with integration test for presenters. We want to include a module to a class (Controller), which would mix in <code>present</code> method. Let's call it DecentPresenter::Exposable:</p>
@@ -170,7 +170,7 @@ end
 
 ```
 
-<p>What happens here? First off, we set up some dummy classes: DummyModel with <code>name</code> method, two presenters for testing with default presenter and other presenter and two classes, where we include DecentPresenter::Exposable module. Why two? Just to check that if the object implements <code>view_context</code> method. If the <code>view_context</code> method is not implemented, we provide descriptive error. Then we test write some tests for a single model / collection and default / custom presenter to check if they are presented. Let's write some code:</p>
+<p>What happens here? First off, we set up some dummy classes: DummyModel with <code>name</code> method, two presenters for testing with default presenter and other presenter and two classes, where we include <code>DecentPresenter::Exposable</code> module. Why two? Just to check that if the object implements <code>view_context</code> method. If the <code>view_context</code> method is not implemented, we provide descriptive error. Then we write some tests for a single model / collection and default / custom presenter to check if they are presented. Let's write some code:</p>
 
 ``` ruby lib/decent_presenter/exposable.rb
 
@@ -204,7 +204,7 @@ moduleDecentPresenter
 end
 ```
 
-<p>Tests within presentation context still fail but they will be the last ones that will pass. Let's leave them for now and thing about base class - DecentPresenter::Base and it's subclasses, our presenters. We want to have access to helpers by <code>helpers</code> method and <code>h</code> for shorthand. We also need have access to presented object: by <code>object</code> and <code>model</code> methods. If the method isn't implemented by presenter, it should be delegated to presented model. Sounds like <code>method_missing</code>? That's one possibility. Let's try something different - <a href="http://www.ruby-doc.org/stdlib-1.9.3/libdoc/delegate/rdoc/SimpleDelegator.html" target="_blank">SimpleDelegator</a>. SimpleDelegator is a pretty cool core class with two public methods <code>__getobj__</code> and <code>__setobj__</code> - the first one exposes decorated object and the latter sets objects to which all method calls will be delegated. The object is set when we pass it to the constructor of <code>SimpleDelegator</code>. Looks like our <code>DecentPresenter::Base</code> class will inherit from <code>SimpleDelegator</code>. But we will need to override constructor to pass <code>view_context</code>. Also, it would be quite useful to be able to present other objects within our presenters. Let's write some tests:</p>
+<p>Tests within presentation context still fail but they will be the last ones that will pass. Let's leave them for now and thing about base class - <code>DecentPresenter::Base</code> and it's subclasses, our presenters. We want to have access to helpers by <code>helpers</code> method and <code>h</code> for shorthand. We also need have access to presented object: by <code>object</code> and <code>model</code> methods. If the method isn't implemented by presenter, it should be delegated to presented model. Sounds like <code>method_missing</code>? That's one possibility. Let's try something different - <a href="http://www.ruby-doc.org/stdlib-1.9.3/libdoc/delegate/rdoc/SimpleDelegator.html" target="_blank">SimpleDelegator</a>. SimpleDelegator is a pretty cool core class with two public methods <code>__getobj__</code> and <code>__setobj__</code> - the first one exposes decorated object and the latter sets objects to which all method calls will be delegated. The object is set when we pass it to the constructor of <code>SimpleDelegator</code>. Looks like our <code>DecentPresenter::Base</code> class will inherit from <code>SimpleDelegator</code>. But we will need to override constructor to pass <code>view_context</code>. Also, it would be quite useful to be able to present other objects within our presenters. Let's write some tests:</p>
 
 ``` ruby specs/decent_presenter/base_spec.rb
 require 'spec_helper'
@@ -365,7 +365,7 @@ end
 
 <p>The <code>Exposure</code> class is going to have one public method which takes model or collection as the first argument and the options hash, where we can specify presenter. If it's not specified the default presenter will be used. And how do we know what the default presenter is? Don't know yet, so let's introduce a collaborator, which takes model and returns default presenter for it. We will call it <code>presenter_factory</code>. We also need to remember about the <code>view_context</code> dependency. Let's write the implementation:</p>
 
-<p>Note: again, the implementation is quite clean, but remember the TDD cycle: red, green, refactor, write minimal implementation for the first test, make it pass and repeat. This post is not about how to TDD properly and to focus on the core things I just give code after refactoring phase. </p>
+<p>Note: again, the implementation is quite clean, but remember the TDD cycle: red, green, refactor, write minimal implementation for the first test, make it pass and repeat. This post is not about how to TDD properly and to focus on the core things I just give code after the refactoring phase. </p>
 
 ``` ruby lib/decent_presenter/exposure.rb
 module DecentPresenter
@@ -403,7 +403,7 @@ module DecentPresenter
   end
 end
 ```
-<p>We need somehow to distinguish between collection and a single model. The collection will probably implement the <code>size</code> method. What if the model also implements size method ? Looks like we need to make some paranoid check. Let's modify test for <code>DecentPresenter::Exposure</code> and add <code>size</code> method to DummyModel:</p>
+<p>We need somehow to distinguish between collection and a single model. The collection will probably implement the <code>size</code> method. What if the model also implements size method? Looks like we need to make some paranoid check. Let's modify test for <code>DecentPresenter::Exposure</code> and add <code>size</code> method to DummyModel:</p>
 
 ``` ruby spec/decent_presenter/exposure_spec.rb
 # other code
