@@ -7,11 +7,11 @@ categories: [Rails, TDD, Design Patterns, Testing, Architecture]
 ---
 
 
-<p>You are working currently on that awesome app and just started thinking about implementing new feature, let's called it feature X. What's the first thing you do? Rolling your own solution or... maybe checking if there's a magical gem that can help you solve that problem? Ok, it turns out there's already a gem Y that does what you expect. It does tons of other things and is really complex but who cares. After some time your app breaks, something is definitively not working and it seems that gem Y is responsible for that. So you read all the issues on Github, pull requests and even read the source code and finally find a little bug. You managed to do some monkeypatching first and then send pull request for a small fix and solved a problem, which took you a few hours. Looks like a problem is solved. And then, you try to update Rails to the current version. Seems like there's a dependency problem - gem Y depends on previous version of Rails...</p>
+<p>You are working currently on that awesome app and just started thinking about implementing new feature, let's call it feature X. What's the first thing you do? Rolling your own solution or... maybe checking if there's a magical gem that can help you solve that problem? Ok, it turns out there's already a gem Y that does what you expect. It does tons of other things and is really complex. After some time your app breaks, something is definitively not working and it seems that gem Y is responsible for that. So you read all the issues on Github, pull requests and even read the source code and finally find a little bug. You managed to do some monkeypatching first and then send pull request for a small fix and solved a problem, which took you a few hours. Looks like a problem is solved. And then, you try to update Rails to the current version. Seems like there's a dependency problem - gem Y depends on previous version of Rails...</p>
 
-<p>Does it sound somehow familiar to you? I know the pain... Some breaking changes happens especially when updating Rails. If this change happens in "big" gem that solves a lot of problems and is still maintained, it's not that bad. How about these "small" gems, which come in handy and look quite complex but you could roll your own solution to that particular problem within half an hour?</p>
+<p>Does it sound somehow familiar to you, especially when updating Rails? If it's caused by "big" gem that solves a lot of problems and is still maintained, it's not that bad. How about these "small" gems, which come in handy and look quite complex but you could roll your own solution to that particular problem within half an hour?</p>
 
-<p>I've seen this many times where first thing when implementing new feature is searching for a gem that solves this problem. We need really basic polymorphic tags? Let's use acts-as-taggable-on, we don't need half of the features provided and setting up a few migrations and associations would take 10 minutes anyway but there's no need to reinvent the wheel. Client asked for a simple admin panel with some CRUD stuff involving several models. Let's use active_admin or rails_admin for that! Simple searching / filtering where several fields in one model are involved? Ransack is an obvious choice!</p>
+<p>I've seen this many times where first thing when implementing new feature is searching for a gem that solves this problem. We need really basic polymorphic tags? Let's use <a href="https://github.com/mbleigh/acts-as-taggable-on" target="_blank">acts-as-taggable-on</a>, we don't need half of the features provided and setting up a few migrations and associations would take 10 minutes anyway but there's no need to reinvent the wheel. Client asked for a simple admin panel with some CRUD stuff involving several models. Let's use <a href="https://github.com/gregbell/active_admin" target="_blank">active_admin</a> or <a href="https://github.com/sferik/rails_admin" target="_blank">rails_admin</a> for that! Simple searching / filtering where several fields in one model are involved? <a href="https://github.com/activerecord-hackery/ransack" target="_blank">Ransack</a> is an obvious choice!</p>
 
 <p>More gems mean: slower boot time of your application, more dependencies (don't look only at Gemfile, Gemfile.lock is the real deal), more things that can break, more issues to take care of when updating Rails and the gem itself (reading Changelogs, issues etc.).</p>
 
@@ -20,9 +20,10 @@ categories: [Rails, TDD, Design Patterns, Testing, Architecture]
 <ul>
   <li>Gem is actively being maintained, there were some commits not that long ago (basic prerequisite)</li>
   <li>Gem solves the exact problem you have and does only that</li>
-  <li>Gem does plenty of other things but it deals with areas you are not really familiar involving security, encryption etc. (e.g. symmetric-encryption)</li>
-  <li>Gem does many other things and you need just a small part of it but rolling your own solution would take really a lot of time (e.g. devise)</li>
-  <li>Gem deals with complex infrastructure things (e.g. carrierwave)</li>
+  <li>Gem does plenty of other things but it deals with areas you are not really familiar involving security, encryption etc. (e.g. <a href="https://github.com/reidmorrison/symmetric-encryption" target="_blank">symmetric-encryption</a>)</li>
+  <li>Gem does many other things and you need just a small part of it but rolling your own solution would take really a lot of time (e.g. <a href="https://github.com/plataformatec/devise" target="_blank">devise</a>)</li>
+  <li>Gem deals with complex infrastructure things (e.g. <a href="https://github.com/carrierwaveuploader/carrierwave" target="_blank">carrierwave</a>)</li>
+  <li>Gem has a nice integration with many other gems you already use</li>
 </ul>
 
 <p>Remember that using gem Y means also reading docs and it might be beneficial to read some parts of source code, just to get the general idea how it works. It also takes some time. Why not implement your own solution? It might look like reinventing the wheel but no gem will be that customizable to the extent you need. Or you will be using just a small part of it and the models / controllers will have tens of additional methods you don't need (and hundreds more with several gems).</p>
@@ -30,7 +31,7 @@ categories: [Rails, TDD, Design Patterns, Testing, Architecture]
 
 <h2>Writing own solution</h2>
 
-<p>How much work does it really take to reimplement a gem? Let's take a look at something popular - draper gem. Draper is a pretty good solution for decorators/presenters for your models in Rails apps. I've been using it for quite long a time, had some issues but managed to solve them rather quickly. But the source code looks quite complex, especially extracting view_context with a bit global-variable-like RequestStore. And there are some other complex parts that I don't really use. Let's write custom presenters and call it DecentPresenter. What kind of interface and conventions would I expect from it?</p>
+<p>How much work does it really take to reimplement a gem? Let's take a look at something popular - <a href="https://github.com/drapergem/draper" target="_blank">draper</a> gem. Draper is a pretty good solution for decorators/presenters for your models in Rails apps. I've been using it for quite long a time, had some issues but managed to solve them rather quickly. Unfortunately, the source code looks quite complex, especially extracting view_context with a bit global-variable-like RequestStore. And there are some other complex parts that I don't really use. Let's write custom presenter and call it DecentPresenter. What kind of interface and conventions would I expect from it?</p>
 
 <ul>
   <li>Include some module in controllers (ApplicationController) - I want to be explicit here, without including it automatically on Rails app boot. Also I don't want to include it in models - model doesn't have to know that it can be presented in one way or another</li>
@@ -177,7 +178,7 @@ module DecentPresenter
   module Exposable
  
     def present(presentable, options = {})
-      if respond_to? :view_context
+      if respond_to? :view_context, true
         # decorate the presentable object here
       else
         raise DecentPresenter::Exposable::DoesNotImplementViewContextError.new(
@@ -698,4 +699,4 @@ end
 
 <h2>Wrapping up</h2>
 
-<p>Using third party gem isn't always a best solution, sometimes it's quite easy to write similar solution. Many gems are quite complex because they need to handle all possible use cases and that level of complexity and other dependencies might not be necessary for your app.</p>
+<p>Using third party gem isn't always the best solution, sometimes it's quite easy to write similar solution. Many gems are quite complex because they need to handle all possible use cases and that level of complexity and other dependencies might not be necessary for your app.</p>
