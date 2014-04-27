@@ -416,7 +416,6 @@ end
 
 # other code
 
-end
 ```
 
 <p>Now the tests fail. How can we make sure the collection really is a collection? Besides <code>size</code>, it'll probably implement <code>to_a</code> and <code>first</code> methods. Let's update the implementation:</p>
