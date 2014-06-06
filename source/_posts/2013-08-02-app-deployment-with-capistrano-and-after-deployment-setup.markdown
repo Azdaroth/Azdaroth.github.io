@@ -9,6 +9,8 @@ categories: [Capistrano, Deployment]
 
 <p>You've just setup your production server, but still haven't deployed your app? Then this the right place for you. You are going to learn how to deploy your app to remote server, deal with some config files, create staging environment and setup monitoring tools.</p>
 
+<!--more--> 
+
 <h2>Introducing Capistrano</h2>
 
 <p>Capistrano is an excellent tool to automate your deployment process using Rake DSL. It allows you to deploy applications using various source control management systems like Git, run migrations on remote server, restart application and many more.</p>

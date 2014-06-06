@@ -8,6 +8,8 @@ categories: [TDD, BDD, Testing, Rails, OOP, Design Patterns]
 
 <p>Last time, in <a href="http://karolgalanciak.com/blog/2014/01/04/test-driven-rails-part-1/" target="_blank">part 1</a>, I was giving some advice about testing - why to test at all, which tests are valuable and which are not, when to write acceptance tests and in what cases aim for the maximum code coverage. It brought about some serious discussion about testing ideas and if you haven't read it yet, you should probably check (<a href="http://karolgalanciak.com/blog/2014/01/04/test-driven-rails-part-1/#disqus_thread" target="_blank">it</a>) it out. Giving some general point of view about such broad topic like Test Driven Development / Behavior Driven Development is definetely not enough so I will try to apply these techniques by implementing a concrete feature. I wanted to choose some popular usecase so that most developers will have an opinion how they would approach it. In most applications you will probably need:</p>
 
+<!--more--> 
+
 <h2>User Registration</h2>
 
 <p>It is quite common feature and it can be approached in many ways. The most popular is to some authentication gem, like Devise, which is the probably the safest and the fastest way. However, Devise might be an overkill for some cases or maybe you need highly customizable solution. How would you write an implementation fot that usecase then?</p>

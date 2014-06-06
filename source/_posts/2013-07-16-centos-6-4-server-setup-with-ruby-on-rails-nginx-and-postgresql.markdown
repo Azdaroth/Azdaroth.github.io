@@ -8,6 +8,8 @@ categories: [Ruby, Rails, Server, PostgreSQL, Deployment, Unix]
 
 <p>Server setup with the entire environment for Rails applications can be quite tricky, especially when you do it for the first time. Here is step by step guide how to setup CentOS 6.4 server with a basic environment for deploying Rails applications. I encourage you to choose CentOS Linux - it is a reliable distro (well, based on Red Hat Enterprise Linux), easy to handle and doesn't require advanced Unix knowledge like Gentoo (especially while updating system related stuff).</p>
 
+<!--more--> 
+
 <h2>Initial setup</h2>
 
 <p>You need to ssh on your server:</p>

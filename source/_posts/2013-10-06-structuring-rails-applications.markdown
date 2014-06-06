@@ -8,6 +8,8 @@ categories: [OOP, Rails, Design Patterns, Callbacks, Refactoring]
 
 <p>There've been a lot of discussions recently about applying Object Oriented Programming in Rails applications, how ActiveRecord callbacks make testing painful and how Rails makes it hard to do OOP the right way. Is it really true? Rails makes everything easy - you can easily write terrible code, which will be a maintenance nightmare, but is also easy to apply good practices, especially with available gems. What is the good way then to extract logic in Rails applications and the best place to put it?</p>
 
+<!--more--> 
+
 <h2>Standard structure</h2>
 
 <p>By default we have four directories where we can put our code: models, views, controllers and helpers. The basic explanation of them is following:</p>

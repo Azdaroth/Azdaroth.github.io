@@ -9,6 +9,8 @@ categories: [TDD, BDD, Testing, Rails]
 
 <p>Testing is still one of the hottest topics when it comes to developing maintainable and business-critical applications. Ruby on Rails community embraces the importance of writings tests, yet there are so little resources about the Test-Driven Development or Behavior-Driven Development in Rails applications from a wider perspective. How should we test our application? Which tests are valuable and which don’t provide any value? What scenarios should be included in acceptance tests?</p>
 
+<!--more--> 
+
 <h2>Value of tests</h2>
 
 <p>If you aren’t yet into testing, you might have some doubts: what can you get from tests and how they can help you? In a few words, by writing tests:</p>
