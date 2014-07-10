@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Automate to the max: instant Ubuntu Server setup with Chef"
-date: 2014-06-28 17:00
+date: 2014-07-10 10:00
 comments: true
 categories: [Server, Chef, Deployment]
 ---
@@ -13,7 +13,7 @@ categories: [Server, Chef, Deployment]
 <h2>What is Chef?</h2>
 <p>Chef is the automation framework which uses Ruby DSL and helps provisioning new servers by automating the whole process. We are going to concentrate on Chef Solo where we set up all roles (like PostgreSQL server) on local machine and use them on our server, contrary to Chef Server which is a hub for configuration data that is automatically applied to all nodes (servers) connected with central server, quite useful when you need to manage serious amount of servers.</p>
 
-<p>We will also be using some other utilities - <strong>Knife</strong> (solo) which is a command line utility which helps us interact with server and <strong>Berkshelf</strong> - a bundler-like utility for Chef recipes.</p>
+<p>We will also be using some other utilities - <strong>Knife</strong> (solo) which is a command line utility helpings us interact with server and <strong>Berkshelf</strong> - a bundler-like utility for Chef recipes.</p>
 
 <p>I'm not going to write another tutorial explaining every possible detail of entire Chef DSL. The <a href="http://docs.opscode.com" target="_blank">documentation</a> is pretty good and there are also plenty of other resources you can learn from. I'd rather like to explain the most important terms, show basic configuration, demonstrate how to write very simple recipe and at the end I am going to introduce my own cookbook that I use for servers' setup with <strong>Ubuntu Server 14.04</strong>. Why Ubuntu? Well, sysadministration is not my main responsibility and it's much easier to find solutions (or Chef cookbooks) for Ubuntu than any other distribution. 
 
@@ -143,7 +143,7 @@ knife solo prepare vagrant@127.0.0.1 -p 2222 -i /Users/system_user_name/.vagrant
 knife solo prepare vagrant@127.0.0.1 -p 2222 -i /home/system_user_name/.vagrant.d/insecure_private_key
 ```
 
-<p>Remember about using real system user name.</p>
+<p>Remember to use real system user name.</p>
 
 <p>Our virtual node can now run the Chef client. The command above has also generated <b>nodes/127.0.0.1.json</b> configuration file. Let's investigate the content: <code>run_list</code> is a list of all roles and recipes that will be applied on the node. You can add new roles/recipes just by specifying the name but it may be a good idea to be more explicit and specify whether it's a role or a recipe to avoid name collisions. In our case it will be:</p>
 
@@ -316,8 +316,8 @@ end
 <ol>
   <li>We start with adding Nginx repository using <code>bash</code> method which is used for executing Bash scripts (as the name implies). We want to run in as <code>root</code> user and the script for adding repository is in <code>code</code> body.</li>
   <li>In next step we tell Chef to install Nginx itself using package manager.</li>
-  <li>Then we want Chef to use our template file for configuration. Most of the parameters are pretty self-explanatory: root user will be the owner of the file, the file will belong to root group, we set permissions for the file, specify source in <code>templates</code> directory and we use notifications to take some action <code>immediately</code> (the other option is <code>delayed</code> which would take action at the end of chef-client run). To specify action to take place we use <code>resource[name]</code> syntax.</li>
-  <li>In last step we define our action for restarting Nginx using Chef Execute provider: we specify the command which we want to be run and action, which can be <code>:run</code>(which will run the command) and <code>:nothing</code>(prevents from running the command - we use <code>:nothing</code> in this case as we use it in <code>notifies</code> method in <code>template</code>).</li>
+  <li>Then we want Chef to use our template file for configuration. Most of the parameters are pretty self-explanatory: root user will be the owner of the file, the file will belong to root group, we set permissions for the file, specify source in <code>templates</code> directory and we use notifications to take some action <code>immediately</code> (the other option is <code>delayed</code> taking action at the end of chef-client run). To specify action to take place we use <code>resource[name]</code> syntax.</li>
+  <li>In last step we define our action for restarting Nginx using Chef Execute provider: we specify the command to be run and action, which can be <code>:run</code>(will run the command) and <code>:nothing</code>(prevents from running the command - we use <code>:nothing</code> in this case as we use it in <code>notifies</code> method in <code>template</code>).</li>
 </ol>
 
 
@@ -416,10 +416,10 @@ knife solo cook root@ip
 
 <p>Composing Chef cookbooks for your server can take a long time: reading all recipes / cookbooks, checking configuration etc. may be quite tedious, especially when doing if for the first time, so I decided to share with <a href="https://github.com/Azdaroth/chef-server-setup-template" target="_blank">my own</a> configuration which I'm going to describe in this section (heavily inspired by <a href="https://github.com/TalkingQuickly" target="_blank"></a> Ben Dixon's recipes, author of <a href="https://leanpub.com/deploying_rails_applications" target="_blank">Reliably Deploying Rails Applications</a>).</p>
 
-<p>Let's take a look at the <a href="https://github.com/Azdaroth/chef-server-setup-template/blob/master/nodes/put_your_ip_address_here.json" target="_blank">node definition</a>. We have some new parameters: <code>environment</code> which is set to production - I will explain in a minute what is it for - and Debian <code>platform_family</code>. Next we've got some recipes-related attributes. It could also be put in role definitions but I like keeping sensitive data in node definition:</p>
+<p>Let's take a look at the <a href="https://github.com/Azdaroth/chef-server-setup-template/blob/master/nodes/put_your_ip_address_here.json" target="_blank">node definition</a>. We have some new parameters: <code>environment</code> set to production - I will explain in a minute what is it for - and Debian <code>platform_family</code>. Next we've got some recipes-related attributes. It could also be put in role definitions but I like keeping sensitive data in node definition:</p>
 
 <ul>
-  <li><strong>authorization</strong> - these attributes are related to <code>sudo</code> recipe - we assume that we are going to use <strong>deploy</strong> user which is going to have sudo access enabled. Also, the entire <strong>sysadmin</strong> group is going to have sudo access. We set <code>passwordless</code> to be false - which will always require the password.</li>
+  <li><strong>authorization</strong> - these attributes are related to <code>sudo</code> recipe - we assume that we are going to use <strong>deploy</strong> user which is going to have sudo access enabled. Also, the entire <strong>sysadmin</strong> group is going to have sudo access. We set <code>passwordless</code> to be false - the password will alwaus be required.</li>
   <li><strong>monit</strong> - configuration for Monit concerning sending notifications and accessing via web interface. I would suggest having them enabled. However, if you decide not to enable them, just delete this section.</li>
   <li><strong>postgresql</strong> - you must specify password hash for <code>postgres</code> user. You can generate it easily using openssl:</li>
 ``` bash
@@ -445,13 +445,13 @@ knife solo cook root@ip
 
 <p>If you don't want to install some components, simply remove them from <code>run_list</code>.</p>
 
-<p>One more thing before me move to more detailed description of the roles: <code>data_bags</code> directory. It will be used for creating user (<strong>deploy</strong>), setting up password (again, password hash, not the plain password) and uploading ssh key. The <strong>deploy</strong> user is already specified in <code>deploy.json</code> file, so just paste your ssh key from <code>id_rsa.pub</code> and the password hash generated by:</p>
+<p>One more thing before we move to more detailed description of the roles: <code>data_bags</code> directory. It will be used for creating user (<strong>deploy</strong>), setting up password (again, password hash, not the plain password) and uploading ssh key. The <strong>deploy</strong> user is already specified in <code>deploy.json</code> file, so just paste your ssh key from <code>id_rsa.pub</code> and the password hash generated by:</p>
 
 ``` bash
 openssl passwd -1 "yourpassword"
 ```
 
-<p>As the the attributes set in the node definition take precedence over the ones defined in roles, the important part in the server role is the <code>run_list</code>:</p>
+<p>As the attributes set in the node definition take precedence over the ones defined in roles, the important part in the server role is the <code>run_list</code>:</p>
 <ul>
   <li><code>openssl</code> is responsible for managing passwords></li>
   <li><code>build-essential</code> installs build-essential</li>
