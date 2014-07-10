@@ -33,7 +33,7 @@ end
 ```
 <p>You can have some general idea what it does, even if you don't know Chef. That way it's quite easy to find reusable recipes that you can customize to your requirements and write your own solutions.</p>
 
-<p>Another huge benefit is <code>idempotence</code> - you can apply the same recipes multiple times on your server and the state of the server will be exactly the same as after running them for the first time. If you change something in eg. configuration files, only these changes will be applied. Try achieving the same using shell scripts only ;).</p>
+<p>Another huge benefit is <strong>idempotence</strong> - you can apply the same recipes multiple times on your server and the state of the server will be exactly the same as after running them for the first time. If you change something in eg. configuration files, only these changes will be applied. Try achieving the same using shell scripts only ;).</p>
 
 <p>Once you understand Chef, provisioning new servers will be extremely easy and fast - it can be even limited to 2 commands if you use the same configuration for all servers.</p>
 
