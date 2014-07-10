@@ -6,7 +6,7 @@ comments: true
 categories: [Server, Chef, Deployment]
 ---
 
-<p>You've started developing new app and need server to deploy it. You can choose dedicated hosting platform like <a href="https://www.heroku.com" target="_blank">Heroku</a> or <a href="https://shellycloud.com" target="_blank">Shelly</a> which may turn out to be quite expensive if you want to host multiple apps. You can also set up your own server. Going with the latter option can be quite time consuming, especially if sysadministration is not you main responsibility and you have multiple servers to provision. I that case automation beyond simple Bash scripts is a must - time to meet <strong>Chef</strong>.</p>
+<p>You've started developing new app and need server to deploy it. You can choose hosting platform like <a href="https://www.heroku.com" target="_blank">Heroku</a> or <a href="https://shellycloud.com" target="_blank">Shelly</a> which may turn out to be quite expensive if you want to host multiple apps. You can also set up your own server. Going with the latter option can be quite time consuming, especially if sysadministration is not you main responsibility and you have multiple servers to provision. I that case automation beyond simple Bash scripts is a must - time to meet <strong>Chef</strong>.</p>
 
 <!--more--> 
 
