@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Automate to the max: instant Ubuntu Server setup with Chef"
-date: 2014-07-10 10:00
+date: 2014-07-10 20:00
 comments: true
 categories: [Server, Chef, Deployment]
 ---
@@ -18,6 +18,24 @@ categories: [Server, Chef, Deployment]
 <p>I'm not going to write another tutorial explaining every possible detail of entire Chef DSL. The <a href="http://docs.opscode.com" target="_blank">documentation</a> is pretty good and there are also plenty of other resources you can learn from. I'd rather like to explain the most important terms, show basic configuration, demonstrate how to write very simple recipe and at the end I am going to introduce my own cookbook that I use for servers' setup with <strong>Ubuntu Server 14.04</strong>. Why Ubuntu? Well, sysadministration is not my main responsibility and it's much easier to find solutions (or Chef cookbooks) for Ubuntu than any other distribution. 
 
 <p>After reading this post you should be able to setup every server instantly and have some basic understanding of what's going on.</p>
+
+<h2>Why use Chef?</h2>
+
+<p>You may wonder what are the benefits of using Chef over the Bash scripts. Firstly, Chef provides extremely expressive DSL, just take a look at the code below:</p>
+
+``` ruby
+template "/etc/nginx/nginx.conf" do
+  owner "root"
+  group "root"
+  mode "0644"
+  source "nginx.conf.erb"
+end
+```
+<p>You can have some general idea what it does, even if you don't know Chef. That way it's quite easy to find reusable recipes that you can customize to your requirements and write your own solutions.</p>
+
+<p>Another huge benefit is <code>idempotence</code> - you can apply the same recipes multiple times on your server and the state of the server will be exactly the same as after running them for the first time. If you change something in eg. configuration files, only these changes will be applied. Try achieving the same using shell scripts only ;).</p>
+
+<p>Once you understand Chef, provisioning new servers will be extremely easy and fast - it can be even limited to 2 commands if you use the same configuration for all servers.</p>
 
 <h2>Chef basics</h2>
 
