@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Rails: Useful Patterns"
-date: 2014-09-17 09:00
+date: 2014-09-17 19:55
 comments: true
 categories: [OOP, Rails, Design Patterns, Refactoring]
 ---
@@ -12,7 +12,7 @@ categories: [OOP, Rails, Design Patterns, Refactoring]
 
 <h2>Pass form objects as data aggregates to service objects</h2>
 
-<p>Imagine situation where your usecase involves more than one model, some virtual attributes are needed etc., basically the usecase where form object is necessary (unless you want to have a serious mess in models). Furthermore, you need to implement pretty complex features - besides proper mapping of attributes to models in form objects you want to send some notifications, log an activity and whatever else. How to tackle such a problem? Often I see a code where all custom logic, apart from simple saving data, is put in form objects. That's not really a way to go. Why start from separating responsibilities and end up with form object which does everything? You can easily handle it by passing form objects with populated data to service objects. Take a look at the controller action below:</p>
+<p>Imagine situation where your usecase involves more than one model, some virtual attributes are needed etc., basically the usecase where form object is necessary (unless you want to have a serious mess in models). Furthermore, you need to implement pretty complex features - besides proper mapping of attributes to models in form objects you want to send some notifications, log an activity and other stuff. How to tackle such a problem? Often I see a code where all custom logic, apart from simple saving data, is put in form objects. That's not really a way to go. Why start from separating responsibilities and end up with form object which does everything? You can easily handle it by passing form objects with populated data to service objects. Take a look at the controller action below:</p>
 
 ``` ruby
 class UsersController < ApplicationController
@@ -34,7 +34,7 @@ end
 
 <p>The <code>UsersController</code> is responsible here for control flow, form aggregates and validates data and <code>User::Registration</code> does some domain business logic and assumes it operates on valid data. Looks and feels great, it's easy to test and the responsibilities are clear. I also inject some dependencies in the constructor of <code>User::Registration</code> to make it even more testable and extensible.</p> 
 
-<p>The only problem with such an approach is lack of compatibility or difficulty with customizations with some gems (like <code>inherited_resources</code>). But gems shouldn't force you to write code in a particular way and it would be probably better to give up on them and enjoy clean code.</p>
+<p>The only problem with such an approach is lack of compatibility or difficulties with customization with some gems (like <code>inherited_resources</code>). But gems shouldn't force you to write code in a particular way and it would be probably better to give up on them and enjoy a clean code.</p>
 
 <h2>Create flexible service objects with listeners</h2>
 
@@ -65,7 +65,7 @@ class User::Registration
 
 ```
 
-<p>We can pass any number of listeners to the constructor and inject dependencies if required. All listeners have to implement the same interface: <code>notify</code> method which takes one argument. The controller action for registering new user may look like this one:</p>
+<p>We can pass any number of listeners to the constructor and inject dependencies if required. All listeners have to implement the same interface: <code>notify</code> method which takes one argument. The controller action for registering new user may look like this:</p>
 
 
 
@@ -91,7 +91,7 @@ class UsersController < ApplicationController
 end
 ```
 
-<p>We've encapsulated additional logic in separate classes in form of listeners and create quite flexible interface - we need another action in registration process but only in one type of registration, not all of them? Just pass another listener into the constructor in controller.</p>
+<p>We've encapsulated additional logic in separate classes in form of listeners and created quite flexible interface - we need another action in registration process but only in one type of registration, not all of them? Just pass another listener into the constructor in controller.</p>
 
 
 <h2>Extract context classes</h2>
@@ -142,7 +142,7 @@ end
 
 <h2>Trade long if/case statements for declarative dispatch</h2>
 
-<p>Rather a structural implementation detail but still quite interesting. Imagine situation when you have to return proper status based on some conditions. You can of course use <code>case</code> statement but the problem with this is approach is that the code is not really pretty, especially when you have multiple conditions for each status. For complex logic it might be better to handle such usecases with more declarative approach:</p>
+<p>Rather a structural implementation detail but still quite interesting. Imagine situation when you have to return proper status based on some conditions. You can of course use <code>case</code> statement but the problem with this approach is that the code is not really pretty, especially when you have multiple conditions for each status. For complex logic it might be better to handle such usecases with more declarative approach:</p>
 
 ``` ruby
 class User::SellerStatus
