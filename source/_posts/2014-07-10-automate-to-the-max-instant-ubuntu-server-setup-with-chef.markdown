@@ -8,14 +8,14 @@ categories: [Server, Chef, Deployment]
 
 <p>You've started developing new app and need server to deploy it. You can choose hosting platform like <a href="https://www.heroku.com" target="_blank">Heroku</a> or <a href="https://shellycloud.com" target="_blank">Shelly</a> which may turn out to be quite expensive if you want to host multiple apps. You can also set up your own server. Going with the latter option can be quite time consuming, especially if sysadministration is not you main responsibility and you have multiple servers to provision. I that case automation beyond simple Bash scripts is a must - time to meet <strong>Chef</strong>.</p>
 
-<!--more--> 
+<!--more-->
 
 <h2>What is Chef?</h2>
 <p>Chef is the automation framework which uses Ruby DSL and helps provisioning new servers by automating the whole process. We are going to concentrate on Chef Solo where we set up all roles (like PostgreSQL server) on local machine and use them on our server, contrary to Chef Server which is a hub for configuration data that is automatically applied to all nodes (servers) connected with central server, quite useful when you need to manage serious amount of servers.</p>
 
 <p>We will also be using some other utilities - <strong>Knife</strong> (solo) which is a command line utility helpings us interact with server and <strong>Berkshelf</strong> - a bundler-like utility for Chef recipes.</p>
 
-<p>I'm not going to write another tutorial explaining every possible detail of entire Chef DSL. The <a href="http://docs.opscode.com" target="_blank">documentation</a> is pretty good and there are also plenty of other resources you can learn from. I'd rather like to explain the most important terms, show basic configuration, demonstrate how to write very simple recipe and at the end I am going to introduce my own cookbook that I use for servers' setup with <strong>Ubuntu Server 14.04</strong>. Why Ubuntu? Well, sysadministration is not my main responsibility and it's much easier to find solutions (or Chef cookbooks) for Ubuntu than any other distribution. 
+<p>I'm not going to write another tutorial explaining every possible detail of entire Chef DSL. The <a href="http://docs.opscode.com" target="_blank">documentation</a> is pretty good and there are also plenty of other resources you can learn from. I'd rather like to explain the most important terms, show basic configuration, demonstrate how to write very simple recipe and at the end I am going to introduce my own cookbook that I use for servers' setup with <strong>Ubuntu Server 14.04</strong>. Why Ubuntu? Well, sysadministration is not my main responsibility and it's much easier to find solutions (or Chef cookbooks) for Ubuntu than any other distribution.
 
 <p>After reading this post you should be able to setup every server instantly and have some basic understanding of what's going on.</p>
 
@@ -72,7 +72,7 @@ cd chef-simple-recipe
 
 <p>and create Gemfile with chef, knife-solo and berkshelf gems:</p>
 
-``` ruby 
+``` ruby
 source 'https://rubygems.org'
 
 gem 'knife-solo'
@@ -129,7 +129,7 @@ cd ubuntu-server-14-04
 
 <p>and install Ubuntu Server 14-04:</p>
 
-``` bash 
+``` bash
 vagrant init ubuntu-server-14-04 https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box
 ```
 
@@ -149,17 +149,11 @@ vagrant ssh
 
 <p>Now we have our node, let's prepare it for running Chef (the command below must be run within main Chef project directory):</p>
 
-<p>On OS X:</p>
 
 ```
-knife solo prepare vagrant@127.0.0.1 -p 2222 -i /Users/system_user_name/.vagrant.d/insecure_private_key
+knife solo prepare vagrant@127.0.0.1 -p 2222 -i ~/.vagrant.d/insecure_private_key
 ```
 
-<p>On any Linux:</p>
-
-```
-knife solo prepare vagrant@127.0.0.1 -p 2222 -i /home/system_user_name/.vagrant.d/insecure_private_key
-```
 
 <p>Remember to use real system user name.</p>
 
@@ -243,7 +237,7 @@ http {
   keepalive_timeout 65;
   types_hash_max_size 2048;
   server_names_hash_bucket_size  64;
-  
+
   include /etc/nginx/mime.types;
   default_type application/octet-stream;
 
@@ -258,7 +252,7 @@ http {
 }
 ```
 
-<p>Just to keep it as simple as possible let's assume that we will want only <code>user</code> and <code>worker_processes</code> attributes to be customizable and <code>www-data</code> user will be our default with 4 worker processes. We can achieve that using <strong>erb</strong> templates and specifying default attributes for our <code>default.rb</code> recipe. Using attributes is pretty straight-forward: we need to create file for our recipe (in that case<code>default.rb</code>) file in attributes directory and use hash syntax on <code>default</code> object where <code>nginx</code> will be our namespace:</p> 
+<p>Just to keep it as simple as possible let's assume that we will want only <code>user</code> and <code>worker_processes</code> attributes to be customizable and <code>www-data</code> user will be our default with 4 worker processes. We can achieve that using <strong>erb</strong> templates and specifying default attributes for our <code>default.rb</code> recipe. Using attributes is pretty straight-forward: we need to create file for our recipe (in that case<code>default.rb</code>) file in attributes directory and use hash syntax on <code>default</code> object where <code>nginx</code> will be our namespace:</p>
 
 ``` ruby attributes/default.rb
 default['nginx']['user']      = 'www-data'
@@ -286,7 +280,7 @@ http {
   keepalive_timeout 65;
   types_hash_max_size 2048;
   server_names_hash_bucket_size  64;
-  
+
   include /etc/nginx/mime.types;
   default_type application/octet-stream;
 
