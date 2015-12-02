@@ -7,13 +7,13 @@ categories: [Ember, JavaScript, ES7, design patterns]
 ---
 
 
-<p>ES6 introduced plenty of useful features such as modules, arrow functions, let variables, destructing, classes and many more which made writing JS code much readable and enjoyable. Thanks to <a href="https://babeljs.io" target="_blank">Babel</a>, a JavaScript transpiler, it's been pretty painless to use them all in the applications. If you happen to develop EmberJS apps and use <a href="http://www.ember-cli.com" target="_blank">ember-cli</a>, you don't probably think much about Babel or any transpilation as these features are natural part of every Ember application. But the new features didn't end with ES6, we're going to have even more of them in ES7 (2016). Some of them can already be used, thanks again to Babel. In this blogpost I'm going to explore very powerful concept which is the decorators.</p>
+<p>ES6 introduced plenty of useful features such as modules, arrow functions, let variables, destructuring, classes and many more which made writing JS code much readable and enjoyable. Thanks to <a href="https://babeljs.io" target="_blank">Babel</a>, a JavaScript transpiler, it's been pretty painless to use them all in the applications. If you happen to develop EmberJS apps and use <a href="http://www.ember-cli.com" target="_blank">ember-cli</a>, you don't probably think much about Babel or any transpilation as these features are a natural part of every Ember application. But the new features didn't end with ES6, we're going to have even more of them in ES7 (2016). Some of them can already be used, thanks again to Babel. In this blogpost I'm going to explore a very powerful concept which of decorators.</p>
 
 <!--more-->
 
-<h2>Decorators - what are they and how to use them</h2>
+<h2>Decorators - what are they and how to use them?</h2>
 
-<p>Decorators are expressions (functions) taking <code>target</code>, <code>name</code> and <code>descriptors</code> as arguments and allowing to modify classes and properties using declarative syntax at design time. It sounds interesting, but doesn't say much exactly what it does exactly. Let's check some basic example and examine what these arguments are and how to apply the decorator:</p>
+<p>Decorators are expressions (functions) taking <code>target</code>, <code>name</code> and <code>descriptors</code> as arguments and allowing to modify classes and properties using declarative syntax at design time. It sounds interesting, but doesn't say much what exactly it does. Let's check some basic example and examine what these arguments are and how to apply the decorator:</p>
 
 ``` javascript
 function describe(target, name, descriptor) {
@@ -54,15 +54,15 @@ function measureable(target, name, descriptor) {
 
 <p>And that's it! We extended the original function in a really elegant and unobtrusive manner. Notice that we still pass the arguments to the original function with JS <code>arguments</code>. If you are familiar with Python, you've probably been using the decorators in the similar way. The cool thing is that syntax (<code>@</code>) is even the same :). </p>
 
-<p>Decorators can also be applied to classes. However, In such case we won't have name and descriptor, only the first argument - <code>target</code> - which is going to be the constructor of the class. So what are the usecases for decorating classes?</p>
+<p>Decorators can also be applied to classes. However, In that case we won't have name and descriptor, only the first argument - <code>target</code> - which is going to be the constructor of the class. So what are the use cases for decorating classes?</p>
 
-<p>How about implementing mixins? An ideal interface would be something like <code>@mixin(myAwesomeFunctions)</code>. It happens that classes are just a sugar and adding instance functions is just defining properties onto the <code>prototype</code>. We have a reference to the constructor, so if we create e.g. <code>User</code> class, we can add new functions to it's prototype the following way:</p>
+<p>How about implementing mixins? An ideal interface would be something like <code>@mixin(myAwesomeFunctions)</code>. It happens that classes are just a sugar and adding instance functions is just defining properties onto the <code>prototype</code>. We have a reference to the constructor, so if we create e.g. <code>User</code> class, we can add new functions to its prototype the following way:</p>
 
 ``` javascript
 User.prototype[functionName] = func;
 ```
 
-<p>How about <code>mixin</code> decorator which takes some arguments? Not a problem, we just need to define function which returns another function that will be applied:</p>
+<p>How about <code>mixin</code> decorator taking arguments? Not a problem, we just need to define function which returns another function that will be applied:</p>
 
 ``` javascript
 function mixin(functions) {
@@ -157,7 +157,7 @@ export default DS.Model.extend({
 });
 ```
 
-<p>That looks perfect now. There are plenty of more computed decorators implemented in <code>ember-computed-decorators</code> addon, I encourage you to check all of them.</p>
+<p>This looks perfect now. There are plenty of more computed decorators implemented in <code>ember-computed-decorators</code> addon, I encourage you to check all of them.</p>
 
 <p>The only problem is that the new syntax doesn't play nicely with JSHint. The policy of JSHint is to support features that are Stage 2 of standardization process, which is not the case yet for decorators. The current workaround is to add some extra config to <code>.jshintrc</code>:</p>
 
