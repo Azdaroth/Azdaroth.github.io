@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Ember and ES7: async / await"
-date: 2015-12-06 13:48
+date: 2015-12-18 9:50
 comments: true
 categories: [Ember, JavaScript, ES7, ECMAScript]
 ---
