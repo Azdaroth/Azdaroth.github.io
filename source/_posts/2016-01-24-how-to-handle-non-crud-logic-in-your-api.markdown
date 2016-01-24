@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "How To Handle Non-CRUD Logic In Your API"
-date: 2016-01-17 12:52
+date: 2016-01-24 22:00
 comments: true
 categories: [API, Rails, Ruby, Architecture]
 ---
