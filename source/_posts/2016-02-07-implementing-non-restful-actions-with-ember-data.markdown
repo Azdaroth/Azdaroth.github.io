@@ -42,14 +42,10 @@ export default ApplicationAdapter.extend({
 import Ember from 'ember';
 import DS from 'ember-data';
 
-const { getOwner } = Ember;
-
 export default DS.Model.extend({
   publish() {
     let modelName = this.constructor.modelName;
-    let adapter = getOwner(this).lookup(`adapter:${modelName}`);
-    // if you use Ember version prior to 2.3 you'll probably need to use container:
-    // let adapter = this.container.lookup(`adapter:${modelName}`);
+    let adapter = this.store.adapterFor(modelName);
     return adapter.publish(this.get('id'));
   }
 });
@@ -65,12 +61,10 @@ export default DS.Model.extend({
 import Ember from 'ember';
 import DS from 'ember-data';
 
-const { getOwner } = Ember;
-
 export default DS.Model.extend({
   publish() {
     let modelName = this.constructor.modelName;
-    let adapter = getOwner(this).lookup(`adapter:${modelName}`);
+    let adapter = this.store.adapterFor(modelName);
     return adapter.publish(this.get('id'), this.serialize());
   }
 });
@@ -100,3 +94,6 @@ export default ApplicationAdapter.extend({
 <h2>Wrapping up</h2>
 
 <p>Non-RESTful actions are not supported out of the box by <strong>Ember Data</strong>, but they are not that hard to implement when using adapters.</p>
+
+
+<p class="meta small-p">Edit: Thanks to <a href="https://karolgalanciak.com/blog/2016/02/07/implementing-non-restful-actions-with-ember-data/#comment-2500931825" target="_blank">Wesley Workman</a> for mentioning <code>adapterFor</code> and suggesting using it in favour of <code>owner</code> / <code>container</code> API.</p>
