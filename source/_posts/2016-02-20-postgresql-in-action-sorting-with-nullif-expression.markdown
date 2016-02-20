@@ -10,7 +10,7 @@ categories: [PostgreSQL, Database, ActiveRecord, Quick Tips]
 
 <!--more-->
 
-<h2>NULLIF to the resscue</h2>
+<h2>NULLIF to the rescue</h2>
 
 <p>Imagine that you want to sort users by <code>fullname</code> ascending and for whatever reason it happens that the records contain both null and empty string values (besides some meaningful data of course). As previously mentioned, the following expression: <code>order("fullname ASC NULLS LAST")</code> won't be enough: it will work only for null values and the blank strings will get in a way. Fortunately, <strong>PostgreSQL</strong> offers <code>NULLIF</code> conditional statement which takes 2 arguments. If argument 1 equals argument 2 it will return <code>NULL</code>, otherwise it will return argument 1. In our case we want to return <code>NULL</code> if <code>fullname</code> is a blank string, so the final ordering statment could look like this: <code>order("NULLIF(fullname, '') ASC NULLS LAST")</code>. That's all you need for such sorting!</p>
 
