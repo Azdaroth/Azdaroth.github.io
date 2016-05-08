@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "When validation is not enough: PostgreSQL triggers for data integrity"
-date: 2016-05-01 23:12
+date: 2016-05-06 19:45
 comments: true
 categories: [PostgreSQL, Database, ActiveRecord, Quick Tips, Patterns, Triggers]
 ---
