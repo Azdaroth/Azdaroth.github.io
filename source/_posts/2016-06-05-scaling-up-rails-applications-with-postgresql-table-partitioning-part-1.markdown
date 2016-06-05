@@ -29,7 +29,7 @@ CREATE TABLE other_orders() INHERITS (orders);
 
 <h2>Defining constraints for partitioning criteria</h2>
 
-<p>As we are going to split one big table into the smaller ones, we need to have some criterium that would be used to decide which table should we put the data in. We can do it either by range (e.g. <code>created_at</code> between 01.01.2016 and 31.12.2016) or by value (<code>client_id</code> equal to 100). To ensure we have only the valid data which always satisfy out partitioning criterium, we should add proper <code>CHECK CONSTRAINTS</code> as guard statements. To make sure the orders in particular table were e.g. created at 2016, we could add the following constraint</p>
+<p>As we are going to split one big table into the smaller ones, we need to have some criterium that would be used to decide which table should we put the data in. We can do it either by range (e.g. <code>created_at</code> between 01.01.2016 and 31.12.2016) or by value (<code>client_id</code> equal to 100). To ensure we have only the valid data which always satisfy out partitioning criterium, we should add proper <code>CHECK CONSTRAINTS</code> as guard statements. To make sure the orders in particular table were e.g. created at 2016, we could add the following constraint:</p>
 
 ``` sql
 CHECK (created_at >= DATE '2016-01-01' AND day <= created_at '2016-12-31' )
