@@ -52,8 +52,8 @@ CREATE TABLE orders_2018 (
 <p>Beware of potential gotcha when defining <code>CHECK CONSTRAINTS</code>. Take a look at the following example:</p>
 
 ``` sql
-CHECK (client_id >= 1 AND created_at <= 1000);
-CHECK (client_id >= 1000 AND created_at <= 2000);
+CHECK (client_id >= 1 AND client_id <= 1000);
+CHECK (client_id >= 1000 AND client_id <= 2000);
 ```
 
 <p>In this case orders with <code>client_id</code> equal to 1000 could be inserted to any of these tables. Make sure the constraints are not inclusive on the same value when using ranges to avoid such problems.</p>
