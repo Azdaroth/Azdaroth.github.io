@@ -50,3 +50,23 @@
     background-color: #1263FF;
   }
 }
+
+.table-pretty {
+  margin-bottom: 10px;
+
+  caption, th, td {
+    text-align: center;
+    font-weight: normal;
+    vertical-align: middle;
+    padding: 6px 13px;
+    border: 1px solid #ddd;
+  }
+
+  th {
+    font-weight: bold;
+  }
+}
+
+p.center {
+  text-align: center;
+}
