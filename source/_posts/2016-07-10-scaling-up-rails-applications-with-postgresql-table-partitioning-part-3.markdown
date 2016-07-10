@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Scaling Up Rails Applications With PostgreSQL Table Partitioning - Part 3"
-date: 2016-06-28 09:14
+date: 2016-07-10 23:50
 comments: true
 categories: [PostgreSQL, databases, Ruby, Ruby on Rails, scaling, performance, architecture]
 ---
@@ -35,7 +35,7 @@ class CreateOrders < ActiveRecord::Migration
 end
 ```
 
-<p>In case of partitioning partitioning, however, we need to set up some extra tables. We can reuse the examples from <a href="https://karolgalanciak.com/blog/2016/06/12/scaling-up-rails-applications-with-postgresql-table-partitioning-part-2/" target="_blank">part 2</a>. Let's add the partitoned gem to the Gemfile:</p>
+<p>In case of partitioning, however, we need to set up some extra tables. We can reuse the examples from <a href="https://karolgalanciak.com/blog/2016/06/12/scaling-up-rails-applications-with-postgresql-table-partitioning-part-2/" target="_blank">part 2</a>. Let's add the partitoned gem to the Gemfile:</p>
 
 ```
 gem 'activerecord-redshift-adapter',  git: "git@github.com:arp/activerecord-redshift-adapter.git", branch: "rails4-compatibility"
@@ -87,7 +87,7 @@ class CreateOrders < ActiveRecord::Migration
 end
 ```
 
-<p>For sample data let's start with creating 1 million orders for every year from 2016 to 2020. This should be enough to make the tables moderately big for real-world example and perform some meaningful benchmarking. Here's a code to create these records with random date from given year: </p>
+<p>For sample data let's start with creating 1 million orders for every year from 2016 to 2020. This should be enough to make the tables moderately big for real-world example and perform some meaningful benchmarking. Here's the code to create these records with random date from given year: </p>
 
 ```
 [2016, 2017, 2018, 2019, 2020].each do |current_year|
@@ -940,9 +940,9 @@ select_random_order:           3655.0 i/s - 21.17x slower
 
 <p>Let's break down these benchmarks to several groups:</p>
 
-<p>For selecting all records and counting them the obvious conclusion is that for partitioned tables the queries are slower: slightly slower for just selecting them and noticeably slower for counting them. For selecting all orders, the ratio of partitioned to not partitioned tables query times most likely decreases as the tables' size grow and for counting it is not clear: the data doesn't show any regular correlation, we could expect the ratio would also decrease for the larger amount of data, however, we can't really tell based on this benchmark, which even suggests it could be a constant value. Nevertheless, table partitioning isn't the best idea if the queries are primarily ryn across all the tables.</p>
+<p>For selecting all records and counting them the obvious conclusion is that for partitioned tables the queries are slower: slightly slower for just selecting them and noticeably slower for counting them. For selecting all orders, the ratio of partitioned to not partitioned tables query times most likely decreases as the tables' size grow and for counting it is not clear: the data doesn't show any regular correlation, we could expect the ratio would also decrease for the larger amount of data, however, we can't really tell based on this benchmark, which even suggests it could be a constant value. Nevertheless, table partitioning isn't the best idea if the queries are primarily run across all the tables.</p>
 
-<p>The results for selecting orders (queries for orders from years: 2016, 2018, 2020) only from specific date range which matches the constraints for children partitioned tabled look quite interesting: The more records we have, the better ratio (in favour of table of partitioning) we get. Table partitioning doesn't always yield better results when the child table is not specified (see: Partitioned (master table) To Not Partitioned Ratio), but there's a certain size of the tables when we get the ratio above 1, which means queries for partitioned tables (even without specifying a child table) are faster. When selecting from partitioned child table (see: Partitioned (child table) To Not Partitioned Ratio) the queries are faster for partitioned tables regardless of the size, which was expected. Depending on the size of the table, the difference can be quite significant, up to 28%. The data is not clear enough to be certain about the correlation with amount of orders / table size (substantial irregularity for orders from years 2020), but probably the bigger the tables are, the bigger difference of query time between partitioned and not partitioned tables, similarly to the case when the child table is not specified. The difference between explicitly running queries against a specific child table and running against a master table and relying on constraints exclusion it quite surprising: I was expecting only a slight difference, however, specifying a child table can make the queries even up to 35% faster. There is a possibility this difference decreases slowly the more records there are in the tables, however, we would need more benchmarks to prove or disprove this hypothesis as there is another possibility of having costant ratio.</p>
+<p>The results for selecting orders (queries for orders from years: 2016, 2018, 2020) only from specific date range which matches the constraints for children partitioned tabled look quite interesting: The more records we have, the better ratio (in favour of table of partitioning) we get. Table partitioning doesn't always yield better results when the child table is not specified (see: Partitioned (master table) To Not Partitioned Ratio), but there's a certain size of the tables when we get the ratio above 1, which means queries for partitioned tables (even without specifying a child table) are faster. When selecting from partitioned child table (see: Partitioned (child table) To Not Partitioned Ratio) the queries are faster for partitioned tables regardless of the size, which was expected. Depending on the size of the table, the difference can be quite significant, up to 28%. The data is not clear enough to be certain about the correlation with amount of orders / table size (substantial irregularity for orders from years 2020), but probably the bigger the tables are, the bigger difference of query time between partitioned and not partitioned tables, similarly to the case when the child table is not specified. The difference between explicitly running queries against a specific child table and running against a master table and relying on constraints exclusion it quite surprising: I was expecting only a slight difference, however, specifying a child table can make the queries up to 35% faster. There is a possibility this difference decreases slowly the more records there are in the tables, however, we would need more benchmarks to prove or disprove this hypothesis as there is another possibility of having costant ratio.</p>
 
 <p>The general correlation for counting the records which can be put in the specific partitioned child tables is the same as for selecting the orders: the more records in the tables, the better performance table partitioning yields. When the child table is not specified, counting records can be faster for not partitioned tables until we reach a certain size where table partitioning seems to be a better choice performance-wise. For counting orders from all the years (2016, 2018, 2020) for 5 mln orders, the ratios are significantly different comparing to the values for higher amount of orders, which can't be easily explained. It's quite interesting that it happened for the queries for all the tables used in the benchmark, which might be worth investigating further, however, I would treat them as irrelevant in this case and not consider them at all. When the partitioned table is specified, the results are always better in favour of table partitioning - we can expect queries to be more than 2 times faster, even up to almost 3 times faster. Similarly to selecting the orders, the ratio of running queries against child table and master table is either a constant or slightly decreases as the amount of orders grows.</p>
 
@@ -952,7 +952,14 @@ select_random_order:           3655.0 i/s - 21.17x slower
 
 <p>Initially, there seems to be no difference in query time between selecting orders from partitioned and not-partitioned table, but as the amount of orders grows, the performance keeps getting worse considerably, which is expected as the constraints exclusion can't be applied in such case.</p>
 
+<p>To sum up:</p>
+
+<ul>
+  <li>The larger amount of records, the better performance table partitioning yields</li>
+  <li>Table partitioning is not optimal for all type of queries, it should be mostly used when querying only a subset of records covered by a particular child table</li>
+  <li>Specifying exact child table yields much better peformance than querying master table and relying on constraint exclusion</li>
+</ul>
+
 <h2>Wrapping up</h2>
 
 <p>Even though table partitioning requires some extra overhead and may be tricky to get started with, it is clear that the performance benefits of using it may outweight the costs when applying to the right queries. However, we need to be aware that it is not the perfect choice for all the queries and in some cases it can deteriorate the performance.</p>
-```
