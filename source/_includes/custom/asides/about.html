@@ -3,10 +3,15 @@
   {% img left /images/me_formal.jpg 'me:)' 'Karol Galanciak - photo' %}
   <p>Hi, my name is Karol Galanciak, I'm a technical polyglot and domain expert in vacation rental and fitness industries. I love hard challenges, especially when it comes to API and architecture design, refactoring and building beautiful frontend apps.</p>
 
-  <p>I'm available for remote contracting. I work mostly with Ruby on Rails and JavaScript (primarily with Ember.js, but I'm familiar with most of the JS frameworks). If you are looking for experienced and dedicated developer who can easily tackle tough problems, feel free to reach out and let me know how I could help you.</p>
+  <p>I'm available for remote consulting. I work mostly with Ruby on Rails and JavaScript (primarily with Ember.js, but I'm familiar with most of the JS frameworks). If you are looking for experienced and dedicated developer who can easily tackle tough problems, feel free to reach out and let me know how I could help you.</p>
 
-  <p>Find more about me on <a href="https://pl.linkedin.com/in/karol-galanciak-64b25381
-" target="_blank">LinkedIn</a>.</p>
+  <p>Find more about me in <a href="http://download.karolgalanciak.com/resume.pdf" target="_blank">resume</a>.</p>
 
-  <p>You can reach me at karol.galanciak at gmail dot com</p>
+  <p id="email-me"></p>
 </section>
+
+<script type="text/javascript">
+  (function(d, id, lhs, rhs) {
+    d.getElementById(id).innerHTML = "You can reach me at <a rel='nofollow' href='mailto:" + lhs + "@" + rhs + "'>" + lhs + "@" + rhs + "</a>";
+  })(window.document, 'email-me', 'karol.galanciak', 'gmail.com');
+</script>
