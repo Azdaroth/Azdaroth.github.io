@@ -15,8 +15,7 @@ categories: [Ruby, Ruby on Rails, Design Patterns, Architecture, ActiveJob]
 <p>Let’s start with some simple job class, let it be <code>MyAwesomeJob</code>:</p>
 
 
-``` ruby
-# app/jobs/my_awesome_job.rb
+``` ruby app/jobs/my_awesome_job.rb
 class MyAwesomeJob < ActiveJob::Base
   def perform(user)
     User::DoSomethingAwesome.call(user)
@@ -112,7 +111,7 @@ module ActiveJob
 end
 ```
 
-<p>These callbacks are defined inside <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/callbacks.rb" target="_blank">Callbacks</a> module, but its only responsibility is defining callbacks for <code>perform</code> and <code>enqueue</code> method, which help extend the behaviour of the jobs in a pretty unobtrusive manner. For example, I we wanted to log when the job is finished, we could add the following <code>after_perform</code> callback:</p>
+<p>These callbacks are defined inside <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/callbacks.rb" target="_blank">Callbacks</a> module, but its only responsibility is defining callbacks for <code>perform</code> and <code>enqueue</code> method, which help extend the behaviour of the jobs in a pretty unobtrusive manner. For example, if we wanted to log when the job is finished, we could add the following <code>after_perform</code> callback:</p>
 
 
 ``` ruby app/jobs/my_awesome_job.rb
