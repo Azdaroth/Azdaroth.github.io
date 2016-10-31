@@ -1,12 +1,14 @@
 ---
 layout: post
 title: "Keeping Data Integrity In Check: Conditional Unique Indexes For Soft Delete"
-date: 2016-10-30 22:00:00
+date: 2016-10-31 23:30:00
 comments: true
 categories: [PostgreSQL, Database, ActiveRecord, Quick Tips, Patterns]
 ---
 
 <p><strong>Soft delete</strong> is a pretty common feature in most of the applications. It may increase complexity of the queries, nevertheless, not deleting anything might be a <strong>right default</strong> as the data might prove to be useful in the future: for restoring if a record was removed by mistake, to derive some conclusions based on statistics and plenty of other purposes. It may seem like it's a pretty trivial thing: just adding a column like <code>deleted_at</code> and filtering out records that have this value present. But what happens when you need to do some proper <strong>uniqueness validation</strong> on both model layer and database level? Let's take a look what kind of problem can easily be overlooked and how it can be solved with a <strong>conditional index</strong>.</p>
+
+<!--more-->
 
 <h2>Case study: daily prices for vacation rentals</h2>
 
@@ -28,7 +30,7 @@ validates :rental_id, presence: true, uniqueness: { scope: :date }
 
 <h2>Adding soft delete functionality</h2>
 
-<p>We have some nice setup already. But it turned out that for recalculating <code>daily_prices</code> if some rules or values influencing the price change, it's much more convenient to just remove them all and recalculate form scratch than checking if the price for given date needs to be recalculated. To be on the safe side, we may decide not to hard remove these rates, but do a soft delete instead.</p>
+<p>We have some nice setup already. But it turned out that for recalculating <code>daily_prices</code> if some rules or values influencing the price change it's much more convenient to just remove them all and recalculate from scratch than checking if the price for given date needs to be recalculated. To be on the safe side, we may decide not to hard remove these rates, but do a soft delete instead.</p>
 
 <p>To implement this feature we could add <code>deleted_at</code> column, drop the previous index and a new one which will respect the new column. We should also update the validation in model in such case:</p>
 
@@ -50,7 +52,7 @@ validates :rental_id, presence: true, uniqueness: { scope: [:date, :deleted_at] 
 
 <p>Let's play with Rails console and check it out:</p>
 
-```
+``` ruby
 > time_now = Time.current
  => Sun, 23 Oct 2016 09:44:46 UTC +00:00
 > DailyPrice.create!(price: 100, date: Date.current, rental_id: 1, deleted_at: time_now)
@@ -64,7 +66,7 @@ ActiveRecord::RecordInvalid: Validation failed: Rental has already been taken
 
 <p>Nah, there can't be any problem, looks like we have the expected behaviour - we couldn't create a non-soft-deleted <strong>daily_price</strong> for given date and rental. But let's check one more thing:</p>
 
-```
+``` ruby
 > price = DailyPrice.new(price: 100, date: Date.current, rental_id: 1)
 > price.save(validate: false)
   COMMIT
@@ -74,13 +76,13 @@ ActiveRecord::RecordInvalid: Validation failed: Rental has already been taken
 
 <p>Let's consult <strong>PostgreSQL</strong> <a href="https://www.postgresql.org/docs/9.0/static/indexes-unique.html" target="_blank">docs</a>. There is something mentioned about null values: </p>
 
-```
->  Null values are not considered equal
-```
+{% blockquote %}
+Null values are not considered equal
+{% endblockquote %}
 
 <p>That is our problem: ActiveRecord considered it as a unique value, but it doesn't work quite like that in <strong>PostgreSQL</strong>.</p>
 
-<p>Our index should be in fact <strong>conditional</strong> and look like that from the very beginning:</p>
+<p>Our index should be in fact <strong>conditional</strong> and look the following way:</p>
 
 ``` ruby
 add_index :nightly_rates, [:rental_id, :date], unique: true, where: "deleted_at IS NULL"
