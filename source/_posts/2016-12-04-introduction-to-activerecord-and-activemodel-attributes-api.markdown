@@ -6,7 +6,7 @@ comments: true
 categories: [Ruby, Rails, ActiveRecord, ActiveModel]
 ---
 
-<p><strong>Rails 5.0</strong> is without a doubt a great release with plenty of useful changes and additions. The most notable change was probably <strong>ActionCable</strong> - the layer responsible for integrating your app with websockets. However, there were also other additions that could bring some <strong>substantial improvements</strong> to your Rails apps, but were a bit outshined by bigger changes. One of such features is <strong>Attributes</strong> API.</p>
+<p><strong>Rails 5.0</strong> is without a doubt a great release with plenty of useful changes and additions. The most notable change was probably <strong>ActionCable</strong> - the layer responsible for integrating your app with websockets. However, there were also other additions that could bring some <strong>substantial improvements</strong> to your Rails apps, but were a bit outshined by bigger changes. One of such features is <strong>Attributes API</strong>.</p>
 
 <!--more-->
 
@@ -14,7 +14,7 @@ categories: [Ruby, Rails, ActiveRecord, ActiveModel]
 
 <p>Imagine that you are in a vacation rental industry and you are adding a new model for handling reservations for rentals, let's call it <code>Reservation</code>. To keep it simple for the purpose of this example, let's assume that we need <code>start_date</code> and <code>end_date</code> date fields for handling the duration of the reservations and <code>price</code> field, which is pretty useful unless you are developing an app for a charity organization ;). Let's say we want to provide some defaults for the <code>start_date</code> and <code>end_date</code> attributes to be 1 day from now and 8 days from know accordingly when initializing a new instance of <code>Reservation</code> and the price should be converted to integer, so in fact it is going to be <code>price in cents</code>, and the expected format of the input is going to look like <code>"$1000.12"</code>. How could we handle it inside ActiveRecord models?</p>
 
-<p>For default values one option would be to add <code>after_initialize</code> callbacks which would assign the given default defaults unless the values were already set in the initializer. For <code>price</code> we can simply override the attribute writer which is <code>Reservation#price=</code> method. We would most likely end up with something looking like this:</p>
+<p>For default values, one option would be to add <code>after_initialize</code> callbacks which would assign the given defaults unless the values were already set in the initializer. For <code>price</code> we can simply override the attribute writer which is <code>Reservation#price=</code> method. We would most likely end up with something looking like this:</p>
 
 ``` rb app/models/reservation.rb
 class Reservation < ApplicationRecord
@@ -139,7 +139,7 @@ end
  => Fri, 01 Jan 2016..Sun, 01 Jan 2017
 ```
 
-<p>Attributes API is already great, but it's not the end of the story. You can use your custom types for querying a database, you just need to define <code>serialize</code> method for your custom types:</p>
+<p>Attributes API is already looking great, but it's not the end of the story. You can use your custom types for querying a database, you just need to define <code>serialize</code> method for your own types:</p>
 
 ``` rb
 class PriceType < ActiveRecord::Type::Integer
@@ -170,7 +170,7 @@ Reservation.where(price: "$100.12")
 
 <h2>What About ActiveModel?</h2>
 
-<p>So far I've discussed only the ActiveRecord Attributes API, but the title clearly mentions <code>ActiveModel</code> part, so what about it? There is a bad news and good news.</p>
+<p>So far I've discussed only the <strong>ActiveRecord Attributes API</strong>, but the title clearly mentions <code>ActiveModel</code> part, so what about it? There is a bad news and good news.</p>
 
 <p>The bad news is that it is not <a href="https://github.com/rails/rails/pull/26728" target="_blank">yet</a> supported in Rails core, but most likely it is going to be the part of <strong>ActiveModel</strong> eventually.</p>
 
@@ -188,7 +188,7 @@ class MyAwesomeModel
 end
 ```
 
-<p>You can also add your custom types. Just create a class inheriting from <code>ActiveModel::Type::Value</code> or already existing type, e.g. ActiveModel::Type::Integer</code>, define <code>cast</code> method and register the new type:</p>
+<p>You can also add your custom types. Just create a class inheriting from <code>ActiveModel::Type::Value</code> or already existing type, e.g. <code>ActiveModel::Type::Integer</code>, define <code>cast</code> method and register the new type:</p>
 
 ``` rb
 class MoneyType < ActiveModel::Type::Integer
@@ -215,4 +215,4 @@ end
 
 <h2>Wrapping up</h2>
 
-<p><strong>ActiveRecord Attributes API</strong> is defintely a great feature introduced in <code>Rails 5.0</code>. Even though it is not yet supported in ActiveModel in Rails core, <a href="https://github.com/Azdaroth/active_model_attributes" target="_blank">ActiveModelAttributes</a> can be easily added to your Rails apps to provide almost the same functionality.</p>
+<p><strong>ActiveRecord Attributes API</strong> is defintely a great feature introduced in <strong>Rails 5.0</strong>. Even though it is not yet supported in ActiveModel in Rails core, <a href="https://github.com/Azdaroth/active_model_attributes" target="_blank">ActiveModelAttributes</a> can be easily added to your Rails apps to provide almost the same functionality.</p>
