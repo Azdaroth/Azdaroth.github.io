@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Introduction to ActiveRecord and ActiveModel Attributes API"
-date: 2016-12-04 10:01
+date: 2016-12-04 22:00
 comments: true
 categories: [Ruby, Rails, ActiveRecord, ActiveModel]
 ---
