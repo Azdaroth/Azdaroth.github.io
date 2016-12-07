@@ -37,7 +37,7 @@ order.addItem({ description: 'Glimmer 2 rockzzz' });
 order.logItems();  // whooops
 ```
 
-<p>We have a simple class-like functionality using <strong>constructor function</strong> and <strong>prototypes</code> to implement <code>Order</code> with some questionable (;)) way of assigning id and some <code>items</code>. We can add more items with <code>Order.prototype.addItem</code> function and we can log them with <code>Order.prototype.logItems</code> function.</p>
+<p>We have a simple class-like functionality using <strong>constructor function</strong> and <strong>prototypes</strong> to implement <code>Order</code> with some questionable ( ;) ) way of assigning id and some <code>items</code>. We can add more items with <code>Order.prototype.addItem</code> function and we can log them with <code>Order.prototype.logItems</code> function.</p>
 
 <p>But there's a problem: <code>logItems</code> function doesn't log <code>id</code>, but logs <code>undefined</code> instead. Why is that?</p>
 
@@ -142,7 +142,7 @@ export default Model.extend({
 
 <p>And how did this refactoring end up? Well, instead of a proper <code>fullName</code> I was getting <code>undefined undefined</code>! That was surprising, but then I looked at the changes and saw that I'm using <code>arrow function expressions</code> in computed properties and referring there to <code>this</code>, which won't obviously work. So what are the options for computed properties?</p>
 
-<p><code>The first one would be to simply use good ol' <code>function expressions</code>:</p>
+<p>The first one would be to simply use good ol' <code>function expressions</code>:</p>
 
 ``` js app/models/user.js
 import Ember from "ember";
