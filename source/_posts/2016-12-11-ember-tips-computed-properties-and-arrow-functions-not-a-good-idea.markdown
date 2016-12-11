@@ -6,13 +6,13 @@ comments: true
 categories: [Ember, JavaScript, ES6, Quick Tips]
 ---
 
-<p><strong>Arrow function expressions</strong> was definitely a great addition in ES6 and thanks to tools like <a href="https://babeljs.io" target="_blank">babel</a> the new syntax has been quite widely adopted. Besides more concise syntax, an interesting thing about <strong>arrow function expressions</strong> is that they preserve the context, i.e. they don't define their own <code>this</code>, which was sometimes annoying and resulted in assigning <code>that</code> or <code>self</code> variables to keep the outer context that could be referred inside functions. As great as it sounds, <code>arrow function expressions</code> cannot be used in all cases. One example would be <code>Ember computed properties</code>.</p>
+<p><strong>Arrow function expressions</strong> were definitely a great addition in ES6 and thanks to tools like <a href="https://babeljs.io" target="_blank">babel</a> the new syntax has been quite widely adopted. Besides more concise syntax, an interesting thing about <strong>arrow function expressions</strong> is that they preserve the context, i.e. they don't define their own <code>this</code>, which was sometimes annoying and resulted in assigning <code>that</code> or <code>self</code> variables to keep the outer context that could be referred inside functions. As great as it sounds, <strong>arrow function expressions</strong> cannot be used in all cases. One example would be <strong>Ember computed properties</strong>.</p>
 
 <!--more-->
 
 <h2>Arrow Function Expressions - A Quick Introduction</h2>
 
-<p>Let's start with a quick introduction to arrow functions. Before ES6, anytime we were using <code>function expressions</code> and wanted to refer <code>this</code> from outer context, we had to do some workarounds which are (arguably) a bit unnatural, especially comparing to other major programming languages.</p>
+<p>Let's start with a quick introduction to arrow functions. Before ES6, anytime we were using <strong>function expressions</strong> and wanted to refer <code>this</code> from outer context, we had to do some workarounds which are (arguably) a bit unnatural, especially comparing to other major programming languages.</p>
 
 <p>Let's do some pseudo-object-oriented programming with JavaScript (ES5) to illustrate a possible issue with <strong>function expressions</strong>:</p>
 
@@ -37,7 +37,7 @@ order.addItem({ description: 'Glimmer 2 rockzzz' });
 order.logItems();  // whooops
 ```
 
-<p>We have a simple class-like functionality using <strong>constructor function</strong> and <strong>prototypes</strong> to implement <code>Order</code> with some questionable ( ;) ) way of assigning id and some <code>items</code>. We can add more items with <code>Order.prototype.addItem</code> function and we can log them with <code>Order.prototype.logItems</code> function.</p>
+<p>We have a simple class-like functionality using <strong>constructor function</strong> and <strong>prototype</strong> to implement <code>Order</code> with some questionable ( ;) ) way of assigning id and some <code>items</code>. We can add more items with <code>Order.prototype.addItem</code> function and we can log them with <code>Order.prototype.logItems</code> function.</p>
 
 <p>But there's a problem: <code>logItems</code> function doesn't log <code>id</code>, but logs <code>undefined</code> instead. Why is that?</p>
 
@@ -86,7 +86,7 @@ Order.prototype.logItems = function() {
 
 <p>Much Better!</p>
 
-<p>As great as it looks like, it may not be a good idea to apply <code>arrow function expressions</code> everywhere, especially for <strong>Ember computed properties</strong>.</p>
+<p>As great as it looks like, it may not be a good idea to apply <strong>arrow function expressions</strong> everywhere, especially for <strong>Ember computed properties</strong>.</p>
 
 <h2>Ember Computed Properties And Arrow Functions? - Not A Good Idea</h2>
 
@@ -140,16 +140,16 @@ export default Model.extend({
 });
 ```
 
-<p>And how did this refactoring end up? Well, instead of a proper <code>fullName</code> I was getting <code>undefined undefined</code>! That was surprising, but then I looked at the changes and saw that I'm using <code>arrow function expressions</code> in computed properties and referring there to <code>this</code>, which won't obviously work. So what are the options for computed properties?</p>
+<p>And how did this refactoring end up? Well, instead of a proper <code>fullName</code> I was getting <code>undefined undefined</code>! That was surprising, but then I looked at the changes and saw that I'm using <strong>arrow function expressions</strong> in computed properties and referring there to <code>this</code>, which won't obviously work for the reasons mentioned before. So what are the options for computed properties?</p>
 
-<p>The first one would be to simply use good ol' <code>function expressions</code>:</p>
+<p>The first one would be to simply use good ol' <strong>function expressions</strong>:</p>
 
 ``` js app/models/user.js
 import Ember from "ember";
 import Model from 'ember-data/model';
 
 export default Model.extend({
-  fullname: Ember.computed('firstname', 'lastname', function () {
+  fullname: Ember.computed('firstname', 'lastname', function() {
     return `${this.get('firstName')} ${this.get('lastName')}`;
   })
 });
@@ -170,7 +170,7 @@ export default Model.extend({
 });
 ```
 
-<p>And the last option, my preferred one: unleashing the power of ES7 decorators, which I described <a href="https://karolgalanciak.com/blog/2015/12/02/ember-and-es7-decorators/" target="_blank">here</a> and using <a href="https://github.com/rwjblue/ember-computed-decorators" target="_blank">ember-computed-decorators</a> addon. That way we could define <code>fullName</code> computed property in the following way:</p>
+<p>And the last option, my preferred one: unleashing the power of <a href="https://karolgalanciak.com/blog/2015/12/02/ember-and-es7-decorators/" target="_blank">ES7 decorators</a> and using <a href="https://github.com/rwjblue/ember-computed-decorators" target="_blank">ember-computed-decorators</a> addon. That way we could define <code>fullName</code> computed property in the following way:</p>
 
 ``` js app/models/user.js
 import Ember from "ember";
@@ -189,4 +189,4 @@ export default Model.extend({
 
 <h2>Wrapping Up</h2>
 
-<p>Even though <strong>arrow function expressions</strong> are very convenient to use, they can't be used interchangeably with good ol' <strong>function expressions</strong>. Sometimes you don't want <code>this</code> inside a function to preserve outer context, which is exactly the case with Ember <code>computed properties</code>.</p>
+<p>Even though <strong>arrow function expressions</strong> are very convenient to use, they can't be used interchangeably with <strong>function expressions</strong>. Sometimes you may not want <code>this</code> inside a function to preserve outer context, which is exactly the case with <strong>Ember computed properties</strong>.</p>
