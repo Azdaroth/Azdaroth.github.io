@@ -179,9 +179,9 @@ import computed from 'ember-computed-decorators';
 
 export default Model.extend({
   @computed('firstName', 'lastName')
-  fullname(firstName, lastName)
+  fullname(firstName, lastName) {
     return `${firstName} ${lastName}`;
-  })
+  }
 });
 ```
 
