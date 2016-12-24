@@ -12,7 +12,7 @@ categories: [JavaScript, ECMAScript]
 
 <p>Imagine you have some numbers as strings and you want to convert them to integers. You could probably use <code>Number</code> function to do that, but let's assume you are used to <code>parseInt</code> function. So let's do some conversions: </p>
 
-```
+``` js
 ["1"].map(parseInt);
 // [1]
 
@@ -250,7 +250,19 @@ new Date(2016, 0 , 1) + 123 // => "Fri Jan 01 2016 00:00:00 GMT+0100 (CET)123"
 
 <p>Now that we know what happens under the hood, let's explain the results feom the examples above.</p>
 
-<p>The result of calling <code>valueOf</code> method on <strong>objects</strong> (<code>{}</code>) and <strong>arrays</strong> (which technically are also objects) is simple the object itself, so it's not a primitive. However, for objects <code>toString</code> method will return <code>"[object Object]"</code> and for ararys it will return empty string - <code>""</code>. Now we have primitives that can  added. From this point we can predict the results of operation like <code>{} + {}</code>, <code>[] + {}</code> or even <code>1 + { valueOf: function() { return 10; }, toString: function() { return 5; } }</code> and <code>1 + { toString: function() { return 10; } }</code> (remember the steps for converting objects to primitives?). If you remember that <string>string</string> is the preferred type for operations involving dates, the result of <code>({ toString: function() { return "trolololo"; } }) + new Date(2016, 0 , 1)</code> is not really surprising. But how is it possible that <code>{} + []</code> returns <code>0</code>, not <code>"[object Object]"</code>?</p>
+<p>The result of calling <code>valueOf</code> method on <strong>objects</strong> (<code>{}</code>) and <strong>arrays</strong> (which technically are also objects) is simple the object itself, so it's not a primitive. However, for objects <code>toString</code> method will return <code>"[object Object]"</code> and for ararys it will return empty string - <code>""</code>. Now we have primitives that can  added. From this point we can predict the results of operation like <code>{} + {}</code>, <code>[] + {}</code> or even:</p>
+
+``` js
+1 + { valueOf: function() { return 10; }, toString: function() { return 5; } };
+```
+
+<p>and: </p>
+
+```
+1 + { toString: function() { return 10; } };
+```
+
+<p>If you remember that <string>string</string> is the preferred type for operations involving dates, the result of <code>({ toString: function() { return "trolololo"; } }) + new Date(2016, 0 , 1)</code> is not really surprising. But how is it possible that <code>{} + []</code> returns <code>0</code>, not <code>"[object Object]"</code>?</p>
 
 <p>Most likely <code>{}</code> in the beginning is interpreted as an empty block and it's ignored and if you put the empty object in parentheses (<code>({}) + []</code>), the result will be <code>"[object Object]"</code>. In fact that expression is interpreted as <code>+[]</code> which is very different from addition! As I've already mentioned before, it's the <strong>unary prefix operator</strong> which performs conversions to numbers. For arrays, the result of such conversion is simply 0.</p>
 
