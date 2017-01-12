@@ -81,7 +81,7 @@ end
 
 <p>That's exactly what we needed. What about our conversion for <code>price</code>? As we can specify the type for given attribute, we may expect that it would be possible to define our own types. Turns out it is possible and quite simple actually. Just create a class inheriting from <code>ActiveRecord::Type::Value</code> or already existing type, e.g. <code>ActiveRecord::Type::Integer</code>, define <code>cast</code> method and register the new type. In our use case let's register a new <code>price</code> type:</p>
 
-``` rb
+``` rb app/types/price_type.rb
 class PriceType < ActiveRecord::Type::Integer
   def cast(value)
     return super if value.kind_of?(Numeric)
@@ -91,7 +91,9 @@ class PriceType < ActiveRecord::Type::Integer
     super(price_in_dollars * 100)
   end
 end
+```
 
+``` rb config/initializers/types.rb
 ActiveRecord::Type.register(:price, Price)
 ```
 
@@ -141,7 +143,7 @@ end
 
 <p>Attributes API is already looking great, but it's not the end of the story. You can use your custom types for querying a database, you just need to define <code>serialize</code> method for your own types:</p>
 
-``` rb
+``` rb app/types/price_type.rb
 class PriceType < ActiveRecord::Type::Integer
   def cast(value)
     return super if value.kind_of?(Numeric)
@@ -159,7 +161,7 @@ end
 
 <p>That way we could simply give prices in original format as arguments and they are going to be converted to price in cents before performing a query.</p>
 
-```
+``` rb
 Reservation.where(price: "$100.12")
  => Reservation Load (0.3ms)  SELECT "reservations".* FROM "reservations" WHERE "reservations"."price" = $1  [["price", 10012]]
 ```
@@ -178,7 +180,7 @@ Reservation.where(price: "$100.12")
 
 <p>Just define your <strong>ActiveModel model</strong>, include <code>ActiveModel::Model</code> and ActiveModelAttributes</code> modules and define attributes and their types using <code>attribute</code> class method:</p>
 
-``` rb
+``` rb app/models/my_awesome_model.rb
 class MyAwesomeModel
   include ActiveModel::Model
   include ActiveModelAttributes
@@ -190,7 +192,7 @@ end
 
 <p>You can also add your custom types. Just create a class inheriting from <code>ActiveModel::Type::Value</code> or already existing type, e.g. <code>ActiveModel::Type::Integer</code>, define <code>cast</code> method and register the new type:</p>
 
-``` rb
+``` rb app/types/money_type.rb
 class MoneyType < ActiveModel::Type::Integer
   def cast(value)
     return super if value.kind_of?(Numeric)
@@ -200,9 +202,13 @@ class MoneyType < ActiveModel::Type::Integer
     super(price_in_dollars * 100)
   end
 end
+```
 
+``` rb config/initializers/types.rb
 ActiveModel::Type.register(:money, MoneyType)
+```
 
+``` rb app/models/my_awesome_model.rb
 class MyAwesomeModel
   include ActiveModel::Model
   include ActiveModelAttributes
