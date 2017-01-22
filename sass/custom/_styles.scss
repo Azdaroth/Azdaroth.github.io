@@ -95,3 +95,11 @@ article.hentry {
 p.center {
   text-align: center;
 }
+
+
+.img-center-wrapper {
+  img {
+    display: block;
+    margin: auto;
+  }
+}
