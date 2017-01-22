@@ -51,7 +51,7 @@ categories: [JavaScript, ECMAScript]
 // => [1, 100, 2, 20] // WUT again...
 ```
 
-<p>Again, something odd is going on here. However, this is the intended behavior - after consulting with <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Array/sort" target="_blank">docs</a>, we can learn that <code>sort()</code> converts all elements into strings and compares them in Unicode code point order. I think this might be a big surprise for a majority of developers performing sorting and seeing the result, but this behaviour is clearly documented. Due to the necessity of maintaing backwards compatibility, I wouldn't except this behavior to change, so it's worth keeping it in mind.</p>
+<p>Again, something odd is going on here. However, this is the intended behavior - after consulting with <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Array/sort" target="_blank">docs</a>, we can learn that <code>sort()</code> converts all elements into strings and compares them in Unicode code point order. I think this might be a big surprise for a majority of developers performing sorting and seeing the result, but this behaviour is clearly documented. Due to the necessity of maintaing backwards compatibility, I wouldn't expect this behavior to change, so it's worth keeping it in mind.</p>
 
 <p>To perform sorting on integers you need to provide a <strong>compare function</strong>:</p>
 
