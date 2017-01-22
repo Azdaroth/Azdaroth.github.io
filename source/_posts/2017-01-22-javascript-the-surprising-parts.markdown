@@ -25,7 +25,7 @@ categories: [JavaScript, ECMAScript]
 // => [1, 2, 3, 4] // WUT...
 ```
 
-<p>Something is definitely wrong her. How could possibly <code>parseFloat()</code> work fine here and <code>parseInt()</code> not? Obviously <strong>JavaScript</strong> is broken, right?</p>
+<p>Something is definitely wrong here. How could possibly <code>parseFloat()</code> work fine here and <code>parseInt()</code> not? Obviously <strong>JavaScript</strong> is broken, right?</p>
 
 <p>Not really. This is actually the expected behaviour. The difference between <code>parseFloat</code> and <code>parseInt()</code> is that <code>parseFloat()</code> takes only one argument (<code>string</code>), but <code>parseInt()</code>takes two arguments - <code>string</code> and... <code>radix</code>. To verify it, let's rewrite the mapping using an anonymous function:</p>
 
