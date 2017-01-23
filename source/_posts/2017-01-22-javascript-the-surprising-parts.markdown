@@ -71,8 +71,8 @@ categories: [JavaScript, ECMAScript]
 <p>So basically this table says that the following expressions will be truthy:</p>
 
 ``` js
-1 == "2";
-"2" == 1;
+1 == "1";
+"1" == 1;
 new String("string") == "string";
 1 == { valueOf: function() { return 1; } }; // lulz, it's not a joke ;)
 1 == true;
