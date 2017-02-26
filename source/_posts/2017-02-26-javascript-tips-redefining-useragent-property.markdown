@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "JavaScript Tips: Redefining userAgent property"
-date: 2017-02-12 22:00
+date: 2017-02-26 23:00
 comments: true
 categories: [JavaScript, Quick Tips]
 ---
@@ -38,7 +38,7 @@ Well, that's not exactly what we wanted to be returned. But we need to override 
 Object.defineProperty(obj, prop, descriptor)
 ```
 
-`descriptor` argument is a particularly interesting one - it allows to define a `value` of the property, a getter, setter, whether the property should be `enumerable` (i.e. if it's going to be included when iterating over the properties), if it's `writable` (i.e. if the value can be changed with an assignment operator) and `configurable` (i.e. if the property can be changed and deleted from the object's properties).
+`descriptor` argument is a particularly interesting one - it allows to define a `value` of the property, a getter, a setter, whether the property should be `enumerable` (if it's going to be included when iterating over the properties), if it's `writable` (if the value can be changed with an assignment operator) and `configurable` (if the property can be changed and deleted from the object's properties).
 
 Looks like `value` is exactly what we need. Let's try it then:
 
@@ -70,7 +70,7 @@ Hmm, doesn't work, maybe let's try to redefine this propert again then?
 < TypeError: Attempting to change value of a readonly property.
 ```
 
-Apparently it's not that great as we thought it would be. However, that's not a problem! We just need to make it property either `configurable` or `writable`! Let's check both scenarios:
+Apparently it's not that great as we thought it would be. However, that's not a problem! We just need to make this property either `configurable` or `writable`! Let's check both scenarios:
 
 ``` javascript
 > Object.defineProperty(window.navigator, 'userAgent', {
