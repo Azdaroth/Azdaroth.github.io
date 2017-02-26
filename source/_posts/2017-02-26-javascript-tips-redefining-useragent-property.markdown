@@ -123,4 +123,4 @@ Both of the ways work just fine, however, `writable` is a bit more flexible as i
 
 ## Wrapping Up
 
-Maybe **JavaScript** has some  TU WSTAW LINKS DO WPISU O DZIWACTWACH <a href="" target="_blank">odd parts</a>, nevertheless, it's a quite powerful language. Changing the value of read-only properties is probably not a something do you will do often, but if you really need to do it, `Object.defineProperty` will be your friend.
+Maybe **JavaScript** has some odd parts, nevertheless, it's a quite powerful language. Changing the value of read-only properties is probably not a something do you will do often, but if you really need to do it, `Object.defineProperty` will be your friend.
