@@ -47,13 +47,16 @@ export default Ember.Component.extend({
 });
 ```
 
-``` text app/templates/components/display-todo-item.hbs
+{% raw %}
+``` html app/templates/components/display-todo-item.hbs
 {{item.name}}
 <button {{action "destroy"}} data-test="destroy-item-btn">Destroy</button>
 ```
+{% endraw %}
 
 and that the component was test-driven with the following test written before the actual implementation (TDD for FTW!):
 
+{% raw %}
 ``` javascript tests/integration/components/display-todo-item-test.js
 import Ember from 'ember';
 import { moduleForComponent, test } from 'ember-qunit';
@@ -68,7 +71,7 @@ moduleForComponent('display-todo-item', 'Integration | Component | display todo 
   integration: true
 });
 
-test('item can be destroyed', function (assert) {
+test('item can be destroyed', function(assert) {
   assert.expect(1);
 
   const {
@@ -92,17 +95,21 @@ test('item can be destroyed', function (assert) {
   $destroyBtn.click();
 });
 ```
+{% endraw %}
+
 
 Basically this test verifies that the `destroyRecord` method will be called on item after clicking the button.
 
 Let's add `hold-button` which will trigger `destroy` action after holding it for 3 seconds:
 
-``` text app/templates/components/display-todo-item.hbs
+{% raw %}
+``` html app/templates/components/display-todo-item.hbs
 {{item.name}}
 {{#hold-button type="rectangle" action="destroy" delay=3000 data-test="destroy-item-btn"}}
   Destroy
 {{/hold-button}}
 ```
+{% endraw %}
 
 `delay` option will get the job done here to make it holdable for 3 seconds to trigger `destroy` action.
 
@@ -122,6 +129,7 @@ After checking <a href="https://github.com/AddJam/ember-hold-button/blob/master/
 
 Here's our new test:
 
+{% raw %}
 ``` javascript tests/integration/components/display-todo-item-test.js
 import Ember from 'ember';
 import { moduleForComponent, test } from 'ember-qunit';
@@ -166,6 +174,7 @@ test('item can be destroyed', function (assert) {
   });
 });
 ```
+{% endraw %}
 
 Nice! Our test is passing again. However, there is one serious problem: this test is quite slow as it waits 3 second for the action to finish. Can we make it somehow faster?
 
@@ -173,10 +182,12 @@ Nice! Our test is passing again. However, there is one serious problem: this tes
 
 The answer is: yes. We just need to provide a way to make `delay` configurable from the outside. This can be simply done by introducing `destroyActionDelay` property with default value equal `3000` and allowing it to be modified. Let's start with applying this little change to the test:
 
-``` text tests/integration/components/display-todo-item-test.js
+{% raw %}
+``` javascript tests/integration/components/display-todo-item-test.js
 // the rest of the tests
 this.render(hbs`{{display-todo-item item=item destroyActionDelay=0}}`);
 ```
+{% endraw %}
 
 We don't care about waiting for 3 seconds in the tests, we just want to test if it works and to make it fast. `0` sounds like the most reasonable value in such case.
 
@@ -202,12 +213,15 @@ export default Ember.Component.extend({
 });
 ```
 
-``` text app/templates/components/display-todo-item.hbs
+{% raw %}
+``` html app/templates/components/display-todo-item.hbs
 {{item.name}}
 {{#hold-button type="rectangle" action="destroy" delay=destroyActionDelay data-test="destroy-item-btn"}}
   Destroy
 {{/hold-button}}
 ```
+{% endraw %}
+
 
 And that's it! You can now enjoy the much faster test suite!
 
