@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Test Driven Ember - Testing Holding a Button"
-date: 2017-03-14 22:00
+date: 2017-03-26 23:00
 comments: true
 categories: [Ember, JavaScript, Testing, TDD, Quick Tips]
 ---
@@ -12,24 +12,24 @@ Thanks to the awesome tools in **Ember ecosystem** such as <a href="http://githu
 
 ## Anatomy of The Problem
 
-Imagine you are implementing destroying some records in your application, e.g. the todo items from the list. It would be a bit unfortunate to destroy any item if user **accidentally clicked** on the destroy button, so it would be a good idea to somehow make it harder to execute such action. A simple approach would be displaying some alert **asking user to confirm** whether this item should be removed or not. This approach would get our job done, but it doesn't offer the best **UX**. What are the better options here?
+Imagine you are implementing a feature of destroying some records in your application, e.g. the todo items from the list. It would be a bit unfortunate to destroy any item if a user **accidentally clicked** on the destroy button, so it might be a good idea to somehow make it harder to execute such an action. A simple approach would be displaying some alert **asking user to confirm** whether this item should be removed or not. This approach would get our job done, but it doesn't offer the best **UX**. What are the better options here?
 
-A pretty cool solution to this problem would be making user **hold a delete button** for a particular period of time, e.g. for 3 seconds. Holding this button for less than 3 seconds wouldn't destroy the item, so it would be impossible to accidentally delete some item.
+A pretty cool solution to this problem would be making user **hold a delete button** for a particular period of time, e.g. for 3 seconds. Holding this button for less than 3 seconds wouldn't destroy the item, so it would be impossible to accidentally delete anything.
 
-There is an addon which solved exactly our problem: <a href="https://www.npmjs.com/package/ember-hold-button" target="_blank">ember-hold-button</a>, so there is no need to reinvent the wheel. Let's add this to our application.
+There is an addon which solves exactly this problem: <a href="https://www.npmjs.com/package/ember-hold-button" target="_blank">ember-hold-button</a>, so there is no need to reinvent the wheel. Let's add this to our application.
 
 
 ## Adding Destroy Action
 
-Let's start by adding `ember-hold-button` addon to our application:
+Let's start by installing `ember-hold-button` addon:
 
 ```
 ember install ember-hold-button
 ```
 
-and assume that we already have some component for displaying single item with `destroy` action:
+and assume that we already have some component for displaying a single item with `destroy` action:
 
-``` text app/components/display-todo-item.js
+``` javascript app/components/display-todo-item.js
 import Ember from 'ember';
 
 const {
@@ -52,9 +52,9 @@ export default Ember.Component.extend({
 <button {{action "destroy"}} data-test="destroy-item-btn">Destroy</button>
 ```
 
-and that the component was test-driven with the following test written before the actual implementation:
+and that the component was test-driven with the following test written before the actual implementation (TDD for FTW!):
 
-``` text tests/integration/components/display-todo-item-test.js
+``` javascript tests/integration/components/display-todo-item-test.js
 import Ember from 'ember';
 import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
@@ -95,7 +95,7 @@ test('item can be destroyed', function (assert) {
 
 Basically this test verifies that the `destroyRecord` method will be called on item after clicking the button.
 
-Let's add `hold-button` which will trigger `destroy` action after holding it ofr 3 seconds:
+Let's add `hold-button` which will trigger `destroy` action after holding it for 3 seconds:
 
 ``` text app/templates/components/display-todo-item.hbs
 {{item.name}}
@@ -110,19 +110,19 @@ The button is working great, but our test obviously is failing now! How can we s
 
 ## Testing Holding Interaction
 
-To solve that problem we should break the problem down into the single events. On desktop pressing a button simply means triggering `mouseDown` event and releasing means trigger `mouseUp` event. On mobile that would be `touchStart` and `touchEnd` events accordingly.
+To solve that problem we should break the problem down into the single events. On desktop, pressing a button simply means triggering `mouseDown` event and releasing means trigger `mouseUp` event. On mobile that would be `touchStart` and `touchEnd` events accordingly.
 
 Based on how `hold-button` component works, we may suspect that there is some internal timer which starts counting time after triggering `mouseDown` (`touchStart`) event or a scheduler which executes the action if it was held for required period of time and cancels it if it was released before that period of time, which would mean cancelling timer on `mouseUp` event.
 
-After checking <a href="https://github.com/AddJam/ember-hold-button/blob/master/addon/components/hold-button.js" target="_blank">the internals</a>, it turns out this is exactly the case! Let's rewrite out test by triggering these events. We will also need two extra things as we are dealing with asynchronous actions:
+After checking <a href="https://github.com/AddJam/ember-hold-button/blob/master/addon/components/hold-button.js" target="_blank">the internals</a>, it turns out this is exactly the case! Let's rewrite our test by triggering these events. We will also need two extra things as we are dealing with asynchronous actions:
 
-* `async()` / `done()` - To make sure QUnit will wait for an asynchronous operation to be finished we need to use `async()` function. That way QUnit will wait until `done()` is called. We will call `done()` after triggering `mouseUp` event. But we actually need to wait until the action is executed. We will need `wait()` helper for that.
+* `async()` / `done()` - To make sure QUnit will wait for an asynchronous operation to be finished we need to use `async()` function. That way QUnit will wait until `done()` is called. We will call `done()` after triggering `mouseUp` event. But we also need to wait until the action is executed. We will need `wait()` helper for that.
 
 * `wait()` - it forces run loop to process all the pending events. That way we ensure that the asynchronous operation have been executed (like calling `destroy` action after 3 seconds).
 
 Here's our new test:
 
-``` text tests/integration/components/display-todo-item-test.js
+``` javascript tests/integration/components/display-todo-item-test.js
 import Ember from 'ember';
 import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
@@ -167,11 +167,11 @@ test('item can be destroyed', function (assert) {
 });
 ```
 
-Nice! Out test is passing again. However, there is one serious problem: this test is quite slow as it waits 3 second for the action to finish. Can we make it somehow faster?
+Nice! Our test is passing again. However, there is one serious problem: this test is quite slow as it waits 3 second for the action to finish. Can we make it somehow faster?
 
 ## Making Our Test Faster
 
-The answer is: yes. We just need to provide a way to make `delay` configurable from the outside. This can be simply done by introducing `destroyActionDelay` property with default value equal `3000` and allowing it to be overriden. Let's start with applying this little change to the test:
+The answer is: yes. We just need to provide a way to make `delay` configurable from the outside. This can be simply done by introducing `destroyActionDelay` property with default value equal `3000` and allowing it to be modified. Let's start with applying this little change to the test:
 
 ``` text tests/integration/components/display-todo-item-test.js
 // the rest of the tests
@@ -180,7 +180,7 @@ this.render(hbs`{{display-todo-item item=item destroyActionDelay=0}}`);
 
 We don't care about waiting for 3 seconds in the tests, we just want to test if it works and to make it fast. `0` sounds like the most reasonable value in such case.
 
-And let's do some changes in our components:
+And let's change few things in our component:
 
 ``` javascript app/components/display-todo-item.js
 import Ember from 'ember';
@@ -209,11 +209,11 @@ export default Ember.Component.extend({
 {{/hold-button}}
 ```
 
-And that's it!
+And that's it! You can now enjoy the much faster test suite!
 
 
 ## Wrapping Up
 
-Testing holding a button for particular period of time doesn't sound like an obvious thing. Fortunately, with proper design and understanding the interaction from the browser's perspective, it isn't that hard and doesn't necessarily make your tests slower.
+Testing holding a button for particular period of time doesn't sound like an obvious thing to do. Fortunately, with proper design and understanding the interaction from the **browser's perspective**, it isn't that hard to do and doesn't necessarily make your tests slower.
 
 P.S. I've just started **writing a book** about **test-driving Ember** applications. If you found this article useful, you are going to love it :). **Subscribe** to my newsletter to get updates and promotion code once it's released.
