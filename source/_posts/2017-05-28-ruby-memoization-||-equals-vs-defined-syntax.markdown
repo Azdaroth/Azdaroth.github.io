@@ -12,11 +12,11 @@ In the majority of the **Rails applications** or even **Ruby gems** you can find
 
 ## What Is `||=` operator?
 
-Let's get back to the example from the introduction: `@result ||= do_some_heavy_computation`. What is this `||=` operator and how does it work? It's nothing more than a syntactic shortcut and it's an equivalent of `@result || @result = do_some_heavy_computation`, which translates to: "return the value of `@result` if the value is truthy or assign the result of `do_some_heavy_computation` to `@result`".   Clearly, the shortcut version looks more appealing. Keep in mind though that it's not really about already assigning some value to the instance variable, but rather if the value of it is truthy or not. How do we check then if the instance variable has already been set knowing that referring to undefined instance variable will simply result in `nil` without any errors?
+Let's get back to the example from the introduction: `@result ||= do_some_heavy_computation`. What is this `||=` operator and how does it work? It's nothing more than a **syntactic shortcut** and it's an equivalent of `@result || @result = do_some_heavy_computation`, which translates to: "return the value of `@result` if the value is truthy or assign the result of `do_some_heavy_computation` to `@result`". Clearly, the shortcut version looks more appealing. Keep in mind though that it's not really about already assigning some value to the instance variable, but rather if the value of it is truthy or not. How do we check then if the instance variable has already been set knowing that referring to undefined instance variable will simply result in `nil` without any exceptions?
 
 ## What Is `defined?` operator?
 
-We can do that by using `defined?` opeator, which returns `nil` if its argument is not defined or, if is defined, the description of that argument. Thanks to that behaviour, we can easily check if some instance variable has already been set or not:
+We can do that by using `defined?` opeator, which returns `nil` if its argument is not defined or, if it is defined, the description of that argument. Thanks to that behaviour, we can easily check if some instance variable has already been set or not:
 
 ``` ruby
 defined?(@result) // => nil
@@ -27,7 +27,7 @@ defined?(@result) // => "instance-variable"
 
 ## Memoization gotcha
 
-Ok, we now know the difference between `||=` and `defined?` operators, why should we bother in the context of memoization?
+Ok, we know understand the difference between `||=` and `defined?` operators, why should we bother in the context of memoization?
 
 Imagine that you have a following method in some object:
 
@@ -41,7 +41,7 @@ and you are calling `heavy_computation_result` method multiple times to reuse th
 
 As `@result ||= do_some_heavy_computation` is nothing more than a shortcut of `@result || @result = do_some_heavy_computation` expression, the left side will be falsey in such case and the computation will be performed every time you call `heavy_computation_result` method making this syntax useless here!
 
-For the proper memoization, this method should be rewritten using `defined?` operator:
+For the **proper memoization**, this method should be rewritten using `defined?` operator:
 
 ``` ruby
 def heavy_computation_result
@@ -52,4 +52,4 @@ end
 
 ## Wrapping Up
 
-Even though `||=` operator is commonly used for memoization, it isn't necessarily the best solution to this problem. It is certainly quite convenient to use, nevertheless, when there is a possiblity of having **falsey values** such as `false` and `nil`, it will probably make more sense to use `defined?` operator instead.
+Even though `||=` operator is commonly used for memoization, it isn't necessarily the best solution to this problem. It is certainly quite convenient to use, nevertheless, when there is a possiblity of having **falsey values** such as `false` and `nil`, it is much safer to use `defined?` operator instead.
