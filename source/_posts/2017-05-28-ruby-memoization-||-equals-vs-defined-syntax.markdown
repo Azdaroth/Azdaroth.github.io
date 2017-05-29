@@ -27,7 +27,7 @@ defined?(@result) // => "instance-variable"
 
 ## Memoization gotcha
 
-Ok, we know understand the difference between `||=` and `defined?` operators, why should we bother in the context of memoization?
+Ok, we now understand the difference between `||=` and `defined?` operators, why should we bother in the context of memoization?
 
 Imagine that you have a following method in some object:
 
