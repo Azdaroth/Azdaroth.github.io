@@ -6,9 +6,9 @@ comments: true
 categories: [Ember, JavaScript, ES6, Quick Tips]
 ---
 
-**Ember.js** is a web frontend framework and it's no surprise that majority of the applications deal with a lot of **HTTP requests**. But such fact has a lot of implications on the process of developing of the Ember apps, especially when it comes to **testing**. For basic `GET` requests which don't include any query params or don't deal with pagination it's quite straight-forward - for those we just want to fetch some data, so we can check if proper objects are present as a side-effect of these requests. What about `POST`, `PATCH` or `DELETE` requests, where we can't easily test the side effects?
+**Ember.js** is a web frontend framework and it's no surprise that majority of the applications deal with a lot of **HTTP requests**. But such fact has a lot of implications on the process of development of the Ember apps, especially when it comes to **testing**. For basic `GET` requests which don't include any query params or don't deal with pagination it's quite straight-forward - for those we just want to fetch some data, so we can check if proper objects are present as a side-effect of these requests. What about `POST`, `PATCH` or `DELETE` requests, where we can't easily test the side effects?
 
-Fortunately, thanks to the awesome tools such as <a href="https://github.com/pretenderjs/pretender" target="_blank">pretender</a> and <a href="https://github.com/samselikoff/ember-cli-mirage" target="_blank">ember-cli-mirage</a>, it's not such a big problem.
+Fortunately, thanks to the awesome tools such as <a href="https://github.com/pretenderjs/pretender" target="_blank">pretender</a> and <a href="https://github.com/samselikoff/ember-cli-mirage" target="_blank">ember-cli-mirage</a>, it's not a big problem.
 
 <!--more-->
 
@@ -18,7 +18,7 @@ Imagine that you are writing a classic sign-up for users. It would be quite usef
 
 For dealing with HTTP requests and/or implementing a backend mock, <a href="https://github.com/samselikoff/ember-cli-mirage" target="_blank">ember-cli-mirage</a> addon is a great choice. The setup is beyond the scope of this article, but if you happen to not be familiar with `ember-cli-mirage`, I highly recommend reading the <a href="http://www.ember-cli-mirage.com" target="_blank">docs</a> which are very clear about the setup and its features.
 
-Let's assume that we have a proper route generated for the signup, let it be a `signup` route, a corresponding `signup` controller already handling a logic for the registration in one of its actions and that we have a `User` model with `email` and `password` attributes. Our scenario will be pretty simple: we want to make sure that after filling in `email` and `password` fields and clicking the `submit` button the request will be sent to `/api/users` with the right params. Here's our test for the signup feature:
+Let's assume that we have a proper route generated for the signup, let it be a `signup` route, a corresponding `signup` controller already handling a logic for the registration in one of its actions and that we have a `User` model with `email` and `password` attributes. Our scenario will be pretty simple: we want to make sure that after filling in `email` and `password` fields and clicking the `submit` button the request will be performed to `/api/users` with the right params. Here's our test for the signup feature:
 
 ``` javascript my-awesome-app/tests/acceptance/sign-up.js
 /* global server */
@@ -44,7 +44,7 @@ test('user can successfully sign up', function(assert) {
   visit('/signup');
 
   andThen(() => {
-    fillIn('[data-test=signup-email]', "examole@email.com");
+    fillIn('[data-test=signup-email]', "example@email.com");
     fillIn('[data-test=signup-password]', 'secretPassword');
 
     click('[data-test=submit-signup]');
@@ -70,7 +70,7 @@ export default function() {
 }
 ```
 
-And now that's how our test could look like:
+And that's how our test could look like:
 
 ``` javascript my-awesome-app/tests/acceptance/delete-task.js
 /* global server */
@@ -98,8 +98,10 @@ test('user can delete tasks', function(assert) {
 });
 ```
 
-Again, our test has a very simple structure: we visit the `tasks` route where all the tasks are displayed and delete the one we created in the test's setup. To make sure that the request was performed to the right enpoint we take advantage of the fact that `ember-cli-mirage` user `pretender` under the hood which keeps track of all handled requests in `handledRequests` property. Thanks to this feature, we can identify our request based on the **URL** and the **request method**.
+Again, our test has a very simple structure: we visit the `tasks` route where all the tasks are displayed and delete the one we created in the test's setup. To make sure that the request was performed to the right endpoint we take advantage of the fact that `ember-cli-mirage` uses `pretender` under the hood which keeps track of all handled requests in `handledRequests` property. Thanks to this feature, we can identify our request based on the **URL** and the **request method**.
 
 ## Wrapping Up
 
 Testing **outgoing requests** in Ember might not be the most obvious thing to do. Fortunately, thanks to <a href="https://github.com/pretenderjs/pretender" target="_blank">pretender</a> and <a href="https://github.com/samselikoff/ember-cli-mirage" target="_blank">ember-cli-mirage</a>, we can easily verify both the **URLs** of the endpoints where the requests were performed to and the **request body** that was sent with the request.
+
+P.S. I've just started **writing a book** about **test-driving Ember** applications. If you found this article useful, you are going to love it :). **Subscribe** to my newsletter to get updates and promotion code once it's released.
