@@ -54,8 +54,10 @@ end
 ``` ruby active_job/core.rb
 module ActiveJob
   module Core
-    def set(options={})
-      ConfiguredJob.new(self, options)
+    module ClassMethods
+      def set(options={})
+        ConfiguredJob.new(self, options)
+      end
     end
   end
 end
