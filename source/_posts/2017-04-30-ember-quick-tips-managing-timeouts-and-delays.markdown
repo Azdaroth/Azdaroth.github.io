@@ -99,7 +99,7 @@ For this purpose we could add a special function which would return the value fo
 
 
 ``` javascript my-app/app/utils/timeout-for-env.js
-import config from 'fitbot-client/config/environment';
+import config from 'my-app/config/environment';
 
 export default function timeoutForEnv(timeout, timeoutForTestEnv = 0) {
   if (config.environment === 'test') {
@@ -115,7 +115,7 @@ And update the component:
 
 ``` javascript app/components/display-todo-item.js
 import Ember from 'ember';
-import timeoutForEnv from 'fitbot-client/utils/timeout-for-env';
+import timeoutForEnv from 'my-app/utils/timeout-for-env';
 
 const {
   get,
@@ -138,7 +138,7 @@ If we wanted for some reason to have a delay different than `0` for the test env
 
 ``` javascript app/components/display-todo-item.js
 import Ember from 'ember';
-import timeoutForEnv from 'fitbot-client/utils/timeout-for-env';
+import timeoutForEnv from 'my-app/utils/timeout-for-env';
 
 const {
   get,
