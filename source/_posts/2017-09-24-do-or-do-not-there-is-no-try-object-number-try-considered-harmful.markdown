@@ -91,7 +91,7 @@ class Payment
 end
 ```
 
-It's much now - instead of referring to the address via `payment.client.try(:address)` we can simply do `payment.client_address`, which is already an improvement as `Object#try` happens only in one place. Let's refactor it further.
+It's much better now - instead of referring to the address via `payment.client.try(:address)` we can simply do `payment.client_address`, which is already an improvement as `Object#try` happens only in one place. Let's refactor it further.
 
 We are left now with two options: either `client` being `nil` is a legit case or not. If it is, we can make the code look confident and explicitly return early, which clearly shows that having no `client` is a valid use case:
 
@@ -286,7 +286,7 @@ class MyService
 end
 ```
 
-The extra benefit of this option is that it helps to identify some common behaviors of the objects and to make them explicit. As you can see, in case of `Object#try` a lot of domain concepts might stay implicit and unclear. It doesn't mean they are not there; they are just not clearly identified. This is yet another important thing to keep in mind - `Object#try` also hurts your the domain.
+The extra benefit of this option is that it helps to identify some common behaviors of the objects and to make them explicit. As you can see, in case of `Object#try` a lot of domain concepts might stay implicit and unclear. It doesn't mean they are not there; they are just not clearly identified. This is yet another important thing to keep in mind - `Object#try` also hurts your domain.
 
 ### Null Object Pattern
 
