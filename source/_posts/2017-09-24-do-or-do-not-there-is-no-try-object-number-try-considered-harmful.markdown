@@ -10,6 +10,8 @@ categories: [Ruby, Rails, Design Patterns, Architecture]
 
 Well, not really. There are some **severe problems** with using `Object#try`, and usually, it's quite easy to implement a solution that would be much better.
 
+<!--more-->
+
 ## Object#try - how does it work?
 
 The idea behind `Object#try` is simple: instead of raising `NoMethodError` exception when calling some method on `nil` or calling a method on non-`nil` object that is not implemented by this object, it just returns `nil`.
