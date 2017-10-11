@@ -1,10 +1,12 @@
 ---
 layout: page
-title: Test-Driven Ember.js Book
+title: Test-Driven Ember.js Book, learn TDD in Ember
 footer: false
 ---
 
-## Why did I write this book?
+## Learn How To Write Effective And Maintainable Tests in Ember.js applications
+
+### Why did I write this book?
 
 Writing a book seemed to me to be a pretty cool idea for a long time. I remember reading a few years ago a short, self-published e-book about Chef and setting up server infrastructure and besides enjoying the content of the book and learning a lot from it, I found it pretty fascinating that you can publish a book in such a simple way. That was probably the day when I started thinking about writing something more meaningful and having more impact comparing to writing just blog posts.
 
@@ -14,23 +16,25 @@ It was pretty clear that despite learning myself how to code, I couldn't really 
 
 It made me think that I partially owe my career to all the awesome people involved in the development process of the languages, frameworks, gems, addons and other tools I've been using from the beginning and to the fact that they gave something back. I've been been contributing to open source software for a while and have been periodically writing articles on [my blog](http://karolgalanciak.com), wrote a couple of articles on [Ragnarson's blog](https://blog.ragnarson.com) when I used to work there and also had a chance to write a guest blog post for [Code School](https://www.codeschool.com/blog/2016/06/14/understanding-dependency-injection-in-ember/). I managed to help some developers here and there by own contributions, but I didn't think it was enough compared to how much I'd had benefitted from the open source software. Since I had had a plan to write a book for a long time, I thought it was the right time to do something much more meaningful and truly give back.
 
-One major gap in the Ember ecosystem for a long time has been a lack of information (besides the official docs) how to do the testing in real-world Ember apps and how to do it right. I've been interested in Test-Driven Development for a long time, so that looked like a perfect opportunity to share something that could help other developers in a substantial way.
+One major gap in the Ember ecosystem for a long time has been a lack of information (besides the official docs) how to do the TDD in real-world Ember apps and how to do it right. I've been interested in Test-Driven Development for a long time, so that looked like a perfect opportunity to share something that could help other developers in a substantial way.
 
 I hope that by releasing this book for free, I will reach a larger audience comparing to a paid version and "pay" my debt to the open source community.
 
-## Who Is This Book For?
+### Who Is This Book For?
 
 Every Ember developer, regardless of the skills, could benefit from this book. If you are a beginner, you will certainly learn more as it may serve as a guide for writing the tests. Nevertheless, if you are an experienced developer who has already written tons of tests, you can still find some useful ideas and techniques about writing tests presented in the book that could improve the way you approach testing or just show a different perspective.
 
 This book assumes a basic knowledge of Ember and popular tools (mostly **ember-cli**). Having some background in testing (not necessarily in JavaScript) will also be beneficial, as this book doesn't really focus on the basics of testing itself, but rather how to do it for Ember applications.
 
-## How To Read It
+### How To Read It
 
 I would suggest reading it from the beginning till the end in chronological order, but feel free to jump to some particular chapter if you *really* want to focus on one particular concept at the moment.
 
 
-### Download 1.0 Release Candidate 3
+#### Download 1.0 Release Candidate 4
 
 <a href="http://download.karolgalanciak.com/test-driven-ember.pdf" target="_blank">Download in PDF</a>
 
 <a href="http://download.karolgalanciak.com/test-driven-ember.epub" target="_blank">Download in EPUB</a>
+
+<a href="http://download.karolgalanciak.com/test-driven-ember.html" target="_blank">Download in HTML</a>
