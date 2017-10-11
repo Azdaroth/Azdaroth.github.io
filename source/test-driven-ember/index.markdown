@@ -38,3 +38,7 @@ I would suggest reading it from the beginning till the end in chronological orde
 <a href="http://download.karolgalanciak.com/test-driven-ember.epub" target="_blank">Download in EPUB</a>
 
 <a href="http://download.karolgalanciak.com/test-driven-ember.html" target="_blank">Download in HTML</a>
+
+<a href="https://github.com/Azdaroth/book-me" target="_blank">Github Repo of the application developer in the book</a>
+
+If you enjoyed the book, please rate in on <a href="https://www.goodreads.com/book/show/36377068-test-driven-ember" target="_blank">Goodreads.</a>
