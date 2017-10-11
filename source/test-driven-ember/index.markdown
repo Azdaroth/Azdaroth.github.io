@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Test-Driven Ember.js Book
+title: Test-Driven Ember Book
 footer: false
 ---
 
