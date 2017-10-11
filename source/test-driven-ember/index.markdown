@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Test-Driven Ember.js Book, learn TDD in Ember
+title: Test-Driven Ember.js Book
 footer: false
 ---
 
