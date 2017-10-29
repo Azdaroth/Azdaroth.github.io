@@ -20,6 +20,8 @@ collection.each_with_object(Hash.new(0)) { |item, accum| accum[item] = accum[ite
 
 All these solutions look quite nice; however, there is one that looks particularly beautiful.
 
+<!--more-->
+
 
 ## The Aesthetics of Ruby
 
