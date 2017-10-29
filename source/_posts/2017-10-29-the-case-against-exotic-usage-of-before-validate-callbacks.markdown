@@ -6,13 +6,13 @@ comments: true
 categories: [Ruby, Rails, ActiveRecord Architecture]
 ---
 
-It's nothing new that **ActiveRecord callbacks** are abused in many projects and used for the wrong reasons for many use cases where they can be **easily avoided** in favour of a much better alternative, like service objects. There is one callback though that is special and quite often used for pretty **exotic reasons** that have nothing to do with the process when it gets executed - it's the `before_validate` callback.
+It's nothing new that **ActiveRecord callbacks** are abused in many projects and used for the wrong reasons for many use cases where they can be **easily avoided** in favor of a much better alternative, like service objects. There is one callback though that is special and quite often used for pretty **exotic reasons** that have nothing to do with the process when it gets executed - it's the `before_validate` callback.
 
 <!--more-->
 
 ## Data Formatting
 
-Data formatting is something pretty common in the majority of the applications, especially stripping strings. Imagine that you need to strip some `URL` so that any potential spaces won't cause any issues. How would you approach that?
+Data formatting is something pretty common in the majority of the applications, especially stripping strings. Imagine that you need to strip some `URL` so that potential spaces won't cause any issues. How would you approach that?
 
 One way would be to use `before_validate` callback, especially if you have some format validations:
 
@@ -28,7 +28,7 @@ class MyModel
 end
 ```
 
-It definitely gets the job done. However, how would you test it? You would need to call `valid?` method on the model to check that... `URL` is stripped? Sounds quite funny and is even better when you look at the potential spec:
+It gets the job done. However, how would you test it? You would need to call `valid?` method on the model to check that... `URL` is stripped? Sounds quite funny and is even better when you look at the potential spec:
 
 ``` ruby spec/models/my_model_spec.rb
 require "rails_helper"
@@ -44,7 +44,7 @@ RSpec.describe MyModel, type: :model do
 end
 ```
 
-Really unlikely that this would be the result of **TDD** ;). What's the alternative then?
+It's quite unlikely that this would be the result of **TDD** though ;). What's the alternative then?
 
 How about just using attribute writer for that? So something like this:
 
@@ -90,7 +90,7 @@ class MyModel
   private
 
   def assign_group
-    self.group = current_user.group
+    self.group = author.group if author
   end
 end
 ```
@@ -109,4 +109,4 @@ There is no magic here - just a simple assignment, which is easy to test and und
 
 ## Wrapping up
 
-Maybe there are some scenarios where `before_validate` callback is the best possible choice (I'm yet to find them though), but I'm pretty sure data formatting or populating attributes/associations are not valid use cases to use it for.
+Maybe there are some scenarios where `before_validate` callback is the best possible choice (I'm yet to find them though), but I'm pretty sure data formatting or populating attributes/associations are not valid cases to use it for.
