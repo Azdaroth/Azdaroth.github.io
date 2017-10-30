@@ -31,7 +31,7 @@ This book assumes a basic knowledge of Ember and popular tools (mostly **ember-c
 I would suggest reading it from the beginning till the end in chronological order, but feel free to jump to some particular chapter if you *really* want to focus on one particular concept at the moment.
 
 
-#### Download 1.0 Release Candidate 4
+#### Download 1.0
 
 <a href="http://download.karolgalanciak.com/test-driven-ember.pdf" target="_blank">Download in PDF</a>
 
