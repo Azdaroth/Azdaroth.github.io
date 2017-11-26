@@ -14,7 +14,8 @@ One very **useful** feature of **ActiveRecord** is automatically defining attrib
 
 Imagine that you are developing some application, where users can be activated and deactivated from an admin panel. However, the application is not free, and every user that wants to access the application needs to buy a subscription. In that case, to check if the user is, in fact, active, you could override `User#active?` method and add some extra requirements regarding the subscription:
 
-``` ruby app/models/users.rb
+``` rb
+# app/models/users.rb
 class User < ApplicationRecord
   def active?
     super && valid_subscription?
@@ -30,7 +31,8 @@ We are taking advantage of the fact that ActiveRecord defines the aliases for bo
 
 Ok, cool, we have our feature working and to check if a user is fully active, we call `User#active?` here and there. Our next requirement is exposing users in the API. Nothing too hard, we can add <a href="https://github.com/fotinakis/jsonapi-serializers">`jsonapi-serializers`</a> gem and implement fully JSONAPI-compliant serializers. It turns out that we need to expose info if a user is active and not. Here is how our serializer could look like:
 
-``` ruby app/serializers/user.rb
+``` rb
+# app/serializers/user.rb
 class UserSerializer
   include JSONAPI::Serializer
 
@@ -51,7 +53,8 @@ A solution would be simply making this domain concept explicit. `User#active?` m
 
 It is quite possible that we might later need to add some extra features that are related to this feature, like checking if the user is active but cannot access the app or just simply checking the `active` flag itself. Our final model could look like this in the end:
 
-``` ruby app/models/users.rb
+``` rb
+# app/models/users.rb
 class User < ApplicationRecord
   def can_access_application?
     active? && valid_subscription?
@@ -67,7 +70,8 @@ end
 
 We should also update the serializer:
 
-``` ruby app/serializers/user.rb
+``` rb
+# app/serializers/user.rb
 class UserSerializer
   include JSONAPI::Serializer
 
