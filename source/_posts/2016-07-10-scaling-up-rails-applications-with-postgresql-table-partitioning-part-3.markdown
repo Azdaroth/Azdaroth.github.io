@@ -17,13 +17,13 @@ categories: [PostgreSQL, databases, Ruby, Ruby on Rails, scaling, performance, a
 <p>In the two previous parts we were discussing <code>orders</code> example, so let's do the same here. We can start with generating model:</p>
 
 
-```
+``` rb
 rails generate Order
 ```
 
 <p>For benchmarking use case without table partitioning we don't really need to change much, just add an index for <code>created_at</code> column:</p>
 
-```
+``` rb
 class CreateOrders < ActiveRecord::Migration
   def change
     create_table :orders do |t|
@@ -37,14 +37,14 @@ end
 
 <p>In case of partitioning, however, we need to set up some extra tables. We can reuse the examples from <a href="https://karolgalanciak.com/blog/2016/06/12/scaling-up-rails-applications-with-postgresql-table-partitioning-part-2/" target="_blank">part 2</a>. Let's add the partitoned gem to the Gemfile:</p>
 
-```
+``` rb
 gem 'activerecord-redshift-adapter',  git: "git@github.com:arp/activerecord-redshift-adapter.git", branch: "rails4-compatibility"
 gem 'partitioned', git: "git@github.com:dkhofer/partitioned.git", branch: "rails-4-2"
 ```
 
 <p>And set up <code>Order</code> model with the base class for partitioning by year (all the details are explained in <a href="https://karolgalanciak.com/blog/2016/06/12/scaling-up-rails-applications-with-postgresql-table-partitioning-part-2/" target="_blank">part 2</a>):</p>
 
-```
+``` rb
 class PartitionedByCreatedAtYearly < Partitioned::ByYearlyTimeField
   self.abstract_class = true
 
@@ -58,7 +58,7 @@ class PartitionedByCreatedAtYearly < Partitioned::ByYearlyTimeField
 end
 ```
 
-```
+``` rb
 class Order < PartitionedByCreatedAtYearly
 end
 ```
@@ -66,7 +66,7 @@ end
 <p>Finally, we can set up the migration:</p>
 
 
-```
+``` rb
 class CreateOrders < ActiveRecord::Migration
   def up
     create_table :orders do |t|
@@ -89,7 +89,7 @@ end
 
 <p>For sample data let's start with creating 1 million orders for every year from 2016 to 2020. This should be enough to make the tables moderately big for real-world example and perform some meaningful benchmarking. Here's the code to create these records with random date from given year: </p>
 
-```
+``` rb
 [2016, 2017, 2018, 2019, 2020].each do |current_year|
   dates_range = Date.new(current_year, 1, 1)..Date.new(current_year, 12, 31)
   Order.transaction do
@@ -136,7 +136,7 @@ constraint_exclusion = partition
 <p>Here's the final benchmark code, for patitioned tables:</p>
 
 
-```
+``` rb
 require 'benchmark/ips'
 
 Benchmark.ips do |x|
@@ -172,7 +172,7 @@ end
 
 <p>and for tables without partitioning:</p>
 
-```
+``` rb
 require 'benchmark/ips'
 
 Benchmark.ips do |x|

@@ -15,7 +15,6 @@ categories: [Ruby, Ruby on Rails, Design Patterns, Architecture]
 <p>Let’s start with adding a very simple <code>WelcomeMailer</code> as an example:</p>
 
 
-
 ``` ruby app/mailers/welcome_mailer.rb
 class WelcomeMailer < ApplicationMailer
   def welcome(user)

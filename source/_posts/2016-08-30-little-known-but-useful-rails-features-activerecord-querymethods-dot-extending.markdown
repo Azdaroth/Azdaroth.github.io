@@ -15,13 +15,13 @@ categories: [Ruby, Rails, Ruby on Rails, Quick Tips]
 <p>Imagine you are developing an <strong>API</strong> in your Rails application from where you will be fetching data periodically. To avoid getting all the records every time (which may end up with tons of unnecessary requests) and returning only the changed records since the last time they were fetched, you may want to implement some scope that will be returning records updated from given date that may look like this:</p>
 
 
-```
+``` rb
 scope :updated_from, ->(datetime) { where("updated_at >= ?", datetime) }
 ```
 
 <p>To handle this logic in <strong>API</strong>, we could implement a generic method returning either all records or records updated from given date, depending on the presence of <code>updated_from</code> param:</p>
 
-```
+``` rb
 def fetch_records(model_class, params)
   records = model_class.all
   if updated_from = ActiveRecord::Type::DateTime.new.type_cast_from_user(params[:updated_from])
@@ -36,7 +36,7 @@ end
 <p>One way to solve this problem would be defining <code>updated_from</code> <strong>scope</strong> in <code>ApplicationRecord</code> and letting the models <strong>inherit</strong> it from this base class:</p>
 
 
-```
+``` rb
 class ApplicationRecord < ActiveRecord::Base
   self.abstract_class = true
 
@@ -46,7 +46,7 @@ end
 
 <p>The problem with this solution is that <code>updated_from</code> scope would be available for all the models, even for the ones that won’t really need it. Another way would be extracting <code>updated_from</code> to <code>HasUpdatedFrom</code> models' <strong>concern</strong>:</p>
 
-```
+``` rb
 module HasUpdatedFrom
   extend ActiveSupport::Concern
 
@@ -59,7 +59,7 @@ end
 <p>and including it in all the models that will be using that scope, but it’s a bit cumbersome. Fortunately, there’a a <strong>perfect solution</strong> for such problem in Rails: <a href="http://apidock.com/rails/ActiveRecord/QueryMethods/extending" target="_blank">ActiveRecord::QueryMethods.extending</a>, which lets you extend a collection with additional methods. In this case, we could simply define <code>updated_from</code> method in <code>HasUpdatedFrom</code> module: </p>
 
 
-```
+``` rb
 module HasUpdatedFrom
   def updated_from(datetime)
     where("updated_at >= ?", datetime)
@@ -70,7 +70,7 @@ end
 <p>and use <code>ActiveRecord::QueryMethods.extending</code> in our <code>fetch_records</code> method just like this:</p>
 
 
-```
+``` rb
 def fetch_records(model_class, params)
   records = model_class.all
   if updated_from = ActiveRecord::Type::DateTime.new.type_cast_from_user(params[:updated_from])

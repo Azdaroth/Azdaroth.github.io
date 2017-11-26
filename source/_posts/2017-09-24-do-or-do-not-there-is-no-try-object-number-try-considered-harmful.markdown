@@ -24,7 +24,7 @@ user.first.try(:email)
 
 What if you implemented some generic service where you can pass many types of objects and, e.g., after saving the object it attempts to send a notification if the object happens to implement a proper method for that? With `Object#try` it could be done like this:
 
-```
+``` rb
 class MyService
   def call(object)
     object.save!
@@ -37,7 +37,7 @@ As you can see, it is also possible to provide `arguments` of the method.
 
 What if you need to do some chaining of the methods where you can get `nil` at each intermediate step? No problem, you can use `Object#try`:
 
-```
+``` rb
 payment.client.try(:addresses).try(:first).try(:country).try(:name)
 ```
 
@@ -47,7 +47,7 @@ Apparently, `Object#try` is capable of handling multiple cases, so what is the p
 
 Well, there are many. The biggest issue with `Object#try` is that in many cases it `solves` problems that should never happen in the first place and that problem is `nil`. The another one is that the intention of using it is not clear. What does the following code try to say?
 
-```
+``` rb
 payment.client.try(:address)
 ```
 
@@ -65,13 +65,13 @@ Here are few "patterns" you could apply depending on the context where `Object#t
 
 <a href="https://en.wikipedia.org/wiki/Law_of_Demeter" target="_blank">Law of Demeter</a> is a handy rule (I wouldn't go that far to call it a "law" though) which helps avoid structural coupling. What it states is that hypothetical object A should be only interested in its own immediate surrounding and should not be aware of the internal structure of its collaborators or associations. In many cases, it means having only one "dot" in method calls. However, **Law of Demeter** is not really about the amount of "dots" (method calls), it's only about the coupling between objects, so chained operations and transformations are perfectly fine, e.g., the following example doesn't violate the law:
 
-```
+``` rb
 input.to_s.strip.split(" ").map(&:capitalize).join(" ")
 ```
 
 but the following one does:
 
-```
+``` rb
 payment.client.address
 ```
 
@@ -79,13 +79,13 @@ Respecting **Law of Demeter** usually results in a clean and maintainable code, 
 
 Let's get back to the example with `payment`, `client` and `address`. How could we refactor the following code?
 
-```
+``` rb
 payment.client.try(:address)
 ```
 
 The first thing would be to reduce structural coupling and implement `Payment#client_address` method:
 
-```
+``` rb
 class Payment
   def client_address
     client.try(:address)
@@ -97,7 +97,7 @@ It's much better now - instead of referring to the address via `payment.client.t
 
 We are left now with two options: either `client` being `nil` is a legit case or not. If it is, we can make the code look confident and explicitly return early, which clearly shows that having no `client` is a valid use case:
 
-```
+``` rb
 class Payment
   def client_address
     return nil if client.nil?
@@ -109,7 +109,7 @@ end
 
 If it never happens to be `nil`, we can skip the guard statement:
 
-```
+``` rb
 class Payment
   def client_address
     client.address
@@ -121,7 +121,7 @@ Such delegations are pretty generic; maybe Rails has some nice solution to this 
 
 The first example, where `nil` is a legit use case, could be rewritten the following way:
 
-```
+``` rb
 class Payment
   delegate :address, to: :client, prefix: true, allow_nil: true
 end
@@ -129,7 +129,7 @@ end
 
 and the second one, if `nil` is never to be expected:
 
-```
+``` rb
 class Payment
   delegate :address, to: :client, prefix: true
 end
@@ -143,7 +143,7 @@ However, it is still possible that we might not expect payment to have an empty 
 
 If we want to deal payments with completed transactions, which are guaranteed to have `client`, why not simply make sure that we are dealing with the right set of data? In Rails apps that would probably mean applying some ActiveRecord `scope` to `Payment`s collection, like `with_completed_transactions`:
 
-```
+``` rb
 Payment.with_completed_transactions.find_each do |payment|
   do_something_with_address(payment.client_address)
 end
@@ -157,7 +157,7 @@ Nevertheless, even if `client` were always required for creating a payment, it w
 
 Ensuring data integrity, especially with RDBMS like PostgreSQL, is quite simple - we just need to remember about adding the right constraints when creating new tables. Keep in mind that this needs to be handled on a database level, validations in models are never enough as they can easily be bypassed. To avoid the issue where `client` turns out to be `nil`, despite presence validation, we should add `NOT NULL` and `FOREIGN KEY` constraints when creating `payments` table, which will prevent us from not having a client assigned at all and also deleting the client record if it's still associated with some payment:
 
-```
+``` rb
 create_table :payments do |t|
   t.references :client, index: true, foreign_key: true, null: false
 end
@@ -169,13 +169,13 @@ And that's it! By remembering about those constraints, you can avoid a lot of un
 
 I saw few times `Object#try` used in a quite exotic way which looked similar to this:
 
-```
+``` rb
 params[:name].try(:upcase)
 ```
 
 Well, this code clearly shows that some string is expected to be found under `name` key in `params`, so why not just ensure it is a string by applying explicit conversion using `to_s` method?
 
-```
+``` rb
 params[:name].to_s.upcase
 ```
 
@@ -185,7 +185,7 @@ However, those two codes are not equivalent. The former one returns a string if 
 
 * `nil` is the expected return value if `params[:name]` is `nil` - might not be the best idea as dealing with nils instead of strings might be quite inconvenient, however, in some cases, it might be necessary to have `nil`s. If that's the case, we can make it clear that we expect `params[:name]` to be `nil` by adding a guard statement:
 
-```
+``` rb
 return if params[:name].nil?
 
 params[:name].to_s.upcase
@@ -193,7 +193,7 @@ params[:name].to_s.upcase
 
 * a string is the expected return type - we don't need to bother with guard statements, and we can just keep the explicit conversion:
 
-```
+``` rb
 params[:name].to_s.upcase
 ```
 
@@ -203,7 +203,7 @@ In more complex scenarios, it might be a better idea to use form objects and/or 
 
 Dealing with nested hashes is quite a common use case, especially when building APIs and dealing with user-provided payload. Imagine you are dealing with JSONAPI-compliant API and want to grab client's name when updating. The expected payload might look like this:
 
-```
+``` rb
 {
   data: {
     id: 1,
@@ -219,7 +219,7 @@ However, since we never know if the API consumer provided a proper payload or no
 
 One terrible way to handle it would be using... guess what? Obviously `Object#try`:
 
-```
+``` rb
 params[:data].try(:[], :attributes).try(:[], :name)
 ```
 
@@ -227,19 +227,19 @@ It's certainly hard to say that this code looks pleasant. And the funny thing is
 
 One solution would be applying explicit conversions on each intermediate step:
 
-```
+``` rb
 params[:data].to_h[:attributes].to_h[:name]
 ```
 
 That's better, but not really expressive. Ideally, we would use some dedicated method. One of those potentially dedicated methods is <a href="https://ruby-doc.org/core-2.2.0/Hash.html#method-i-fetch" target="_blank">`Hash#fetch`</a> which allows you to provide a value that should be returned if the given key is not present in the hash:
 
-```
+``` rb
 params.fetch(:data).fetch(:attributes, {}).fetch(:name)
 ```
 
 It looks even better but would be nice to have something even more dedicated for digging through nested hashes. Fortunately, since Ruby 2.3.0, we can take advantage of <a href="http://ruby-doc.org/core-2.3.0_preview1/Hash.html#method-i-dig" target="_blank">`Hash#dig`</a>, which was implemented for exactly this purpose - digging through nested hashes and not raising exceptions if some intermediate key turns out to not be there:
 
-```
+``` rb
 params.dig(:data, :attributes, :name)
 ```
 
@@ -247,7 +247,7 @@ params.dig(:data, :attributes, :name)
 
 Let's get back to the example that was mentioned in the beginning with sending a potential notification:
 
-```
+``` rb
 class MyService
   def call(object)
     object.save!
@@ -260,7 +260,7 @@ There are two possible solutions here:
 
 * **Implementing two set of services** - one that sends notifications and one that doesn't:
 
-```
+``` rb
 class MyServiceA
   def call(object)
     object.save!
@@ -279,7 +279,7 @@ Thanks to this refactoring, the code is much cleaner, and we easily got rid of `
 
 * **Duck typing**. Simply add `send_success_notification` method to all objects that are passed to `MyService` and if it's supposed to do nothing, just leave the method body empty:
 
-```
+``` rb
 class MyService
   def call(object)
     object.save!
@@ -294,7 +294,7 @@ The extra benefit of this option is that it helps to identify some common behavi
 
 Let's reuse the example above with sending notifications after persisting some models and do a little modification - we will make `mailer` an argument of the method and call `send_success_notification` on it:
 
-```
+``` rb
 class MyService
   def call(object, mailer: SomeMailer)
     object.save!
@@ -305,7 +305,7 @@ end
 
 That's going to work great if we always want to send a notification. What if we don't want to do it? One terrible way to handle it would be passing `nil` as a mailer and take advantage of `Object#try`:
 
-```
+``` rb
 class MyService
   def call(object, mailer: SomeMailer)
     object.save!
@@ -319,7 +319,7 @@ Service.new.call(object, mailer: nil)
 
 But you've probably already guessed this solution is a no-go. Fortunately, we can apply <a href="https://en.wikipedia.org/wiki/Null_Object_pattern" target="_blank">Null Object Pattern</a> and pass an instance of some `NullMailer` which implements `send_success_notification` method that simply does nothing:
 
-```
+``` rb
 class NullMailer
   def send_success_notification(*)
   end
@@ -341,7 +341,7 @@ That's certainly better than using `Object#try`.
 
 `&.`, lonely/safe navigation operator is a pretty new thing introduced in Ruby 2.3.0. It's quite similar to `Object#try`, but it's less ambiguous - if you call a method on the object different than `nil`, and this method is not implemented by that object, `NoMethodError` will still be raised which is not the case for `Object#try`. Check the following examples:
 
-```
+``` rb
 User.first.try(:unknown_method) # assuming `user` is nil
 => nil
 
@@ -359,7 +359,7 @@ Does it mean safe navigation operator is fine and safe to use? Not really. It st
 
 Nevertheless, I think there is a case where the lonely operator is not that bad. Check the following example:
 
-```
+``` rb
 Comment.create!(
   content: content,
   author: current_user,
@@ -371,7 +371,7 @@ What we want to do is create a comment belonging to some `current_user` who migh
 
 The same code could be written as:
 
-```
+``` rb
 Comment.create!(content: content, author: current_user) do |c|
   c.group_id = current_user&.group_id if current_user
 end
@@ -379,7 +379,7 @@ end
 
 or maybe as:
 
-```
+``` rb
 comment_params = {
   content: content,
   author: current_user,
