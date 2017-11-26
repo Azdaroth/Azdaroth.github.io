@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Traps on Rails - Overriding boolean methods in models"
-date: 2017-11-26 26:00
+date: 2017-11-26 16:00
 comments: true
 categories: [Ruby, Ruby on Rails, Rails, Design, Quick Tips]
 ---
