@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "PostgreSQL Quick Tips: Working With Dates Using EXTRACT function"
-date: 2018-01-28 22:00
+date: 2018-01-30 4:30
 comments: true
 categories: [PostgreSQL, Database, ActiveRecord, Quick Tips]
 ---
