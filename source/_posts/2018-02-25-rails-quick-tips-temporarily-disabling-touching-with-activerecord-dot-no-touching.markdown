@@ -1,12 +1,12 @@
 ---
 layout: post
 title: "Rails Quick Tips: Temporarily Disabling Touching with ActiveRecord.no_touching"
-date: 2018-02-25 22:00
+date: 2018-02-25 20:00
 comments: true
 categories: [Rails, Database, ActiveRecord, Quick Tips]
 ---
 
-**Touching** **ActiveRecord models** is quite a common thing in most of the **Rails applications**, especially useful for cache invalidation. By default, it updates `updated_at` timestamp with the current time, Here's the most typical example of using [`touch`](https://apidock.com/rails/ActiveRecord/Persistence/touch) in a model:
+**Touching** **ActiveRecord models** is quite a common thing in most of the **Rails applications**, especially useful for cache invalidation. By default, it updates `updated_at` timestamp with the current time, Here's a typical example of using [touch](https://apidock.com/rails/ActiveRecord/Persistence/touch) in a model:
 
 ``` ruby
 # app/models/photo.rb
@@ -22,11 +22,11 @@ Whenever a new photo is created, or the existing one is updated/destroyed, the `
 
 ## Anatomy Of The Problem
 
-Temporarily disabling `touch`ing can useful either for performance reasons (when updating a large number of records) or simply to prevent `after_touch` or `after_commit` from being executed multiple times. The latter might indicate that there is a deeper problem in the design as putting any important logic causing side-effects outside the model in those **ActiveRecord callbacks** can easily go south (especially if you trigger email notifications), but the reality is that a lot of Rails applications use those callbacks.
+Temporarily disabling `touch`ing can useful either for performance reasons (when updating a large number of records) or simply to prevent `after_touch` or `after_commit` from being executed multiple times. The latter might indicate that there is a deeper problem in the design as putting any important logic causing side-effects beyond the record's internal state in those **ActiveRecord callbacks** can easily go south (especially if you trigger email notifications), but the reality is that a lot of Rails applications use those callbacks in such cases.
 
 ## The Solution
 
-Fortunately, a heavy refactoring or a rewrite is not necessary. Instead, we can take advantage of [`ActiveRecord.no_touching`](http://api.rubyonrails.org/classes/ActiveRecord/NoTouching/ClassMethods.html) which temporarily disables touching inside the block.
+Fortunately, a heavy refactoring or a rewrite is not necessary. Instead, we can take advantage of [ActiveRecord.no_touching](http://api.rubyonrails.org/classes/ActiveRecord/NoTouching/ClassMethods.html) which temporarily disables touching inside the block.
 
 Imagine that you need to update all photos belonging to some user and `touch` this user only after all photos are updated. Here's how it could be handled:
 
@@ -51,7 +51,7 @@ If for some reason disabling touching is necessary for all models, you could jus
 user = User.find(user_id)
 
 ActiveRecord::Base.transaction do
-  User.no_touching do
+  ActiveRecord::Base.no_touching do
     user.photos.find_each do |photo|
       # no model will be `touch`ed
       photo.update!(some_attributes)
