@@ -2,7 +2,8 @@
 #      Main Configs       #
 # ----------------------- #
 
-url: http://karolgalanciak.com
+url: https://karolgalanciak.com
+legacy_url: http://karolgalanciak.com
 title: Karol Galanciak - Ruby on Rails and Ember.js consultant
 main_header: Karol Galanciak - Ruby on Rails and Ember.js consultant
 author: Karol Galanciak
