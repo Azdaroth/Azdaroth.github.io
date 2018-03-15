@@ -94,7 +94,7 @@ end
 ```
 
 ``` rb config/initializers/types.rb
-ActiveRecord::Type.register(:price, Price)
+ActiveRecord::Type.register(:price, PriceType)
 ```
 
 <p>Let's use Attributes API for <code>price</code> attribute:</p>
