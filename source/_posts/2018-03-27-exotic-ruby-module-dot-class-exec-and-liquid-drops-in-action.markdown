@@ -1,21 +1,24 @@
 ---
 layout: post
 title: "Exotic Ruby: Module.class_exec, custom JSON And Liquid Drops In Action"
-date: 2018-03-25 21:00
+date: 2018-03-27 21:30
 comments: true
 categories: [Ruby, Design, Liquid, Metaprogramming]
 ---
 
 Ruby has quite a lot of **"exotic" features** that are not used that often, but when you need to utilize some **metaprogramming magic**, you can easily take advantage of them. One of such features is [Object.instance_exec](http://ruby-doc.org/core-2.4.3/BasicObject.html#method-i-instance_exec) which you might be familiar with if you've ever built some more advanced DSL.
 
-The great thing about `Object#instance_exec` is that it allows to execute code **within the context of a given object** but it also gives possibility to **pass arguments from the current context**. Thanks to that, you we build some nice DSLs and other features like this:
+The great thing about `Object#instance_exec` is that it allows to execute code **within the context of a given object** but it also gives possibility to **pass arguments from the current context**. Thanks to that, we can build some nice DSLs and other features like this:
 
 ``` rb
-some_filter = ->() { where(role: "admin") }
-User.all.instance_exec(&some_filter) # same as User.all.where(role: "admin")
+role_filter = ->(role) { where(role: role) }
+role = "admin"
+User.all.instance_exec(role, &some_filter) # same as User.all.where(role: "admin")
 ```
 
-An interesting thing is that there is a **class** equivalent of `Object#instance_exec` - [Module.class_exec](http://ruby-doc.org/core-2.4.3/Module.html#method-i-class_exec). It would be easy to figure out some theoretical example how it can be used but what could be the real-world use case where this is the best approach to the problem?
+An interesting thing is that there is a **class** equivalent of `Object#instance_exec` - [Module.class_exec](http://ruby-doc.org/core-2.4.3/Module.html#method-i-class_exec). It would be easy to figure out some theoretical example how it can be used but what could be the real-world use case where this is the best approach to solve the problem?
+
+<!--more-->
 
 ## Anatomy Of The Problem
 
@@ -66,7 +69,7 @@ Do we have any alternative that would be the most robust solution to this proble
 
 The answer is yes! Although, the solution is going to be more tricky than the previous one.
 
-First, we will need to take advantage of using the constructor of `Class` itself and create anonymous classes inheriting from `Liquid::Drop`. The next step would be defining the required methods based on `payload`. But how can we do that if `payload` is not available in the context of this class? Somehow we will need to make it available and execute the code within the context of this class.
+First, we will need to take advantage of using the constructor of `Class` itself and create anonymous classes inheriting from `Liquid::Drop`. The next step would be defining the required methods based on `payload`. But how can we do that if `payload` is not available in the context of this class? We will need to make it available somehow and execute the code within the context of this class.
 
 Fortunately, Ruby has got our back, and we can take advantage of [Module.class_exec](http://ruby-doc.org/core-2.4.3/Module.html#method-i-class_exec) method which does exactly what we need here.
 
