@@ -13,7 +13,7 @@ The great thing about `Object#instance_exec` is that it allows to execute code *
 ``` rb
 role_filter = ->(role) { where(role: role) }
 role = "admin"
-User.all.instance_exec(role, &some_filter) # same as User.all.where(role: "admin")
+User.all.instance_exec(role, &role_filter) # same as User.all.where(role: "admin")
 ```
 
 An interesting thing is that there is a **class** equivalent of `Object#instance_exec` - [Module.class_exec](http://ruby-doc.org/core-2.4.3/Module.html#method-i-class_exec). It would be easy to figure out some theoretical example how it can be used but what could be the real-world use case where this is the best approach to solve the problem?
