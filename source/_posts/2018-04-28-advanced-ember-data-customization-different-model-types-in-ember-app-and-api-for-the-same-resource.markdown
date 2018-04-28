@@ -55,6 +55,7 @@ import DS from 'ember-data';
 export default DS.JSONAPIAdapter.extend();
 ```
 
+
 ``` js
 // app/adapters/photographer.js
 import ApplicationAdapter from './application';
@@ -65,6 +66,7 @@ export default ApplicationAdapter.extend({
   }
 });
 ```
+
 
 ``` js
 // app/adapters/photo.js
@@ -133,7 +135,7 @@ const keysMappingForSerialization = {
   'photo': 'picture'
 };
 
-export default DS.JSONAPISerializer.extend({});
+export default DS.JSONAPISerializer.extend({
   payloadKeyFromModelName(key) {
     if (keysMappingForSerialization[key]) {
       return this._super(keysMappingForSerialization[key]);
