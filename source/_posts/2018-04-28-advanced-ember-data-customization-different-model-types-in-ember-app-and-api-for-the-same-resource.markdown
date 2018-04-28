@@ -1,13 +1,13 @@
 ---
 layout: post
 title: "Advanced Ember Data Customization - Different Model Types in Ember App and API For The Same Resource"
-date: 2018-04-28 21:00
+date: 2018-04-28 19:00
 comments: true
 categories: [Ember, Ember Data]
 ---
 
 
-A **great advantage** of using **Ember Data** with **JSONAPI-compliant** adapters/serializers is that there is almost nothing extra needed to work with the **data layer** - just create the models with names matching the types of the resources returned by the **API** and you are good to go! However, sometimes you may need to customize the naming which means that the name of the models in the **Ember application** will be different than the ones expected by the API and their corresponding types. What are the steps required to make it work in **Ember Data**?
+A **great advantage** of using **Ember Data** with **JSONAPI-compliant** adapters/serializers is that there is almost nothing extra needed to work with the **data layer** - just create the models with names matching the types of the resources returned by the **API** and you are good to go! However, sometimes you may need to customize the naming which means that the names of the models in the **Ember application** will be different than the ones expected by the API and their corresponding types. What are the steps required to make it work in **Ember Data**?
 
 <!--more-->
 
@@ -136,7 +136,7 @@ const keysMappingForSerialization = {
 export default DS.JSONAPISerializer.extend({});
   payloadKeyFromModelName(key) {
     if (keysMappingForSerialization[key]) {
-      return this._super(guestRelatedKeysMappingForSerialization[key]);
+      return this._super(keysMappingForSerialization[key]);
     } else {
       return this._super(...arguments);
     }
@@ -302,7 +302,7 @@ module('Unit | Serializer | application', function(hooks) {
 ```
 
 
-First, let's make it work with non-relationshio-related part, i.e. `modelNameFromPayloadKey` customization:
+First, let's make it work with nonrelationship-related part, i.e. `modelNameFromPayloadKey` customization:
 
 ``` js
 // app/serializers/application.js
@@ -380,7 +380,6 @@ export default ApplicationSerializer.extend({
 ```
 
 And that's it! All our tests are green, and the models are going to work with the API!
-
 
 ## Wrapping Up
 
