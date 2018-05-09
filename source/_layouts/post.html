@@ -12,9 +12,6 @@ single: true
       {% include post/date.html %}{% if updated %}{{ updated }}{% else %}{{ time }}{% endif %}
       {% include post/categories.html %}
     </p>
-    <div class="meta top-line">
-      {% include post/subscription.html %}
-    </p>
     <div class="top-line">
       {% unless page.sharing == false %}
         {% include post/sharing.html %}
