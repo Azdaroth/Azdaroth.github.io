@@ -6,7 +6,7 @@ comments: true
 categories: [Ruby, Rails, ActiveRecord Architecture]
 ---
 
-A few months ago I wrote a [blog post](https://karolgalanciak.com/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks/) about **ActiveRecord** `before_validation` callback and how it is used for  **wrong reasons** and concluded that in most cases this is not something we should be using routinely. However, I missed one **appropriate use case** for it which might be quite common in Rails apps, so this might be an excellent opportunity to get back to  **before_validation callback** and show its other side.
+Few months ago I wrote a [blog post](https://karolgalanciak.com/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks/) about **ActiveRecord** `before_validation` callback and how it is used for  **wrong reasons** and concluded that in most cases this is not something we should be using routinely. However, I missed one **appropriate use case** for it which might be quite common in Rails apps, so this might be an excellent opportunity to get back to  **before_validation callback** and show its other side.
 
 <!--more-->
 
@@ -54,7 +54,7 @@ end
 
 ## Alternative Solution
 
-In the first paragraph, I mentioned that this solution could work especially well in Rails apps. What I meant by that is the fact that usually, the "primitive" attributes coming from HTTP params are mass-assigned to the model. Of course in Ruby, everything is an object, but to keep things simpler, let's treat numeric types and strings as these primitives.
+In the first paragraph, I mentioned that this solution could work especially well in Rails apps. What I meant by that is the fact that usually, the "primitive" attributes coming from HTTP params are mass-assigned to the model. Of course in Ruby, everything is an object, but to keep things simpler, let's treat numeric types and strings as primitives.
 
 What would be a non-primitive value though? In our case, we have something that is widely used as a typical example of a value object: **Money** object that is composed of `amount` and `currency`.  If the attributes before the assignment were mapped to some more domain-oriented objects, we would have an even simpler solution for our problem:
 
