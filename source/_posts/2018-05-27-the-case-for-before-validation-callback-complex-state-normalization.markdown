@@ -44,9 +44,9 @@ class Payment < ApplicationRecord
 
   private
 
-  def  assign_amount_in_usd
+  def assign_amount_in_usd
     if currency && amount
-      CurrencyExchanger.exchange(amount, from: currency, to: "USD")
+      self.amount_in_usd = CurrencyExchanger.exchange(amount, from: currency, to: "USD")
     end
   end
 end
