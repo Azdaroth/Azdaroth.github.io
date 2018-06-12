@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Server | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/server/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/server/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Automate to the max: instant Ubuntu Server setup with Chef]]></title>
-    <link href="http://Azdaroth.github.io/blog/2014/07/10/automate-to-the-max-instant-ubuntu-server-setup-with-chef/"/>
+    <link href="https://karolgalanciak.com/blog/2014/07/10/automate-to-the-max-instant-ubuntu-server-setup-with-chef/"/>
     <updated>2014-07-10T20:00:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2014/07/10/automate-to-the-max-instant-ubuntu-server-setup-with-chef</id>
+    <id>https://karolgalanciak.com/blog/2014/07/10/automate-to-the-max-instant-ubuntu-server-setup-with-chef</id>
     <content type="html"><![CDATA[<p>You've started developing new app and need server to deploy it. You can choose hosting platform like <a href="https://www.heroku.com" target="_blank">Heroku</a> or <a href="https://shellycloud.com" target="_blank">Shelly</a> which may turn out to be quite expensive if you want to host multiple apps. You can also set up your own server. Going with the latter option can be quite time consuming, especially if sysadministration is not you main responsibility and you have multiple servers to provision. I that case automation beyond simple Bash scripts is a must - time to meet <strong>Chef</strong>.</p>
 
 
@@ -237,7 +237,7 @@ touch roles/nginx.json
 <p>``` ruby site-cookbooks/nginx/metadata.rb
 name              &ldquo;Nginx&rdquo;
 maintainer        &ldquo;Karol Galanciak&rdquo;
-maintainer_email  &ldquo;<a href="&#x6d;&#x61;&#105;&#108;&#x74;&#111;&#58;&#107;&#x61;&#x72;&#111;&#108;&#46;&#103;&#97;&#108;&#97;&#x6e;&#x63;&#105;&#97;&#107;&#x40;&#103;&#x6d;&#97;&#x69;&#x6c;&#46;&#x63;&#111;&#109;">&#107;&#97;&#114;&#x6f;&#108;&#46;&#x67;&#97;&#108;&#x61;&#110;&#99;&#105;&#x61;&#107;&#64;&#103;&#x6d;&#97;&#105;&#x6c;&#46;&#99;&#111;&#109;</a>&rdquo;
+maintainer_email  &ldquo;<a href="&#109;&#x61;&#105;&#108;&#116;&#111;&#58;&#x6b;&#x61;&#114;&#x6f;&#x6c;&#x2e;&#x67;&#x61;&#108;&#97;&#x6e;&#x63;&#105;&#x61;&#x6b;&#64;&#x67;&#109;&#x61;&#105;&#x6c;&#x2e;&#x63;&#111;&#x6d;">&#x6b;&#x61;&#x72;&#x6f;&#x6c;&#x2e;&#x67;&#97;&#x6c;&#97;&#x6e;&#x63;&#x69;&#97;&#x6b;&#64;&#103;&#x6d;&#97;&#x69;&#108;&#46;&#99;&#x6f;&#109;</a>&rdquo;
 description       &ldquo;Installs Nginx&rdquo;
 version           &ldquo;0.0.1&rdquo;</p>
 
@@ -542,9 +542,9 @@ openssl passwd -1 "yourpassword"
   
   <entry>
     <title type="html"><![CDATA[CentOS 6.4 server setup with Ruby On Rails, Nginx and PostgreSQL]]></title>
-    <link href="http://Azdaroth.github.io/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql/"/>
+    <link href="https://karolgalanciak.com/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql/"/>
     <updated>2013-07-19T14:02:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql</id>
+    <id>https://karolgalanciak.com/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql</id>
     <content type="html"><![CDATA[<p>Server setup with the entire environment for Rails applications can be quite tricky, especially when you do it for the first time. Here is step by step guide how to setup CentOS 6.4 server with a basic environment for deploying Rails applications. I encourage you to choose CentOS Linux - it is a reliable distro (well, based on Red Hat Enterprise Linux), easy to handle and doesn't require advanced Unix knowledge like Gentoo (especially while updating system related stuff).</p>
 
 

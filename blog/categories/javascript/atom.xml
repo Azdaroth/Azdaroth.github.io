@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: JavaScript | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/javascript/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/javascript/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ember Tips: Testing Outgoing HTTP Requests]]></title>
-    <link href="http://Azdaroth.github.io/blog/2017/06/25/ember-tips-testing-outgoing-http-requests/"/>
+    <link href="https://karolgalanciak.com/blog/2017/06/25/ember-tips-testing-outgoing-http-requests/"/>
     <updated>2017-06-25T22:00:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2017/06/25/ember-tips-testing-outgoing-http-requests</id>
+    <id>https://karolgalanciak.com/blog/2017/06/25/ember-tips-testing-outgoing-http-requests</id>
     <content type="html"><![CDATA[<p><strong>Ember.js</strong> is a web frontend framework and it&rsquo;s no surprise that majority of the applications deal with a lot of <strong>HTTP requests</strong>. But such fact has a lot of implications on the process of development of the Ember apps, especially when it comes to <strong>testing</strong>. For basic <code>GET</code> requests which don&rsquo;t include any query params or don&rsquo;t deal with pagination it&rsquo;s quite straight-forward &ndash; for those we just want to fetch some data, so we can check if proper objects are present as a side-effect of these requests. What about <code>POST</code>, <code>PATCH</code> or <code>DELETE</code> requests, where we can&rsquo;t easily test the side effects?</p>
 
 <p>Fortunately, thanks to the awesome tools such as <a href="https://github.com/pretenderjs/pretender" target="_blank">pretender</a> and <a href="https://github.com/samselikoff/ember-cli-mirage" target="_blank">ember-cli-mirage</a>, it&rsquo;s not a big problem.</p>
@@ -132,9 +132,9 @@ assert.ok(deleteTaskRequest, 'delete task request should be performed');
   
   <entry>
     <title type="html"><![CDATA[Ember Tips: Managing Timeouts And Delays]]></title>
-    <link href="http://Azdaroth.github.io/blog/2017/04/30/ember-quick-tips-managing-timeouts-and-delays/"/>
+    <link href="https://karolgalanciak.com/blog/2017/04/30/ember-quick-tips-managing-timeouts-and-delays/"/>
     <updated>2017-04-30T22:00:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2017/04/30/ember-quick-tips-managing-timeouts-and-delays</id>
+    <id>https://karolgalanciak.com/blog/2017/04/30/ember-quick-tips-managing-timeouts-and-delays</id>
     <content type="html"><![CDATA[<p><strong>Timeouts</strong> and <strong>delays</strong> are quite extensively used in many applications when deferring execution of some action via <code>Ember.run.later</code> or debouncing via <code>Ember.run.debounce</code>. Having small amounts of tests executing such methods might not be a problem initially, but obviously, as the application grows, this can easily lead to <strong>slow test suite</strong> which takes minutes to finish due to the waiting for all the timeouts and delays in many places. Let&rsquo;s try to find the best solution to solve this problem.</p>
 
 <!--more-->
@@ -312,9 +312,9 @@ import timeoutForEnv from &lsquo;my-app/utils/timeout-for-env&rsquo;;</p>
   
   <entry>
     <title type="html"><![CDATA[Test Driven Ember - Testing Holding a Button]]></title>
-    <link href="http://Azdaroth.github.io/blog/2017/03/26/test-driven-ember-testing-holding-button/"/>
+    <link href="https://karolgalanciak.com/blog/2017/03/26/test-driven-ember-testing-holding-button/"/>
     <updated>2017-03-26T23:00:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2017/03/26/test-driven-ember-testing-holding-button</id>
+    <id>https://karolgalanciak.com/blog/2017/03/26/test-driven-ember-testing-holding-button</id>
     <content type="html"><![CDATA[<p>Thanks to the awesome tools in <strong>Ember ecosystem</strong> such as <a href="http://github.com/samselikoff/ember-cli-mirage/" target="_blank">ember-cli-mirage</a>, <a href="https://github.com/emberjs/ember-test-helpers" target="_blank">ember-qunit</a> or <a href="https://github.com/emberjs/ember-test-helpers" target"_blank">ember-test-helpers</a> writing majority of the tests is pretty straight-forward. Nevertheless, there are quite a few cases where <strong>simulating user&rsquo;s interaction</strong> is not that simple. An example of such use case would be <strong>holding a button</strong> for particular period of time triggering some side effect.</p>
 
 <!--more-->
@@ -565,9 +565,9 @@ import Ember from &lsquo;ember&rsquo;;</p>
   
   <entry>
     <title type="html"><![CDATA[JavaScript Tips: Redefining userAgent property]]></title>
-    <link href="http://Azdaroth.github.io/blog/2017/02/26/javascript-tips-redefining-useragent-property/"/>
+    <link href="https://karolgalanciak.com/blog/2017/02/26/javascript-tips-redefining-useragent-property/"/>
     <updated>2017-02-26T23:00:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2017/02/26/javascript-tips-redefining-useragent-property</id>
+    <id>https://karolgalanciak.com/blog/2017/02/26/javascript-tips-redefining-useragent-property</id>
     <content type="html"><![CDATA[<p>Imagine a use case where you are trying to check if a user accessed your app from a <strong>mobile</strong> device or not. Most likely you will need to use <a href="https://developer.mozilla.org/en-US/docs/Web/API/NavigatorID/userAgent" target="_blank">navigator.userAgent</a>  property and craft some smart regular expression to test for the presence of particular expression, like <code>(/Mobi/.test(navigator.userAgent)</code> which seems to be the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent" target="_blank">recommended way</a> to do it. Ok, so we&rsquo;re almost done with our feature, we just need to add some tests to make sure it works as expected. But there&rsquo;s a problem &ndash; you can&rsquo;t redefine <code>userAgent</code> property with just using a setter! Fortunately, there is a way to solve this problem.</p>
 
 <!--more-->
@@ -697,9 +697,9 @@ Object.defineProperty(obj, prop, descriptor)
   
   <entry>
     <title type="html"><![CDATA[JavaScript: The Surprising Parts]]></title>
-    <link href="http://Azdaroth.github.io/blog/2017/01/22/javascript-the-surprising-parts/"/>
+    <link href="https://karolgalanciak.com/blog/2017/01/22/javascript-the-surprising-parts/"/>
     <updated>2017-01-22T22:45:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2017/01/22/javascript-the-surprising-parts</id>
+    <id>https://karolgalanciak.com/blog/2017/01/22/javascript-the-surprising-parts</id>
     <content type="html"><![CDATA[<p>Do you think you know all the surprising parts of <strong>JavaScript</strong>? Some of these "features" may look as if the language was broken, but it's not necessarily the case. Things like <strong>variables hoisting</strong>, <strong>variables scope</strong>, behaviour of <code>this</code> are quite intentional and besides just being different from most of other programming languages, there is nothing particularly wrong with them. However, there are still some things that are quite surprising about <strong>JavaScript</strong>. Let's take a look at some of them.</p>
 
 

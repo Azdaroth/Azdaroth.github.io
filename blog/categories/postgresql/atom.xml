@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: PostgreSQL | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/postgresql/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/postgresql/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[PostgreSQL Quick Tips: Working With Dates Using EXTRACT function]]></title>
-    <link href="http://Azdaroth.github.io/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function/"/>
+    <link href="https://karolgalanciak.com/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function/"/>
     <updated>2018-01-30T04:30:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function</id>
+    <id>https://karolgalanciak.com/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function</id>
     <content type="html"><![CDATA[<p>Imagine that you are implementing an e-commerce platform and want to grab all orders from the <strong>current year</strong>. What would be the simplest way of doing it in Rails? Probably writing a query looking like this:</p>
 
 <p><code>ruby
@@ -40,9 +40,9 @@ Order.where("EXTRACT(year FROM created_at) = EXTRACT(year FROM now())")
   
   <entry>
     <title type="html"><![CDATA[Keeping Data Integrity In Check: Conditional Unique Indexes For Soft Delete]]></title>
-    <link href="http://Azdaroth.github.io/blog/2016/11/01/keeping-data-integrity-in-check-conditional-unique-indexes-for-soft-delete/"/>
+    <link href="https://karolgalanciak.com/blog/2016/11/01/keeping-data-integrity-in-check-conditional-unique-indexes-for-soft-delete/"/>
     <updated>2016-11-01T00:30:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2016/11/01/keeping-data-integrity-in-check-conditional-unique-indexes-for-soft-delete</id>
+    <id>https://karolgalanciak.com/blog/2016/11/01/keeping-data-integrity-in-check-conditional-unique-indexes-for-soft-delete</id>
     <content type="html"><![CDATA[<p><strong>Soft delete</strong> is a pretty common feature in most of the applications. It may increase complexity of the queries, nevertheless, not deleting anything might be a <strong>right default</strong> as the data might prove to be useful in the future: for restoring if a record was removed by mistake, to derive some conclusions based on statistics and plenty of other purposes. It may seem like it's a pretty trivial thing: just adding a column like <code>deleted_at</code> and filtering out records that have this value present. But what happens when you need to do some proper <strong>uniqueness validation</strong> on both model layer and database level? Let's take a look what kind of problem can easily be overlooked and how it can be solved with a <strong>conditional index</strong>.</p>
 
 
@@ -190,9 +190,9 @@ validates :rental_id, presence: true, uniqueness: { scope: :date, conditions: -&
   
   <entry>
     <title type="html"><![CDATA[Scaling Up Rails Applications With PostgreSQL Table Partitioning - Part 3]]></title>
-    <link href="http://Azdaroth.github.io/blog/2016/07/10/scaling-up-rails-applications-with-postgresql-table-partitioning-part-3/"/>
+    <link href="https://karolgalanciak.com/blog/2016/07/10/scaling-up-rails-applications-with-postgresql-table-partitioning-part-3/"/>
     <updated>2016-07-10T23:50:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2016/07/10/scaling-up-rails-applications-with-postgresql-table-partitioning-part-3</id>
+    <id>https://karolgalanciak.com/blog/2016/07/10/scaling-up-rails-applications-with-postgresql-table-partitioning-part-3</id>
     <content type="html"><![CDATA[<p>After publishing recent blog posts about table partitioning - its <a href="https://karolgalanciak.com/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/" target="_blank">SQL basics part</a> and <a href="https://karolgalanciak.com/blog/2016/06/12/scaling-up-rails-applications-with-postgresql-table-partitioning-part-2/" target="_blank">how to use in in Rails application</a> I was asked quite a few times what is the real <b>performance gain</b> when using <strong>table partitioning</strong>. This is a great question, so let's answer it by performing some benchmarks.</p>
 
 
@@ -732,7 +732,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_all_graph.png" title="&lsquo;select_all_graph&rsquo; &lsquo;select_all_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_all_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_all_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -748,7 +748,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_all_count_graph.png" title="&lsquo;select_all_count&rsquo; &lsquo;select_all_count&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_all_count_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_all_count_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -764,7 +764,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2016_p_to_np_master_graph.png" title="&lsquo;select_2016_p_to_np_master_graph&rsquo; &lsquo;select_2016_p_to_np_master_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2016_p_to_np_master_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2016_p_to_np_master_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -780,7 +780,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2016_p_to_np_child_graph.png" title="&lsquo;select_2016_p_to_np_child_graph&rsquo; &lsquo;select_2016_p_to_np_child_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2016_p_to_np_child_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2016_p_to_np_child_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -796,7 +796,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2016_p_to_p_graph.png" title="&lsquo;select_2016_p_to_p_graph&rsquo; &lsquo;select_2016_p_to_p_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2016_p_to_p_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2016_p_to_p_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -812,7 +812,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2016_count_p_to_np_master_graph.png" title="&lsquo;select_2016_count_p_to_np_master_graph&rsquo; &lsquo;select_2016_count_p_to_np_master_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2016_count_p_to_np_master_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2016_count_p_to_np_master_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -828,7 +828,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2016_count_p_to_np_child_graph.png" title="&lsquo;select_2016_count_p_to_np_child_graph&rsquo; &lsquo;select_2016_count_p_to_np_child_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2016_count_p_to_np_child_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2016_count_p_to_np_child_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -844,7 +844,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2016_count_p_to_p_graph.png" title="&lsquo;select_2016_count_p_to_p_graph&rsquo; &lsquo;select_2016_count_p_to_p_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2016_count_p_to_p_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2016_count_p_to_p_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -860,7 +860,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2018_p_to_np_master_graph.png" title="&lsquo;select_2018_p_to_np_master_graph&rsquo; &lsquo;select_2018_p_to_np_master_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2018_p_to_np_master_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2018_p_to_np_master_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -876,7 +876,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2018_p_to_np_child_graph.png" title="&lsquo;select_2018_p_to_np_child_graph&rsquo; &lsquo;select_2018_p_to_np_child_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2018_p_to_np_child_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2018_p_to_np_child_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -892,7 +892,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2018_p_to_p_graph.png" title="&lsquo;select_2018_p_to_p_graph&rsquo; &lsquo;select_2018_p_to_p_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2018_p_to_p_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2018_p_to_p_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -908,7 +908,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2018_count_p_to_np_master_graph.png" title="&lsquo;select_2018_count_p_to_np_master_graph&rsquo; &lsquo;select_2018_count_p_to_np_master_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2018_count_p_to_np_master_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2018_count_p_to_np_master_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -924,7 +924,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2018_count_p_to_np_child_graph.png" title="&lsquo;select_2018_count_p_to_np_child_graph&rsquo; &lsquo;select_2018_count_p_to_np_child_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2018_count_p_to_np_child_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2018_count_p_to_np_child_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -940,7 +940,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2018_count_p_to_p_graph.png" title="&lsquo;select_2018_count_p_to_p_graph&rsquo; &lsquo;select_2018_count_p_to_p_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2018_count_p_to_p_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2018_count_p_to_p_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -956,7 +956,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2020_p_to_np_master_graph.png" title="&lsquo;select_2020_p_to_np_master_graph&rsquo; &lsquo;select_2020_p_to_np_master_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2020_p_to_np_master_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2020_p_to_np_master_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -972,7 +972,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2020_p_to_np_child_graph.png" title="&lsquo;select_2020_p_to_np_child_graph&rsquo; &lsquo;select_2020_p_to_np_child_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2020_p_to_np_child_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2020_p_to_np_child_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -988,7 +988,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2020_p_to_p_graph.png" title="&lsquo;select_2020_p_to_p_graph&rsquo; &lsquo;select_2020_p_to_p_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2020_p_to_p_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2020_p_to_p_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -1004,7 +1004,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2020_count_p_to_np_master_graph.png" title="&lsquo;select_2020_count_p_to_np_master_graph&rsquo; &lsquo;select_2020_count_p_to_np_master_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2020_count_p_to_np_master_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2020_count_p_to_np_master_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -1020,7 +1020,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2020_count_p_to_np_child_graph.png" title="&lsquo;select_2020_count_p_to_np_child_graph&rsquo; &lsquo;select_2020_count_p_to_np_child_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2020_count_p_to_np_child_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2020_count_p_to_np_child_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -1036,7 +1036,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2020_count_p_to_p_graph.png" title="&lsquo;select_2020_count_p_to_p_graph&rsquo; &lsquo;select_2020_count_p_to_p_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2020_count_p_to_p_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2020_count_p_to_p_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -1052,7 +1052,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2016-2019_p_to_np_graph.png" title="&lsquo;select_2016-2019_p_to_np_graph&rsquo; &lsquo;select_2016-2019_p_to_np_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2016-2019_p_to_np_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2016-2019_p_to_np_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -1068,7 +1068,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2016-2019_count_p_to_np_graph.png" title="&lsquo;select_2016-select_2016-2019_count_p_to_np_graph&rsquo; &lsquo;select_2016-2019_count_p_to_np_graph-2019_p_to_np_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2016-2019_count_p_to_np_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2016-2019_count_p_to_np_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -1084,7 +1084,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2018-2020_p_to_np_graph.png" title="&lsquo;select_2018-2020_p_to_np_graph&rsquo; &lsquo;select_2018-2020_p_to_np_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2018-2020_p_to_np_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2018-2020_p_to_np_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -1100,7 +1100,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_2018-2020_count_p_to_np_graph.png" title="&lsquo;select_2018-2020_count_p_to_np_graph&rsquo; &lsquo;2020_count_p_to_np_graph-2020_p_to_np_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2018-2020_count_p_to_np_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_2018-2020_count_p_to_np_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -1116,7 +1116,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_last_3_months_graph.png" title="&lsquo;select_last_3_months_graph&rsquo; &lsquo;select_last_3_months_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_last_3_months_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_last_3_months_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -1132,7 +1132,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_last_3_months_count_graph.png" title="&lsquo;select_last_3_months_count_graph&rsquo; &lsquo;select_last_3_months_count_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_last_3_months_count_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_last_3_months_count_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -1148,7 +1148,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_last_6_months_graph.png" title="&lsquo;select_last_3_months_graph&rsquo; &lsquo;select_last_6_months_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_last_6_months_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_last_6_months_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -1164,7 +1164,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <img src="/images/partitioned_benchmark_graphs/select_last_6_months_count_graph.png" title="&lsquo;select_last_6_months_count_graph&rsquo; &lsquo;select_last_6_months_count_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_last_6_months_count_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_last_6_months_count_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -1181,7 +1181,7 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
 <p><img src="/images/partitioned_benchmark_graphs/select_random_graph.png" title="&lsquo;select_random_graph&rsquo; &lsquo;select_random_graph&rsquo;" ></p>
 
 <p class="center">
-  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_random_graph.png" target="_blank">See in better quality</a>
+  <a href="https://karolgalanciak.com/images/partitioned_benchmark_graphs/select_random_graph.png" target="_blank">See in better quality</a>
 </p>
 
 
@@ -1248,9 +1248,9 @@ select_random_order:           3655.0 i/s &ndash; 21.17x slower
   
   <entry>
     <title type="html"><![CDATA[Scaling Up Rails Applications With PostgreSQL Table Partitioning - Part 2]]></title>
-    <link href="http://Azdaroth.github.io/blog/2016/06/12/scaling-up-rails-applications-with-postgresql-table-partitioning-part-2/"/>
+    <link href="https://karolgalanciak.com/blog/2016/06/12/scaling-up-rails-applications-with-postgresql-table-partitioning-part-2/"/>
     <updated>2016-06-12T22:45:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2016/06/12/scaling-up-rails-applications-with-postgresql-table-partitioning-part-2</id>
+    <id>https://karolgalanciak.com/blog/2016/06/12/scaling-up-rails-applications-with-postgresql-table-partitioning-part-2</id>
     <content type="html"><![CDATA[<p>In the previous <a href="https://karolgalanciak.com/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/" target="_blank">blog post</a> we learned some basics about <strong>table partitioning</strong>: how it works and what kind of problems it solves. So far we've been discussing mostly basic concepts with raw <strong>SQL</strong> examples. But the essential question in our case would be: how to make it work inside <strong>Rails application</strong> then? Let's see what we can do about it.</p>
 
 
@@ -1431,9 +1431,9 @@ Order.all.count
   
   <entry>
     <title type="html"><![CDATA[Scaling Up Rails Applications With PostgreSQL Table Partitioning - Part 1]]></title>
-    <link href="http://Azdaroth.github.io/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/"/>
+    <link href="https://karolgalanciak.com/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/"/>
     <updated>2016-06-05T22:00:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1</id>
+    <id>https://karolgalanciak.com/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1</id>
     <content type="html"><![CDATA[<p>You've probably heard many times that the database is the bottleneck of many web applications. This isn't necessarily true. Often it happens that some heavy queries can be substiantially optimized, making them really efficient and fast. As the time passes by, however, the data can remarkably grow in size, especially in several years time which can indeed make the database a bottleneck - the tables are huge and don't fit into memory any longer, the indexes are even bigger making queries much slower and you can't really optimize further any query. In many cases deleting old records that are no longer used is not an option - they still can have some value, e.g. for data analysis or statystical purposes. Fortunately, it's not a dead end. You can make your database performance great again with a new secret weapon: table partitioning.</p>
 
 

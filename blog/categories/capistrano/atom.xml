@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Capistrano | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/capistrano/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/capistrano/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Rails applications deployment with Capistrano and after deployment setup]]></title>
-    <link href="http://Azdaroth.github.io/blog/2013/08/02/app-deployment-with-capistrano-and-after-deployment-setup/"/>
+    <link href="https://karolgalanciak.com/blog/2013/08/02/app-deployment-with-capistrano-and-after-deployment-setup/"/>
     <updated>2013-08-02T14:15:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2013/08/02/app-deployment-with-capistrano-and-after-deployment-setup</id>
+    <id>https://karolgalanciak.com/blog/2013/08/02/app-deployment-with-capistrano-and-after-deployment-setup</id>
     <content type="html"><![CDATA[<p>You've just setup your production server, but still haven't deployed your app? Then this the right place for you. You are going to learn how to deploy your app to remote server, deal with some config files, create staging environment and setup monitoring tools.</p>
 
 

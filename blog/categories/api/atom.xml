@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: API | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/api/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/api/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Implementing non-RESTful actions with Ember Data]]></title>
-    <link href="http://Azdaroth.github.io/blog/2016/02/07/implementing-non-restful-actions-with-ember-data/"/>
+    <link href="https://karolgalanciak.com/blog/2016/02/07/implementing-non-restful-actions-with-ember-data/"/>
     <updated>2016-02-07T10:45:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2016/02/07/implementing-non-restful-actions-with-ember-data</id>
+    <id>https://karolgalanciak.com/blog/2016/02/07/implementing-non-restful-actions-with-ember-data</id>
     <content type="html"><![CDATA[<p>In my <a target="_blank" href="http://karolgalanciak.com/blog/2016/01/24/how-to-handle-non-crud-logic-in-your-api/">recent post</a> I mentioned some strategies of handling non-strictly <strong>CRUD</strong> / <strong>RESTful</strong> actions in <strong>API</strong>. One of them was adding extra actions beyond creating, updating and deleting resources. As it's not a standard solution and some data layers on client side (like <strong>Ember Data</strong>) don't handle it out-of-box, I was asked by some developers what's the best way to handle such actions. So let's see how can we hack into <strong>Ember Data</strong> and make it smooth.</p>
 
 
@@ -162,9 +162,9 @@ return adapter.publish(this.get('id'), this.serialize());
   
   <entry>
     <title type="html"><![CDATA[How To Handle Non-CRUD Logic In Your API]]></title>
-    <link href="http://Azdaroth.github.io/blog/2016/01/24/how-to-handle-non-crud-logic-in-your-api/"/>
+    <link href="https://karolgalanciak.com/blog/2016/01/24/how-to-handle-non-crud-logic-in-your-api/"/>
     <updated>2016-01-24T22:00:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2016/01/24/how-to-handle-non-crud-logic-in-your-api</id>
+    <id>https://karolgalanciak.com/blog/2016/01/24/how-to-handle-non-crud-logic-in-your-api</id>
     <content type="html"><![CDATA[<p>If you happen to develop <strong>API</strong> for non-trivial app with complex business logic beyond <strong>CRUD</strong> directly mapped to the database tables (i.e. typical Active Record pattern) you were probably wondering many times how to handle these cases and what's the best way to do it. There are quite a few solutions to this problem: you could add another endpoint for handling given use case, add <strong>non-RESTful</strong> action to already existing endpoint or you can add a magic param to the payload that would force non-standard scenario in the <strong>API</strong>. Let's take a closer look at the these solutions and discuss some advantages and disadvantages of each of them.</p>
 
 

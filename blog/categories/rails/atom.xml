@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Rails | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/rails/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/rails/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[The Case for before_validation callback: complex state normalization]]></title>
-    <link href="http://Azdaroth.github.io/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization/"/>
+    <link href="https://karolgalanciak.com/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization/"/>
     <updated>2018-05-27T20:00:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization</id>
+    <id>https://karolgalanciak.com/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization</id>
     <content type="html"><![CDATA[<p>Few months ago I wrote a <a href="https://karolgalanciak.com/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks/">blog post</a> about <strong>ActiveRecord</strong> <code>before_validation</code> callback and how it is used for  <strong>wrong reasons</strong> and concluded that in most cases this is not something we should be using routinely. However, I missed one <strong>appropriate use case</strong> for it which might be quite common in Rails apps, so this might be an excellent opportunity to get back to  <strong>before_validation callback</strong> and show its other side.</p>
 
 <!--more-->
@@ -106,9 +106,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[Rails Quick Tips: Temporarily Disabling Touching with ActiveRecord.no_touching]]></title>
-    <link href="http://Azdaroth.github.io/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/"/>
+    <link href="https://karolgalanciak.com/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/"/>
     <updated>2018-02-25T20:00:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching</id>
+    <id>https://karolgalanciak.com/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching</id>
     <content type="html"><![CDATA[<p><strong>Touching</strong> <strong>ActiveRecord models</strong> is quite a common thing in most of the <strong>Rails applications</strong>, especially useful for cache invalidation. By default, it updates <code>updated_at</code> timestamp with the current time, Here&rsquo;s a typical example of using <a href="https://apidock.com/rails/ActiveRecord/Persistence/touch">touch</a> in a model:</p>
 
 <p>``` ruby</p>
@@ -183,9 +183,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[Traps on Rails - Overriding boolean methods in models]]></title>
-    <link href="http://Azdaroth.github.io/blog/2017/11/26/traps-on-rails-overriding-boolean-methods-in-models/"/>
+    <link href="https://karolgalanciak.com/blog/2017/11/26/traps-on-rails-overriding-boolean-methods-in-models/"/>
     <updated>2017-11-26T16:00:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2017/11/26/traps-on-rails-overriding-boolean-methods-in-models</id>
+    <id>https://karolgalanciak.com/blog/2017/11/26/traps-on-rails-overriding-boolean-methods-in-models</id>
     <content type="html"><![CDATA[<p>One very <strong>useful</strong> feature of <strong>ActiveRecord</strong> is automatically defining attribute readers and writers for all the columns for given tables. For the ones with <strong>boolean</strong> type, however, there is one more addition &ndash; defining an <strong>alias</strong> of the method with a question mark. Sometimes it might be useful to override this method and add some extra requirements for a given condition. However, this might not be such a good idea.</p>
 
 <!--more-->
@@ -311,9 +311,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[The Case Against Exotic Usage of :before_validate Callbacks]]></title>
-    <link href="http://Azdaroth.github.io/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks/"/>
+    <link href="https://karolgalanciak.com/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks/"/>
     <updated>2017-10-29T22:00:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks</id>
+    <id>https://karolgalanciak.com/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks</id>
     <content type="html"><![CDATA[<p>It&rsquo;s nothing new that <strong>ActiveRecord callbacks</strong> are abused in many projects and used for the wrong reasons for many use cases where they can be <strong>easily avoided</strong> in favor of a much better alternative, like service objects. There is one callback though that is special and quite often used for pretty <strong>exotic reasons</strong> that have nothing to do with the process when it gets executed &ndash; it&rsquo;s the <code>before_validate</code> callback.</p>
 
 <!--more-->
@@ -439,9 +439,9 @@ Comment.create!(
   
   <entry>
     <title type="html"><![CDATA[Do. Or do not. There is no try - Object#try considered harmful]]></title>
-    <link href="http://Azdaroth.github.io/blog/2017/09/24/do-or-do-not-there-is-no-try-object-number-try-considered-harmful/"/>
+    <link href="https://karolgalanciak.com/blog/2017/09/24/do-or-do-not-there-is-no-try-object-number-try-considered-harmful/"/>
     <updated>2017-09-24T22:00:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2017/09/24/do-or-do-not-there-is-no-try-object-number-try-considered-harmful</id>
+    <id>https://karolgalanciak.com/blog/2017/09/24/do-or-do-not-there-is-no-try-object-number-try-considered-harmful</id>
     <content type="html"><![CDATA[<p><a href="https://apidock.com/rails/v4.2.7/Object/try" target="_blank"><code>Object#try</code></a> is quite a commonly used method in <strong>Rails applications</strong> to cover cases where there is a possibility of dealing with a <code>nil</code> value or to provide <strong>flexible interface</strong> for handling cases where some kind of object doesn&rsquo;t necessarily implement given method. Thanks to <code>try</code>, we may avoid getting <code>NoMethodError</code>. So it seems like it&rsquo;s perfect, right? No <code>NoMethodError</code> exception, no problem?</p>
 
 <p>Well, not really. There are some <strong>severe problems</strong> with using <code>Object#try</code>, and usually, it&rsquo;s quite easy to implement a solution that would be much better.</p>

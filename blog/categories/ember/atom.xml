@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Ember | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/ember/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/ember/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Advanced Ember Data Customization - Different Model Types in Ember App and API For The Same Resource]]></title>
-    <link href="http://Azdaroth.github.io/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/"/>
+    <link href="https://karolgalanciak.com/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/"/>
     <updated>2018-04-28T19:00:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource</id>
+    <id>https://karolgalanciak.com/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource</id>
     <content type="html"><![CDATA[<p>A <strong>great advantage</strong> of using <strong>Ember Data</strong> with <strong>JSONAPI-compliant</strong> adapters/serializers is that there is almost nothing extra needed to work with the <strong>data layer</strong> &ndash; just create the models with names matching the types of the resources returned by the <strong>API</strong> and you are good to go! However, sometimes you may need to customize the naming which means that the names of the models in the <strong>Ember application</strong> will be different than the ones expected by the API and their corresponding types. What are the steps required to make it work in <strong>Ember Data</strong>?</p>
 
 <!--more-->
@@ -433,9 +433,9 @@ import ApplicationSerializer from &lsquo;./application&rsquo;;</p>
   
   <entry>
     <title type="html"><![CDATA[Ember Tips: Testing Outgoing HTTP Requests]]></title>
-    <link href="http://Azdaroth.github.io/blog/2017/06/25/ember-tips-testing-outgoing-http-requests/"/>
+    <link href="https://karolgalanciak.com/blog/2017/06/25/ember-tips-testing-outgoing-http-requests/"/>
     <updated>2017-06-25T22:00:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2017/06/25/ember-tips-testing-outgoing-http-requests</id>
+    <id>https://karolgalanciak.com/blog/2017/06/25/ember-tips-testing-outgoing-http-requests</id>
     <content type="html"><![CDATA[<p><strong>Ember.js</strong> is a web frontend framework and it&rsquo;s no surprise that majority of the applications deal with a lot of <strong>HTTP requests</strong>. But such fact has a lot of implications on the process of development of the Ember apps, especially when it comes to <strong>testing</strong>. For basic <code>GET</code> requests which don&rsquo;t include any query params or don&rsquo;t deal with pagination it&rsquo;s quite straight-forward &ndash; for those we just want to fetch some data, so we can check if proper objects are present as a side-effect of these requests. What about <code>POST</code>, <code>PATCH</code> or <code>DELETE</code> requests, where we can&rsquo;t easily test the side effects?</p>
 
 <p>Fortunately, thanks to the awesome tools such as <a href="https://github.com/pretenderjs/pretender" target="_blank">pretender</a> and <a href="https://github.com/samselikoff/ember-cli-mirage" target="_blank">ember-cli-mirage</a>, it&rsquo;s not a big problem.</p>
@@ -550,9 +550,9 @@ assert.ok(deleteTaskRequest, 'delete task request should be performed');
   
   <entry>
     <title type="html"><![CDATA[Ember Tips: Managing Timeouts And Delays]]></title>
-    <link href="http://Azdaroth.github.io/blog/2017/04/30/ember-quick-tips-managing-timeouts-and-delays/"/>
+    <link href="https://karolgalanciak.com/blog/2017/04/30/ember-quick-tips-managing-timeouts-and-delays/"/>
     <updated>2017-04-30T22:00:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2017/04/30/ember-quick-tips-managing-timeouts-and-delays</id>
+    <id>https://karolgalanciak.com/blog/2017/04/30/ember-quick-tips-managing-timeouts-and-delays</id>
     <content type="html"><![CDATA[<p><strong>Timeouts</strong> and <strong>delays</strong> are quite extensively used in many applications when deferring execution of some action via <code>Ember.run.later</code> or debouncing via <code>Ember.run.debounce</code>. Having small amounts of tests executing such methods might not be a problem initially, but obviously, as the application grows, this can easily lead to <strong>slow test suite</strong> which takes minutes to finish due to the waiting for all the timeouts and delays in many places. Let&rsquo;s try to find the best solution to solve this problem.</p>
 
 <!--more-->
@@ -730,9 +730,9 @@ import timeoutForEnv from &lsquo;my-app/utils/timeout-for-env&rsquo;;</p>
   
   <entry>
     <title type="html"><![CDATA[Test Driven Ember - Testing Holding a Button]]></title>
-    <link href="http://Azdaroth.github.io/blog/2017/03/26/test-driven-ember-testing-holding-button/"/>
+    <link href="https://karolgalanciak.com/blog/2017/03/26/test-driven-ember-testing-holding-button/"/>
     <updated>2017-03-26T23:00:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2017/03/26/test-driven-ember-testing-holding-button</id>
+    <id>https://karolgalanciak.com/blog/2017/03/26/test-driven-ember-testing-holding-button</id>
     <content type="html"><![CDATA[<p>Thanks to the awesome tools in <strong>Ember ecosystem</strong> such as <a href="http://github.com/samselikoff/ember-cli-mirage/" target="_blank">ember-cli-mirage</a>, <a href="https://github.com/emberjs/ember-test-helpers" target="_blank">ember-qunit</a> or <a href="https://github.com/emberjs/ember-test-helpers" target"_blank">ember-test-helpers</a> writing majority of the tests is pretty straight-forward. Nevertheless, there are quite a few cases where <strong>simulating user&rsquo;s interaction</strong> is not that simple. An example of such use case would be <strong>holding a button</strong> for particular period of time triggering some side effect.</p>
 
 <!--more-->
@@ -983,9 +983,9 @@ import Ember from &lsquo;ember&rsquo;;</p>
   
   <entry>
     <title type="html"><![CDATA[Ember Tips: Computed Properties And Arrow Functions? Not A Good Idea]]></title>
-    <link href="http://Azdaroth.github.io/blog/2016/12/11/ember-tips-computed-properties-and-arrow-functions-not-a-good-idea/"/>
+    <link href="https://karolgalanciak.com/blog/2016/12/11/ember-tips-computed-properties-and-arrow-functions-not-a-good-idea/"/>
     <updated>2016-12-11T22:00:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2016/12/11/ember-tips-computed-properties-and-arrow-functions-not-a-good-idea</id>
+    <id>https://karolgalanciak.com/blog/2016/12/11/ember-tips-computed-properties-and-arrow-functions-not-a-good-idea</id>
     <content type="html"><![CDATA[<p><strong>Arrow function expressions</strong> were definitely a great addition in ES6 and thanks to tools like <a href="https://babeljs.io" target="_blank">babel</a> the new syntax has been quite widely adopted. Besides more concise syntax, an interesting thing about <strong>arrow function expressions</strong> is that they preserve the context, i.e. they don't define their own <code>this</code>, which was sometimes annoying and resulted in assigning <code>that</code> or <code>self</code> variables to keep the outer context that could be referred inside functions. As great as it sounds, <strong>arrow function expressions</strong> cannot be used in all cases. One example would be <strong>Ember computed properties</strong>.</p>
 
 

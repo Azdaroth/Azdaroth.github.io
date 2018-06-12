@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: ECMAScript | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/ecmascript/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/ecmascript/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[JavaScript: The Surprising Parts]]></title>
-    <link href="http://Azdaroth.github.io/blog/2017/01/22/javascript-the-surprising-parts/"/>
+    <link href="https://karolgalanciak.com/blog/2017/01/22/javascript-the-surprising-parts/"/>
     <updated>2017-01-22T22:45:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2017/01/22/javascript-the-surprising-parts</id>
+    <id>https://karolgalanciak.com/blog/2017/01/22/javascript-the-surprising-parts</id>
     <content type="html"><![CDATA[<p>Do you think you know all the surprising parts of <strong>JavaScript</strong>? Some of these "features" may look as if the language was broken, but it's not necessarily the case. Things like <strong>variables hoisting</strong>, <strong>variables scope</strong>, behaviour of <code>this</code> are quite intentional and besides just being different from most of other programming languages, there is nothing particularly wrong with them. However, there are still some things that are quite surprising about <strong>JavaScript</strong>. Let's take a look at some of them.</p>
 
 
@@ -443,9 +443,9 @@ new Date(2016, 0 , 1) + 123 // =&gt; "Fri Jan 01 2016 00:00:00 GMT+0100 (CET)123
   
   <entry>
     <title type="html"><![CDATA[Ember and ES7: async / await]]></title>
-    <link href="http://Azdaroth.github.io/blog/2015/12/18/ember-and-es7-async-slash-await/"/>
+    <link href="https://karolgalanciak.com/blog/2015/12/18/ember-and-es7-async-slash-await/"/>
     <updated>2015-12-18T09:50:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2015/12/18/ember-and-es7-async-slash-await</id>
+    <id>https://karolgalanciak.com/blog/2015/12/18/ember-and-es7-async-slash-await</id>
     <content type="html"><![CDATA[<p>In the <a href="http://karolgalanciak.com/blog/2015/12/02/ember-and-es7-decorators/" target="_blank">previous blog post</a> we were exploring a new wonderful feature coming with ECMAScript 7: decorators. This time we are going to learn about <code>async / await</code>, which is at this moment at Stage 3 in <a href="https://tc39.github.io/process-document/" target="_blank">TC39 process</a>, which means it's already a release candidate that passed Proposal and Draft stages. Just like decorators, it's already available in <a href="https://babeljs.io">Babel</a>. Let's see what kind of benefits does it offer.</p>
 
 

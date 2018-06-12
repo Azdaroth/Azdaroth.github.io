@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Metaprogramming | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/metaprogramming/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/metaprogramming/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Exotic Ruby: Module.class_exec, custom JSON And Liquid Drops In Action]]></title>
-    <link href="http://Azdaroth.github.io/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/"/>
+    <link href="https://karolgalanciak.com/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/"/>
     <updated>2018-03-27T21:30:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action</id>
+    <id>https://karolgalanciak.com/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action</id>
     <content type="html"><![CDATA[<p>Ruby has quite a lot of <strong>&ldquo;exotic&rdquo; features</strong> that are not used that often, but when you need to utilize some <strong>metaprogramming magic</strong>, you can easily take advantage of them. One of such features is <a href="http://ruby-doc.org/core-2.4.3/BasicObject.html#method-i-instance_exec">Object.instance_exec</a> which you might be familiar with if you&rsquo;ve ever built some more advanced DSL.</p>
 
 <p>The great thing about <code>Object#instance_exec</code> is that it allows to execute code <strong>within the context of a given object</strong> but it also gives possibility to <strong>pass arguments from the current context</strong>. Thanks to that, we can build some nice DSLs and other features like this:</p>

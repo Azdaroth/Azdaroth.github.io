@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Callbacks | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/callbacks/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/callbacks/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Structuring Rails applications]]></title>
-    <link href="http://Azdaroth.github.io/blog/2013/10/06/structuring-rails-applications/"/>
+    <link href="https://karolgalanciak.com/blog/2013/10/06/structuring-rails-applications/"/>
     <updated>2013-10-06T15:00:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2013/10/06/structuring-rails-applications</id>
+    <id>https://karolgalanciak.com/blog/2013/10/06/structuring-rails-applications</id>
     <content type="html"><![CDATA[<p>There've been a lot of discussions recently about applying Object Oriented Programming in Rails applications, how ActiveRecord callbacks make testing painful and how Rails makes it hard to do OOP the right way. Is it really true? Rails makes everything easy - you can easily write terrible code, which will be a maintenance nightmare, but is also easy to apply good practices, especially with available gems. What is the good way then to extract logic in Rails applications and the best place to put it?</p>
 
 

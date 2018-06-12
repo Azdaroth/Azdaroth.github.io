@@ -2,280 +2,280 @@
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql/
+            https://karolgalanciak.com/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2013/08/02/app-deployment-with-capistrano-and-after-deployment-setup/
+            https://karolgalanciak.com/blog/2013/08/02/app-deployment-with-capistrano-and-after-deployment-setup/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
-        <loc>http://Azdaroth.github.io/blog/2013/10/06/structuring-rails-applications/</loc>
+        <loc>https://karolgalanciak.com/blog/2013/10/06/structuring-rails-applications/</loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
-        <loc>http://Azdaroth.github.io/blog/2014/01/04/test-driven-rails-part-1/</loc>
+        <loc>https://karolgalanciak.com/blog/2014/01/04/test-driven-rails-part-1/</loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
-        <loc>http://Azdaroth.github.io/blog/2014/03/03/test-driven-rails-part-2/</loc>
-        <lastmod>2018-06-02T09:04:30+02:00</lastmod>
-    </url>
-    <url>
-        <loc>
-            http://Azdaroth.github.io/blog/2014/04/27/you-dont-necessarily-need-gem-for-that-feature/
-        </loc>
+        <loc>https://karolgalanciak.com/blog/2014/03/03/test-driven-rails-part-2/</loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2014/07/10/automate-to-the-max-instant-ubuntu-server-setup-with-chef/
-        </loc>
-        <lastmod>2018-06-02T09:04:30+02:00</lastmod>
-    </url>
-    <url>
-        <loc>http://Azdaroth.github.io/blog/2014/09/17/rails-useful-patterns/</loc>
-        <lastmod>2018-06-02T09:04:30+02:00</lastmod>
-    </url>
-    <url>
-        <loc>
-            http://Azdaroth.github.io/blog/2015/02/26/model-your-domain-with-composed-models/
-        </loc>
-        <lastmod>2018-06-02T09:04:30+02:00</lastmod>
-    </url>
-    <url>
-        <loc>http://Azdaroth.github.io/blog/2015/07/12/embarking-on-programming-journey/</loc>
-        <lastmod>2018-06-02T09:04:30+02:00</lastmod>
-    </url>
-    <url>
-        <loc>http://Azdaroth.github.io/blog/2015/12/02/ember-and-es7-decorators/</loc>
-        <lastmod>2018-06-02T09:04:30+02:00</lastmod>
-    </url>
-    <url>
-        <loc>http://Azdaroth.github.io/blog/2015/12/18/ember-and-es7-async-slash-await/</loc>
-        <lastmod>2018-06-02T09:04:30+02:00</lastmod>
-    </url>
-    <url>
-        <loc>
-            http://Azdaroth.github.io/blog/2016/01/06/refactoring-tips-trade-conditionals-for-type-delegation/
+            https://karolgalanciak.com/blog/2014/04/27/you-dont-necessarily-need-gem-for-that-feature/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2016/01/24/how-to-handle-non-crud-logic-in-your-api/
+            https://karolgalanciak.com/blog/2014/07/10/automate-to-the-max-instant-ubuntu-server-setup-with-chef/
+        </loc>
+        <lastmod>2018-06-02T09:04:30+02:00</lastmod>
+    </url>
+    <url>
+        <loc>https://karolgalanciak.com/blog/2014/09/17/rails-useful-patterns/</loc>
+        <lastmod>2018-06-02T09:04:30+02:00</lastmod>
+    </url>
+    <url>
+        <loc>
+            https://karolgalanciak.com/blog/2015/02/26/model-your-domain-with-composed-models/
+        </loc>
+        <lastmod>2018-06-02T09:04:30+02:00</lastmod>
+    </url>
+    <url>
+        <loc>https://karolgalanciak.com/blog/2015/07/12/embarking-on-programming-journey/</loc>
+        <lastmod>2018-06-02T09:04:30+02:00</lastmod>
+    </url>
+    <url>
+        <loc>https://karolgalanciak.com/blog/2015/12/02/ember-and-es7-decorators/</loc>
+        <lastmod>2018-06-02T09:04:30+02:00</lastmod>
+    </url>
+    <url>
+        <loc>https://karolgalanciak.com/blog/2015/12/18/ember-and-es7-async-slash-await/</loc>
+        <lastmod>2018-06-02T09:04:30+02:00</lastmod>
+    </url>
+    <url>
+        <loc>
+            https://karolgalanciak.com/blog/2016/01/06/refactoring-tips-trade-conditionals-for-type-delegation/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2016/02/07/implementing-non-restful-actions-with-ember-data/
+            https://karolgalanciak.com/blog/2016/01/24/how-to-handle-non-crud-logic-in-your-api/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2016/02/20/postgresql-in-action-sorting-with-nullif-expression/
+            https://karolgalanciak.com/blog/2016/02/07/implementing-non-restful-actions-with-ember-data/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2016/04/24/security-on-rails-hacking-sessions-with-insecure-secret-key-base/
+            https://karolgalanciak.com/blog/2016/02/20/postgresql-in-action-sorting-with-nullif-expression/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2016/05/06/when-validation-is-not-enough-postgresql-triggers-for-data-integrity/
+            https://karolgalanciak.com/blog/2016/04/24/security-on-rails-hacking-sessions-with-insecure-secret-key-base/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/
+            https://karolgalanciak.com/blog/2016/05/06/when-validation-is-not-enough-postgresql-triggers-for-data-integrity/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2016/06/12/scaling-up-rails-applications-with-postgresql-table-partitioning-part-2/
+            https://karolgalanciak.com/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2016/07/10/scaling-up-rails-applications-with-postgresql-table-partitioning-part-3/
+            https://karolgalanciak.com/blog/2016/06/12/scaling-up-rails-applications-with-postgresql-table-partitioning-part-2/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2016/07/31/decoding-rails-magic-how-does-calling-class-methods-on-mailers-work/
+            https://karolgalanciak.com/blog/2016/07/10/scaling-up-rails-applications-with-postgresql-table-partitioning-part-3/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2016/08/30/little-known-but-useful-rails-features-activerecord-querymethods-dot-extending/
+            https://karolgalanciak.com/blog/2016/07/31/decoding-rails-magic-how-does-calling-class-methods-on-mailers-work/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2016/09/25/decoding-rails-magic-how-does-activejob-work/
+            https://karolgalanciak.com/blog/2016/08/30/little-known-but-useful-rails-features-activerecord-querymethods-dot-extending/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2016/11/01/keeping-data-integrity-in-check-conditional-unique-indexes-for-soft-delete/
+            https://karolgalanciak.com/blog/2016/09/25/decoding-rails-magic-how-does-activejob-work/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2016/12/04/introduction-to-activerecord-and-activemodel-attributes-api/
+            https://karolgalanciak.com/blog/2016/11/01/keeping-data-integrity-in-check-conditional-unique-indexes-for-soft-delete/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2016/12/11/ember-tips-computed-properties-and-arrow-functions-not-a-good-idea/
-        </loc>
-        <lastmod>2018-06-02T09:04:30+02:00</lastmod>
-    </url>
-    <url>
-        <loc>http://Azdaroth.github.io/blog/2017/01/22/javascript-the-surprising-parts/</loc>
-        <lastmod>2018-06-02T09:04:30+02:00</lastmod>
-    </url>
-    <url>
-        <loc>
-            http://Azdaroth.github.io/blog/2017/02/26/javascript-tips-redefining-useragent-property/
+            https://karolgalanciak.com/blog/2016/12/04/introduction-to-activerecord-and-activemodel-attributes-api/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2017/03/26/test-driven-ember-testing-holding-button/
+            https://karolgalanciak.com/blog/2016/12/11/ember-tips-computed-properties-and-arrow-functions-not-a-good-idea/
+        </loc>
+        <lastmod>2018-06-02T09:04:30+02:00</lastmod>
+    </url>
+    <url>
+        <loc>https://karolgalanciak.com/blog/2017/01/22/javascript-the-surprising-parts/</loc>
+        <lastmod>2018-06-02T09:04:30+02:00</lastmod>
+    </url>
+    <url>
+        <loc>
+            https://karolgalanciak.com/blog/2017/02/26/javascript-tips-redefining-useragent-property/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2017/04/30/ember-quick-tips-managing-timeouts-and-delays/
+            https://karolgalanciak.com/blog/2017/03/26/test-driven-ember-testing-holding-button/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2017/05/28/ruby-memoization-%7C%7C-equals-vs-defined-syntax/
+            https://karolgalanciak.com/blog/2017/04/30/ember-quick-tips-managing-timeouts-and-delays/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2017/06/25/ember-tips-testing-outgoing-http-requests/
+            https://karolgalanciak.com/blog/2017/05/28/ruby-memoization-%7C%7C-equals-vs-defined-syntax/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2017/08/27/5-years-of-professional-ruby-and-rails-development-my-reflections/
+            https://karolgalanciak.com/blog/2017/06/25/ember-tips-testing-outgoing-http-requests/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2017/09/24/do-or-do-not-there-is-no-try-object-number-try-considered-harmful/
+            https://karolgalanciak.com/blog/2017/08/27/5-years-of-professional-ruby-and-rails-development-my-reflections/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks/
+            https://karolgalanciak.com/blog/2017/09/24/do-or-do-not-there-is-no-try-object-number-try-considered-harmful/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2017/11/26/traps-on-rails-overriding-boolean-methods-in-models/
+            https://karolgalanciak.com/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2017/12/26/the-aesthetics-of-ruby-kernel-number-itself-method/
+            https://karolgalanciak.com/blog/2017/11/26/traps-on-rails-overriding-boolean-methods-in-models/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function/
+            https://karolgalanciak.com/blog/2017/12/26/the-aesthetics-of-ruby-kernel-number-itself-method/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/
+            https://karolgalanciak.com/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/
+            https://karolgalanciak.com/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/
+            https://karolgalanciak.com/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/
         </loc>
         <lastmod>2018-06-02T09:04:30+02:00</lastmod>
     </url>
     <url>
         <loc>
-            http://Azdaroth.github.io/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization/
+            https://karolgalanciak.com/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/
+        </loc>
+        <lastmod>2018-06-02T09:04:30+02:00</lastmod>
+    </url>
+    <url>
+        <loc>
+            https://karolgalanciak.com/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization/
         </loc>
         <lastmod>2018-06-02T09:05:05+02:00</lastmod>
     </url>
     <url>
-        <loc>http://Azdaroth.github.io/</loc>
+        <loc>https://karolgalanciak.com/</loc>
         <lastmod>2018-06-02T09:05:05+02:00</lastmod>
     </url>
     <url>
-        <loc>http://Azdaroth.github.io/open-source/</loc>
+        <loc>https://karolgalanciak.com/open-source/</loc>
         <lastmod>2018-06-02T09:05:05+02:00</lastmod>
     </url>
     <url>
-        <loc>http://Azdaroth.github.io/privacy-policy/</loc>
+        <loc>https://karolgalanciak.com/privacy-policy/</loc>
         <lastmod>2018-06-02T09:05:05+02:00</lastmod>
     </url>
     <url>
-        <loc>http://Azdaroth.github.io/publications/</loc>
+        <loc>https://karolgalanciak.com/publications/</loc>
         <lastmod>2018-06-02T09:05:05+02:00</lastmod>
     </url>
     <url>
-        <loc>http://Azdaroth.github.io/test-driven-ember/</loc>
+        <loc>https://karolgalanciak.com/test-driven-ember/</loc>
         <lastmod>2017-12-26T20:32:16+01:00</lastmod>
     </url>
     <url>
-        <loc>http://Azdaroth.github.io/blog/</loc>
+        <loc>https://karolgalanciak.com/blog/</loc>
         <lastmod>2018-06-02T09:05:05+02:00</lastmod>
     </url>
     <url>
-        <loc>http://Azdaroth.github.io/blog/archives/</loc>
+        <loc>https://karolgalanciak.com/blog/archives/</loc>
         <lastmod>2018-06-02T09:05:05+02:00</lastmod>
     </url>
     <url>
-        <loc>http://Azdaroth.github.io/presentations/</loc>
+        <loc>https://karolgalanciak.com/presentations/</loc>
         <lastmod>2018-06-02T09:05:05+02:00</lastmod>
     </url>
     <url>
-        <loc>http://Azdaroth.github.io/robots.txt</loc>
+        <loc>https://karolgalanciak.com/robots.txt</loc>
         <lastmod>2013-07-15T10:05:00+02:00</lastmod>
     </url>
 </urlset>

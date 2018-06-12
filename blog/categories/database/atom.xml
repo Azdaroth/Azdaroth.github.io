@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Database | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/database/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/database/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Rails Quick Tips: Temporarily Disabling Touching with ActiveRecord.no_touching]]></title>
-    <link href="http://Azdaroth.github.io/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/"/>
+    <link href="https://karolgalanciak.com/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/"/>
     <updated>2018-02-25T20:00:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching</id>
+    <id>https://karolgalanciak.com/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching</id>
     <content type="html"><![CDATA[<p><strong>Touching</strong> <strong>ActiveRecord models</strong> is quite a common thing in most of the <strong>Rails applications</strong>, especially useful for cache invalidation. By default, it updates <code>updated_at</code> timestamp with the current time, Here&rsquo;s a typical example of using <a href="https://apidock.com/rails/ActiveRecord/Persistence/touch">touch</a> in a model:</p>
 
 <p>``` ruby</p>
@@ -92,9 +92,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[PostgreSQL Quick Tips: Working With Dates Using EXTRACT function]]></title>
-    <link href="http://Azdaroth.github.io/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function/"/>
+    <link href="https://karolgalanciak.com/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function/"/>
     <updated>2018-01-30T04:30:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function</id>
+    <id>https://karolgalanciak.com/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function</id>
     <content type="html"><![CDATA[<p>Imagine that you are implementing an e-commerce platform and want to grab all orders from the <strong>current year</strong>. What would be the simplest way of doing it in Rails? Probably writing a query looking like this:</p>
 
 <p><code>ruby
@@ -117,9 +117,9 @@ Order.where("EXTRACT(year FROM created_at) = EXTRACT(year FROM now())")
   
   <entry>
     <title type="html"><![CDATA[Keeping Data Integrity In Check: Conditional Unique Indexes For Soft Delete]]></title>
-    <link href="http://Azdaroth.github.io/blog/2016/11/01/keeping-data-integrity-in-check-conditional-unique-indexes-for-soft-delete/"/>
+    <link href="https://karolgalanciak.com/blog/2016/11/01/keeping-data-integrity-in-check-conditional-unique-indexes-for-soft-delete/"/>
     <updated>2016-11-01T00:30:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2016/11/01/keeping-data-integrity-in-check-conditional-unique-indexes-for-soft-delete</id>
+    <id>https://karolgalanciak.com/blog/2016/11/01/keeping-data-integrity-in-check-conditional-unique-indexes-for-soft-delete</id>
     <content type="html"><![CDATA[<p><strong>Soft delete</strong> is a pretty common feature in most of the applications. It may increase complexity of the queries, nevertheless, not deleting anything might be a <strong>right default</strong> as the data might prove to be useful in the future: for restoring if a record was removed by mistake, to derive some conclusions based on statistics and plenty of other purposes. It may seem like it's a pretty trivial thing: just adding a column like <code>deleted_at</code> and filtering out records that have this value present. But what happens when you need to do some proper <strong>uniqueness validation</strong> on both model layer and database level? Let's take a look what kind of problem can easily be overlooked and how it can be solved with a <strong>conditional index</strong>.</p>
 
 
@@ -267,9 +267,9 @@ validates :rental_id, presence: true, uniqueness: { scope: :date, conditions: -&
   
   <entry>
     <title type="html"><![CDATA[When validation is not enough: PostgreSQL triggers for data integrity]]></title>
-    <link href="http://Azdaroth.github.io/blog/2016/05/06/when-validation-is-not-enough-postgresql-triggers-for-data-integrity/"/>
+    <link href="https://karolgalanciak.com/blog/2016/05/06/when-validation-is-not-enough-postgresql-triggers-for-data-integrity/"/>
     <updated>2016-05-06T19:45:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2016/05/06/when-validation-is-not-enough-postgresql-triggers-for-data-integrity</id>
+    <id>https://karolgalanciak.com/blog/2016/05/06/when-validation-is-not-enough-postgresql-triggers-for-data-integrity</id>
     <content type="html"><![CDATA[<p>Is <strong>validation</strong> in your models or form objects enough to ensure <strong>integrity of the data</strong>? Well, seems like you can't really persist a record when the data is <strong>not valid</strong> unless you intentionally try to bypass validation using <code>save: false</code> option when calling <code>save</code> or using <code>update_column</code>. What about <strong>uniqueness validation</strong>?
 A classic example would be a unique <code>email</code> per user. To make sure the email is truly unique we could add a unique index in database - not only would it prevent saving non-unique users when <strong>bypassing validation</strong>, but also it would raise extra error when 2 <strong>concurrent requests</strong> would attempt to save user with the same email. However, some validations are more complex that ensuring  a value is unique and index won't really help much. Fortunately, PostgreSQL is powerful enough to provide a perfect solution to such problem. Time to meet your new friend: <strong>PostgreSQL triggers</strong>.</p>
 
@@ -475,9 +475,9 @@ Event.create(calendar_id: calendar.id, begins_at: begins_at, finishes_at: finish
   
   <entry>
     <title type="html"><![CDATA[PostgreSQL In Action: Sorting With NULLIF Expression]]></title>
-    <link href="http://Azdaroth.github.io/blog/2016/02/20/postgresql-in-action-sorting-with-nullif-expression/"/>
+    <link href="https://karolgalanciak.com/blog/2016/02/20/postgresql-in-action-sorting-with-nullif-expression/"/>
     <updated>2016-02-20T21:20:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2016/02/20/postgresql-in-action-sorting-with-nullif-expression</id>
+    <id>https://karolgalanciak.com/blog/2016/02/20/postgresql-in-action-sorting-with-nullif-expression</id>
     <content type="html"><![CDATA[<p>Ordering with <strong>ActiveRecord</strong> and <strong>PostgreSQL</strong> may seem like an obvious and simple thing: in most cases you just specify one or several criteria with direction of ordering like <code>order(name: :asc)</code> and that's all, maybe in more <b>complex scenarios</b> you would need to use <code>CASE</code> statement to provide some more customized conditions. But how could we approach sorting with forcing <b>blank values</b> to be the last ones, regardless of the direction of the sort? You might be thinking now about <code>NULLS LAST</code> statement for this purpose, but that's not going to handle empty string. For this case you need something special: time to meet <code>NULLIF</code> conditional expression.</p>
 
 

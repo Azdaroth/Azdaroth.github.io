@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Mentoring | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/mentoring/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/mentoring/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Embarking on Programming Journey]]></title>
-    <link href="http://Azdaroth.github.io/blog/2015/07/12/embarking-on-programming-journey/"/>
+    <link href="https://karolgalanciak.com/blog/2015/07/12/embarking-on-programming-journey/"/>
     <updated>2015-07-12T20:00:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2015/07/12/embarking-on-programming-journey</id>
+    <id>https://karolgalanciak.com/blog/2015/07/12/embarking-on-programming-journey</id>
     <content type="html"><![CDATA[<p>Recently I've been repeatedly asked how to get started with programming, especially Ruby and Rails. To keep things DRY and make sure I always include all great resources for learning, I decided to write this blog post. Most of people who asked me had never programmed before or had done some coding before in other languages, but are not (yet) proficient developers, so if you are a total beginner or just started learning Ruby / Rails and you are not sure what the next step is then you came to the right place.</p>
 
 

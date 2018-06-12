@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: design patterns | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/design-patterns/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/design-patterns/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ember and ES7: decorators]]></title>
-    <link href="http://Azdaroth.github.io/blog/2015/12/02/ember-and-es7-decorators/"/>
+    <link href="https://karolgalanciak.com/blog/2015/12/02/ember-and-es7-decorators/"/>
     <updated>2015-12-02T23:30:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2015/12/02/ember-and-es7-decorators</id>
+    <id>https://karolgalanciak.com/blog/2015/12/02/ember-and-es7-decorators</id>
     <content type="html"><![CDATA[<p>ES6 introduced plenty of useful features such as modules, arrow functions, let variables, destructuring, classes and many more which made writing JS code much readable and enjoyable. Thanks to <a href="https://babeljs.io" target="_blank">Babel</a>, a JavaScript transpiler, it's been pretty painless to use them all in the applications. If you happen to develop EmberJS apps and use <a href="http://www.ember-cli.com" target="_blank">ember-cli</a>, you don't probably think much about Babel or any transpilation as these features are a natural part of every Ember application. But the new features didn't end with ES6, we're going to have even more of them in ES7 (2016). Some of them can already be used, thanks again to Babel. In this blogpost I'm going to explore a very powerful concept which of decorators.</p>
 
 

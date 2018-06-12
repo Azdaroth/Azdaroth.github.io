@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Refactoring | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/refactoring/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/refactoring/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Refactoring Tips: Trade Conditionals For Type Delegation]]></title>
-    <link href="http://Azdaroth.github.io/blog/2016/01/06/refactoring-tips-trade-conditionals-for-type-delegation/"/>
+    <link href="https://karolgalanciak.com/blog/2016/01/06/refactoring-tips-trade-conditionals-for-type-delegation/"/>
     <updated>2016-01-06T23:20:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2016/01/06/refactoring-tips-trade-conditionals-for-type-delegation</id>
+    <id>https://karolgalanciak.com/blog/2016/01/06/refactoring-tips-trade-conditionals-for-type-delegation</id>
     <content type="html"><![CDATA[<p>Having some kind of <code>type</code> attribute in your models is a pretty common thing, especially in applications with more complex domain. How do you handle such cases? Is it with multiple conditionals / <code>case</code> statements in every method dealing with the type attribute? If you've been struggling with organizing and maintaing code for such use cases then say hello to your new friend: type delegation.</p>
 
 
@@ -280,9 +280,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[Model your domain with composed models]]></title>
-    <link href="http://Azdaroth.github.io/blog/2015/02/26/model-your-domain-with-composed-models/"/>
+    <link href="https://karolgalanciak.com/blog/2015/02/26/model-your-domain-with-composed-models/"/>
     <updated>2015-02-26T09:10:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2015/02/26/model-your-domain-with-composed-models</id>
+    <id>https://karolgalanciak.com/blog/2015/02/26/model-your-domain-with-composed-models</id>
     <content type="html"><![CDATA[<p>In many Rails applications the modeling is limited only to creating classes inheritng from <code>ActiveRecord::Base</code> which are 1:1 mapped to database tables. Having AR models like <code>User</code> and <code>Project</code> doesn't tell much about the domain of your application. Well, you can add some domain logic to the models but that way you will easily end up having giant classes with thousands lines of code, so let's just use models for database-related stuff only. Other option would be to create service objects for every usecase. That's a good and clean way, but it's merely the interaction layer between different parts of your application. You may end up easily with all logic encapsulated within service objects that will start looking more like procedural programming rather than proper OOP and not real domain API at all. The good news is that you can easily counteract it: time to use composed models.</p>
 
 
@@ -502,9 +502,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[Rails: Useful Patterns]]></title>
-    <link href="http://Azdaroth.github.io/blog/2014/09/17/rails-useful-patterns/"/>
+    <link href="https://karolgalanciak.com/blog/2014/09/17/rails-useful-patterns/"/>
     <updated>2014-09-17T19:55:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2014/09/17/rails-useful-patterns</id>
+    <id>https://karolgalanciak.com/blog/2014/09/17/rails-useful-patterns</id>
     <content type="html"><![CDATA[<p>There've been a lot of discussions for several months about "The Rails Way" and problems associated with it - huge models with several thousands lines of code and no distinguishable responsibilities (User class which does everything related to users doesn't tell much what the app does), unmaintainable callback hell and no domain objects at all. Fortunately, service objects (or usecases) and other forms of extracting logic from models have become quite mainstream recently. However, it's not always clear how to use them all together without creating huge classes with tens of private methods and too many responsibilities. Here are some strategies you can use to solve these problems.</p>
 
 
@@ -803,9 +803,9 @@ end</p>
   
   <entry>
     <title type="html"><![CDATA[Structuring Rails applications]]></title>
-    <link href="http://Azdaroth.github.io/blog/2013/10/06/structuring-rails-applications/"/>
+    <link href="https://karolgalanciak.com/blog/2013/10/06/structuring-rails-applications/"/>
     <updated>2013-10-06T15:00:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2013/10/06/structuring-rails-applications</id>
+    <id>https://karolgalanciak.com/blog/2013/10/06/structuring-rails-applications</id>
     <content type="html"><![CDATA[<p>There've been a lot of discussions recently about applying Object Oriented Programming in Rails applications, how ActiveRecord callbacks make testing painful and how Rails makes it hard to do OOP the right way. Is it really true? Rails makes everything easy - you can easily write terrible code, which will be a maintenance nightmare, but is also easy to apply good practices, especially with available gems. What is the good way then to extract logic in Rails applications and the best place to put it?</p>
 
 

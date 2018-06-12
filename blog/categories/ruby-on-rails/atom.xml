@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Ruby on Rails | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/ruby-on-rails/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/ruby-on-rails/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Traps on Rails - Overriding boolean methods in models]]></title>
-    <link href="http://Azdaroth.github.io/blog/2017/11/26/traps-on-rails-overriding-boolean-methods-in-models/"/>
+    <link href="https://karolgalanciak.com/blog/2017/11/26/traps-on-rails-overriding-boolean-methods-in-models/"/>
     <updated>2017-11-26T16:00:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2017/11/26/traps-on-rails-overriding-boolean-methods-in-models</id>
+    <id>https://karolgalanciak.com/blog/2017/11/26/traps-on-rails-overriding-boolean-methods-in-models</id>
     <content type="html"><![CDATA[<p>One very <strong>useful</strong> feature of <strong>ActiveRecord</strong> is automatically defining attribute readers and writers for all the columns for given tables. For the ones with <strong>boolean</strong> type, however, there is one more addition &ndash; defining an <strong>alias</strong> of the method with a question mark. Sometimes it might be useful to override this method and add some extra requirements for a given condition. However, this might not be such a good idea.</p>
 
 <!--more-->
@@ -143,9 +143,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[5 years of professional Ruby and Rails development - My Reflections]]></title>
-    <link href="http://Azdaroth.github.io/blog/2017/08/27/5-years-of-professional-ruby-and-rails-development-my-reflections/"/>
+    <link href="https://karolgalanciak.com/blog/2017/08/27/5-years-of-professional-ruby-and-rails-development-my-reflections/"/>
     <updated>2017-08-27T23:00:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2017/08/27/5-years-of-professional-ruby-and-rails-development-my-reflections</id>
+    <id>https://karolgalanciak.com/blog/2017/08/27/5-years-of-professional-ruby-and-rails-development-my-reflections</id>
     <content type="html"><![CDATA[<p>As hard as it is for me to believe, I already have over <strong>5 years</strong> of professional experience in <strong>Ruby and Rails</strong>. Throughout all these years my attitude towards Rails has been fluctuating between going from <strong>blind love</strong> to <strong>harsh critic</strong> (<strong>ActiveRecord</strong>, I&rsquo;m looking at you) ending with a bit more balanced but certainly a positive approach. Such time is long enough to have a meaningful opinion about the <strong>overall experience</strong> using any framework, so here are few points about Rails that I would particularly like to focus on in my reflections.</p>
 
 <!--more-->
@@ -199,9 +199,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[Decoding Rails Magic: How Does ActiveJob work?]]></title>
-    <link href="http://Azdaroth.github.io/blog/2016/09/25/decoding-rails-magic-how-does-activejob-work/"/>
+    <link href="https://karolgalanciak.com/blog/2016/09/25/decoding-rails-magic-how-does-activejob-work/"/>
     <updated>2016-09-25T23:45:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2016/09/25/decoding-rails-magic-how-does-activejob-work</id>
+    <id>https://karolgalanciak.com/blog/2016/09/25/decoding-rails-magic-how-does-activejob-work</id>
     <content type="html"><![CDATA[<p>Executing <strong>background jobs</strong> is quite a common feature in many of the web applications. Switching between different background processing frameworks used to be quite painful as most of them had different API for enqueuing jobs, enqueuing mailers and scheduling jobs. One of the great addition in <strong>Rails 4.2</strong> was a solution to this problem: <strong>ActiveJob</strong>, which provides extra layer on top of background jobs framework and unifies the API regardless of the queue adapter you use. But how exactly does it work? What are the requirements for adding new <strong>queue adapters</strong>? What kind of API does ActiveJob provide? Let’s dive deep into the codebase  and answer these and some other questions.</p>
 
 
@@ -1023,9 +1023,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[Little-known but useful Rails features: ActiveRecord.extending]]></title>
-    <link href="http://Azdaroth.github.io/blog/2016/08/30/little-known-but-useful-rails-features-activerecord-querymethods-dot-extending/"/>
+    <link href="https://karolgalanciak.com/blog/2016/08/30/little-known-but-useful-rails-features-activerecord-querymethods-dot-extending/"/>
     <updated>2016-08-30T12:00:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2016/08/30/little-known-but-useful-rails-features-activerecord-querymethods-dot-extending</id>
+    <id>https://karolgalanciak.com/blog/2016/08/30/little-known-but-useful-rails-features-activerecord-querymethods-dot-extending</id>
     <content type="html"><![CDATA[<p>Every now and then I discover some features in <strong>Rails</strong> that are not that (arguably) commonly used, but there are some use cases when they turn out to be super useful and the <strong>best tool</strong> for the job. One of them would definitely be a nice addition to <code>ActiveRecord::QueryMethods</code> - <code>extending</code> method. Let’s see how it could be used in the <strong>Rails apps</strong>.</p>
 
 
@@ -1143,9 +1143,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[Decoding Rails Magic: How Does Calling Class Methods On Mailers Work]]></title>
-    <link href="http://Azdaroth.github.io/blog/2016/07/31/decoding-rails-magic-how-does-calling-class-methods-on-mailers-work/"/>
+    <link href="https://karolgalanciak.com/blog/2016/07/31/decoding-rails-magic-how-does-calling-class-methods-on-mailers-work/"/>
     <updated>2016-07-31T21:15:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2016/07/31/decoding-rails-magic-how-does-calling-class-methods-on-mailers-work</id>
+    <id>https://karolgalanciak.com/blog/2016/07/31/decoding-rails-magic-how-does-calling-class-methods-on-mailers-work</id>
     <content type="html"><![CDATA[<p>Have you ever wondered how it is possible that calling <strong>class methods</strong> on <strong>mailers</strong> work in Rails, even though you only define some instance methods in those classes? It seems like it’s quite common question, especially when you see the mailers in action for the first time. Apparently, there is some Ruby "magic" involved here, so let’s try to <b>decode</b> it and check what happens under the hood.</p>
 
 

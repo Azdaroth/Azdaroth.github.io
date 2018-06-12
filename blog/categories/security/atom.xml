@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Security | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/security/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/security/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Security On Rails: Hacking Sessions With Insecure Secret Key Base]]></title>
-    <link href="http://Azdaroth.github.io/blog/2016/04/24/security-on-rails-hacking-sessions-with-insecure-secret-key-base/"/>
+    <link href="https://karolgalanciak.com/blog/2016/04/24/security-on-rails-hacking-sessions-with-insecure-secret-key-base/"/>
     <updated>2016-04-24T20:00:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2016/04/24/security-on-rails-hacking-sessions-with-insecure-secret-key-base</id>
+    <id>https://karolgalanciak.com/blog/2016/04/24/security-on-rails-hacking-sessions-with-insecure-secret-key-base</id>
     <content type="html"><![CDATA[<p>I was recently asked what is <code>secret key base</code> used for in Rails applications and why not secure value of it (or even worse - the public one!) creates a security issue. That was a really good question, I remember how it was a serious threat years ago, especially before introducing <code>secrets.yml</code> in Rails 4.1 - at that time by default <code>secret_token</code> initializer was generated and the secret key was directly stored there. The result was that in many open source projects secret key was publicly available creating a great <strong>security risk</strong>. Let's take a look how exposed secret key base could be exploited.</p>
 
 

@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: ActiveRecord Architecture | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/activerecord-architecture/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/activerecord-architecture/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[The Case for before_validation callback: complex state normalization]]></title>
-    <link href="http://Azdaroth.github.io/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization/"/>
+    <link href="https://karolgalanciak.com/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization/"/>
     <updated>2018-05-27T20:00:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization</id>
+    <id>https://karolgalanciak.com/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization</id>
     <content type="html"><![CDATA[<p>Few months ago I wrote a <a href="https://karolgalanciak.com/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks/">blog post</a> about <strong>ActiveRecord</strong> <code>before_validation</code> callback and how it is used for  <strong>wrong reasons</strong> and concluded that in most cases this is not something we should be using routinely. However, I missed one <strong>appropriate use case</strong> for it which might be quite common in Rails apps, so this might be an excellent opportunity to get back to  <strong>before_validation callback</strong> and show its other side.</p>
 
 <!--more-->
@@ -106,9 +106,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[The Case Against Exotic Usage of :before_validate Callbacks]]></title>
-    <link href="http://Azdaroth.github.io/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks/"/>
+    <link href="https://karolgalanciak.com/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks/"/>
     <updated>2017-10-29T22:00:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks</id>
+    <id>https://karolgalanciak.com/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks</id>
     <content type="html"><![CDATA[<p>It&rsquo;s nothing new that <strong>ActiveRecord callbacks</strong> are abused in many projects and used for the wrong reasons for many use cases where they can be <strong>easily avoided</strong> in favor of a much better alternative, like service objects. There is one callback though that is special and quite often used for pretty <strong>exotic reasons</strong> that have nothing to do with the process when it gets executed &ndash; it&rsquo;s the <code>before_validate</code> callback.</p>
 
 <!--more-->

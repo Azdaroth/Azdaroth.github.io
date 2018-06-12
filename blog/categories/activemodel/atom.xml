@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: ActiveModel | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/activemodel/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/activemodel/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Introduction to ActiveRecord and ActiveModel Attributes API]]></title>
-    <link href="http://Azdaroth.github.io/blog/2016/12/04/introduction-to-activerecord-and-activemodel-attributes-api/"/>
+    <link href="https://karolgalanciak.com/blog/2016/12/04/introduction-to-activerecord-and-activemodel-attributes-api/"/>
     <updated>2016-12-04T22:00:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2016/12/04/introduction-to-activerecord-and-activemodel-attributes-api</id>
+    <id>https://karolgalanciak.com/blog/2016/12/04/introduction-to-activerecord-and-activemodel-attributes-api</id>
     <content type="html"><![CDATA[<p><strong>Rails 5.0</strong> is without a doubt a great release with plenty of useful changes and additions. The most notable change was probably <strong>ActionCable</strong> - the layer responsible for integrating your app with websockets. However, there were also other additions that could bring some <strong>substantial improvements</strong> to your Rails apps, but were a bit outshined by bigger changes. One of such features is <strong>Attributes API</strong>.</p>
 
 

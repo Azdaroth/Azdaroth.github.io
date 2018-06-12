@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: ActiveJob | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/activejob/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/activejob/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Decoding Rails Magic: How Does ActiveJob work?]]></title>
-    <link href="http://Azdaroth.github.io/blog/2016/09/25/decoding-rails-magic-how-does-activejob-work/"/>
+    <link href="https://karolgalanciak.com/blog/2016/09/25/decoding-rails-magic-how-does-activejob-work/"/>
     <updated>2016-09-25T23:45:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2016/09/25/decoding-rails-magic-how-does-activejob-work</id>
+    <id>https://karolgalanciak.com/blog/2016/09/25/decoding-rails-magic-how-does-activejob-work</id>
     <content type="html"><![CDATA[<p>Executing <strong>background jobs</strong> is quite a common feature in many of the web applications. Switching between different background processing frameworks used to be quite painful as most of them had different API for enqueuing jobs, enqueuing mailers and scheduling jobs. One of the great addition in <strong>Rails 4.2</strong> was a solution to this problem: <strong>ActiveJob</strong>, which provides extra layer on top of background jobs framework and unifies the API regardless of the queue adapter you use. But how exactly does it work? What are the requirements for adding new <strong>queue adapters</strong>? What kind of API does ActiveJob provide? Let’s dive deep into the codebase  and answer these and some other questions.</p>
 
 

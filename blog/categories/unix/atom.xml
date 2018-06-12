@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Unix | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/unix/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/unix/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[CentOS 6.4 server setup with Ruby On Rails, Nginx and PostgreSQL]]></title>
-    <link href="http://Azdaroth.github.io/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql/"/>
+    <link href="https://karolgalanciak.com/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql/"/>
     <updated>2013-07-19T14:02:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql</id>
+    <id>https://karolgalanciak.com/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql</id>
     <content type="html"><![CDATA[<p>Server setup with the entire environment for Rails applications can be quite tricky, especially when you do it for the first time. Here is step by step guide how to setup CentOS 6.4 server with a basic environment for deploying Rails applications. I encourage you to choose CentOS Linux - it is a reliable distro (well, based on Red Hat Enterprise Linux), easy to handle and doesn't require advanced Unix knowledge like Gentoo (especially while updating system related stuff).</p>
 
 

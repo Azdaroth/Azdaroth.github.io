@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Ember Data | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/ember-data/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/ember-data/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Advanced Ember Data Customization - Different Model Types in Ember App and API For The Same Resource]]></title>
-    <link href="http://Azdaroth.github.io/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/"/>
+    <link href="https://karolgalanciak.com/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/"/>
     <updated>2018-04-28T19:00:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource</id>
+    <id>https://karolgalanciak.com/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource</id>
     <content type="html"><![CDATA[<p>A <strong>great advantage</strong> of using <strong>Ember Data</strong> with <strong>JSONAPI-compliant</strong> adapters/serializers is that there is almost nothing extra needed to work with the <strong>data layer</strong> &ndash; just create the models with names matching the types of the resources returned by the <strong>API</strong> and you are good to go! However, sometimes you may need to customize the naming which means that the names of the models in the <strong>Ember application</strong> will be different than the ones expected by the API and their corresponding types. What are the steps required to make it work in <strong>Ember Data</strong>?</p>
 
 <!--more-->
@@ -433,9 +433,9 @@ import ApplicationSerializer from &lsquo;./application&rsquo;;</p>
   
   <entry>
     <title type="html"><![CDATA[Implementing non-RESTful actions with Ember Data]]></title>
-    <link href="http://Azdaroth.github.io/blog/2016/02/07/implementing-non-restful-actions-with-ember-data/"/>
+    <link href="https://karolgalanciak.com/blog/2016/02/07/implementing-non-restful-actions-with-ember-data/"/>
     <updated>2016-02-07T10:45:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2016/02/07/implementing-non-restful-actions-with-ember-data</id>
+    <id>https://karolgalanciak.com/blog/2016/02/07/implementing-non-restful-actions-with-ember-data</id>
     <content type="html"><![CDATA[<p>In my <a target="_blank" href="http://karolgalanciak.com/blog/2016/01/24/how-to-handle-non-crud-logic-in-your-api/">recent post</a> I mentioned some strategies of handling non-strictly <strong>CRUD</strong> / <strong>RESTful</strong> actions in <strong>API</strong>. One of them was adding extra actions beyond creating, updating and deleting resources. As it's not a standard solution and some data layers on client side (like <strong>Ember Data</strong>) don't handle it out-of-box, I was asked by some developers what's the best way to handle such actions. So let's see how can we hack into <strong>Ember Data</strong> and make it smooth.</p>
 
 

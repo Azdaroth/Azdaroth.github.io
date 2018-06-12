@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: OOP | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
-  <link href="http://Azdaroth.github.io/blog/categories/oop/atom.xml" rel="self"/>
-  <link href="http://Azdaroth.github.io/"/>
-  <updated>2018-06-12T17:11:48+02:00</updated>
-  <id>http://Azdaroth.github.io/</id>
+  <link href="https://karolgalanciak.com/blog/categories/oop/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-06-12T17:23:02+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Model your domain with composed models]]></title>
-    <link href="http://Azdaroth.github.io/blog/2015/02/26/model-your-domain-with-composed-models/"/>
+    <link href="https://karolgalanciak.com/blog/2015/02/26/model-your-domain-with-composed-models/"/>
     <updated>2015-02-26T09:10:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2015/02/26/model-your-domain-with-composed-models</id>
+    <id>https://karolgalanciak.com/blog/2015/02/26/model-your-domain-with-composed-models</id>
     <content type="html"><![CDATA[<p>In many Rails applications the modeling is limited only to creating classes inheritng from <code>ActiveRecord::Base</code> which are 1:1 mapped to database tables. Having AR models like <code>User</code> and <code>Project</code> doesn't tell much about the domain of your application. Well, you can add some domain logic to the models but that way you will easily end up having giant classes with thousands lines of code, so let's just use models for database-related stuff only. Other option would be to create service objects for every usecase. That's a good and clean way, but it's merely the interaction layer between different parts of your application. You may end up easily with all logic encapsulated within service objects that will start looking more like procedural programming rather than proper OOP and not real domain API at all. The good news is that you can easily counteract it: time to use composed models.</p>
 
 
@@ -237,9 +237,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[Rails: Useful Patterns]]></title>
-    <link href="http://Azdaroth.github.io/blog/2014/09/17/rails-useful-patterns/"/>
+    <link href="https://karolgalanciak.com/blog/2014/09/17/rails-useful-patterns/"/>
     <updated>2014-09-17T19:55:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2014/09/17/rails-useful-patterns</id>
+    <id>https://karolgalanciak.com/blog/2014/09/17/rails-useful-patterns</id>
     <content type="html"><![CDATA[<p>There've been a lot of discussions for several months about "The Rails Way" and problems associated with it - huge models with several thousands lines of code and no distinguishable responsibilities (User class which does everything related to users doesn't tell much what the app does), unmaintainable callback hell and no domain objects at all. Fortunately, service objects (or usecases) and other forms of extracting logic from models have become quite mainstream recently. However, it's not always clear how to use them all together without creating huge classes with tens of private methods and too many responsibilities. Here are some strategies you can use to solve these problems.</p>
 
 
@@ -538,9 +538,9 @@ end</p>
   
   <entry>
     <title type="html"><![CDATA[Test Driven Rails - Part 2]]></title>
-    <link href="http://Azdaroth.github.io/blog/2014/03/03/test-driven-rails-part-2/"/>
+    <link href="https://karolgalanciak.com/blog/2014/03/03/test-driven-rails-part-2/"/>
     <updated>2014-03-03T19:52:00+01:00</updated>
-    <id>http://Azdaroth.github.io/blog/2014/03/03/test-driven-rails-part-2</id>
+    <id>https://karolgalanciak.com/blog/2014/03/03/test-driven-rails-part-2</id>
     <content type="html"><![CDATA[<p>Last time, in <a href="http://karolgalanciak.com/blog/2014/01/04/test-driven-rails-part-1/" target="_blank">part 1</a>, I was giving some advice about testing - why to test at all, which tests are valuable and which are not, when to write acceptance tests and in what cases aim for the maximum code coverage. It brought about some serious discussion about testing ideas and if you haven't read it yet, you should probably check (<a href="http://karolgalanciak.com/blog/2014/01/04/test-driven-rails-part-1/#disqus_thread" target="_blank">it</a>) it out. Giving some general point of view about such broad topic like Test Driven Development / Behavior Driven Development is definetely not enough so I will try to apply these techniques by implementing a concrete feature. I wanted to choose some popular usecase so that most developers will have an opinion how they would approach it. In most applications you will probably need:</p>
 
 
@@ -648,7 +648,7 @@ end
 <p>end</p>
 
 <p>def fill_form_with_valid_data(args={})
-  email = args.fetch(:email, &ldquo;<a href="&#x6d;&#x61;&#105;&#108;&#116;&#111;&#x3a;&#101;&#109;&#x61;&#105;&#108;&#64;&#101;&#x78;&#x61;&#109;&#x70;&#108;&#x65;&#x2e;&#99;&#x6f;&#x6d;">&#x65;&#x6d;&#97;&#105;&#108;&#x40;&#x65;&#120;&#97;&#x6d;&#112;&#108;&#x65;&#x2e;&#x63;&#x6f;&#109;</a>&rdquo;)
+  email = args.fetch(:email, &ldquo;<a href="&#x6d;&#97;&#x69;&#x6c;&#116;&#111;&#x3a;&#101;&#109;&#x61;&#x69;&#x6c;&#64;&#101;&#x78;&#97;&#x6d;&#x70;&#108;&#x65;&#46;&#x63;&#111;&#x6d;">&#x65;&#109;&#x61;&#105;&#x6c;&#x40;&#x65;&#120;&#x61;&#109;&#x70;&#108;&#101;&#46;&#99;&#x6f;&#109;</a>&rdquo;)
   fill_in &ldquo;email&rdquo;, with: email
   fill_in &ldquo;user_password&rdquo;, with: &ldquo;my-super-secret-password&rdquo;
   fill_in &ldquo;user_password_confirmation&rdquo;, with: &ldquo;my-super-secret-password&rdquo;
@@ -1769,7 +1769,7 @@ end
 
 <p>describe User do</p>
 
-<p>  subject { User.new(email: &ldquo;<a href="&#x6d;&#x61;&#105;&#x6c;&#116;&#x6f;&#x3a;&#x65;&#x6d;&#97;&#x69;&#x6c;&#x40;&#101;&#x78;&#x61;&#109;&#x70;&#x6c;&#x65;&#46;&#x63;&#x6f;&#x6d;">&#x65;&#109;&#97;&#105;&#x6c;&#x40;&#101;&#120;&#97;&#109;&#x70;&#x6c;&#101;&#46;&#99;&#x6f;&#109;</a>&rdquo;,</p>
+<p>  subject { User.new(email: &ldquo;<a href="&#109;&#97;&#105;&#108;&#x74;&#111;&#x3a;&#x65;&#x6d;&#97;&#x69;&#108;&#64;&#101;&#x78;&#97;&#x6d;&#x70;&#x6c;&#x65;&#46;&#x63;&#111;&#x6d;">&#x65;&#109;&#x61;&#x69;&#x6c;&#64;&#x65;&#x78;&#x61;&#x6d;&#x70;&#108;&#101;&#46;&#x63;&#x6f;&#x6d;</a>&rdquo;,</p>
 
 <pre><code>encrypted_password: "password") }
 </code></pre>
@@ -1928,7 +1928,7 @@ end
 
 <p>  class UserConfirmationMailer &lt; ActionMailer::Base</p>
 
-<p>  default from: &ldquo;<a href="&#x6d;&#x61;&#x69;&#x6c;&#116;&#111;&#58;&#x63;&#111;&#x6e;&#116;&#x61;&#x63;&#x74;&#x40;&#x65;&#109;&#x61;&#105;&#x6c;&#46;&#99;&#111;&#109;">&#x63;&#x6f;&#110;&#x74;&#x61;&#99;&#x74;&#x40;&#x65;&#109;&#97;&#x69;&#x6c;&#46;&#99;&#x6f;&#109;</a>&rdquo;</p>
+<p>  default from: &ldquo;<a href="&#109;&#x61;&#x69;&#108;&#116;&#111;&#58;&#x63;&#x6f;&#x6e;&#x74;&#x61;&#x63;&#116;&#64;&#101;&#109;&#x61;&#x69;&#108;&#x2e;&#99;&#x6f;&#109;">&#x63;&#111;&#110;&#x74;&#x61;&#x63;&#116;&#64;&#101;&#109;&#97;&#105;&#108;&#46;&#x63;&#x6f;&#x6d;</a>&rdquo;</p>
 
 <p>  def send_confirmation_instructions(user)</p>
 
@@ -2079,7 +2079,7 @@ rails generate mailer NewUserAdminNotificationMailer notify
 
 <p>class NewUserAdminNotificationMailer &lt; ActionMailer::Base</p>
 
-<p>  default from: &ldquo;<a href="&#109;&#97;&#x69;&#108;&#x74;&#111;&#58;&#x63;&#111;&#x6e;&#x74;&#97;&#x63;&#x74;&#x40;&#101;&#109;&#97;&#105;&#108;&#x2e;&#x63;&#x6f;&#x6d;">&#x63;&#111;&#110;&#116;&#97;&#x63;&#116;&#x40;&#101;&#x6d;&#x61;&#x69;&#x6c;&#x2e;&#99;&#x6f;&#109;</a>&rdquo;</p>
+<p>  default from: &ldquo;<a href="&#x6d;&#97;&#x69;&#x6c;&#116;&#x6f;&#x3a;&#99;&#111;&#110;&#x74;&#97;&#x63;&#x74;&#x40;&#x65;&#109;&#97;&#x69;&#x6c;&#x2e;&#x63;&#111;&#x6d;">&#x63;&#111;&#x6e;&#116;&#97;&#99;&#x74;&#x40;&#x65;&#109;&#97;&#x69;&#x6c;&#46;&#x63;&#x6f;&#109;</a>&rdquo;</p>
 
 <p>  def notify(user)</p>
 
@@ -2221,7 +2221,7 @@ redirect_to root_path, notice: "You have confirmed you account. Now you can logi
 
 <p>describe User do</p>
 
-<p>  subject { User.new(email: &ldquo;<a href="&#x6d;&#x61;&#105;&#x6c;&#116;&#111;&#x3a;&#101;&#109;&#x61;&#x69;&#x6c;&#64;&#101;&#x78;&#97;&#x6d;&#x70;&#108;&#101;&#x2e;&#x63;&#111;&#109;">&#101;&#109;&#x61;&#x69;&#108;&#64;&#101;&#120;&#x61;&#109;&#x70;&#x6c;&#101;&#46;&#x63;&#x6f;&#x6d;</a>&rdquo;,</p>
+<p>  subject { User.new(email: &ldquo;<a href="&#109;&#x61;&#x69;&#108;&#116;&#x6f;&#58;&#x65;&#109;&#x61;&#105;&#x6c;&#x40;&#x65;&#120;&#97;&#109;&#112;&#108;&#101;&#46;&#x63;&#x6f;&#109;">&#x65;&#x6d;&#97;&#x69;&#108;&#x40;&#x65;&#x78;&#x61;&#x6d;&#x70;&#x6c;&#101;&#x2e;&#99;&#111;&#109;</a>&rdquo;,</p>
 
 <pre><code>encrypted_password: "password") }
 </code></pre>
@@ -2586,9 +2586,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[Structuring Rails applications]]></title>
-    <link href="http://Azdaroth.github.io/blog/2013/10/06/structuring-rails-applications/"/>
+    <link href="https://karolgalanciak.com/blog/2013/10/06/structuring-rails-applications/"/>
     <updated>2013-10-06T15:00:00+02:00</updated>
-    <id>http://Azdaroth.github.io/blog/2013/10/06/structuring-rails-applications</id>
+    <id>https://karolgalanciak.com/blog/2013/10/06/structuring-rails-applications</id>
     <content type="html"><![CDATA[<p>There've been a lot of discussions recently about applying Object Oriented Programming in Rails applications, how ActiveRecord callbacks make testing painful and how Rails makes it hard to do OOP the right way. Is it really true? Rails makes everything easy - you can easily write terrible code, which will be a maintenance nightmare, but is also easy to apply good practices, especially with available gems. What is the good way then to extract logic in Rails applications and the best place to put it?</p>
 
 
