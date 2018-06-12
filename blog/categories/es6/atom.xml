@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: ES6 | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
+  <link href="http://Azdaroth.github.io/blog/categories/es6/atom.xml" rel="self"/>
+  <link href="http://Azdaroth.github.io/"/>
+  <updated>2018-06-12T17:11:48+02:00</updated>
+  <id>http://Azdaroth.github.io/</id>
+  <author>
+    <name><![CDATA[Karol Galanciak]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Ember Tips: Testing Outgoing HTTP Requests]]></title>
+    <link href="http://Azdaroth.github.io/blog/2017/06/25/ember-tips-testing-outgoing-http-requests/"/>
+    <updated>2017-06-25T22:00:00+02:00</updated>
+    <id>http://Azdaroth.github.io/blog/2017/06/25/ember-tips-testing-outgoing-http-requests</id>
+    <content type="html"><![CDATA[<p><strong>Ember.js</strong> is a web frontend framework and it&rsquo;s no surprise that majority of the applications deal with a lot of <strong>HTTP requests</strong>. But such fact has a lot of implications on the process of development of the Ember apps, especially when it comes to <strong>testing</strong>. For basic <code>GET</code> requests which don&rsquo;t include any query params or don&rsquo;t deal with pagination it&rsquo;s quite straight-forward &ndash; for those we just want to fetch some data, so we can check if proper objects are present as a side-effect of these requests. What about <code>POST</code>, <code>PATCH</code> or <code>DELETE</code> requests, where we can&rsquo;t easily test the side effects?</p>
+
+<p>Fortunately, thanks to the awesome tools such as <a href="https://github.com/pretenderjs/pretender" target="_blank">pretender</a> and <a href="https://github.com/samselikoff/ember-cli-mirage" target="_blank">ember-cli-mirage</a>, it&rsquo;s not a big problem.</p>
+
+<!--more-->
+
+
+<h2>Scenario #1: Testing if the request body sent in the outgoing request is right</h2>
+
+<p>Imagine that you are writing a classic sign-up for users. It would be quite useful to ensure that the right params are indeed sent to the <code>/api/users</code> endpoint (if that&rsquo;s the case).</p>
+
+<p>For dealing with HTTP requests and/or implementing a backend mock, <a href="https://github.com/samselikoff/ember-cli-mirage" target="_blank">ember-cli-mirage</a> addon is a great choice. The setup is beyond the scope of this article, but if you happen to not be familiar with <code>ember-cli-mirage</code>, I highly recommend reading the <a href="http://www.ember-cli-mirage.com" target="_blank">docs</a> which are very clear about the setup and its features.</p>
+
+<p>Let&rsquo;s assume that we have a proper route generated for the signup, let it be a <code>signup</code> route, a corresponding <code>signup</code> controller already handling a logic for the registration in one of its actions and that we have a <code>User</code> model with <code>email</code> and <code>password</code> attributes. Our scenario will be pretty simple: we want to make sure that after filling in <code>email</code> and <code>password</code> fields and clicking the <code>submit</code> button the request will be performed to <code>/api/users</code> with the right params. Here&rsquo;s our test for the signup feature:</p>
+
+<p>``` javascript my-awesome-app/tests/acceptance/sign-up.js
+/<em> global server </em>/
+import { test } from &lsquo;qunit&rsquo;;
+import moduleForAcceptance from &lsquo;book-me/tests/helpers/module-for-acceptance&rsquo;;</p>
+
+<p>moduleForAcceptance(&lsquo;Acceptance | sign up&rsquo;);
+test(&lsquo;user can successfully sign up&rsquo;, function(assert) {
+  assert.expect(1);</p>
+
+<p>  server.post(&lsquo;/api/users&rsquo;, function(schema)  {</p>
+
+<pre><code>const attributes = this.normalizedRequestAttrs();
+const expectedAttributes = {
+  email: 'example@email.com',
+  password: 'secretpassword'
+};
+
+assert.deepEqual(attributes, expectedAttributes, "attributes don't match the expected ones");
+
+return schema.users.create(attributes);
+</code></pre>
+
+<p>  });</p>
+
+<p>  visit(&lsquo;/signup&rsquo;);</p>
+
+<p>  andThen(() => {</p>
+
+<pre><code>fillIn('[data-test=signup-email]', "example@email.com");
+fillIn('[data-test=signup-password]', 'secretPassword');
+
+click('[data-test=submit-signup]');
+</code></pre>
+
+<p>  });
+});
+```</p>
+
+<p>In this acceptance test we visit the <code>signup</code> page, provide the email and password combo and we click on the submit button. There is only one simple assertion here: comparing the expected attributes against the normalized attributes from the requests to <code>/api/users</code> endpoint &ndash; we use normalized attributes to avoid dealing with JSONAPI format. To achieve that we provide a custom action handler which is very close to the default implementation for <code>POST</code> actions from <code>ember-cli-mirage</code>. The only extra step here is comparing the attributes.</p>
+
+<p>What if we want to just make sure that the request was performed to the given endpoint, but we don&rsquo;t care about the request body?</p>
+
+<h2>Scenario #2 Testing if the request was performed to the given endpoint</h2>
+
+<p>For this scenario imagine that we want to have a feature of deleting some tasks from the to-do list. The simplest way to make sure that the task will be removed would be checking if the <code>DELETE</code> request was performed to <code>/api/tasks/:id</code> endpoint. Again, let&rsquo;s assume that we already have a right implementation for this feature (too bad we didn&rsquo;t practice strict TDD to develop it properly).</p>
+
+<p>For this use case we will do something a bit different than the last time. First, let&rsquo;s add the right config for the <code>ember-cli-mirage</code> to handle CRUD actions for <code>tasks</code> using <code>resource</code> helper:</p>
+
+<p>``` javascript my-awesome-app/mirage/config.js
+export default function() {
+  this.namespace = &lsquo;api&rsquo;;</p>
+
+<p>  this.resource(&lsquo;users&rsquo;);
+}
+```</p>
+
+<p>And that&rsquo;s how our test could look like:</p>
+
+<p>``` javascript my-awesome-app/tests/acceptance/delete-task.js
+/<em> global server </em>/
+import { test } from &lsquo;qunit&rsquo;;
+import moduleForAcceptance from &lsquo;book-me/tests/helpers/module-for-acceptance&rsquo;;</p>
+
+<p>moduleForAcceptance(&lsquo;Acceptance | delete task&rsquo;);
+test(&lsquo;user can delete tasks&rsquo;, function(assert) {
+  assert.expect(1);</p>
+
+<p>  const task = server.create(&lsquo;task&rsquo;);</p>
+
+<p>  visit(&lsquo;/tasks&rsquo;);</p>
+
+<p>  click(&lsquo;[data-test=delete-task]&rsquo;);</p>
+
+<p>  andThen(() => {</p>
+
+<pre><code>const taskUrl = `/api/tasks/${task.id}`;
+const deleteTaskRequest = server.pretender.handledRequests.find((request) =&gt; {
+  return request.url === taskUrl &amp;&amp; request.method === 'DELETE';
+});
+
+assert.ok(deleteTaskRequest, 'delete task request should be performed');
+</code></pre>
+
+<p>  });
+});
+```</p>
+
+<p>Again, our test has a very simple structure: we visit the <code>tasks</code> route where all the tasks are displayed and delete the one we created in the test&rsquo;s setup. To make sure that the request was performed to the right endpoint we take advantage of the fact that <code>ember-cli-mirage</code> uses <code>pretender</code> under the hood which keeps track of all handled requests in <code>handledRequests</code> property. Thanks to this feature, we can identify our request based on the <strong>URL</strong> and the <strong>request method</strong>.</p>
+
+<h2>Wrapping Up</h2>
+
+<p>Testing <strong>outgoing requests</strong> in Ember might not be the most obvious thing to do. Fortunately, thanks to <a href="https://github.com/pretenderjs/pretender" target="_blank">pretender</a> and <a href="https://github.com/samselikoff/ember-cli-mirage" target="_blank">ember-cli-mirage</a>, we can easily verify both the <strong>URLs</strong> of the endpoints where the requests were performed to and the <strong>request body</strong> that was sent with the request.</p>
+
+<p>P.S. I&rsquo;ve just started <strong>writing a book</strong> about <strong>test-driving Ember</strong> applications. If you found this article useful, you are going to love it :). <strong>Subscribe</strong> to my newsletter to get updates and promotion code once it&rsquo;s released.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ember Tips: Managing Timeouts And Delays]]></title>
+    <link href="http://Azdaroth.github.io/blog/2017/04/30/ember-quick-tips-managing-timeouts-and-delays/"/>
+    <updated>2017-04-30T22:00:00+02:00</updated>
+    <id>http://Azdaroth.github.io/blog/2017/04/30/ember-quick-tips-managing-timeouts-and-delays</id>
+    <content type="html"><![CDATA[<p><strong>Timeouts</strong> and <strong>delays</strong> are quite extensively used in many applications when deferring execution of some action via <code>Ember.run.later</code> or debouncing via <code>Ember.run.debounce</code>. Having small amounts of tests executing such methods might not be a problem initially, but obviously, as the application grows, this can easily lead to <strong>slow test suite</strong> which takes minutes to finish due to the waiting for all the timeouts and delays in many places. Let&rsquo;s try to find the best solution to solve this problem.</p>
+
+<!--more-->
+
+
+<h2>Anatomy of The Problem</h2>
+
+<p>Imagine you are implementing a todo-list and want to add a <strong>destroy item feature</strong>. The obvious solution would be adding a button which would trigger some <code>destroy</code> action once a user clicks it. But the problem with such solution is that it doesn&rsquo;t offer the best <strong>UX</strong> as a user could easily destroy items <strong>by accident</strong>. A nicer way for such use cases is making a user hold the button for a certain period of time and only after this <strong>delay</strong> would the action be invoked, otherwise it won&rsquo;t be executed.</p>
+
+<p>A great news is that there is already an addon solving such problem: <a href="https://www.npmjs.com/package/ember-hold-button" target="_blank">ember-hold-button</a>. Let&rsquo;s create a very simple component handling the logic of displaying the item and deleting it after holding a button for 3 seconds using <code>ember-hold-button</code>:</p>
+
+<p>``` javascript app/components/display-todo-item.js
+import Ember from &lsquo;ember&rsquo;;</p>
+
+<p>const {
+  get,
+} = Ember;</p>
+
+<p>export default Ember.Component.extend({
+  actions: {</p>
+
+<pre><code>destroy() {
+  const item = get(this, 'item');
+
+  item.destroyRecord();
+},
+</code></pre>
+
+<p>  },
+});
+```</p>
+
+<p>
+<code>html app/templates/components/display-todo-item.hbs
+{{item.name}}
+{{#hold-button type="rectangle" action="destroy" delay=3000 data-test="destroy-item-btn"}}
+  Destroy
+{{/hold-button}}
+</code>
+</p>
+
+<p>Ok, cool, so the feature is done. What about integrations tests verifying that this feature works? Currently, it would take at least 3 seconds due to the waiting time + the runtime of the test itself, which is definitely too slow.</p>
+
+<h2>Solving The Problem</h2>
+
+<p>One way to fix this problem would be moving <code>delay</code> to computed property which would be configurable and by default make it equal to 3 seconds. The component would look like this in such case:</p>
+
+<p>``` javascript app/components/display-todo-item.js
+import Ember from &lsquo;ember&rsquo;;</p>
+
+<p>const {
+  get,
+} = Ember;</p>
+
+<p>export default Ember.Component.extend({
+  destroyActionDelay: 3000,</p>
+
+<p>  actions: {</p>
+
+<pre><code>destroy() {
+  const item = get(this, 'item');
+
+  item.destroyRecord();
+},
+</code></pre>
+
+<p>  },
+});
+```</p>
+
+<p>
+<code>html app/templates/components/display-todo-item.hbs
+{{item.name}}
+{{#hold-button type="rectangle" action="destroy" delay=destroyActionDelay data-test="destroy-item-btn"}}
+  Destroy
+{{/hold-button}}
+</code>
+</p>
+
+<p>To make integration tests fast, we would simply override the default value of <code>destroyActionDelay</code> and render the component in the test the following way:</p>
+
+<p>
+``` javascript tests/integration/components/display-todo-item-test.js
+// the rest of the tests</p>
+
+<p>this.render(hbs<code>{{display-todo-item item=item destroyActionDelay=0}}</code>);</p>
+
+<p>// the rest of the tests
+```
+</p>
+
+<p>This surely solves the problem for <strong>integration tests</strong>, but what about the <strong>acceptance ones</strong>? It would still take at least 3 seconds of waiting for this delay.</p>
+
+<p>For this purpose we could add a special function which would return the value for the delay <strong>based on the environment</strong>. For <strong>non-test</strong> we may want to return a provided value and for test environment some other value, which by default would be equal to 0 to make the tests fast. Let&rsquo;s add such a utility function and call it <code>timeoutForEnv</code>:</p>
+
+<p>``` javascript my-app/app/utils/timeout-for-env.js
+import config from &lsquo;my-app/config/environment&rsquo;;</p>
+
+<p>export default function timeoutForEnv(timeout, timeoutForTestEnv = 0) {
+  if (config.environment === &lsquo;test&rsquo;) {</p>
+
+<pre><code>return timeoutForTestEnv;
+</code></pre>
+
+<p>  } else {</p>
+
+<pre><code>return timeout;
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>And update the component:</p>
+
+<p>``` javascript app/components/display-todo-item.js
+import Ember from &lsquo;ember&rsquo;;
+import timeoutForEnv from &lsquo;my-app/utils/timeout-for-env&rsquo;;</p>
+
+<p>const {
+  get,
+} = Ember;</p>
+
+<p>export default Ember.Component.extend({
+  destroyActionDelay: timeoutForEnv(3000),</p>
+
+<p>  actions: {</p>
+
+<pre><code>destroy() {
+  const item = get(this, 'item');
+
+  item.destroyRecord();
+},
+</code></pre>
+
+<p>  },
+});
+```</p>
+
+<p>If we wanted for some reason to have a delay different than <code>0</code> for the test env, we could simply provide the value of the second argument:</p>
+
+<p>``` javascript app/components/display-todo-item.js
+import Ember from &lsquo;ember&rsquo;;
+import timeoutForEnv from &lsquo;my-app/utils/timeout-for-env&rsquo;;</p>
+
+<p>const {
+  get,
+} = Ember;</p>
+
+<p>export default Ember.Component.extend({
+  destroyActionDelay: timeoutForEnv(3000, 1000),</p>
+
+<p>  actions: {</p>
+
+<pre><code>destroy() {
+  const item = get(this, 'item');
+
+  item.destroyRecord();
+},
+</code></pre>
+
+<p>  },
+});
+```</p>
+
+<p>And that&rsquo;s it! It will work for both integration and acceptance tests.</p>
+
+<h2>Wrapping Up</h2>
+
+<p>Using a lot of <strong>timeouts</strong> and <strong>delays</strong> without special adjustments for tests can easily lead to a very <strong>slow test suite</strong> as the application grows. Fortunately, it&rsquo;s quite easy so solve such a problem by using <strong>environment-dependent</strong> config and setting the values to <code>0</code> for tests.</p>
+
+<p>P.S. I&rsquo;ve just started <strong>writing a book</strong> about <strong>test-driving Ember</strong> applications. If you found this article useful, you are going to love it :). <strong>Subscribe</strong> to my newsletter to get updates and promotion code once it&rsquo;s released.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ember Tips: Computed Properties And Arrow Functions? Not A Good Idea]]></title>
+    <link href="http://Azdaroth.github.io/blog/2016/12/11/ember-tips-computed-properties-and-arrow-functions-not-a-good-idea/"/>
+    <updated>2016-12-11T22:00:00+01:00</updated>
+    <id>http://Azdaroth.github.io/blog/2016/12/11/ember-tips-computed-properties-and-arrow-functions-not-a-good-idea</id>
+    <content type="html"><![CDATA[<p><strong>Arrow function expressions</strong> were definitely a great addition in ES6 and thanks to tools like <a href="https://babeljs.io" target="_blank">babel</a> the new syntax has been quite widely adopted. Besides more concise syntax, an interesting thing about <strong>arrow function expressions</strong> is that they preserve the context, i.e. they don't define their own <code>this</code>, which was sometimes annoying and resulted in assigning <code>that</code> or <code>self</code> variables to keep the outer context that could be referred inside functions. As great as it sounds, <strong>arrow function expressions</strong> cannot be used in all cases. One example would be <strong>Ember computed properties</strong>.</p>
+
+
+
+
+<!--more-->
+
+
+
+
+<h2>Arrow Function Expressions - A Quick Introduction</h2>
+
+
+
+
+<p>Let's start with a quick introduction to arrow functions. Before ES6, anytime we were using <strong>function expressions</strong> and wanted to refer <code>this</code> from outer context, we had to do some workarounds which are (arguably) a bit unnatural, especially comparing to other major programming languages.</p>
+
+
+
+
+<p>Let's do some pseudo-object-oriented programming with JavaScript (ES5) to illustrate a possible issue with <strong>function expressions</strong>:</p>
+
+
+<p>``` js
+function Order() {
+  this.id = Math.floor((Math.random() * 10000000) + 1); // don&rsquo;t do it in a production code ;)
+  this.items = [];
+}</p>
+
+<p>Order.prototype.addItem = function(item) {
+  this.items.push(item);
+}</p>
+
+<p>Order.prototype.logItems = function() {
+  this.items.forEach(function(item) {</p>
+
+<pre><code>console.log("item description: " + item.description + " for order with id: " + this.id);
+</code></pre>
+
+<p>  });
+}</p>
+
+<p>var order = new Order();
+order.addItem({ description: &lsquo;Glimmer 2 rockzzz&rsquo; });
+order.logItems();  // whooops
+```</p>
+
+<p>We have a simple class-like functionality using <strong>constructor function</strong> and <strong>prototype</strong> to implement <code>Order</code> with some questionable ( ;) ) way of assigning id and some <code>items</code>. We can add more items with <code>Order.prototype.addItem</code> function and we can log them with <code>Order.prototype.logItems</code> function.</p>
+
+
+
+
+<p>But there's a problem: <code>logItems</code> function doesn't log <code>id</code>, but logs <code>undefined</code> instead. Why is that?</p>
+
+
+
+
+<p><strong>Function expressions</strong> create their own context and define own <code>this</code>, so it no longer refers to the outer context, which is the <code>order</code> instance. There are several ways to solve this problem.</p>
+
+
+
+
+<p>The most obvious is to assign outer <code>this</code> to some other variable, like <code>that</code> or <code>self</code>:</p>
+
+
+<p>``` js
+Order.prototype.logItems = function() {
+  var self = this;
+  this.items.forEach(function(item) {</p>
+
+<pre><code>console.log("item description: " + item.description + " for order with id: " + self.id);
+</code></pre>
+
+<p>  });
+}
+```</p>
+
+<p>You can also pass outer <code>this</code> as a second argument to <code>forEach</code> function:</p>
+
+
+<p>``` js
+Order.prototype.logItems = function() {
+  this.items.forEach(function(item) {</p>
+
+<pre><code>console.log("item description: " + item.description + " for order with id: " + this.id);
+</code></pre>
+
+<p>  }, this);
+}
+```</p>
+
+<p>You can even explicitly <code>bind</code> outer <code>this</code> to callback argument inside <code>forEach</code> function:</p>
+
+
+<p>``` js
+Order.prototype.logItems = function() {
+  this.items.forEach(function(item) {</p>
+
+<pre><code>console.log("item description: " + item.description + " for order with id: " + this.id);
+</code></pre>
+
+<p>  }.bind(this));
+}
+```</p>
+
+<p>All these solutions work, but aren't really that clean. Fortunately, since ES6, we can use <code>arrow function expressions</code> which preserve outer context and don't define own <code>this</code>. After little refactoring <code>Order.prototype.logItems</code> could look like this:</p>
+
+
+<p>``` js
+Order.prototype.logItems = function() {
+  this.items.forEach((item) => {</p>
+
+<pre><code>console.log("item description: " + item.description + " for order with id: " + this.id);
+</code></pre>
+
+<p>  });
+}
+```</p>
+
+<p>Much Better!</p>
+
+
+
+
+<p>As great as it looks like, it may not be a good idea to apply <strong>arrow function expressions</strong> everywhere, especially for <strong>Ember computed properties</strong>.</p>
+
+
+
+
+<h2>Ember Computed Properties And Arrow Functions? - Not A Good Idea</h2>
+
+
+
+
+<p>Recently I was doing some refactoring in one Ember app. The syntax in one of the models was a bit mixed and there were some <strong>function expressions</strong> and <strong>arrow function expressions</strong> which looked a bit like this:</p>
+
+
+<p>``` js app/models/user.js
+import Ember from &ldquo;ember&rdquo;;
+import Model from &lsquo;ember-data/model&rsquo;;</p>
+
+<p>export default Model.extend({
+  fullname: Ember.computed(&lsquo;firstname&rsquo;, &lsquo;lastname&rsquo;, function() {</p>
+
+<pre><code>return `${this.get('firstName')} ${this.get('lastName')}`;
+</code></pre>
+
+<p>  }),</p>
+
+<p>  doThis: function() {</p>
+
+<pre><code>// some logic goes here
+</code></pre>
+
+<p>  },</p>
+
+<p>  doThat: function() {</p>
+
+<pre><code>// even more logic
+</code></pre>
+
+<p>  },</p>
+
+<p>  doYetAnotherThing(args) {</p>
+
+<pre><code>// more logic
+</code></pre>
+
+<p>  }
+});
+```</p>
+
+<p>So I decided ES6-ify entire syntax here and ended up with the following code:</p>
+
+
+<p>``` js app/models/user.js
+import Ember from &ldquo;ember&rdquo;;
+import Model from &lsquo;ember-data/model&rsquo;;</p>
+
+<p>export default Model.extend({
+  fullname: Ember.computed(&lsquo;firstname&rsquo;, &lsquo;lastname&rsquo;, () => {</p>
+
+<pre><code>return `${this.get('firstName')} ${this.get('lastName')}`;
+</code></pre>
+
+<p>  }),</p>
+
+<p>  doThis() {</p>
+
+<pre><code>// some logic goes here
+</code></pre>
+
+<p>  },</p>
+
+<p>  doThat() {</p>
+
+<pre><code>// even more logic
+</code></pre>
+
+<p>  },</p>
+
+<p>  doYetAnotherThing(args) {</p>
+
+<pre><code>// more logic
+</code></pre>
+
+<p>  }
+});
+```</p>
+
+<p>And how did this refactoring end up? Well, instead of a proper <code>fullName</code> I was getting <code>undefined undefined</code>! That was surprising, but then I looked at the changes and saw that I'm using <strong>arrow function expressions</strong> in computed properties and referring there to <code>this</code>, which won't obviously work for the reasons mentioned before. So what are the options for computed properties?</p>
+
+
+
+
+<p>The first one would be to simply use good ol' <strong>function expressions</strong>:</p>
+
+
+<p>``` js app/models/user.js
+import Ember from &ldquo;ember&rdquo;;
+import Model from &lsquo;ember-data/model&rsquo;;</p>
+
+<p>export default Model.extend({
+  fullname: Ember.computed(&lsquo;firstname&rsquo;, &lsquo;lastname&rsquo;, function() {</p>
+
+<pre><code>return `${this.get('firstName')} ${this.get('lastName')}`;
+</code></pre>
+
+<p>  })
+});
+```</p>
+
+<p>But if you don't really like it, you may define <strong>explicit getter</strong>:</p>
+
+
+<p>``` js app/models/user.js
+import Ember from &ldquo;ember&rdquo;;
+import Model from &lsquo;ember-data/model&rsquo;;</p>
+
+<p>export default Model.extend({
+  fullname: Ember.computed(&lsquo;firstname&rsquo;, &lsquo;lastname&rsquo;, {</p>
+
+<pre><code>get() {
+  return `${this.get('firstName')} ${this.get('lastName')}`;
+}
+</code></pre>
+
+<p>  })
+});
+```</p>
+
+<p>And the last option, my preferred one: unleashing the power of <a href="https://karolgalanciak.com/blog/2015/12/02/ember-and-es7-decorators/" target="_blank">ES7 decorators</a> and using <a href="https://github.com/rwjblue/ember-computed-decorators" target="_blank">ember-computed-decorators</a> addon. That way we could define <code>fullName</code> computed property in the following way:</p>
+
+
+<p>``` js app/models/user.js
+import Ember from &ldquo;ember&rdquo;;
+import Model from &lsquo;ember-data/model&rsquo;;
+import computed from &lsquo;ember-computed-decorators&rsquo;;</p>
+
+<p>export default Model.extend({
+  @computed(&lsquo;firstName&rsquo;, &lsquo;lastName&rsquo;)
+  fullname(firstName, lastName) {</p>
+
+<pre><code>return `${firstName} ${lastName}`;
+</code></pre>
+
+<p>  }
+});
+```</p>
+
+<p>which looks just beautiful ;).</p>
+
+
+
+
+<h2>Wrapping Up</h2>
+
+
+
+
+<p>Even though <strong>arrow function expressions</strong> are very convenient to use, they can't be used interchangeably with <strong>function expressions</strong>. Sometimes you may not want <code>this</code> inside a function to preserve outer context, which is exactly the case with <strong>Ember computed properties</strong>.</p>
+
+]]></content>
+  </entry>
+  
+</feed>

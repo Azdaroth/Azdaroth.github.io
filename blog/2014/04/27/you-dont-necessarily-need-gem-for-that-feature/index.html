@@ -1,0 +1,1768 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>You don't (necessarily) need gem for that feature - Karol Galanciak - Ruby on Rails and Ember.js consultant</title>
+  <meta name="author" content="Karol Galanciak">
+
+  
+  <meta name="description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  
+  <meta name="keywords" content="Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps">
+
+  
+  
+
+  <meta property="og:title" value="You don't (necessarily) need gem for that feature - Karol Galanciak - Ruby on Rails and Ember.js consultant" />
+  <meta property="og:description" value="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications." />
+  <meta property="og:url" value="http://Azdaroth.github.io/blog/2014/04/27/you-dont-necessarily-need-gem-for-that-feature/" />
+  <meta property="og:type" content="website" />
+  
+  <meta property="og:site_name" content="Karol Galanciak - Ruby on Rails and Ember.js consultant"/>
+  <meta property="og:locale" content="en_US" />
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@Azdaroth">
+  <meta name="twitter:creator" content="@Azdaroth">
+  <meta name="twitter:title" content="You don't (necessarily) need gem for that feature - Karol Galanciak - Ruby on Rails and Ember.js consultant">
+  <meta name="twitter:url" content="">
+  <meta name="twitter:description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://Azdaroth.github.io/blog/2014/04/27/you-dont-necessarily-need-gem-for-that-feature">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Karol Galanciak - Ruby on Rails and Ember.js consultant" type="application/atom+xml">
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "BlogPosting",
+      "mainEntityOfPage": {
+        "@type":"WebPage",
+        "@id": "http://Azdaroth.github.io/blog/2014/04/27/you-dont-necessarily-need-gem-for-that-feature"
+      },
+      "headline": "You don't (necessarily) need gem for that feature - Karol Galanciak - Ruby on Rails and Ember.js consultant",
+        "image": {
+        "@type": "ImageObject",
+        "url": "",
+        "height": 640,
+        "width": 1024
+      },
+      "datePublished": "2014-04-27",
+      "dateModified": "2018-06-12",
+      "author": {
+        "@type": "Person",
+        "name": "Karol Galanciak"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Karol Galanciak",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://karolgalanciak.com/images/me_formal.jpg",
+          "width": 600,
+          "height": 60
+        }
+      },
+      "description": "Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.",
+      "keywords": "Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps"
+    }
+  </script>
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-42570582-1', 'auto');
+    ga('send', 'pageview');
+    ga('set', 'anonymizeIp', true);
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Karol Galanciak - Ruby on Rails and Ember.js consultant</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:Azdaroth.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">About Me</a></li>
+  <li><a href="/blog">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/test-driven-ember">Test-Driven Ember Book</a></li>
+  <li><a href="/presentations">Presentations</a></li>
+  <li><a href="/publications">Publications</a></li>
+  <li><a href="/open-source">Open Source</a></li>
+  <li><a href="/privacy-policy">Privacy Policy</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">You Don't (Necessarily) Need Gem for That Feature</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-27T17:02:00+02:00" pubdate data-updated="true">Apr 27<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>You are working currently on that awesome app and just started thinking about implementing new feature, let&#8217;s call it feature X. What&#8217;s the first thing you do? Rolling your own solution or&#8230; maybe checking if there&#8217;s a magical gem that can help you solve that problem? Ok, it turns out there&#8217;s already a gem Y that does what you expect. Also, it does tons of other things and is really complex. After some time your app breaks, something is definitively not working and it seems that gem Y is responsible for that. So you read all the issues on Github, pull requests and even read the source code and finally find a little bug. You managed to do some monkeypatching first and then send pull request for a small fix and solved a problem, which took you a few hours. Looks like a problem is solved. And then, you try to update Rails to2 the current version. Seems like there&#8217;s a dependency problem - gem Y depends on previous version of Rails&#8230;</p>
+
+
+
+
+<!--more-->
+
+
+<p></p>
+
+<p>Does it sound somehow familiar to you, especially when updating Rails? If it&#8217;s caused by &#8220;big&#8221; gem that solves a lot of problems and is still maintained, it&#8217;s not that bad. How about these &#8220;small&#8221; gems, which come in handy and look quite complex but you could roll your own solution to that particular problem within half an hour?</p>
+
+
+
+
+<p>I&#8217;ve seen this many times where first thing when implementing new feature is searching for a gem that solves this problem. We need really basic polymorphic tags? Let&#8217;s use <a href="https://github.com/mbleigh/acts-as-taggable-on" target="_blank">acts-as-taggable-on</a>, we don&#8217;t need half of the features provided and setting up a few migrations and associations would take 10 minutes anyway but there&#8217;s no need to reinvent the wheel. Client asked for a simple admin panel with some CRUD stuff involving several models. Let&#8217;s use <a href="https://github.com/gregbell/active_admin" target="_blank">active_admin</a> or <a href="https://github.com/sferik/rails_admin" target="_blank">rails_admin</a> for that! Simple searching / filtering where several fields in one model are involved? <a href="https://github.com/activerecord-hackery/ransack" target="_blank">Ransack</a> is an obvious choice!</p>
+
+
+
+
+<p>More gems mean: slower boot time of your application, more dependencies (don&#8217;t look only at Gemfile, Gemfile.lock is the real deal), more things that can break, more issues to take care of when updating Rails and the gem itself (reading changelogs, issues etc.).</p>
+
+
+
+
+<h2>When to use third party gem when implementing feature X?</h2>
+
+
+
+
+<ul>
+  <li>Gem is actively being maintained, there were some commits not that long ago (basic prerequisite)</li>
+  <li>Gem solves the exact problem you have and does only that</li>
+  <li>Gem does plenty of other things but it deals with areas you are not really familiar involving security, encryption etc. (e.g. <a href="https://github.com/reidmorrison/symmetric-encryption" target="_blank">symmetric-encryption</a>)</li>
+  <li>Gem does many other things and you need just a small part of it but rolling your own solution would take really a lot of time (e.g. <a href="https://github.com/plataformatec/devise" target="_blank">devise</a>)</li>
+  <li>Gem deals with complex infrastructure things (e.g. <a href="https://github.com/carrierwaveuploader/carrierwave" target="_blank">carrierwave</a>)</li>
+  <li>Gem has a nice integration with many other gems you already use</li>
+</ul>
+
+
+
+
+<p>Remember that using gem Y means also reading docs and it might be beneficial to read some parts of source code, just to get the general idea how it works. It also takes some time. Why not implement your own solution? It might look like reinventing the wheel but no gem will be that customizable to the extent you need. Or you will be using just a small part of it and the models / controllers will have tens of additional methods you don&#8217;t need (and hundreds more with several gems).</p>
+
+
+
+
+<h2>Writing own solution</h2>
+
+
+
+
+<p>How much work does it really take to reimplement a gem? Let&#8217;s take a look at something popular - <a href="https://github.com/drapergem/draper" target="_blank">draper</a> gem. Draper is a pretty good solution for decorators/presenters for your models in Rails apps. I&#8217;ve been using it for quite long a time, had some issues but managed to solve them rather quickly. Unfortunately, the source code looks quite complex, especially extracting view_context with a bit global-variable-like RequestStore. And there are some other complex parts that I don&#8217;t really use. Let&#8217;s write custom presenter and call it DecentPresenter. What kind of interface and conventions would I expect from it?</p>
+
+
+
+
+<ul>
+  <li>Include some module in controllers (ApplicationController) - I want to be explicit here, without including it automatically on Rails app boot. Also, I don&#8217;t want to include it in models - model doesn&#8217;t have to know that it can be presented in one way or another</li>
+  <li>Establish naming convention: default presenter for User would be <code>UserPresenter</code></li>
+  <li>Call <code>present(user)</code> in controller which would wrap user by <code>UserPresenter</code> and <code>present(User.all)</code> which would handle collections</li>
+  <li>Ability to specify other presenter than the default one - <code>present(user, with: OtherPresenter)</code></li>
+  <li>Have access to helpers within presenters</li>
+  <li>Presenters will inherit from some base class (<code>DecentPresenter::Base</code>)</li>
+</ul>
+
+
+
+
+<p>Doesn&#8217;t really look that hard. Getting access to Rails helpers might seem difficult but we can get it from <code>view_context</code> in controllers. Let&#8217;s start with integration test for presenters. We want to include a module to a class (Controller), which would mix in <code>present</code> method. Let&#8217;s call it DecentPresenter::Exposable:</p>
+
+
+
+
+<figure class='code'><figcaption><span>spec/decent_presenter/exposable_spec.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">DummyModelForExposableTest</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">name</span>
+</span><span class='line'>    <span class="s2">&quot;name&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">DummyModelForExposableTestPresenter</span> <span class="o">&lt;</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">name</span>
+</span><span class='line'>    <span class="s2">&quot;presented name&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">DummyModelForExposableOtherPresenter</span> <span class="o">&lt;</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">name</span>
+</span><span class='line'>    <span class="s2">&quot;other presented name&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">DummyObjectErrorPresenterExposable</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">include</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Exposable</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">present_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">present</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">DummyObjectPresenterExposable</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">view_context</span> <span class="p">;</span> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">include</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Exposable</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">present_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">present</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">present_model_with_options</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">present</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">present_collection</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">present</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">present_collection_with_options</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">present</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Exposable</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">context</span> <span class="s2">&quot;view_context prerequisite&quot;</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;raises DoesNotImplementViewContextError if view_context method</span>
+</span><span class='line'><span class="s2">      is not defined&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">model</span> <span class="o">=</span> <span class="no">DummyModelForExposableTest</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>      <span class="n">expect</span> <span class="k">do</span>
+</span><span class='line'>        <span class="no">DummyObjectErrorPresenterExposable</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">present_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span><span class="o">.</span><span class="n">to</span> <span class="n">raise_error</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Exposable</span><span class="o">::</span><span class="no">DoesNotImplementViewContextError</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;Object must implement :view_context method to handle presentation&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;doesn&#39;t raise DoesNotImplementViewContextError if view_context method</span>
+</span><span class='line'><span class="s2">      is defined&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">model</span> <span class="o">=</span> <span class="no">DummyModelForExposableTest</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>      <span class="n">expect</span> <span class="k">do</span>
+</span><span class='line'>        <span class="no">DummyObjectPresenterExposable</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">present_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span><span class="o">.</span><span class="n">not_to</span> <span class="n">raise_error</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">context</span> <span class="s2">&quot;presentation&quot;</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">let</span><span class="p">(</span><span class="ss">:model</span><span class="p">)</span> <span class="p">{</span> <span class="no">DummyModelForExposableTest</span><span class="o">.</span><span class="n">new</span> <span class="p">}</span>
+</span><span class='line'>    <span class="n">let</span><span class="p">(</span><span class="ss">:collection</span><span class="p">)</span> <span class="p">{</span> <span class="o">[</span><span class="n">model</span><span class="o">]</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">subject</span> <span class="p">{</span> <span class="no">DummyObjectPresenterExposable</span><span class="o">.</span><span class="n">new</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;presents model with default presenter&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">subject</span><span class="o">.</span><span class="n">present_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span> <span class="s2">&quot;presented name&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;presents model with specified presenter&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">subject</span><span class="o">.</span><span class="n">present_model_with_options</span><span class="p">(</span>
+</span><span class='line'>          <span class="n">model</span><span class="p">,</span>
+</span><span class='line'>          <span class="ss">with</span><span class="p">:</span> <span class="no">DummyModelForExposableOtherPresenter</span>
+</span><span class='line'>        <span class="p">)</span><span class="o">.</span><span class="n">name</span>
+</span><span class='line'>      <span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span> <span class="s2">&quot;other presented name&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;presents models collection with default presenter&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">subject</span><span class="o">.</span><span class="n">present_collection</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span> <span class="s2">&quot;presented name&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;presents models collection with specified presenter&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">subject</span><span class="o">.</span><span class="n">present_collection_with_options</span><span class="p">(</span>
+</span><span class='line'>          <span class="n">collection</span><span class="p">,</span>
+</span><span class='line'>          <span class="ss">with</span><span class="p">:</span> <span class="no">DummyModelForExposableOtherPresenter</span>
+</span><span class='line'>        <span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">name</span>
+</span><span class='line'>      <span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span> <span class="s2">&quot;other presented name&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>What happens here? First off, we set up some dummy classes: DummyModel with <code>name</code> method, two presenters for testing with default presenter and other presenter and two classes, where we include <code>DecentPresenter::Exposable</code> module. Why two? Just to check that if the object implements <code>view_context</code> method. If the <code>view_context</code> method is not implemented, we provide descriptive error. Then we write some tests for a single model / collection and default / custom presenter to check if they are presented. Let&#8217;s write some code:</p>
+
+
+
+
+<figure class='code'><figcaption><span>lib/decent_presenter/exposable.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">DecentPresenter</span>
+</span><span class='line'>  <span class="k">module</span> <span class="nn">Exposable</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">present</span><span class="p">(</span><span class="n">presentable</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{})</span>
+</span><span class='line'>      <span class="k">if</span> <span class="nb">respond_to?</span> <span class="ss">:view_context</span><span class="p">,</span> <span class="kp">true</span>
+</span><span class='line'>        <span class="c1"># decorate the presentable object here</span>
+</span><span class='line'>      <span class="k">else</span>
+</span><span class='line'>        <span class="k">raise</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Exposable</span><span class="o">::</span><span class="no">DoesNotImplementViewContextError</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+</span><span class='line'>          <span class="s2">&quot;Object must implement :view_context method to handle presentation&quot;</span>
+</span><span class='line'>        <span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">class</span> <span class="nc">DoesNotImplementViewContextError</span> <span class="o">&lt;</span> <span class="no">StandardError</span> <span class="p">;</span> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>And just define base class for presenters:</p>
+
+
+
+
+<figure class='code'><figcaption><span>lib/decent_presenter/base.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">moduleDecentPresenter</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">Base</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Tests within presentation context still fail but they will be the last ones that will pass. Let&#8217;s leave them for now and thing about base class - <code>DecentPresenter::Base</code> and it&#8217;s subclasses, our presenters. We want to have access to helpers by <code>helpers</code> method and <code>h</code> for shorthand. We also need have access to presented object: by <code>object</code> and <code>model</code> methods. If the method isn&#8217;t implemented by presenter, it should be delegated to presented model. Sounds like <code>method_missing</code>? That&#8217;s one possibility. Let&#8217;s try something different - <a href="http://www.ruby-doc.org/stdlib-1.9.3/libdoc/delegate/rdoc/SimpleDelegator.html" target="_blank">SimpleDelegator</a>. SimpleDelegator is a pretty cool core class with two public methods <code>__getobj__</code> and <code>__setobj__</code> - the first one exposes decorated object and the latter sets objects to which all method calls will be delegated. The object is set when we pass it to the constructor of <code>SimpleDelegator</code>. Looks like our <code>DecentPresenter::Base</code> class will inherit from <code>SimpleDelegator</code>. But we will need to override constructor to pass <code>view_context</code>. Also, it would be quite useful to be able to present other objects within our presenters. Let&#8217;s write some tests:</p>
+
+
+
+
+<figure class='code'><figcaption><span>specs/decent_presenter/base_spec.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">DummyModelForBaseClassTest</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">name</span>
+</span><span class='line'>    <span class="s2">&quot;dummy_model_name&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">stuff</span>
+</span><span class='line'>    <span class="s2">&quot;stuff&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">DummyViewContext</span> <span class="p">;</span> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">DummyModelPresenter</span> <span class="o">&lt;</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">name</span>
+</span><span class='line'>    <span class="s2">&quot;presented </span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Base</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:model</span><span class="p">)</span> <span class="p">{</span> <span class="no">DummyModelForBaseClassTest</span><span class="o">.</span><span class="n">new</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:view_context</span><span class="p">)</span> <span class="p">{</span> <span class="no">DummyViewContext</span><span class="o">.</span><span class="n">new</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">context</span> <span class="s2">&quot;base&quot;</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">subject</span> <span class="p">{</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">view_context</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;exposes model as model&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">subject</span><span class="o">.</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span> <span class="n">model</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;exposes model as object&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">subject</span><span class="o">.</span><span class="n">object</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span> <span class="n">model</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;exposes view_context as h&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">subject</span><span class="o">.</span><span class="n">h</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span> <span class="n">view_context</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;exposes view_context as helpers&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">subject</span><span class="o">.</span><span class="n">helpers</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span> <span class="n">view_context</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">context</span> <span class="s2">&quot;subclass&quot;</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">subject</span> <span class="p">{</span> <span class="no">DummyModelPresenter</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">view_context</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;decorates model&#39;s methods&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">subject</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span> <span class="s2">&quot;presented dummy_model_name&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;delegates method calls to model when the method is not defined</span>
+</span><span class='line'><span class="s2">      within presenter&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">subject</span><span class="o">.</span><span class="n">stuff</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span> <span class="s2">&quot;stuff&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;implements presentable interface&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">subject</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">respond_to</span> <span class="ss">:present</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Like before, we setup some DummyClasses and write some tests for the requirements we&#8217;ve just discussed. Our base class implements <code>view_context</code> so it looks like we just need to include <code>DecentPresenter::Exposable</code> module and we will be able to decorate other objects within our presenters. We cover it be checking if the subclasses implement required interface. We also cover some delegation stuff in tests, <code>SimpleDelegator</code> ensures it will be delegated but it is a core functionality for presenters so it might be a good idea to test for it. Let&#8217;s write the implementation:</p>
+
+
+
+
+<figure class='code'><figcaption><span>lib/decent_presenter/base.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">DecentPresenter</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">Base</span> <span class="o">&lt;</span> <span class="no">SimpleDelegator</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kp">include</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Exposable</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kp">attr_reader</span> <span class="ss">:view_context</span>
+</span><span class='line'>    <span class="kp">private</span> <span class="ss">:view_context</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">object</span><span class="p">,</span> <span class="n">view_context</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">super</span><span class="p">(</span><span class="n">object</span><span class="p">)</span>
+</span><span class='line'>      <span class="vi">@view_context</span> <span class="o">=</span> <span class="n">view_context</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">model</span>
+</span><span class='line'>      <span class="n">__getobj__</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">alias</span> <span class="ss">:object</span> <span class="ss">:model</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">helpers</span>
+</span><span class='line'>      <span class="n">view_context</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">alias</span> <span class="ss">:h</span> <span class="ss">:helpers</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>We need a main interface which would wrap our models within presenters. Sure, we could do it in present method but I don&#8217;t really like the idea that the e.g. controller would know, how to present a model. Let&#8217;s implement dedicated interface which is going to be used by <code>present</code> method. We have some integration tests for presenters, base class is already covered, so we will just need to check, if a model or collection is decorated by presenters:</p>
+
+
+
+
+<figure class='code'><figcaption><span>spec/decent_presenter/exposure_spec.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">DummyModelForExposureTest</span> <span class="p">;</span> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">DummyModelForExposureTestPresenter</span> <span class="o">&lt;</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Base</span> <span class="p">;</span> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">DummyModelForExposureTestOtherPresenter</span> <span class="o">&lt;</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Base</span> <span class="p">;</span> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Exposure</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:presenter_factory</span><span class="p">)</span> <span class="p">{</span> <span class="n">double</span><span class="p">(</span><span class="ss">:presenter_factory</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:view_context</span><span class="p">)</span> <span class="p">{</span> <span class="n">double</span><span class="p">(</span><span class="ss">:view_context</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:model</span><span class="p">)</span> <span class="p">{</span> <span class="no">DummyModelForExposureTest</span><span class="o">.</span><span class="n">new</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:collection</span><span class="p">)</span> <span class="p">{</span> <span class="o">[</span><span class="n">model</span><span class="o">]</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">subject</span> <span class="p">{</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Exposure</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">view_context</span><span class="p">,</span> <span class="n">presenter_factory</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">before</span><span class="p">(</span><span class="ss">:each</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">allow</span><span class="p">(</span><span class="n">presenter_factory</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">receive</span><span class="p">(</span><span class="ss">:presenter_for</span><span class="p">)</span>
+</span><span class='line'>      <span class="o">.</span><span class="n">with</span><span class="p">(</span><span class="n">model</span><span class="p">)</span> <span class="p">{</span> <span class="no">DummyModelForExposureTestPresenter</span> <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;presents model with default presenter&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">presented_model</span> <span class="o">=</span> <span class="n">subject</span><span class="o">.</span><span class="n">present</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">presented_model</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">be_instance_of</span> <span class="no">DummyModelForExposureTestPresenter</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;presents model with specified presenter&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">presented_model</span> <span class="o">=</span> <span class="n">subject</span><span class="o">.</span><span class="n">present</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="ss">with</span><span class="p">:</span> <span class="no">DummyModelForExposureTestOtherPresenter</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">presented_model</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">be_instance_of</span> <span class="no">DummyModelForExposureTestOtherPresenter</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;presents models in collection with default presenter&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">presented_collection</span> <span class="o">=</span> <span class="n">subject</span><span class="o">.</span><span class="n">present</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">presented_collection</span><span class="o">.</span><span class="n">first</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">be_instance_of</span> <span class="no">DummyModelForExposureTestPresenter</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;presents models in collection with specified presenter&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">presented_collection</span> <span class="o">=</span> <span class="n">subject</span><span class="o">.</span><span class="n">present</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="ss">with</span><span class="p">:</span> <span class="no">DummyModelForExposureTestOtherPresenter</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">presented_collection</span><span class="o">.</span><span class="n">first</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">be_instance_of</span> <span class="no">DummyModelForExposureTestOtherPresenter</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>The <code>Exposure</code> class is going to have one public method which takes model or collection as the first argument and the options hash, where we can specify presenter. If it&#8217;s not specified the default presenter will be used. And how do we know what the default presenter is? Don&#8217;t know yet, so let&#8217;s introduce a collaborator, which takes model and returns default presenter for it. We will call it <code>presenter_factory</code>. We also need to remember about the <code>view_context</code> dependency. Let&#8217;s write the implementation:</p>
+
+
+
+
+<p>Note: again, the implementation is quite clean, but remember the TDD cycle: red, green, refactor, write minimal implementation for the first test, make it pass and repeat. This post is not about how to TDD properly and to focus on the core things I just give code after the refactoring phase. </p>
+
+
+
+
+<figure class='code'><figcaption><span>lib/decent_presenter/exposure.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">DecentPresenter</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">Exposure</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kp">attr_reader</span> <span class="ss">:view_context</span><span class="p">,</span> <span class="ss">:presenter_factory</span>
+</span><span class='line'>    <span class="kp">private</span> <span class="ss">:view_context</span><span class="p">,</span> <span class="ss">:presenter_factory</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">view_context</span><span class="p">,</span> <span class="n">presenter_factory</span><span class="p">)</span>
+</span><span class='line'>      <span class="vi">@view_context</span> <span class="o">=</span> <span class="n">view_context</span>
+</span><span class='line'>      <span class="vi">@presenter_factory</span> <span class="o">=</span> <span class="n">presenter_factory</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">present</span><span class="p">(</span><span class="n">presentable</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{})</span>
+</span><span class='line'>      <span class="k">if</span> <span class="n">presentable</span><span class="o">.</span><span class="n">respond_to?</span><span class="p">(</span><span class="ss">:size</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">present_collection</span><span class="p">(</span><span class="n">presentable</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">else</span>
+</span><span class='line'>        <span class="n">present_model</span><span class="p">(</span><span class="n">presentable</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">def</span> <span class="nf">present_model</span><span class="p">(</span><span class="n">presentable</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{})</span>
+</span><span class='line'>        <span class="n">presenter</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:with</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>          <span class="n">presenter_factory</span><span class="o">.</span><span class="n">presenter_for</span><span class="p">(</span><span class="n">presentable</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>        <span class="n">presenter</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">presentable</span><span class="p">,</span> <span class="n">view_context</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">def</span> <span class="nf">present_collection</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{})</span>
+</span><span class='line'>        <span class="n">collection</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">el</span><span class="o">|</span> <span class="n">present_model</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We need somehow to distinguish between collection and a single model. The collection will probably implement the <code>size</code> method. What if the model also implements size method? Looks like we need to make some paranoid check. Let&#8217;s modify test for <code>DecentPresenter::Exposure</code> and add <code>size</code> method to DummyModel:</p>
+
+
+
+
+<figure class='code'><figcaption><span>spec/decent_presenter/exposure_spec.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># other code</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">DummyModelForExposureTest</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">size</span> <span class="p">;</span> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># other code</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Now the tests fail. How can we make sure the collection really is a collection? Besides <code>size</code>, it&#8217;ll probably implement <code>to_a</code> and <code>first</code> methods. Let&#8217;s update the implementation:</p>
+
+
+
+
+<figure class='code'><figcaption><span>lib/decent_presenter/exposure.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">DecentPresenter</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">Exposure</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kp">attr_reader</span> <span class="ss">:view_context</span><span class="p">,</span> <span class="ss">:presenter_factory</span>
+</span><span class='line'>    <span class="kp">private</span> <span class="ss">:view_context</span><span class="p">,</span> <span class="ss">:presenter_factory</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">view_context</span><span class="p">,</span> <span class="n">presenter_factory</span><span class="p">)</span>
+</span><span class='line'>      <span class="vi">@view_context</span> <span class="o">=</span> <span class="n">view_context</span>
+</span><span class='line'>      <span class="vi">@presenter_factory</span> <span class="o">=</span> <span class="n">presenter_factory</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">present</span><span class="p">(</span><span class="n">presentable</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{})</span>
+</span><span class='line'>      <span class="k">if</span> <span class="n">presentable_is_a_collection?</span><span class="p">(</span><span class="n">presentable</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">present_collection</span><span class="p">(</span><span class="n">presentable</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">else</span>
+</span><span class='line'>        <span class="n">present_model</span><span class="p">(</span><span class="n">presentable</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">def</span> <span class="nf">present_model</span><span class="p">(</span><span class="n">presentable</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{})</span>
+</span><span class='line'>        <span class="n">presenter</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:with</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>          <span class="n">presenter_factory</span><span class="o">.</span><span class="n">presenter_for</span><span class="p">(</span><span class="n">presentable</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>        <span class="n">presenter</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">presentable</span><span class="p">,</span> <span class="n">view_context</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">def</span> <span class="nf">present_collection</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{})</span>
+</span><span class='line'>        <span class="n">collection</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">el</span><span class="o">|</span> <span class="n">present_model</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">def</span> <span class="nf">presentable_is_a_collection?</span><span class="p">(</span><span class="n">presentable</span><span class="p">)</span>
+</span><span class='line'>        <span class="o">[</span><span class="ss">:size</span><span class="p">,</span> <span class="ss">:to_a</span><span class="p">,</span> <span class="ss">:first</span><span class="o">].</span><span class="n">all?</span> <span class="p">{</span> <span class="o">|</span><span class="nb">method</span><span class="o">|</span> <span class="n">presentable</span><span class="o">.</span><span class="n">respond_to?</span> <span class="nb">method</span> <span class="p">}</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Looks like we only have <code>DecentPresenter::Factory</code> left. The factory should return a default presenter (constant) based on model&#8217;s class. What if it doesn&#8217;t exist? We will provide descriptive error message. Let&#8217;s write tests:</p>
+
+
+
+
+<figure class='code'><figcaption><span>spec/decent_presenter/factory_spec.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">DummyModelForFactoryPresenter</span> <span class="p">;</span> <span class="k">end</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">DummyModelForFactory</span> <span class="p">;</span> <span class="k">end</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">OtherDummyModel</span> <span class="p">;</span> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Factory</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">subject</span> <span class="p">{</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Factory</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;implements DecentPresenter Factory interface&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">subject</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">respond_to</span> <span class="ss">:presenter_for</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">describe</span> <span class="s2">&quot;.presenter_for&quot;</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;gives presenter class based on object&#39;s class in convention: KlassPresenter&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">model</span> <span class="o">=</span> <span class="no">DummyModelForFactory</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">subject</span><span class="o">.</span><span class="n">presenter_for</span><span class="p">(</span><span class="n">model</span><span class="p">))</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span> <span class="no">DummyModelForFactoryPresenter</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;raises PresenterForModelDoesNotExist error if presenter class is not defined&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">model</span> <span class="o">=</span> <span class="no">OtherDummyModel</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>      <span class="n">expect</span> <span class="k">do</span>
+</span><span class='line'>        <span class="n">subject</span><span class="o">.</span><span class="n">presenter_for</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span><span class="o">.</span><span class="n">to</span> <span class="n">raise_error</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Factory</span><span class="o">::</span><span class="no">PresenterForModelDoesNotExist</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;expected OtherDummyModelPresenter presenter to exist&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>I also added test for covering factory interface to guard against changing interface which is used in <code>DecentPresenter::Exposure</code> - you can imagine the situation where the method name is changed and the tests still pass. We have integration tests for it (<code>DecentPresenter::Exposable</code>) but having these kind of tests underlines the fact that it shouldn&#8217;t be changed. To extract the presenter&#8217;s name from model we will ask model for it&#8217;s class, add &#8220;Presenter&#8221; suffix and use <code>classify</code> method:</p>
+
+
+
+
+<figure class='code'><figcaption><span>lib/decent_presenter/factory.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">DecentPresenter</span>
+</span><span class='line'>  <span class="k">module</span> <span class="nn">Factory</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kp">extend</span> <span class="nb">self</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">presenter_for</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">presenter_class_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">class</span><span class="si">}</span><span class="s2">Presenter&quot;</span>
+</span><span class='line'>      <span class="k">begin</span>
+</span><span class='line'>        <span class="n">presenter_class_name</span><span class="o">.</span><span class="n">constantize</span>
+</span><span class='line'>      <span class="k">rescue</span> <span class="no">NameError</span>
+</span><span class='line'>        <span class="k">raise</span> <span class="no">PresenterForModelDoesNotExist</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+</span><span class='line'>          <span class="s2">&quot;expected </span><span class="si">#{</span><span class="n">presenter_class_name</span><span class="si">}</span><span class="s2"> presenter to exist&quot;</span>
+</span><span class='line'>        <span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">class</span> <span class="nc">PresenterForModelDoesNotExist</span> <span class="o">&lt;</span> <span class="no">StandardError</span> <span class="p">;</span> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>The last thing is to make integration tests pass, let&#8217;s finish the <code>present</code> method:</p>
+
+
+
+
+<figure class='code'><figcaption><span>lib/decent_presenter/exposable.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">DecentPresenter</span>
+</span><span class='line'>  <span class="k">module</span> <span class="nn">Exposable</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">present</span><span class="p">(</span><span class="n">presentable</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{})</span>
+</span><span class='line'>      <span class="k">if</span> <span class="nb">respond_to?</span> <span class="ss">:view_context</span>
+</span><span class='line'>        <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Exposure</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+</span><span class='line'>          <span class="n">view_context</span><span class="p">,</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Factory</span>
+</span><span class='line'>        <span class="p">)</span><span class="o">.</span><span class="n">present</span><span class="p">(</span><span class="n">presentable</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">else</span>
+</span><span class='line'>        <span class="k">raise</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Exposable</span><span class="o">::</span><span class="no">DoesNotImplementViewContextError</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+</span><span class='line'>          <span class="s2">&quot;Object must implement :view_context method to handle presentation&quot;</span>
+</span><span class='line'>        <span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">class</span> <span class="nc">DoesNotImplementViewContextError</span> <span class="o">&lt;</span> <span class="no">StandardError</span> <span class="p">;</span> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Seems like we are almost done. All tests pass but one common use case still won&#8217;t work - pagination. We can use some array pagination but it&#8217;s pretty inconvenient. We need somehow to keep a reference of the original collection, delegate some pagination methods to the original collection and other methods should be handled by presented collection. Sounds like a proxy? Let&#8217;s write tests for <code>DecentPresenter::CollectionProxy</code>:</p>
+
+
+
+
+<figure class='code'><figcaption><span>spec/decent_presenter/collection_proxy_spec.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">TEST_COLLECTION_PROXY_PAGINATION_METHODS</span> <span class="o">=</span> <span class="o">[</span>
+</span><span class='line'>  <span class="ss">:current_page</span><span class="p">,</span> <span class="ss">:total_pages</span><span class="p">,</span>
+</span><span class='line'>  <span class="ss">:limit_value</span><span class="p">,</span> <span class="ss">:model_name</span><span class="p">,</span> <span class="ss">:total_count</span><span class="p">,</span>
+</span><span class='line'>  <span class="ss">:total_entries</span><span class="p">,</span> <span class="ss">:per_page</span><span class="p">,</span> <span class="ss">:offset</span>
+</span><span class='line'><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">DummyOriginalForCollectionProxy</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="no">TEST_COLLECTION_PROXY_PAGINATION_METHODS</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="nb">method</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">define_method</span> <span class="nb">method</span> <span class="k">do</span>
+</span><span class='line'>      <span class="s2">&quot;original&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">DummyPresentedForCollectionProxy</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">presented_method</span>
+</span><span class='line'>    <span class="s2">&quot;presented&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">other_presented_method</span>
+</span><span class='line'>    <span class="s2">&quot;presented&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:CollectionProxy</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">subject</span> <span class="p">{</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:CollectionProxy</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+</span><span class='line'>    <span class="no">DummyOriginalForCollectionProxy</span><span class="o">.</span><span class="n">new</span><span class="p">,</span> <span class="no">DummyPresentedForCollectionProxy</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;delegates pagination-related methods to original collection&quot;</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="no">TEST_COLLECTION_PROXY_PAGINATION_METHODS</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">pagination_method</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">subject</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">pagination_method</span><span class="p">))</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span> <span class="s2">&quot;original&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;delegates other methods to presented collection&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="o">[</span><span class="ss">:presented_method</span><span class="p">,</span> <span class="ss">:other_presented_method</span><span class="o">].</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">presented_method</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">subject</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">presented_method</span><span class="p">))</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span> <span class="s2">&quot;presented&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>I searched for some pagination-related methods and put them in <code>TEST_COLLECTION_PROXY_PAGINATION_METHODS</code>. I also introduced two dummy collection classes - one for pagination methods and the latter for handling other methods. To DRY out the implementation I use <code>define_method</code>. The tests verify that the method calls are properly delegated. Let&#8217;s write the implementation with <code>method_missing</code>:</p>
+
+
+
+
+<figure class='code'><figcaption><span>lib/decent_presenter/collection_proxy.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">DecentPresenter</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">CollectionProxy</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">delegate</span> <span class="ss">:current_page</span><span class="p">,</span> <span class="ss">:total_pages</span><span class="p">,</span> <span class="ss">:limit_value</span><span class="p">,</span> <span class="ss">:model_name</span><span class="p">,</span> <span class="ss">:total_count</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">:total_entries</span><span class="p">,</span> <span class="ss">:per_page</span><span class="p">,</span> <span class="ss">:offset</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="ss">:original_collection</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kp">attr_reader</span> <span class="ss">:original_collection</span><span class="p">,</span> <span class="ss">:presented_collection</span>
+</span><span class='line'>    <span class="kp">private</span> <span class="ss">:original_collection</span><span class="p">,</span> <span class="ss">:presented_collection</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">original_collection</span><span class="p">,</span> <span class="n">presented_collection</span><span class="p">)</span>
+</span><span class='line'>      <span class="vi">@original_collection</span> <span class="o">=</span> <span class="n">original_collection</span>
+</span><span class='line'>      <span class="vi">@presented_collection</span> <span class="o">=</span> <span class="n">presented_collection</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">method_missing</span><span class="p">(</span><span class="nb">method</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">presented_collection</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="nb">method</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>The <code>delegate</code> method from <code>ActiveSupport</code> comes in handy for proxies. We need to modify <code>DecentPresenter::Exposure#present</code> and wrap the presented collection and the original collection in proxy. Let&#8217;s add a test for that also:</p>
+
+
+<p></p>
+
+<figure class='code'><figcaption><span>spec/decent_presenter/exposure_spec.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:Exposure</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># other code</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;wraps collection in CollectionProxy&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">presented_collection</span> <span class="o">=</span> <span class="n">subject</span><span class="o">.</span><span class="n">present</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">presented_collection</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">be_instance_of</span> <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:CollectionProxy</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>lib/decent_presenter/exposure.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">DecentPresenter</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">Exposure</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kp">attr_reader</span> <span class="ss">:view_context</span><span class="p">,</span> <span class="ss">:presenter_factory</span>
+</span><span class='line'>    <span class="kp">private</span> <span class="ss">:view_context</span><span class="p">,</span> <span class="ss">:presenter_factory</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">view_context</span><span class="p">,</span> <span class="n">presenter_factory</span><span class="p">)</span>
+</span><span class='line'>      <span class="vi">@view_context</span> <span class="o">=</span> <span class="n">view_context</span>
+</span><span class='line'>      <span class="vi">@presenter_factory</span> <span class="o">=</span> <span class="n">presenter_factory</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">present</span><span class="p">(</span><span class="n">presentable</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{})</span>
+</span><span class='line'>      <span class="k">if</span> <span class="n">presentable_is_a_collection?</span><span class="p">(</span><span class="n">presentable</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">present_collection</span><span class="p">(</span><span class="n">presentable</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">else</span>
+</span><span class='line'>        <span class="n">present_model</span><span class="p">(</span><span class="n">presentable</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">def</span> <span class="nf">present_model</span><span class="p">(</span><span class="n">presentable</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{})</span>
+</span><span class='line'>        <span class="n">presenter</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:with</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>          <span class="n">presenter_factory</span><span class="o">.</span><span class="n">presenter_for</span><span class="p">(</span><span class="n">presentable</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>        <span class="n">presenter</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">presentable</span><span class="p">,</span> <span class="n">view_context</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">def</span> <span class="nf">present_collection</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{})</span>
+</span><span class='line'>        <span class="n">presented_collection</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">el</span><span class="o">|</span> <span class="n">present_model</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>        <span class="ss">DecentPresenter</span><span class="p">:</span><span class="ss">:CollectionProxy</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">presented_collection</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">def</span> <span class="nf">presentable_is_a_collection?</span><span class="p">(</span><span class="n">presentable</span><span class="p">)</span>
+</span><span class='line'>        <span class="o">[</span><span class="ss">:size</span><span class="p">,</span> <span class="ss">:to_a</span><span class="p">,</span> <span class="ss">:first</span><span class="o">].</span><span class="n">all?</span> <span class="p">{</span> <span class="o">|</span><span class="nb">method</span><span class="o">|</span> <span class="n">presentable</span><span class="o">.</span><span class="n">respond_to?</span> <span class="nb">method</span> <span class="p">}</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>And we are done! The test for verifying if the instance of <code>DecentPresenter::CollectionProxy</code> is returned when handling collection introduces some coupling but I&#8217;m pretty comfortable with it. It won&#8217;t be handled by any other object than the CollectionProxy.</p>
+
+
+
+
+<p>The DecentPresenter is much simpler than Draper, it offers most of the stuff I need in my presenters and writing it was pretty enjoyable :). It didn&#8217;t take much time and I have a solution, which I&#8217;m familiar with and if something breaks I will know why. In fact, I like it so much that I&#8217;m going to release it as a gem :).</p>
+
+
+
+
+<h2>Wrapping up</h2>
+
+
+
+
+<p>Using third party gem isn&#8217;t always the best solution, sometimes it&#8217;s quite easy to write similar solution. Many gems are quite complex because they need to handle all possible use cases and that level of complexity and other dependencies might not be necessary for your app.</p>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Karol Galanciak</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-27T17:02:00+02:00" pubdate data-updated="true">Apr 27<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/architecture/'>Architecture</a>, <a class='category' href='/blog/categories/design-patterns/'>Design Patterns</a>, <a class='category' href='/blog/categories/rails/'>Rails</a>, <a class='category' href='/blog/categories/tdd/'>TDD</a>, <a class='category' href='/blog/categories/testing/'>Testing</a>
+  
+</span>
+
+
+    </p>
+    <div class="meta top-line">
+      <div class="post-subscription">
+  <div id="mc_embed_signup">
+    <div id="mc_embed_signup_scroll">
+      <label for="mce-EMAIL">Do you want to take your developer skills to the next level? Subscribe to my newsletter and never miss another blog post!</label>
+      <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+      <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_62804f1b69c60e0c7966cddd6_7c71fb81df" tabindex="-1" value=""></div>
+      <div class="clear">
+      <a href="http://eepurl.com/duztq5" target="_blank" id="mc-embedded-subscribe" class="button">Yes, I want to be a better developer!</a>
+    </div>
+  </div>
+</div>
+
+    </div>
+    <div class="top-line">
+      
+        <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://Azdaroth.github.io/blog/2014/04/27/you-dont-necessarily-need-gem-for-that-feature/" data-via="Azdaroth" data-counturl="http://Azdaroth.github.io/blog/2014/04/27/you-dont-necessarily-need-gem-for-that-feature/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+      
+    </div>
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/03/03/test-driven-rails-part-2/" title="Previous Post: Test Driven Rails - Part 2">&laquo; Test Driven Rails - Part 2</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/07/10/automate-to-the-max-instant-ubuntu-server-setup-with-chef/" title="Next Post: Automate to the max: instant Ubuntu Server setup with Chef">Automate to the max: instant Ubuntu Server setup with Chef &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <img class="left" src="/images/me_formal.jpg" title="me:)" alt="Karol Galanciak - photo">
+  <p>Hi, my name is Karol Galanciak, I'm a technical polyglot and domain expert in vacation rental and fitness industries.</p>
+
+  <p>I specialize in building APIs, microservices architecture, working with legacy applications, building ambitious Single Page Applications and building payment processors for credit cards processing. Currently I'm working as CTO at <a href="https://www.bookingsync.com" target="_blank">BookingSync</a>.</p>
+
+  <p id="email-me"></p>
+</section>
+
+<script type="text/javascript">
+  (function(d, id, lhs, rhs) {
+    d.getElementById(id).innerHTML = "You can reach me at <a rel='nofollow' href='mailto:" + lhs + "@" + rhs + "'>" + lhs + "@" + rhs + "</a>";
+  })(window.document, 'email-me', 'karol.galanciak', 'gmail.com');
+</script>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization/">The Case for Before_validation Callback: Complex State Normalization</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/">Advanced Ember Data Customization - Different Model Types in Ember App and API for the Same Resource</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/">Exotic Ruby: Module.class_exec, Custom JSON and Liquid Drops in Action</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/">Rails Quick Tips: Temporarily Disabling Touching With ActiveRecord.no_touching</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function/">PostgreSQL Quick Tips: Working With Dates Using EXTRACT Function</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/Azdaroth">@Azdaroth</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'Azdaroth',
+            count: 6,
+            skip_forks: false,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+<section>
+   <h1>Twitter</h1>
+   <a class="twitter-timeline" href="https://twitter.com/Azdaroth" data-widget-id="357234540634329088">Tweets by @Azdaroth</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - Karol Galanciak -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'karolgalanciak';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://Azdaroth.github.io/blog/2014/04/27/you-dont-necessarily-need-gem-for-that-feature/';
+        var disqus_url = 'http://Azdaroth.github.io/blog/2014/04/27/you-dont-necessarily-need-gem-for-that-feature/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

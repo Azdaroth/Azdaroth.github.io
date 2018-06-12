@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: API | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
+  <link href="http://Azdaroth.github.io/blog/categories/api/atom.xml" rel="self"/>
+  <link href="http://Azdaroth.github.io/"/>
+  <updated>2018-06-12T17:11:48+02:00</updated>
+  <id>http://Azdaroth.github.io/</id>
+  <author>
+    <name><![CDATA[Karol Galanciak]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Implementing non-RESTful actions with Ember Data]]></title>
+    <link href="http://Azdaroth.github.io/blog/2016/02/07/implementing-non-restful-actions-with-ember-data/"/>
+    <updated>2016-02-07T10:45:00+01:00</updated>
+    <id>http://Azdaroth.github.io/blog/2016/02/07/implementing-non-restful-actions-with-ember-data</id>
+    <content type="html"><![CDATA[<p>In my <a target="_blank" href="http://karolgalanciak.com/blog/2016/01/24/how-to-handle-non-crud-logic-in-your-api/">recent post</a> I mentioned some strategies of handling non-strictly <strong>CRUD</strong> / <strong>RESTful</strong> actions in <strong>API</strong>. One of them was adding extra actions beyond creating, updating and deleting resources. As it's not a standard solution and some data layers on client side (like <strong>Ember Data</strong>) don't handle it out-of-box, I was asked by some developers what's the best way to handle such actions. So let's see how can we hack into <strong>Ember Data</strong> and make it smooth.</p>
+
+
+
+
+<!--more-->
+
+
+
+
+<h2>Our use case: publishing articles</h2>
+
+
+
+
+<p>Let's reuse the example from the previous blog post - the articles and publishing process. What we are going to do is to add <code>publish</code> function to our <code>Article</code> model, which simply sends <code>PATCH</code> request to <strong>API</strong> endpoint with <code>/api/articles/:id/publish</code> URL.</p>
+
+
+
+
+<p>First thought about implementation could be using <code>Ember.$.ajax</code> call with manually passing URL and all the data. But that's not really a great solution. For simple cases it may work, but what about sending some custom headers, using namespaces and other options? For these reasons we should encapsulate all the logic within <strong>adapter</strong> - the layer that's responsible for communication with the API. So let's add <code>publish</code> function to our article adapter for executing the request and use this function from <code>article</code> model.</p>
+
+
+<p>``` javascript
+// app/adapters/article.js</p>
+
+<p>import ApplicationAdapter from &lsquo;./application&rsquo;;</p>
+
+<p>export default ApplicationAdapter.extend({
+  publish(id) {</p>
+
+<pre><code>return this.ajax(this.urlForPublishAction(id), 'PUT');
+</code></pre>
+
+<p>  },</p>
+
+<p>  urlForPublishAction(id) {</p>
+
+<pre><code>return `${this.buildURL('article', id)}/publish`;
+</code></pre>
+
+<p>  }
+});
+```</p>
+
+<p>There are some interesting things going on here: the first one is that we use <code>ajax</code> function defined in adapter, which is also utilized when peforming all other requests in <strong>Ember Data</strong>. It takes care of setting up options like headers, proper success and error handling etc., so we should always use this function instead of simple <code>Ember.$.ajax</code>. Another thing is <code>buildURL</code> function, which builds, well, URL for given resource represented by model name (with given id if present) considering adapter options like <code>host</code> or <code>namespace</code>. By using these functions we ensure the consistency between all <strong>API</strong> calls.</p>
+
+
+
+
+<p>To make it work we just need to find proper adapter for <code>article</code> model and call <code>publish</code> function on this adapter from the model:</p>
+
+
+<p>``` javascript
+// app/models/article.js</p>
+
+<p>import Ember from &lsquo;ember&rsquo;;
+import DS from &lsquo;ember-data&rsquo;;</p>
+
+<p>export default DS.Model.extend({
+  publish() {</p>
+
+<pre><code>let modelName = this.constructor.modelName;
+let adapter = this.store.adapterFor(modelName);
+return adapter.publish(this.get('id'));
+</code></pre>
+
+<p>  }
+});
+```</p>
+
+<p>To avoid hardcoding model name we take it from the <code>constructor</code>, then use it as a name of adapter we want to fetch from <code>owner</code> (or <code>container</code> in Ember versions prior to 2.3) and finally call the proper method on adapter with id as argument.</p>
+
+
+
+
+<p>What if we needed to pass the serialized attributes as well? The third argument of <code>ajax</code> function in adapter is a hash, so we would need to pass the serialized article as <code>data</code> param there. Here's a quick example, starting from the model:</p>
+
+
+<p>``` javascript
+// app/models/article.js</p>
+
+<p>import Ember from &lsquo;ember&rsquo;;
+import DS from &lsquo;ember-data&rsquo;;</p>
+
+<p>export default DS.Model.extend({
+  publish() {</p>
+
+<pre><code>let modelName = this.constructor.modelName;
+let adapter = this.store.adapterFor(modelName);
+return adapter.publish(this.get('id'), this.serialize());
+</code></pre>
+
+<p>  }
+});
+```</p>
+
+<p>and here's the adapter:</p>
+
+
+<p>``` javascript
+// app/adapters/article.js</p>
+
+<p>import ApplicationAdapter from &lsquo;./application&rsquo;;</p>
+
+<p>export default ApplicationAdapter.extend({
+  publish(id, serializedData) {</p>
+
+<pre><code>return this.ajax(this.urlForPublishAction(id), 'PUT', { data: serializedData });
+</code></pre>
+
+<p>  },</p>
+
+<p>  urlForPublishAction(id) {</p>
+
+<pre><code>return `${this.buildURL('article', id)}/publish`;
+</code></pre>
+
+<p>  }
+});
+```</p>
+
+<p>And that's it!</p>
+
+
+
+
+<h2>Wrapping up</h2>
+
+
+
+
+<p>Non-RESTful actions are not supported out of the box by <strong>Ember Data</strong>, but they are not that hard to implement when using adapters.</p>
+
+
+
+
+<p class="meta small-p">Edit: Thanks to <a href="https://karolgalanciak.com/blog/2016/02/07/implementing-non-restful-actions-with-ember-data/#comment-2500931825" target="_blank">Wesley Workman</a> for mentioning <code>adapterFor</code> and suggesting using it in favour of <code>owner</code> / <code>container</code> API.</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[How To Handle Non-CRUD Logic In Your API]]></title>
+    <link href="http://Azdaroth.github.io/blog/2016/01/24/how-to-handle-non-crud-logic-in-your-api/"/>
+    <updated>2016-01-24T22:00:00+01:00</updated>
+    <id>http://Azdaroth.github.io/blog/2016/01/24/how-to-handle-non-crud-logic-in-your-api</id>
+    <content type="html"><![CDATA[<p>If you happen to develop <strong>API</strong> for non-trivial app with complex business logic beyond <strong>CRUD</strong> directly mapped to the database tables (i.e. typical Active Record pattern) you were probably wondering many times how to handle these cases and what's the best way to do it. There are quite a few solutions to this problem: you could add another endpoint for handling given use case, add <strong>non-RESTful</strong> action to already existing endpoint or you can add a magic param to the payload that would force non-standard scenario in the <strong>API</strong>. Let's take a closer look at the these solutions and discuss some advantages and disadvantages of each of them.</p>
+
+
+
+
+<!--more-->
+
+
+
+
+<h2>Our use case: creating drafts and articles</h2>
+
+
+
+
+<p>Let's start with some feature that will be simple enough for the blog post, but still interesting enough that we will have several ways to solve some the problem. Creating drafts and published articles (both referring to some <code>Article</code> model) sounds good enough: for <code>drafts</code> and <code>published</code> articles we are going to have different <strong>business validations</strong> and we will also need to have a possibility to transit from one state to another. Let's assume that the drafts don't have any required attributes at all and published articles require presence of: <code>title</code>, <code>content</code> and <code>author_id</code>. Besides creating both type of articles, we will also need to update both type of articles while maintaining current state and have a possibility to transit from drafts to published articles. To add some extra logic articles will also have <code>published_at</code> attribute, which is not directly settable via API, but will be automatically set server-side when making a transition from <code>draft</code> to <code>published</code> state or directly creating published article.</p>
+
+
+
+
+<h2>Magic param</h2>
+
+
+
+
+<p>Let's start with the simplest strategy that I call <code>magic param</code> or <code>virtual param</code>. Basically, to force a different scenario we simply send some extra param, let's name it <code>published</code>. In such case we will only have a single endpoint: <code>Articles</code> with <code>create</code> and <code>update</code> actions and depending on the value of <code>published</code> param we will either run a logic for creating / updating drafts or published articles.</p>
+
+
+
+
+<p>Making transition from <code>draft</code> to <code>published</code> state is going to be the same, we simply need to send <code>published</code> param with <code>true</code> value and make sure other requirements are met (title's, content's and author's presence).</p>
+
+
+
+
+<p>Obviously, this approach looks pretty simple from the client perspective, everything is driven by sending a magic param and this solution is pretty easy to integrate with some client-side data layers like <strong>Ember Data</strong>. But personally I don't find this solution really clean server-side. Having one interface (endpoint) for multiple purposes (where the logic is conditionally driven by a specific value of some param) adds some extra complexity on the design. Expecially in this case where the client knows exactly that we want to handle either drafts or published articles. For some features it may be good to hide some internal details server-side, but here it's not the case. So the solution to this problem might be...</p>
+
+
+
+
+<h2>Adding extra endpoint</h2>
+
+
+
+
+<p>With extra endpoint we clearly separate interfaces between both types of articles. Clearly, the logic on server is now much less complex. If we want to create a draft, we just use <code>Drafts</code> endpoint. If we need to update a published article, we simply use (surprise, surprise) <code>Articles</code> endpoint.</p>
+
+
+
+
+<p>As a side-effect of such design decision we can actually do some cool things, e.g. in <code>index</code> actions we could return only one type of article, either drafts or published ones, depending on the endpoint.</p>
+
+
+
+
+<p>The disadvantage of this approach is that it may not be that easy to handle it client-side with frameworks' data layers, which in most cases are kind of equivalents of <strong>Active Record</strong> pattern, but in API world.</p>
+
+
+
+
+<p>Adding extra endpoint solved one of the issues: having the same interface for different kind of logic. But we still need to have a possibility to make a transition from <code>draft</code> to <code>published</code> article. One way would be to simply use <code>update</code> action from Published Articles endpoint, but this would mean using endpoint for actually different resource, which looks really weird and not proper, especially after separating Articles to two different endpoints. We could still handle it with magic <code>published</code> param, but this time only in Drafts endpoint. Or we could consider doing yet another thing, which is...</p>
+
+
+
+
+<h2>Adding extra action</h2>
+
+
+
+
+<p>This way doesn't sound really RESTful, but I find it pretty elegant. To handle transition from <code>draft</code> to <code>published</code> we can simply add <code>publish</code> action to Drafts endpoint and let the API handle all the necessary logic.</p>
+
+
+
+
+<p>What I like about combining different endpoints with extra actions is that everything is explicitly defined: every part of API has its' own interface and there's no magic and no implicit assumptions. It's also more flexible and removes some complexity server-side. The disadvantage of this approach is that it actually moves complexity to the client - having extra actions, again, may not be that easy to handle neatly by data layers (if you happen to use Ember and Ember Data, you can play with <code>adapters</code> and <code>buildURL</code> function to make it smooth).</p>
+
+
+
+
+<h2>Wrapping up</h2>
+
+
+
+
+<p>There are couple of different ways of handling complex logic in non typical CRUD scenarios in your API: using magic param, adding extra endpoints, adding extra method and each of them has its' own advantages and disadvatages on both server-side and client-side.</p>
+
+]]></content>
+  </entry>
+  
+</feed>

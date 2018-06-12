@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: ActiveRecord Architecture | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
+  <link href="http://Azdaroth.github.io/blog/categories/activerecord-architecture/atom.xml" rel="self"/>
+  <link href="http://Azdaroth.github.io/"/>
+  <updated>2018-06-12T17:11:48+02:00</updated>
+  <id>http://Azdaroth.github.io/</id>
+  <author>
+    <name><![CDATA[Karol Galanciak]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[The Case for before_validation callback: complex state normalization]]></title>
+    <link href="http://Azdaroth.github.io/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization/"/>
+    <updated>2018-05-27T20:00:00+02:00</updated>
+    <id>http://Azdaroth.github.io/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization</id>
+    <content type="html"><![CDATA[<p>Few months ago I wrote a <a href="https://karolgalanciak.com/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks/">blog post</a> about <strong>ActiveRecord</strong> <code>before_validation</code> callback and how it is used for  <strong>wrong reasons</strong> and concluded that in most cases this is not something we should be using routinely. However, I missed one <strong>appropriate use case</strong> for it which might be quite common in Rails apps, so this might be an excellent opportunity to get back to  <strong>before_validation callback</strong> and show its other side.</p>
+
+<!--more-->
+
+
+<h2>Anatomy Of The Problem</h2>
+
+<p>Imagine that we have a <code>Payment</code> model where we need to store <code>amount</code> and <code>currency</code>. However, for statistical purposes, we also want to store normalized amount in USD currency with exchange rate applied at the time of payment&rsquo;s creation. As this is a significant part of our domain, we want to add validation for <code>amount_in_usd</code> attribute. Our Payment model looks like this at the moment:</p>
+
+<p><code>rb
+class Payment &lt; ApplicationRecord
+  validates :amount, :currency, :amount_in_usd, presence :true
+end
+</code></p>
+
+<p>The question is: where do we get <code>amount_in_usd</code> from and how can we assign it?</p>
+
+<h2>The Solution</h2>
+
+<p>One way of solving that problem would be a direct assignment when populating all the attributes. In that case, it would look a bit like this:</p>
+
+<p><code>rb
+Payment.new(currency: currency, amount: amount, amount_in_usd: CurrencyExchanger.exchange(amount, from: currency, to: "USD"))
+</code></p>
+
+<p>The problem with that solution is that this logic would need to be repeated in every place where payment gets initialized. We could implement a factory class that would be reused in all scenarios to keep it DRY, but that&rsquo;s some extra overhead that is not popular in a Rails world. Also, this sounds like a responsibility of the Payment model itself as it is about managing its internal state.</p>
+
+<p>Here, we can&rsquo;t solve this by overriding writers as I suggested <a href="https://karolgalanciak.com/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks/">before</a> as <code>amount_in_usd</code> depends on two attributes: <code>currency</code> and <code>amount</code>, and we don&rsquo;t know in which sequence the attributes will be assigned.</p>
+
+<p>And this is exactly the case where <code>before_validation</code> is useful: for complex state normalization where multiple attributes are involved. With that callback, a solution looks quite elegant and just simpler:</p>
+
+<p>``` rb
+class Payment &lt; ApplicationRecord
+  validates :amount, :currency, :amount_in_usd, presence :true</p>
+
+<p>  before_validation :assign_amount_in_usd</p>
+
+<p>  private</p>
+
+<p>  def assign_amount_in_usd</p>
+
+<pre><code>if currency &amp;&amp; amount
+  self.amount_in_usd = CurrencyExchanger.exchange(amount, from: currency, to: "USD")
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<h2>Alternative Solution</h2>
+
+<p>In the first paragraph, I mentioned that this solution could work especially well in Rails apps. What I meant by that is the fact that usually, the &ldquo;primitive&rdquo; attributes coming from HTTP params are mass-assigned to the model. Of course in Ruby, everything is an object, but to keep things simpler, let&rsquo;s treat numeric types and strings as primitives.</p>
+
+<p>What would be a non-primitive value though? In our case, we have something that is widely used as a typical example of a value object: <strong>Money</strong> object that is composed of <code>amount</code> and <code>currency</code>.  If the attributes before the assignment were mapped to some more domain-oriented objects, we would have an even simpler solution for our problem:</p>
+
+<p><code>rb
+money = Money.new(amount, currency)
+Payment.new(money: money)
+</code></p>
+
+<p>and the model would look like this:</p>
+
+<p>``` rb
+class Payment &lt; ApplicationRecord
+  validates :amount, :currency, :amount_in_usd, presence :true</p>
+
+<p>  def money=(money_object)</p>
+
+<pre><code>self.amount = money_object.amount
+self.currency = money_object.currency
+self.amount_in_usd = CurrencyExchanger.exchange_money(money_object, to: "USD")
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>It might look like extra overhead that is not necessary. However, value objects tend to simplify and DRY a lot of things in the code, so for more complex apps, using value objects will be worth that extra overhead.</p>
+
+<h2>Wrapping Up</h2>
+
+<p>There are some cases where <code>before_validation</code> callback might be useful. However, in more complex apps, using value object might be an alternative worth looking into.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[The Case Against Exotic Usage of :before_validate Callbacks]]></title>
+    <link href="http://Azdaroth.github.io/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks/"/>
+    <updated>2017-10-29T22:00:00+01:00</updated>
+    <id>http://Azdaroth.github.io/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks</id>
+    <content type="html"><![CDATA[<p>It&rsquo;s nothing new that <strong>ActiveRecord callbacks</strong> are abused in many projects and used for the wrong reasons for many use cases where they can be <strong>easily avoided</strong> in favor of a much better alternative, like service objects. There is one callback though that is special and quite often used for pretty <strong>exotic reasons</strong> that have nothing to do with the process when it gets executed &ndash; it&rsquo;s the <code>before_validate</code> callback.</p>
+
+<!--more-->
+
+
+<h2>Data Formatting</h2>
+
+<p>Data formatting is something pretty common in the majority of the applications, especially stripping strings. Imagine that you need to strip some <code>URL</code> so that potential spaces won&rsquo;t cause any issues. How would you approach that?</p>
+
+<p>One way would be to use <code>before_validate</code> callback, especially if you have some format validations:</p>
+
+<p>``` ruby app/models/my_model.rb
+class MyModel
+  before_validate :strip_url</p>
+
+<p>  private</p>
+
+<p>  def strip_url</p>
+
+<pre><code>self.url = url.to_s.strip
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>It gets the job done. However, how would you test it? You would need to call <code>valid?</code> method on the model to check that&hellip; <code>URL</code> is stripped? Sounds quite funny and is even better when you look at the potential spec:</p>
+
+<p>``` ruby spec/models/my_model_spec.rb
+require &ldquo;rails_helper&rdquo;</p>
+
+<p>RSpec.describe MyModel, type: :model do
+  it &ldquo;strips URL before validation&rdquo; do</p>
+
+<pre><code>model = MyModel.new(url: "  http://rubyonrails.org")
+
+model.valid?
+
+expect(model.url).to eq "http://rubyonrails.org"
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>It&rsquo;s quite unlikely that this would be the result of <strong>TDD</strong> though ;). What&rsquo;s the alternative then?</p>
+
+<p>How about just using attribute writer for that? So something like this:</p>
+
+<p>``` ruby app/models/my_model.rb
+class MyModel
+  def url=(val)</p>
+
+<pre><code>super(val.to_s.strip)
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>And here is a potential spec for this feature:</p>
+
+<p>``` ruby spec/models/my_model_spec.rb
+require &ldquo;rails_helper&rdquo;</p>
+
+<p>RSpec.describe MyModel, type: :model do
+  it &ldquo;strips URL&rdquo; do</p>
+
+<pre><code>model = MyModel.new(url: "  http://rubyonrails.org")
+
+expect(model.url).to eq "http://rubyonrails.org"
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Both the implementation and spec are much simpler and just more natural &ndash; data formatting has nothing to do with the validation, there is no need to use a callback related to validation to handle such use case.</p>
+
+<h2>Populating attributes and relationships</h2>
+
+<p>Another popular scenario is assigning attributes and relationships. Imagine you are creating a comment with a <code>content</code>, an author who will be <code>current_user</code> and also want to do some denormalization for performance reasons and directly assign <code>group</code> to this comment to which <code>current_user</code> belongs to. Here is how it is sometimes handled with <code>before_validate</code> callback:</p>
+
+<p><code>ruby
+Comment.create!(
+  content: content,
+  author: current_user,
+)
+</code></p>
+
+<p>``` ruby app/models/my_model.rb
+class MyModel
+  before_validate :assign_group</p>
+
+<p>  private</p>
+
+<p>  def assign_group</p>
+
+<pre><code>self.group = author.group if author
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>It&rsquo;s quite similar to the previous use case with data formatting &ndash; to write a test for this feature, we would need again to call <code>valid?</code> which doesn&rsquo;t make much sense, validation has nothing to do with populating attributes or relationships. There is much simpler and much more explicit way to handle it:</p>
+
+<p><code>ruby
+Comment.create!(
+  content: content,
+  author: current_user,
+  group: current_user.group,
+)
+</code></p>
+
+<p>There is no magic here &ndash; just a simple assignment, which is easy to test and understand.</p>
+
+<h2>Wrapping up</h2>
+
+<p>Maybe there are some scenarios where <code>before_validate</code> callback is the best possible choice (I&rsquo;m yet to find them though), but I&rsquo;m pretty sure data formatting or populating attributes/associations are not valid cases to use it for.</p>
+]]></content>
+  </entry>
+  
+</feed>

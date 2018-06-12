@@ -1,0 +1,1087 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Advanced Ember Data Customization - Different Model Types in Ember App and API For The Same Resource - Karol Galanciak - Ruby on Rails and Ember.js consultant</title>
+  <meta name="author" content="Karol Galanciak">
+
+  
+  <meta name="description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  
+  <meta name="keywords" content="Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps">
+
+  
+  
+
+  <meta property="og:title" value="Advanced Ember Data Customization - Different Model Types in Ember App and API For The Same Resource - Karol Galanciak - Ruby on Rails and Ember.js consultant" />
+  <meta property="og:description" value="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications." />
+  <meta property="og:url" value="http://Azdaroth.github.io/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/" />
+  <meta property="og:type" content="website" />
+  
+  <meta property="og:site_name" content="Karol Galanciak - Ruby on Rails and Ember.js consultant"/>
+  <meta property="og:locale" content="en_US" />
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@Azdaroth">
+  <meta name="twitter:creator" content="@Azdaroth">
+  <meta name="twitter:title" content="Advanced Ember Data Customization - Different Model Types in Ember App and API For The Same Resource - Karol Galanciak - Ruby on Rails and Ember.js consultant">
+  <meta name="twitter:url" content="">
+  <meta name="twitter:description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://Azdaroth.github.io/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Karol Galanciak - Ruby on Rails and Ember.js consultant" type="application/atom+xml">
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "BlogPosting",
+      "mainEntityOfPage": {
+        "@type":"WebPage",
+        "@id": "http://Azdaroth.github.io/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource"
+      },
+      "headline": "Advanced Ember Data Customization - Different Model Types in Ember App and API For The Same Resource - Karol Galanciak - Ruby on Rails and Ember.js consultant",
+        "image": {
+        "@type": "ImageObject",
+        "url": "",
+        "height": 640,
+        "width": 1024
+      },
+      "datePublished": "2018-04-28",
+      "dateModified": "2018-06-12",
+      "author": {
+        "@type": "Person",
+        "name": "Karol Galanciak"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Karol Galanciak",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://karolgalanciak.com/images/me_formal.jpg",
+          "width": 600,
+          "height": 60
+        }
+      },
+      "description": "Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.",
+      "keywords": "Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps"
+    }
+  </script>
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-42570582-1', 'auto');
+    ga('send', 'pageview');
+    ga('set', 'anonymizeIp', true);
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Karol Galanciak - Ruby on Rails and Ember.js consultant</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:Azdaroth.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">About Me</a></li>
+  <li><a href="/blog">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/test-driven-ember">Test-Driven Ember Book</a></li>
+  <li><a href="/presentations">Presentations</a></li>
+  <li><a href="/publications">Publications</a></li>
+  <li><a href="/open-source">Open Source</a></li>
+  <li><a href="/privacy-policy">Privacy Policy</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Advanced Ember Data Customization - Different Model Types in Ember App and API for the Same Resource</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-04-28T19:00:00+02:00" pubdate data-updated="true">Apr 28<span>th</span>, 2018</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>A <strong>great advantage</strong> of using <strong>Ember Data</strong> with <strong>JSONAPI-compliant</strong> adapters/serializers is that there is almost nothing extra needed to work with the <strong>data layer</strong> &ndash; just create the models with names matching the types of the resources returned by the <strong>API</strong> and you are good to go! However, sometimes you may need to customize the naming which means that the names of the models in the <strong>Ember application</strong> will be different than the ones expected by the API and their corresponding types. What are the steps required to make it work in <strong>Ember Data</strong>?</p>
+
+<!--more-->
+
+
+<h2>Anatomy Of The Problem</h2>
+
+<p>Imagine that the API you work with has two resources: <code>User</code> and <code>Picture</code> and that a User can have many Pictures. However, in the Ember application, you want to have these resources named as <code>Photographer</code> and <code>Photo</code>. Here are the models and relationships between them:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// app/models/photographer.js</span>
+</span><span class='line'><span class="kr">import</span> <span class="nx">Model</span> <span class="nx">from</span> <span class="s1">&#39;ember-data/model&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="kr">import</span> <span class="p">{</span> <span class="nx">hasMany</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;ember-data/relationships&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kr">export</span> <span class="k">default</span> <span class="nx">Model</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">MessageSender</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">photos</span><span class="o">:</span> <span class="nx">hasMany</span><span class="p">(</span><span class="s1">&#39;photo&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// app/models/photo.js</span>
+</span><span class='line'><span class="kr">import</span> <span class="nx">Model</span> <span class="nx">from</span> <span class="s1">&#39;ember-data/model&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="kr">import</span> <span class="p">{</span> <span class="nx">belongsTo</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;ember-data/relationships&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kr">export</span> <span class="k">default</span> <span class="nx">Model</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+</span><span class='line'>  <span class="nx">photographer</span><span class="o">:</span> <span class="nx">belongsTo</span><span class="p">(</span><span class="s1">&#39;photographer&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>The Solution</h2>
+
+<p>Unfortunately, models&#8217; names don&rsquo;t follow the naming expected by the API. There are a couple of things that we need to customize here:</p>
+
+<ol>
+<li>Endpoints for a given resource &ndash; by default, for <code>Photographer</code> model, all requests will be performed to <code>/photographers</code> endpoint. We need to make it work with <code>/users</code> endpoint. Same thing with <code>Photo</code> model.</li>
+<li>Serialization of the models &ndash; for <code>Photographers</code> we will need to make sure that <code>users</code> type is present in the payload, not <code>photographers</code> and the same thing for <code>pictures</code> vs. <code>photos</code>.</li>
+<li>Normalization of the payload from the API &ndash; we need to map <code>user</code> type to <code>photographer</code> and <code>picture</code> type to <code>photo</code>.</li>
+<li>Handle the relationship between <code>Photographer</code> and <code>Photo</code> with proper types.</li>
+</ol>
+
+
+<p>Let&rsquo;s handle each case one by one.</p>
+
+<p>The first one is quite straightforward &ndash; we need to adjust adapters for both models. According to the <a href="https://guides.emberjs.com/v3.0.0/models/customizing-adapters/#toc_path-customization">docs</a>, <code>pathForType</code> method is the one that we care about. Since we are just going to change the type, not the actual logic that happens to that type later, we can handle these adjustments the following way:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// app/adapters/application.js</span>
+</span><span class='line'><span class="kr">import</span> <span class="nx">DS</span> <span class="nx">from</span> <span class="s1">&#39;ember-data&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kr">export</span> <span class="k">default</span> <span class="nx">DS</span><span class="p">.</span><span class="nx">JSONAPIAdapter</span><span class="p">.</span><span class="nx">extend</span><span class="p">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// app/adapters/photographer.js</span>
+</span><span class='line'><span class="kr">import</span> <span class="nx">ApplicationAdapter</span> <span class="nx">from</span> <span class="s1">&#39;./application&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kr">export</span> <span class="k">default</span> <span class="nx">ApplicationAdapter</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+</span><span class='line'>  <span class="nx">pathForType</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_super</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// app/adapters/photo.js</span>
+</span><span class='line'><span class="kr">import</span> <span class="nx">ApplicationAdapter</span> <span class="nx">from</span> <span class="s1">&#39;./application&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kr">export</span> <span class="k">default</span> <span class="nx">ApplicationAdapter</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+</span><span class='line'>  <span class="nx">pathForType</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_super</span><span class="p">(</span><span class="s1">&#39;picture&#39;</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The first part is done. Let&rsquo;s focus now on the serialization. After a bit of research of the docs and the source code, it looks like <code>payloadKeyFromModelName</code> needs to be customized. In this case, we just want to make sure that <code>photographer</code> type is mapped to <code>user</code>, and <code>photo</code> is mapped to <code>picture</code>. As this is arguably a less straightforward change than overriding <code>pathForType</code> in adapters, it might make sense to write some unit tests for that. Fortunately, it&rsquo;s nothing too complex &ndash; just comparing the serialization result with the expected one. Let&rsquo;s write a test for <code>ApplicationSerializer</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// tests/unit/serializers/application-test.js</span>
+</span><span class='line'><span class="kr">import</span> <span class="p">{</span> <span class="nx">module</span><span class="p">,</span> <span class="nx">test</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;qunit&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="kr">import</span> <span class="p">{</span> <span class="nx">setupTest</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;ember-qunit&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="kr">import</span> <span class="p">{</span> <span class="nx">run</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;@ember/runloop&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">module</span><span class="p">(</span><span class="s1">&#39;Unit | Serializer | application&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">hooks</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">setupTest</span><span class="p">(</span><span class="nx">hooks</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">module</span><span class="p">(</span><span class="s1">&#39;serialize&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">module</span><span class="p">(</span><span class="s1">&#39;photographer&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">test</span><span class="p">(</span><span class="s1">&#39;it is serialized according to remapped naming&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">assert</span><span class="p">.</span><span class="nx">expect</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">let</span> <span class="nx">store</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">owner</span><span class="p">.</span><span class="nx">lookup</span><span class="p">(</span><span class="s1">&#39;service:store&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nx">run</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span><span class='line'>          <span class="kd">let</span> <span class="nx">model</span> <span class="o">=</span> <span class="nx">store</span><span class="p">.</span><span class="nx">createRecord</span><span class="p">(</span><span class="s1">&#39;photographer&#39;</span><span class="p">,</span> <span class="p">{});</span>
+</span><span class='line'>          <span class="kd">let</span> <span class="nx">payload</span> <span class="o">=</span> <span class="nx">model</span><span class="p">.</span><span class="nx">serialize</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="nx">payload</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">type</span><span class="p">,</span> <span class="s1">&#39;users&#39;</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">});</span>
+</span><span class='line'>      <span class="p">});</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">module</span><span class="p">(</span><span class="s1">&#39;photo&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">test</span><span class="p">(</span><span class="s1">&#39;it is serialized according to its naming&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">assert</span><span class="p">.</span><span class="nx">expect</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">let</span> <span class="nx">store</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">owner</span><span class="p">.</span><span class="nx">lookup</span><span class="p">(</span><span class="s1">&#39;service:store&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nx">run</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span><span class='line'>          <span class="kd">let</span> <span class="nx">model</span> <span class="o">=</span> <span class="nx">store</span><span class="p">.</span><span class="nx">createRecord</span><span class="p">(</span><span class="s1">&#39;photo&#39;</span><span class="p">,</span> <span class="p">{});</span>
+</span><span class='line'>          <span class="kd">let</span> <span class="nx">payload</span> <span class="o">=</span> <span class="nx">model</span><span class="p">.</span><span class="nx">serialize</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="nx">payload</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">type</span><span class="p">,</span> <span class="s1">&#39;pictures&#39;</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">});</span>
+</span><span class='line'>      <span class="p">});</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Since we are interested only in a type remapping, we don&rsquo;t check the entire payload, only <code>type</code> attribute. Let&rsquo;s make these tests pass by either remapping types or using the default logic:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// app/serializers/application.js</span>
+</span><span class='line'><span class="kr">import</span> <span class="nx">DS</span> <span class="nx">from</span> <span class="s1">&#39;ember-data&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kr">const</span> <span class="nx">keysMappingForSerialization</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>  <span class="s1">&#39;photographer&#39;</span><span class="o">:</span> <span class="s1">&#39;user&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;photo&#39;</span><span class="o">:</span> <span class="s1">&#39;picture&#39;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="kr">export</span> <span class="k">default</span> <span class="nx">DS</span><span class="p">.</span><span class="nx">JSONAPISerializer</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+</span><span class='line'>  <span class="nx">payloadKeyFromModelName</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nx">keysMappingForSerialization</span><span class="p">[</span><span class="nx">key</span><span class="p">])</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_super</span><span class="p">(</span><span class="nx">keysMappingForSerialization</span><span class="p">[</span><span class="nx">key</span><span class="p">]);</span>
+</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_super</span><span class="p">(...</span><span class="nx">arguments</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Awesome, we are almost there.</p>
+
+<p>Both third and fourth points are actually about normalization, so we are going to handle them together. Again, after some research, it looks like we need to customize <code>modelNameFromPayloadKey</code> to map types returned by API to corresponding types in our app and also override <code>keyForRelationship</code> method to handle relationships in the payload correctly. Again, let&rsquo;s start with some tests. The simplest way to test such things is checking the result of <a href="https://emberjs.com/api/ember-data/3.0/classes/DS.JSONAPISerializer/methods/normalizeResponse?anchor=normalizeResponse">normalizeResponse</a> for some request type, e.g., for &lsquo;findAll&rsquo;. Let&rsquo;s write a test for a more complex scenario including relationships and sideloading as well:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+<span class='line-number'>123</span>
+<span class='line-number'>124</span>
+<span class='line-number'>125</span>
+<span class='line-number'>126</span>
+<span class='line-number'>127</span>
+<span class='line-number'>128</span>
+<span class='line-number'>129</span>
+<span class='line-number'>130</span>
+<span class='line-number'>131</span>
+<span class='line-number'>132</span>
+<span class='line-number'>133</span>
+<span class='line-number'>134</span>
+<span class='line-number'>135</span>
+<span class='line-number'>136</span>
+<span class='line-number'>137</span>
+<span class='line-number'>138</span>
+<span class='line-number'>139</span>
+<span class='line-number'>140</span>
+<span class='line-number'>141</span>
+<span class='line-number'>142</span>
+<span class='line-number'>143</span>
+<span class='line-number'>144</span>
+<span class='line-number'>145</span>
+<span class='line-number'>146</span>
+<span class='line-number'>147</span>
+<span class='line-number'>148</span>
+<span class='line-number'>149</span>
+<span class='line-number'>150</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// tests/unit/serializers/application-test.js</span>
+</span><span class='line'><span class="kr">import</span> <span class="p">{</span> <span class="nx">module</span><span class="p">,</span> <span class="nx">test</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;qunit&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="kr">import</span> <span class="p">{</span> <span class="nx">setupTest</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;ember-qunit&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="kr">import</span> <span class="p">{</span> <span class="nx">run</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;@ember/runloop&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">module</span><span class="p">(</span><span class="s1">&#39;Unit | Serializer | application&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">hooks</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">setupTest</span><span class="p">(</span><span class="nx">hooks</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">module</span><span class="p">(</span><span class="s1">&#39;serialize&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// previous tests</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">module</span><span class="p">(</span><span class="s1">&#39;normalizeResponse&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">module</span><span class="p">(</span><span class="s1">&#39;photographer&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">test</span><span class="p">(</span><span class="s1">&#39;it is normalized according to remapped naming&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">assert</span><span class="p">.</span><span class="nx">expect</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">let</span> <span class="nx">store</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">owner</span><span class="p">.</span><span class="nx">lookup</span><span class="p">(</span><span class="s1">&#39;service:store&#39;</span><span class="p">);</span>
+</span><span class='line'>        <span class="kd">let</span> <span class="nx">serializer</span> <span class="o">=</span> <span class="nx">store</span><span class="p">.</span><span class="nx">serializerFor</span><span class="p">(</span><span class="s1">&#39;photographer&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nx">run</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span><span class='line'>          <span class="kd">let</span> <span class="nx">payload</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s1">&#39;data&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>              <span class="s1">&#39;type&#39;</span><span class="o">:</span> <span class="s1">&#39;users&#39;</span><span class="p">,</span>
+</span><span class='line'>              <span class="s1">&#39;id&#39;</span><span class="o">:</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span>
+</span><span class='line'>              <span class="s1">&#39;attributes&#39;</span><span class="o">:</span> <span class="p">{},</span>
+</span><span class='line'>              <span class="s1">&#39;relationships&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                <span class="s1">&#39;pictures&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                  <span class="s1">&#39;links&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="s1">&#39;self&#39;</span><span class="o">:</span> <span class="s1">&#39;https://host.test/api/v1/users/1/relationships/pictures&#39;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="s1">&#39;related&#39;</span><span class="o">:</span> <span class="s1">&#39;https://host.test/api/v1/users/1/pictures&#39;</span>
+</span><span class='line'>                  <span class="p">},</span>
+</span><span class='line'>                  <span class="s1">&#39;data&#39;</span><span class="o">:</span> <span class="p">[{</span> <span class="s1">&#39;type&#39;</span><span class="o">:</span> <span class="s1">&#39;pictures&#39;</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="o">:</span> <span class="s1">&#39;10&#39;</span> <span class="p">}]</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>              <span class="p">}</span>
+</span><span class='line'>            <span class="p">},</span>
+</span><span class='line'>            <span class="s1">&#39;included&#39;</span><span class="o">:</span> <span class="p">[</span>
+</span><span class='line'>              <span class="p">{</span>
+</span><span class='line'>                <span class="s1">&#39;type&#39;</span><span class="o">:</span> <span class="s1">&#39;pictures&#39;</span><span class="p">,</span>
+</span><span class='line'>                <span class="s1">&#39;id&#39;</span><span class="o">:</span> <span class="s1">&#39;10&#39;</span><span class="p">,</span>
+</span><span class='line'>                <span class="s1">&#39;attributes&#39;</span><span class="o">:</span> <span class="p">{},</span>
+</span><span class='line'>                <span class="s1">&#39;links&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                  <span class="s1">&#39;self&#39;</span><span class="o">:</span> <span class="s1">&#39;https://host.test/api/v1/pictures/10&#39;</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>              <span class="p">}</span>
+</span><span class='line'>            <span class="p">]</span>
+</span><span class='line'>          <span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="kd">let</span> <span class="nx">normalizedPayload</span> <span class="o">=</span> <span class="nx">serializer</span><span class="p">.</span><span class="nx">normalizeResponse</span><span class="p">(</span><span class="nx">store</span><span class="p">,</span> <span class="nx">store</span><span class="p">.</span><span class="nx">modelFor</span><span class="p">(</span><span class="s1">&#39;photographer&#39;</span><span class="p">),</span>
+</span><span class='line'>            <span class="nx">payload</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;findAll&#39;</span><span class="p">);</span>
+</span><span class='line'>          <span class="kd">let</span> <span class="nx">expectedPayload</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s1">&#39;data&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>              <span class="s1">&#39;attributes&#39;</span><span class="o">:</span> <span class="p">{},</span>
+</span><span class='line'>              <span class="s1">&#39;id&#39;</span><span class="o">:</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span>
+</span><span class='line'>              <span class="s1">&#39;relationships&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                <span class="s1">&#39;emails&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                  <span class="s1">&#39;data&#39;</span><span class="o">:</span> <span class="p">[</span>
+</span><span class='line'>                    <span class="p">{</span> <span class="s1">&#39;id&#39;</span><span class="o">:</span> <span class="s1">&#39;10&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="o">:</span> <span class="s1">&#39;photos&#39;</span> <span class="p">}</span>
+</span><span class='line'>                  <span class="p">],</span>
+</span><span class='line'>                  <span class="s1">&#39;links&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="s1">&#39;self&#39;</span><span class="o">:</span> <span class="s1">&#39;https://host.test/api/v1/users/1/relationships/pictures&#39;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="s1">&#39;related&#39;</span><span class="o">:</span> <span class="s1">&#39;https://host.test/api/v1/users/1/pictures&#39;</span>
+</span><span class='line'>                  <span class="p">}</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>              <span class="p">},</span>
+</span><span class='line'>              <span class="s1">&#39;type&#39;</span><span class="o">:</span> <span class="s1">&#39;photographer&#39;</span>
+</span><span class='line'>            <span class="p">},</span>
+</span><span class='line'>            <span class="s1">&#39;included&#39;</span><span class="o">:</span> <span class="p">[</span>
+</span><span class='line'>              <span class="p">{</span>
+</span><span class='line'>                <span class="s1">&#39;attributes&#39;</span><span class="o">:</span> <span class="p">{},</span>
+</span><span class='line'>                <span class="s1">&#39;id&#39;</span><span class="o">:</span> <span class="s1">&#39;10&#39;</span><span class="p">,</span>
+</span><span class='line'>                <span class="s1">&#39;relationships&#39;</span><span class="o">:</span> <span class="p">{},</span>
+</span><span class='line'>                <span class="s1">&#39;type&#39;</span><span class="o">:</span> <span class="s1">&#39;photo&#39;</span>
+</span><span class='line'>              <span class="p">}</span>
+</span><span class='line'>            <span class="p">]</span>
+</span><span class='line'>          <span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">(</span><span class="nx">normalizedPayload</span><span class="p">,</span> <span class="nx">expectedPayload</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">});</span>
+</span><span class='line'>      <span class="p">});</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">module</span><span class="p">(</span><span class="s1">&#39;photo&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">test</span><span class="p">(</span><span class="s1">&#39;it is normalized according to remapped naming&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">assert</span><span class="p">.</span><span class="nx">expect</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">let</span> <span class="nx">store</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">owner</span><span class="p">.</span><span class="nx">lookup</span><span class="p">(</span><span class="s1">&#39;service:store&#39;</span><span class="p">);</span>
+</span><span class='line'>        <span class="kd">let</span> <span class="nx">serializer</span> <span class="o">=</span> <span class="nx">store</span><span class="p">.</span><span class="nx">serializerFor</span><span class="p">(</span><span class="s1">&#39;photo&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nx">run</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span><span class='line'>          <span class="kd">let</span> <span class="nx">payload</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s1">&#39;data&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>              <span class="s1">&#39;type&#39;</span><span class="o">:</span> <span class="s1">&#39;pictures&#39;</span><span class="p">,</span>
+</span><span class='line'>              <span class="s1">&#39;id&#39;</span><span class="o">:</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span>
+</span><span class='line'>              <span class="s1">&#39;attributes&#39;</span><span class="o">:</span> <span class="p">{},</span>
+</span><span class='line'>              <span class="s1">&#39;relationships&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                <span class="s1">&#39;user&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                  <span class="s1">&#39;links&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="s1">&#39;self&#39;</span><span class="o">:</span> <span class="s1">&#39;https://host.test/api/v1/pictures/1/relationships/user&#39;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="s1">&#39;related&#39;</span><span class="o">:</span> <span class="s1">&#39;https://host.test/api/v1/pictures/1/user&#39;</span>
+</span><span class='line'>                  <span class="p">},</span>
+</span><span class='line'>                  <span class="s1">&#39;data&#39;</span><span class="o">:</span> <span class="p">{</span> <span class="s1">&#39;type&#39;</span><span class="o">:</span> <span class="s1">&#39;users&#39;</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="o">:</span> <span class="s1">&#39;10&#39;</span> <span class="p">}</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>              <span class="p">}</span>
+</span><span class='line'>            <span class="p">},</span>
+</span><span class='line'>            <span class="s1">&#39;included&#39;</span><span class="o">:</span> <span class="p">[</span>
+</span><span class='line'>              <span class="p">{</span>
+</span><span class='line'>                <span class="s1">&#39;type&#39;</span><span class="o">:</span> <span class="s1">&#39;users&#39;</span><span class="p">,</span>
+</span><span class='line'>                <span class="s1">&#39;id&#39;</span><span class="o">:</span> <span class="s1">&#39;10&#39;</span><span class="p">,</span>
+</span><span class='line'>                <span class="s1">&#39;attributes&#39;</span><span class="o">:</span> <span class="p">{},</span>
+</span><span class='line'>                <span class="s1">&#39;links&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                  <span class="s1">&#39;self&#39;</span><span class="o">:</span> <span class="s1">&#39;https://host.test/api/v1/users/10&#39;</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>              <span class="p">}</span>
+</span><span class='line'>            <span class="p">]</span>
+</span><span class='line'>          <span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="kd">let</span> <span class="nx">normalizedPayload</span> <span class="o">=</span> <span class="nx">serializer</span><span class="p">.</span><span class="nx">normalizeResponse</span><span class="p">(</span><span class="nx">store</span><span class="p">,</span> <span class="nx">store</span><span class="p">.</span><span class="nx">modelFor</span><span class="p">(</span><span class="s1">&#39;photo&#39;</span><span class="p">),</span>
+</span><span class='line'>            <span class="nx">payload</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;findAll&#39;</span><span class="p">);</span>
+</span><span class='line'>          <span class="kd">let</span> <span class="nx">expectedPayload</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s1">&#39;data&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>              <span class="s1">&#39;attributes&#39;</span><span class="o">:</span> <span class="p">{},</span>
+</span><span class='line'>              <span class="s1">&#39;id&#39;</span><span class="o">:</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span>
+</span><span class='line'>              <span class="s1">&#39;relationships&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                <span class="s1">&#39;photographer&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                  <span class="s1">&#39;data&#39;</span><span class="o">:</span> <span class="p">{</span> <span class="s1">&#39;id&#39;</span><span class="o">:</span> <span class="s1">&#39;10&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="o">:</span> <span class="s1">&#39;photographer&#39;</span> <span class="p">},</span>
+</span><span class='line'>                  <span class="s1">&#39;links&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="s1">&#39;related&#39;</span><span class="o">:</span> <span class="s1">&#39;https://host.test/api/v1/pictures/1/user&#39;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="s1">&#39;self&#39;</span><span class="o">:</span> <span class="s1">&#39;https://host.test/api/v1/pictures/1/relationships/user&#39;</span>
+</span><span class='line'>                  <span class="p">}</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>              <span class="p">},</span>
+</span><span class='line'>              <span class="s1">&#39;type&#39;</span><span class="o">:</span> <span class="s1">&#39;photo&#39;</span>
+</span><span class='line'>            <span class="p">},</span>
+</span><span class='line'>            <span class="s1">&#39;included&#39;</span><span class="o">:</span> <span class="p">[</span>
+</span><span class='line'>              <span class="p">{</span>
+</span><span class='line'>                <span class="s1">&#39;attributes&#39;</span><span class="o">:</span> <span class="p">{},</span>
+</span><span class='line'>                <span class="s1">&#39;id&#39;</span><span class="o">:</span> <span class="s1">&#39;10&#39;</span><span class="p">,</span>
+</span><span class='line'>                <span class="s1">&#39;relationships&#39;</span><span class="o">:</span> <span class="p">{},</span>
+</span><span class='line'>                <span class="s1">&#39;type&#39;</span><span class="o">:</span> <span class="s1">&#39;photographer&#39;</span>
+</span><span class='line'>              <span class="p">}</span>
+</span><span class='line'>            <span class="p">]</span>
+</span><span class='line'>          <span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">(</span><span class="nx">normalizedPayload</span><span class="p">,</span> <span class="nx">expectedPayload</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">});</span>
+</span><span class='line'>      <span class="p">});</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>First, let&rsquo;s make it work with nonrelationship-related part, i.e. <code>modelNameFromPayloadKey</code> customization:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// app/serializers/application.js</span>
+</span><span class='line'><span class="kr">import</span> <span class="nx">DS</span> <span class="nx">from</span> <span class="s1">&#39;ember-data&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kr">const</span> <span class="nx">keysMappingForSerialization</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>  <span class="s1">&#39;photographer&#39;</span><span class="o">:</span> <span class="s1">&#39;user&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;photo&#39;</span><span class="o">:</span> <span class="s1">&#39;picture&#39;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="kr">const</span> <span class="nx">keysMappingForNormalization</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>  <span class="s1">&#39;users&#39;</span><span class="o">:</span> <span class="s1">&#39;photographers&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;pictures&#39;</span><span class="o">:</span> <span class="s1">&#39;photos&#39;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="kr">export</span> <span class="k">default</span> <span class="nx">DS</span><span class="p">.</span><span class="nx">JSONAPISerializer</span><span class="p">.</span><span class="nx">extend</span><span class="p">({});</span>
+</span><span class='line'>  <span class="nx">payloadKeyFromModelName</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nx">keysMappingForSerialization</span><span class="p">[</span><span class="nx">key</span><span class="p">])</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_super</span><span class="p">(</span><span class="nx">keysMappingForSerialization</span><span class="p">[</span><span class="nx">key</span><span class="p">]);</span>
+</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_super</span><span class="p">(...</span><span class="nx">arguments</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">modelNameFromPayloadKey</span><span class="p">(</span><span class="nx">modelName</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nx">keysMappingForNormalization</span><span class="p">[</span><span class="nx">modelName</span><span class="p">])</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_super</span><span class="p">(</span><span class="nx">keysMappingForNormalization</span><span class="p">[</span><span class="nx">modelName</span><span class="p">]);</span>
+</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_super</span><span class="p">(...</span><span class="nx">arguments</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Again, the same pattern as before &ndash; for whitelisted types we want to remap them and apply the default logic for the rest of the types.</p>
+
+<p>And to handle the relationships we can customize the serializers separately:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// app/serializers/photographer.js</span>
+</span><span class='line'><span class="kr">import</span> <span class="nx">ApplicationSerializer</span> <span class="nx">from</span> <span class="s1">&#39;./application&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kr">const</span> <span class="nx">keysForRelationshipsMapping</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>  <span class="s1">&#39;photographer&#39;</span><span class="o">:</span> <span class="s1">&#39;user&#39;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="kr">export</span> <span class="k">default</span> <span class="nx">ApplicationSerializer</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+</span><span class='line'>  <span class="nx">keyForRelationship</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nx">keysForRelationshipsMapping</span><span class="p">[</span><span class="nx">key</span><span class="p">])</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_super</span><span class="p">(</span><span class="nx">keysForRelationshipsMapping</span><span class="p">[</span><span class="nx">key</span><span class="p">]);</span>
+</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_super</span><span class="p">(...</span><span class="nx">arguments</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// app/serializers/photo.js</span>
+</span><span class='line'><span class="kr">import</span> <span class="nx">ApplicationSerializer</span> <span class="nx">from</span> <span class="s1">&#39;./application&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kr">const</span> <span class="nx">keysForRelationshipsMapping</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>  <span class="s1">&#39;photo&#39;</span><span class="o">:</span> <span class="s1">&#39;picture&#39;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="kr">export</span> <span class="k">default</span> <span class="nx">ApplicationSerializer</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+</span><span class='line'>  <span class="nx">keyForRelationship</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nx">keysForRelationshipsMapping</span><span class="p">[</span><span class="nx">key</span><span class="p">])</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_super</span><span class="p">(</span><span class="nx">keysForRelationshipsMapping</span><span class="p">[</span><span class="nx">key</span><span class="p">]);</span>
+</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_super</span><span class="p">(...</span><span class="nx">arguments</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And that&rsquo;s it! All our tests are green, and the models are going to work with the API!</p>
+
+<h2>Wrapping Up</h2>
+
+<p>Thanks to a <strong>solid design</strong> of <strong>Ember Data</strong>, it&rsquo;s quite simple to customize the <strong>data layer</strong> which in most cases requires merely overriding a couple of methods.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Karol Galanciak</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-04-28T19:00:00+02:00" pubdate data-updated="true">Apr 28<span>th</span>, 2018</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ember/'>Ember</a>, <a class='category' href='/blog/categories/ember-data/'>Ember Data</a>
+  
+</span>
+
+
+    </p>
+    <div class="meta top-line">
+      <div class="post-subscription">
+  <div id="mc_embed_signup">
+    <div id="mc_embed_signup_scroll">
+      <label for="mce-EMAIL">Do you want to take your developer skills to the next level? Subscribe to my newsletter and never miss another blog post!</label>
+      <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+      <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_62804f1b69c60e0c7966cddd6_7c71fb81df" tabindex="-1" value=""></div>
+      <div class="clear">
+      <a href="http://eepurl.com/duztq5" target="_blank" id="mc-embedded-subscribe" class="button">Yes, I want to be a better developer!</a>
+    </div>
+  </div>
+</div>
+
+    </div>
+    <div class="top-line">
+      
+        <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://Azdaroth.github.io/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/" data-via="Azdaroth" data-counturl="http://Azdaroth.github.io/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+      
+    </div>
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/" title="Previous Post: Exotic Ruby: Module.class_exec, custom JSON And Liquid Drops In Action">&laquo; Exotic Ruby: Module.class_exec, custom JSON And Liquid Drops In Action</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization/" title="Next Post: The Case for before_validation callback: complex state normalization">The Case for before_validation callback: complex state normalization &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <img class="left" src="/images/me_formal.jpg" title="me:)" alt="Karol Galanciak - photo">
+  <p>Hi, my name is Karol Galanciak, I'm a technical polyglot and domain expert in vacation rental and fitness industries.</p>
+
+  <p>I specialize in building APIs, microservices architecture, working with legacy applications, building ambitious Single Page Applications and building payment processors for credit cards processing. Currently I'm working as CTO at <a href="https://www.bookingsync.com" target="_blank">BookingSync</a>.</p>
+
+  <p id="email-me"></p>
+</section>
+
+<script type="text/javascript">
+  (function(d, id, lhs, rhs) {
+    d.getElementById(id).innerHTML = "You can reach me at <a rel='nofollow' href='mailto:" + lhs + "@" + rhs + "'>" + lhs + "@" + rhs + "</a>";
+  })(window.document, 'email-me', 'karol.galanciak', 'gmail.com');
+</script>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization/">The Case for Before_validation Callback: Complex State Normalization</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/">Advanced Ember Data Customization - Different Model Types in Ember App and API for the Same Resource</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/">Exotic Ruby: Module.class_exec, Custom JSON and Liquid Drops in Action</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/">Rails Quick Tips: Temporarily Disabling Touching With ActiveRecord.no_touching</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function/">PostgreSQL Quick Tips: Working With Dates Using EXTRACT Function</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/Azdaroth">@Azdaroth</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'Azdaroth',
+            count: 6,
+            skip_forks: false,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+<section>
+   <h1>Twitter</h1>
+   <a class="twitter-timeline" href="https://twitter.com/Azdaroth" data-widget-id="357234540634329088">Tweets by @Azdaroth</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - Karol Galanciak -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'karolgalanciak';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://Azdaroth.github.io/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/';
+        var disqus_url = 'http://Azdaroth.github.io/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

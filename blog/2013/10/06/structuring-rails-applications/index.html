@@ -1,0 +1,1409 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Structuring Rails applications - Karol Galanciak - Ruby on Rails and Ember.js consultant</title>
+  <meta name="author" content="Karol Galanciak">
+
+  
+  <meta name="description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  
+  <meta name="keywords" content="Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps">
+
+  
+  
+
+  <meta property="og:title" value="Structuring Rails applications - Karol Galanciak - Ruby on Rails and Ember.js consultant" />
+  <meta property="og:description" value="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications." />
+  <meta property="og:url" value="http://Azdaroth.github.io/blog/2013/10/06/structuring-rails-applications/" />
+  <meta property="og:type" content="website" />
+  
+  <meta property="og:site_name" content="Karol Galanciak - Ruby on Rails and Ember.js consultant"/>
+  <meta property="og:locale" content="en_US" />
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@Azdaroth">
+  <meta name="twitter:creator" content="@Azdaroth">
+  <meta name="twitter:title" content="Structuring Rails applications - Karol Galanciak - Ruby on Rails and Ember.js consultant">
+  <meta name="twitter:url" content="">
+  <meta name="twitter:description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://Azdaroth.github.io/blog/2013/10/06/structuring-rails-applications">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Karol Galanciak - Ruby on Rails and Ember.js consultant" type="application/atom+xml">
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "BlogPosting",
+      "mainEntityOfPage": {
+        "@type":"WebPage",
+        "@id": "http://Azdaroth.github.io/blog/2013/10/06/structuring-rails-applications"
+      },
+      "headline": "Structuring Rails applications - Karol Galanciak - Ruby on Rails and Ember.js consultant",
+        "image": {
+        "@type": "ImageObject",
+        "url": "",
+        "height": 640,
+        "width": 1024
+      },
+      "datePublished": "2013-10-06",
+      "dateModified": "2018-06-12",
+      "author": {
+        "@type": "Person",
+        "name": "Karol Galanciak"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Karol Galanciak",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://karolgalanciak.com/images/me_formal.jpg",
+          "width": 600,
+          "height": 60
+        }
+      },
+      "description": "Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.",
+      "keywords": "Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps"
+    }
+  </script>
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-42570582-1', 'auto');
+    ga('send', 'pageview');
+    ga('set', 'anonymizeIp', true);
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Karol Galanciak - Ruby on Rails and Ember.js consultant</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:Azdaroth.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">About Me</a></li>
+  <li><a href="/blog">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/test-driven-ember">Test-Driven Ember Book</a></li>
+  <li><a href="/presentations">Presentations</a></li>
+  <li><a href="/publications">Publications</a></li>
+  <li><a href="/open-source">Open Source</a></li>
+  <li><a href="/privacy-policy">Privacy Policy</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Structuring Rails Applications</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-06T15:00:00+02:00" pubdate data-updated="true">Oct 6<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>There&#8217;ve been a lot of discussions recently about applying Object Oriented Programming in Rails applications, how ActiveRecord callbacks make testing painful and how Rails makes it hard to do OOP the right way. Is it really true? Rails makes everything easy - you can easily write terrible code, which will be a maintenance nightmare, but is also easy to apply good practices, especially with available gems. What is the good way then to extract logic in Rails applications and the best place to put it?</p>
+
+
+
+
+<!--more-->
+
+
+<p></p>
+
+<h2>Standard structure</h2>
+
+
+
+
+<p>By default we have four directories where we can put our code: models, views, controllers and helpers. The basic explanation of them is following:</p>
+
+
+
+
+<ul>  
+  <li>Models - dealing with database, validations, repository, persistence.</li>
+  <li>Controllers - parsing requests, sessions, rendering views etc.</li> 
+  <li>Views - user interface, data presenting.</li>
+  <li>Helpers - place to put reusable methods for views.</li>
+</ul>
+
+
+
+
+<p>Does it mean these are the only places where you can put your code? No! It&#8217;s just a default structure with basic parts of your application. You can easily extend it by creating new directories and then adding them to autoload paths, e.g.: </p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">autoload_paths</span> <span class="o">+=</span> <span class="no">Dir</span><span class="o">[</span><span class="s2">&quot;</span><span class="si">#{</span><span class="ss">AppName</span><span class="p">:</span><span class="ss">:Application</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">root</span><span class="si">}</span><span class="s2">/app/usecases&quot;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<h2>How about lib directory?</h2>
+
+
+
+
+<p>Unless you are extracting something to a gem, I would discourage you from putting anything there. Some developers put in the lib all the code that doesn&#8217;t belong to models/controllers/helpers, but if something is part of your application why not add it to the app directory?</p>
+
+
+
+
+<h2>Skinny controllers, fat models</h2>
+
+
+
+
+<p>The design mantra for the last few years in Rails was to move logic from controllers to models. Well, it&#8217;s partially a good thing - skinny controllers are clear, easy to test and maintain, but why should models be like 1000 lines of code with tens of responsibilities (and no, everything concerning User is not a single responsibility)? It makes models in most cases the most problematic layer in Rails applications. They often include a lot of unrelated methods, conditional validations, cross-models operations, callbacks etc. - all the things that ActiveRecord makes really easy to add. So, the important question is:</p>
+
+
+
+
+<h2>Is ActiveRecord evil?</h2>
+
+
+
+
+<p><p>ActiveRecord is a wonderful ORM, which indeed makes everythings easy. But with great power comes great responsibility. Think about callbacks: you can add new logic in a blink of an eye and it does the job. So you keep adding other callbacks until you discover that there are some cases where you don&rsquo;t want them to be executed. So you add conditionals or bypass-like methods. After some time, the logic in callbacks is so complexed that you waste few hours with other developers to understand why something was executed at all. If other developers join the project, it is even harder for them to understand what model class really does. But it isn&rsquo;t the worst part. Think about some gems and their integration with Rails. Often it means extending models with another callbacks. Here are some real world problems:</p>
+
+<p><p>Imagine the situation where you need to implement the ability for admin to register other users and the application uses Devise gem for authentication. Furthermore, the <code> Confirmable</code> module is included in the <code>User</code>  class. Accidentally, you forgot to pass a date to <code>:confirmed_at</code> field or use <code>confirm!</code>  method. What happens then? The confirmation email is sent to all registered users. Oops, welcome to the wonderful world of callbacks. I don&rsquo;t want to criticize Devise, because it is a great gem, which I use in almost every project, but I am not sure if sending emails being directly coupled to the model layer was a good design decision. In docs you can read about the <code>skip_confirmation!</code> method and if you use external gem for such a critical part of your application, you should read the entire docs, but it can be really suprising, that the confirmation email is sent in all cases, even if you create user from Rails Console. Oh, and guess what happens if you want to change one&rsquo;s email from the console and <code> reconfirmable</code> option is enabled? The confirmation email is sent&hellip; Well, remember about reading docs, especially when the gem may include callbacks.</p></p>
+
+<p><p>Any other examples? Of course. So, you want to implement a generic forum. There is a gem called Forem, which provides you with basic forum functionality. And one day you want to change state of some posts to be approved. So you enter Rails Console and using <code> update</code>  or <code>update_attributes</code> you perform the update. What happens then? There is a callback in <code>Forem::Post</code>  model:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="n">after_save</span> <span class="ss">:email_topic_subscribers</span><span class="p">,</span> <span class="ss">:if</span> <span class="o">=&gt;</span> <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="nb">p</span><span class="o">|</span> <span class="nb">p</span><span class="o">.</span><span class="n">approved?</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nb">p</span><span class="o">.</span><span class="n">notified?</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>A lot of emails have been just sent! That was really unexpected. If you are used to  skipping callbacks in such situatons by using <code>update_columns</code> method or any other way, you are safe, but callbacks are so tighly coupled to models, that you cannot be sure if you are safe, even in console. What is the conslusion? Beware of callbacks. And read docs and code of the gems you use :).</p></p>
+
+<p><p>So, how to avoid unexpected situations and have clean and understandable code?</p></p>
+
+<p><h2>Structuring Rails applications &ndash; my way</h2></p>
+
+<p><p>I&rsquo;ve been working on several projects and the best solution in terms of maintenance, understandability and ease of testing is the following:</p></p>
+
+<p><h3>Models</h3></p>
+
+<p><p>I use models for: factory methods, queries, scopes, general validations, which are always applicable e.g. presence and uniqueness validations for fields with <code>null: false</code>  and / or <code>unique: true</code> constraints, also &ldquo;domain constraints&rdquo;, especially with many-to-many associations. The example of domain constraint is assigning users, who belong to the same organization, to some subgroups &ndash; assigning users from other organizations is prohibited. Putting this kind of logic in controllers&#8217; before_filters or permission classes is not enough for me, I want to ensure the integrity of the data and make it impossible to bypass this restriction. Here is an example: we have <code>User</code>  model and <code>Group</code> model and the many-to-many relationship between them, which is established by <code>has_many , through: </code> macro with <code>GroupsUsers</code>  join model. Also, users and groups belong to <code>Organization</code>. Here is a validation for creating relation in join model:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">GroupsUsers</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:group</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:user</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:group</span><span class="p">,</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:user</span><span class="p">,</span>  <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>  <span class="n">validate</span> <span class="ss">:ensure_valid_organization</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">ensure_valid_organization</span>
+</span><span class='line'>      <span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">organization</span> <span class="o">!=</span> <span class="n">group</span><span class="o">.</span><span class="n">organization</span>
+</span><span class='line'>        <span class="k">raise</span> <span class="no">InvalidOrganizationError</span><span class="p">,</span> <span class="s2">&quot;User&#39;s organization does not match Group&#39;s organization.&quot;</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+<p>Other example of domain constraint is validation of inclusion.</p></p>
+
+<p><p>Sometimes I do use callbacks. The basic rule when applying callbacks for me is to use them for processing some data, which should always take place. In most cases, it is limited to three callbacks:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">before_save</span>   <span class="ss">:create_parameterized_name</span>
+</span><span class='line'><span class="n">after_save</span>    <span class="ss">:calculate_statistics</span>
+</span><span class='line'><span class="n">after_destroy</span> <span class="ss">:calculate_statistics</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>Pretty easy to understand: everytime the record is saved, I want to have parameterized form of name, e.g. for a slug. Also, after the record is saved or destroyed, I want the statistics to be updated. For instance, in real estate search engine application, investment has many apartments and I want to keep track of total count of apartments, average price, minimum and maximum price etc. without performing calculations each time. And one more callback concerning associations: <code>dependent: :destroy</code>  option. It is pretty useful and keeps the integrity of data, but you have to be sure when using it. If you think for a moment, these are &ldquo;low-level&rdquo; callbacks &ndash; they don&rsquo;t concern business logic and are something that you would like to have on a database level. It can be also achieved by using trigger functions in the database, but Rails callbacks are much easier to handle.</p></p>
+
+<p><p>This is not the only right way for using callbacks, if you are absolutely sure that something should really be executed as callback, feel free to use them, but please, don&rsquo;t send notifications, don&rsquo;t connect with Facebook API or download files from Dropbox in callbacks. You will be safe, the logic will be easy to understand and testing will be much easier.</p></p>
+
+<p><p>Sometimes I use model as an interface for some service objects / usecases / whatever you call it. Here is an example: </p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Article</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">publish</span><span class="p">(</span><span class="n">publisher</span> <span class="o">=</span> <span class="no">DefaultPublisher</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">publisher</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">self</span><span class="p">)</span><span class="o">.</span><span class="n">publish</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>It is a great way to have a flexibility in publishing articles &ndash; by dependency injection we can control, how it is being published &ndash; just pass publisher class as a strategy. Having default publisher makes it easy to use: just call <code>article.publish</code> . Also, calling <code>article.publish</code> in e.g. controller feels much better than calling <code>DefaultPublisher(article).publish</code>. If you have very simple logic, like this one:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">publish</span>
+</span><span class='line'>  <span class="nb">self</span><span class="o">.</span><span class="n">published_at</span> <span class="o">=</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span> <span class="k">if</span> <span class="nb">self</span><span class="o">.</span><span class="n">published_at</span><span class="o">.</span><span class="n">blank?</span>
+</span><span class='line'>  <span class="nb">self</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>don&rsquo;t bother with extracting it to external class, it would be pointless.</p></p>
+
+<p><h3>Controllers</h3></p>
+
+<p><p>Everything related to parsing requests, sessions, rendering templates, redirecting and flash messages should be put in controllers. What about application logic? In most cases it should be limited to a control-flow, for example:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ArticlesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="vi">@article</span> <span class="o">=</span> <span class="no">Article</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="vi">@article</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>      <span class="n">flash</span><span class="o">[</span><span class="ss">:notice</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;You have successfully created an article.&quot;</span>
+</span><span class='line'>      <span class="n">redirect_to</span> <span class="n">articles_path</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="n">render</span> <span class="ss">:new</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>Depending on the action, it could be much more complex. Consider the following:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">OrdersController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">buy</span>
+</span><span class='line'>    <span class="n">order</span> <span class="o">=</span> <span class="no">Order</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">order_params</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">order_proccesor</span> <span class="o">=</span> <span class="no">BooksOrderProcessor</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">current_user</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">begin</span>
+</span><span class='line'>      <span class="n">order_processor</span><span class="o">.</span><span class="n">pay</span>
+</span><span class='line'>    <span class="k">rescue</span> <span class="ss">BooksOrderProcessor</span><span class="p">:</span><span class="ss">:InsufficientAmount</span>
+</span><span class='line'>      <span class="n">flash</span><span class="o">.</span><span class="n">now</span><span class="o">[</span><span class="ss">:error</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;Not enough books are available.&quot;</span>
+</span><span class='line'>      <span class="n">render</span> <span class="ss">:new</span>
+</span><span class='line'>    <span class="k">rescue</span> <span class="ss">BooksOrderProcessor</span><span class="p">:</span><span class="ss">:InsufficientFounds</span>
+</span><span class='line'>      <span class="n">flash</span><span class="o">[</span><span class="ss">:error</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;You have run out of funds.&quot;</span>
+</span><span class='line'>      <span class="n">redirect_to</span> <span class="n">profile_path</span><span class="p">(</span><span class="n">current_user</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="n">flash</span><span class="o">[</span><span class="ss">:notice</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;You have bought a book.&quot;</span>
+</span><span class='line'>      <span class="n">redirect_to</span> <span class="n">books_path</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">order_params</span>
+</span><span class='line'>      <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:order</span><span class="p">)</span><span class="o">.</span><span class="n">permit!</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>It is still good, such control-flow can take place in a controller, but order processing logic cannot. But what should be done with creating articles and sending notification or logging action? If it is only one additional line of code with method call like <code>Tracker.register(&ldquo;create&rdquo;, @article)</code> or <code>NewArticleNotfier.delay.notify</code>, for example:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ArticlesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="vi">@article</span> <span class="o">=</span> <span class="no">Article</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="vi">@article</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>      <span class="no">NewArticleNotfier</span><span class="o">.</span><span class="n">delay</span><span class="o">.</span><span class="n">notify</span>
+</span><span class='line'>      <span class="n">flash</span><span class="o">[</span><span class="ss">:notice</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;You have successfully created an article.&quot;</span>
+</span><span class='line'>      <span class="n">redirect_to</span> <span class="n">articles_path</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="n">render</span> <span class="ss">:new</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+<p>don&rsquo;t extract it to usecase or service object, it is ok to keep it in a controller.</p></p>
+
+<p><h3>Cells</h3></p>
+
+<p><p>You have probably had many situations with setting up the same instance variables in several controller actions for some widgets like: tags cloud, recent articles, recent comments, top visited articles etc. and it can be really inconvenient. Fortunately, there&rsquo;s a great gem: Cells, which are like mini controllers. Consider the following:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ArticlesCell</span> <span class="o">&lt;</span> <span class="ss">Cell</span><span class="p">:</span><span class="ss">:Rails</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">top_visited</span>
+</span><span class='line'>    <span class="vi">@articles</span> <span class="o">=</span> <span class="no">Article</span><span class="o">.</span><span class="n">top_visited</span>
+</span><span class='line'>    <span class="n">render</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>In cells/articles/top_visited.html.haml/erb you put the related markup and invoke cells from views by:</p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">=</span> <span class="n">render_cell</span> <span class="ss">:articles</span><span class="p">,</span> <span class="ss">:top_five</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>Another great thing about cells is that you can inject a dependency: </p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">=</span> <span class="n">render_cell</span> <span class="ss">:widgets</span><span class="p">,</span> <span class="ss">:newsletter</span><span class="p">,</span> <span class="n">newsletter_form</span><span class="p">:</span> <span class="vi">@newsletter_form</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>You can easily create a widget with newsletter submission form with enabled remote: true option and then render error messages or notice message that the email has been submitted.</p></p>
+
+<p><h3>Helpers</h3></p>
+
+<p><p>In most cases I use helpers to extract some things that aren&rsquo;t related to any particular model &ndash; rendering flash messages, titles, html templates etc., so nothing really fancy. Everything else should be extracted to the presenters/decorators. The good example of helper is the following:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">section_marker</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">content_tag</span><span class="p">(</span><span class="ss">:h2</span><span class="p">,</span> <span class="ss">class</span><span class="p">:</span> <span class="s2">&quot;section-marker&quot;</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>    <span class="s2">&quot;&lt;i class=&#39;icon-align-left&#39;&gt;&lt;/i&gt; </span><span class="si">#{</span><span class="n">text</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">html_safe</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>Before each section I had to insert header with nested icon and some text, so instead of writing the same thing several times, I extracted it to a helper, which is much cleaner. It doesn&rsquo;t belong to any model, so helper is a good place to put this kind of code. If you use Boostrap a lot, you may consider writing <code>modal_activator</code> method:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">modal_activator</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">link_to</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="ss">role</span><span class="p">:</span> <span class="s2">&quot;button&quot;</span><span class="p">,</span> <span class="s2">&quot;data-toggle&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;modal&quot;</span><span class="p">))</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><h3>Presenters/Decorators</h3></p>
+
+<p><p>Helpers aren&rsquo;t the best place to extract logic related to models &ndash; the code in helpers tends to be messy and difficult to maintain and test. The good solution would be to use Presenters &ndash; objects that encapsulate presentation logic in a neat way. There&rsquo;s a gem that is perfect for this kind of problems: Draper. Just create a decorator class, like <code>UserDecorator</code>: </p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">UserDecorator</span> <span class="o">&lt;</span> <span class="ss">Draper</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">delegate_all</span>
+</span><span class='line'>  <span class="n">decorates</span> <span class="ss">:user</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">link_to_edit</span>
+</span><span class='line'>    <span class="n">h</span><span class="o">.</span><span class="n">link_to</span><span class="p">(</span><span class="s2">&quot;Edit&quot;</span><span class="p">,</span> <span class="n">user_path</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">full_name</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">present?</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">surname</span><span class="o">.</span><span class="n">present?</span>
+</span><span class='line'>      <span class="s2">&quot;</span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">surname</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">display</span>
+</span><span class='line'>    <span class="n">full_name</span> <span class="o">||</span> <span class="n">model</span><span class="o">.</span><span class="n">email</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>Looks great! You don&rsquo;t have to keep presentation logic in helpers or even worse in models.
+You have an access to Rails helpers via h, also all method calls are delegated to model if it isn&rsquo;t implemented in a decorator. To decorate model just use <code>decorate</code> method:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">decorate</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>You can also decorate collection by using <code>decorate</code> method.</p></p>
+
+<p><h3>Forms</h3></p>
+
+<p><p>Imagine a situation where you need a form concerning more than one model. Also, some conditional validation is required. What would you do? Probably use nested attributes and add some complex validations, which would make model messy and maybe cause some bugs. There&rsquo;s much better way to do it: use form object and Reform gem. Then you can create following objects:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;reform/form/coercion&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;reform/rails&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">UserRegistrationForm</span> <span class="o">&lt;</span> <span class="ss">Reform</span><span class="p">:</span><span class="ss">:Form</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">DSL</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="ss">Reform</span><span class="p">:</span><span class="ss">:Form</span><span class="o">::</span><span class="no">ActiveRecord</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="ss">Reform</span><span class="p">:</span><span class="ss">:Form</span><span class="o">::</span><span class="no">Coercion</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">properties</span> <span class="o">[</span><span class="ss">:email</span><span class="p">,</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:country_id</span><span class="o">]</span><span class="p">,</span>  <span class="ss">on</span><span class="p">:</span> <span class="ss">:user</span>
+</span><span class='line'>  <span class="n">property</span> <span class="ss">:birth_date</span><span class="p">,</span>        <span class="ss">on</span><span class="p">:</span> <span class="ss">:user_profile</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="no">Date</span>
+</span><span class='line'>  <span class="n">properties</span> <span class="o">[</span><span class="ss">:age</span><span class="p">,</span> <span class="ss">:photo</span><span class="o">]</span><span class="p">,</span>   <span class="ss">on</span><span class="p">:</span> <span class="ss">:user_profile</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:email</span><span class="p">,</span> <span class="ss">:photo</span><span class="p">,</span> <span class="ss">:birth_date</span><span class="p">,</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:age</span><span class="p">,</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:age</span><span class="p">,</span> <span class="ss">numericality</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:email</span><span class="p">,</span> <span class="ss">uniqueness</span><span class="p">:</span> <span class="p">{</span> <span class="n">case_sensitive</span><span class="p">:</span> <span class="kp">false</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">model</span> <span class="ss">:user</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">countries_collection</span>
+</span><span class='line'>    <span class="no">Country</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">persist!</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">validate</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">begin</span>
+</span><span class='line'>        <span class="n">save</span> <span class="k">do</span> <span class="o">|</span><span class="n">data</span><span class="p">,</span> <span class="n">map</span><span class="o">|</span>
+</span><span class='line'>          <span class="no">UserRegistration</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">register!</span><span class="p">(</span>
+</span><span class='line'>            <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">map</span><span class="o">[</span><span class="ss">:user</span><span class="o">]</span><span class="p">),</span>
+</span><span class='line'>            <span class="no">UserProfile</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">map</span><span class="o">[</span><span class="ss">:user_profile</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>          <span class="p">)</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>      <span class="k">rescue</span> <span class="ss">UserRegistration</span><span class="p">:</span><span class="ss">:RegistrationFailed</span>
+</span><span class='line'>        <span class="kp">false</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>By using Reform gem, you can easily create clean form objects, which would deal with validations, coercions (thanks to Virtus) and persisting data concerning multiple models. Also, you can put some form interface logic here &ndash; consider <code>countries_collection</code> method: instead of passing: <code>collection: Country.all.pluck(:id, :name)</code> to the select field, you can just pass <code>form_object.countries_collection</code>. This example is trivial, but if you had some filtering and ordering logic needed to display collection, then it would be great way to keep everything clean. Using form objects doesn&rsquo;t change control-flow in controllers:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">UsersController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">new</span>
+</span><span class='line'>    <span class="vi">@registration</span> <span class="o">=</span> <span class="n">registration_form</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="vi">@registration</span> <span class="o">=</span> <span class="n">registration_form</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="vi">@registration</span><span class="o">.</span><span class="n">persist!</span><span class="p">(</span><span class="n">user_params</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">redirect_to</span> <span class="n">root_path</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="n">render</span> <span class="ss">:new</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">registration_form</span>
+</span><span class='line'>      <span class="no">UserRegistrationForm</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">user</span><span class="p">:</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">,</span> <span class="n">user_profile</span><span class="p">:</span> <span class="no">UserProfile</span><span class="o">.</span><span class="n">new</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">user_params</span>
+</span><span class='line'>      <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span><span class="o">.</span><span class="n">permit!</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>Form objects are also great way to extract search forms and logic related to filtering. Reform can deal with <code>has_many</code> associations and nested collections, so it is pretty powerful. However, there are some cases where you would still want to use <code>accepts_nested_attributes_for</code> &ndash; when you need funcionality provided by nested_form gem. It is not really clean to use <code>accepts_nested_attributes_for</code> macro, but the benefits are great. In other cases, form object is a way to go.</p></p>
+
+<p><h3>Uploaders</h3></p>
+
+<p><p>For file uploading I use Carrierwave where the uploaders&#8217; configuration is kept in the /uploaders directory. That&rsquo;s a really good approach, because thumb-processing strategy etc. has nothing to do with ActiveRecord model, so there&rsquo;s no reason to keep this kind of information there. Here is an example of general uploader:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ApplicationUploader</span> <span class="o">&lt;</span> <span class="ss">CarrierWave</span><span class="p">:</span><span class="ss">:Uploader</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">include</span> <span class="ss">CarrierWave</span><span class="p">:</span><span class="ss">:MiniMagick</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">storage</span> <span class="ss">:file</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="ss">CarrierWave</span><span class="p">:</span><span class="ss">:SanitizedFile</span><span class="o">.</span><span class="n">sanitize_regexp</span> <span class="o">=</span> <span class="sr">/[^[:word:].-+]/</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">store_dir</span>
+</span><span class='line'>    <span class="s2">&quot;system/</span><span class="si">#{</span><span class="no">Rails</span><span class="o">.</span><span class="n">env</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">underscore</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">mounted_as</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">extension_white_list</span>
+</span><span class='line'>    <span class="sx">%w(jpg jpeg gif png pdf tiff tif eps bmp ps)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">rgbify</span>
+</span><span class='line'>      <span class="k">begin</span>
+</span><span class='line'>        <span class="n">manipulate!</span> <span class="k">do</span> <span class="o">|</span><span class="n">img</span><span class="o">|</span>
+</span><span class='line'>          <span class="n">img</span><span class="o">.</span><span class="n">colorspace</span> <span class="s2">&quot;sRGB&quot;</span>
+</span><span class='line'>          <span class="n">img</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>And example of some images uploader:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">LogoUploader</span> <span class="o">&lt;</span> <span class="no">ApplicationUploader</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">filename</span>
+</span><span class='line'>    <span class="s2">&quot;original.</span><span class="si">#{</span><span class="n">model</span><span class="o">.</span><span class="n">logo</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">extension</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">original_filename</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">version</span> <span class="ss">:thumb</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">process</span> <span class="ss">:rgbify</span>
+</span><span class='line'>    <span class="n">process</span> <span class="ss">:resize_to_fill</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="o">]</span>
+</span><span class='line'>    <span class="n">process</span> <span class="ss">:convert</span> <span class="o">=&gt;</span> <span class="s1">&#39;jpg&#39;</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">full_filename</span><span class="p">(</span><span class="n">for_file</span><span class="p">)</span>
+</span><span class='line'>      <span class="s2">&quot;thumb.jpg&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>Looks great and doesn&rsquo;t clutter models with unrelated image-processing configuration options.</p></p>
+
+<p><h3>Services</h3></p>
+
+<p><p>You may expect that in /services directory so called service-objects would be placed. Well, not really. I prefer to call them (service objects) usecases and in /services I put some wrappers concerning third party APIs. In one application I&rsquo;ve been working on, I had to deal with Google Calendar integration and the adapter layer for performing requests to GC was a service, for instance:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">GoogleCalendar</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">Calendars</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kp">attr_reader</span> <span class="ss">:client</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
+</span><span class='line'>      <span class="vi">@client</span> <span class="o">=</span> <span class="n">client</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">#some other methods</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">patch</span><span class="p">(</span><span class="n">calendar_id</span><span class="p">,</span> <span class="n">calendar_data</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">client</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">api_method</span><span class="p">:</span> <span class="n">client</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">calendars</span><span class="o">.</span><span class="n">patch</span><span class="p">),</span> <span class="ss">body</span><span class="p">:</span> <span class="n">calendar_data</span><span class="p">,</span>
+</span><span class='line'>        <span class="ss">parameters</span><span class="p">:</span> <span class="p">{</span> <span class="s2">&quot;calendarId&quot;</span> <span class="o">=&gt;</span> <span class="n">calendar_id</span> <span class="p">},</span> <span class="ss">headers</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;Content-Type&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;application/json&#39;</span><span class="p">})</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>In smaller applications you won&rsquo;t probably need this layer, otherwise it is a neat way to separate services from the rest of the application.</p></p>
+
+<p><h3>Usecases</h3></p>
+
+<p><p>This is a place where most of the business logic should be extracted &ndash; almost everything that would be in models, according to &ldquo;skinny controllers, far models&rdquo;. The benefits of using usecase objects / service objects are great &ndash; they area easy to undestand and maintain, testing is simple and don&rsquo;t lead to unexpected actions (like the ones I pointed out in callbacks). Let&rsquo;s take a look again at the user registration process from form object, the implementation of <code>UserRegistration</code> could be following:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">UserRegistration</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">attr_reader</span> <span class="ss">:admin_notifier</span><span class="p">,</span> <span class="ss">:external_service_notifier</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">notifiers</span> <span class="o">=</span> <span class="p">{})</span>
+</span><span class='line'>    <span class="vi">@admin_notifier</span> <span class="o">=</span> <span class="n">notifiers</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:admin_notifier</span><span class="p">)</span> <span class="p">{</span> <span class="no">AdminNotifier</span><span class="o">.</span><span class="n">new</span> <span class="p">}</span>
+</span><span class='line'>    <span class="vi">@external_service_notifier</span> <span class="o">=</span> <span class="n">notifiers</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:external_service_notifier</span><span class="p">)</span> <span class="p">{</span> <span class="no">ExternalServiceNotifier</span><span class="o">.</span><span class="n">new</span> <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">register!</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">profile</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">profile</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">user</span>
+</span><span class='line'>    <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">transaction</span> <span class="k">do</span>
+</span><span class='line'>      <span class="k">begin</span>
+</span><span class='line'>        <span class="n">user</span><span class="o">.</span><span class="n">save!</span>
+</span><span class='line'>        <span class="n">profile</span><span class="o">.</span><span class="n">save!</span>
+</span><span class='line'>      <span class="k">rescue</span>
+</span><span class='line'>        <span class="k">raise</span> <span class="ss">UserRegistration</span><span class="p">:</span><span class="ss">:RegistrationFailed</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="n">notify_admin</span>
+</span><span class='line'>    <span class="n">notify_external_service</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">notify_admin</span>
+</span><span class='line'>    <span class="n">admin_notifier</span><span class="o">.</span><span class="n">notify</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">notify_external_service</span>
+</span><span class='line'>    <span class="n">external_service_notifier</span><span class="o">.</span><span class="n">new_user</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">profile</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">RegistrationFailed</span> <span class="o">&lt;</span> <span class="no">Exception</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>Let&rsquo;s discuss some design choices here: in the constructor I added a possibility to inject some notifiers and provide reasonable defaults using <code>Hash#fetch</code> method to avoid nils. In <code>register</code> method I wrap the persistence process in <code>ActiveRecord::Base.transaction</code>, to ensure that user is not created without the profile if any error occurs (notice the bang methods), if it fails, the exception is raised. Then, some notifiers are called, one is a mailer, the other one connects with an external service and does some stuff. They should be executed asynchronously, in Delayed Job, Resque or Sidekiq to make sure they are completed if failure occurs &ndash; there might be a temporary problem with connecting to Gmail, Facebook, Twitter etc. but it&rsquo;s not a reason for an entire registration process to fail.</p></p>
+
+<p><h3>Policies</h3></p>
+
+<p><p>Policy objects are a bit special &ndash; it&rsquo;s a decorator, but Draper decorators are not the best place to put them, because they concern presentation logic. Models, except small applications, are also wrong place to write policy logic as they encapsulate important domain logic which can be quite complex. So it is a good idea to create separate objects &ndash; policy objects. Depending on the size of your application, you may have several policy objects or just one for a model, here is an example:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">InvestmentPromotionPolicy</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">attr_reader</span> <span class="ss">:investment</span><span class="p">,</span> <span class="ss">:clock</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">investment</span><span class="p">,</span> <span class="n">clock</span> <span class="o">=</span> <span class="no">DateTime</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@investment</span> <span class="o">=</span> <span class="n">investment</span>
+</span><span class='line'>    <span class="vi">@clock</span> <span class="o">=</span> <span class="n">clock</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">promoted?</span>
+</span><span class='line'>    <span class="n">valid_promotion_date?</span> <span class="ow">and</span> <span class="n">owner_promotable?</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">owner_promotable?</span>
+</span><span class='line'>    <span class="n">investment</span><span class="o">.</span><span class="n">owner</span><span class="o">.</span><span class="n">active_for_promotion?</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">promotion_status</span>
+</span><span class='line'>    <span class="k">case</span>
+</span><span class='line'>    <span class="k">when</span> <span class="n">promoted?</span>
+</span><span class='line'>      <span class="ss">:promoted</span>
+</span><span class='line'>    <span class="k">when</span> <span class="n">valid_promotion_date?</span> <span class="ow">and</span> <span class="o">!</span><span class="n">owner_promotable?</span>
+</span><span class='line'>      <span class="ss">:pending_for_promotion</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="ss">:not_promoted</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">valid_promotion_date?</span>
+</span><span class='line'>      <span class="p">(</span><span class="n">investment</span><span class="o">.</span><span class="n">promotion_starts_at</span><span class="o">.</span><span class="n">.investment</span><span class="o">.</span><span class="n">promotion_ends_at</span><span class="p">)</span><span class="o">.</span><span class="n">cover?</span> <span class="n">clock</span><span class="o">.</span><span class="n">now</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>In the constructor I pass an investment and the clock, which by default is <code>DateTime</code>. I had some issues with concept of time, especially in policy objects where I had to implement own <code>Clock</code>, because <code>DateTime</code> was not sufficient, so just to be on a safe side, I add a possibility for a dependency injection. It doesn&rsquo;t increase a complexity of the class and I wouldn&rsquo;t consider it as a premature optimization. Then we have some methods that encapsulate promotion logic and one that returns proper status. You will probably use policy objects in many cases &ndash; e.g. <code>promotion_status</code> method looks like it could be used in a presenter, which would display proper content, depending on the returned status and the <code>promoted?</code> method could be used in the usecases or in a model class method that would return promoted investments. You can use policy objects in many ways: inject into a model and delegate method calls:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Investment</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">delegate</span> <span class="ss">:promoted?</span><span class="p">,</span> <span class="ss">:owner_promotable?</span><span class="p">,</span> <span class="ss">:promotion_status</span> <span class="ss">to</span><span class="p">:</span> <span class="ss">:promotion_policy</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># some methods</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">promotion_policy</span>
+</span><span class='line'>      <span class="vi">@promotion_policy</span> <span class="o">||=</span> <span class="no">InvestmentPromotionPolicy</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">self</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>In the same way you can use them in presenters if you don&rsquo;t want to keep it in the model layer. They can also be injected as a dependency into a usecase. Choose whatever suits you better and the complexity of the application.</p></p>
+
+<p><h3>Value objects</h3></p>
+
+<p><p>In many applications you may encounter a situation where a concept deserves own abstraction and whose equality isn&rsquo;t based on identity but on the value, some examples would be Ruby&rsquo;s <code>Date</code> or <code>Money</code> concept, typical for e-commerce applications. Extraction to a value object (or domain model) is a great convenience. Imagine a situation where you have a hierarchy of roles of users &ndash; you will probably want to compare the roles if one is &ldquo;greater&rdquo; than another to decide, if some action can be performed &ndash; the <code>RoleRank</code> would solve this problem:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">RoleRank</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Comparable</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="no">ROLES</span> <span class="o">=</span> <span class="sx">%w(superadmin admin junior_admin user guest)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">attr_reader</span> <span class="ss">:value</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">role</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">check_role_existence</span><span class="p">(</span><span class="n">role</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@value</span> <span class="o">=</span> <span class="n">value</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">&lt;=&gt;</span><span class="p">(</span><span class="n">other_role</span><span class="p">)</span>
+</span><span class='line'>    <span class="no">ROLES</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">other_role</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">&lt;=&gt;</span> <span class="no">ROLES</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">to_s</span>
+</span><span class='line'>    <span class="n">value</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">InvalidRole</span> <span class="o">&lt;</span> <span class="no">Exception</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">check_role_existence</span><span class="p">(</span><span class="n">specified_role</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">unless</span> <span class="no">ROLES</span><span class="o">.</span><span class="n">include?</span> <span class="n">specified_role</span>
+</span><span class='line'>        <span class="k">raise</span> <span class="ss">RoleRank</span><span class="p">:</span><span class="ss">:InvalidRole</span><span class="p">,</span> <span class="s2">&quot;Specified Role Doesn&#39;t Exist&quot;</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>Looks great. The <code>Comparable</code> module and <code>&lt;=></code> takes care of implementing comparison operators. You can add a method with ranked role to the user model: </p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">role</span>
+</span><span class='line'>    <span class="vi">@role</span> <span class="o">||=</span> <span class="no">RoleRank</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">permission_level</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>and then compare users&#8217; roles:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">permission_level</span><span class="p">:</span> <span class="s2">&quot;superadmin&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">other_user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">permission_level</span><span class="p">:</span> <span class="s2">&quot;admin&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">role</span> <span class="o">&gt;</span> <span class="n">other_user</span><span class="o">.</span><span class="n">role</span> <span class="o">=&gt;</span> <span class="kp">true</span>
+</span></code></pre></td></tr></table></div></figure>
+<h3>What about Observers and Concerns?</h3></p>
+
+<p><p>There are two more ways to extract logic &ldquo;the standard way&rdquo;: observers (removed from Rails 4) and concerns. Observers aren&rsquo;t really different from callbacks, except they are more difficult to deal with &ndash; you will probably forget that you&rsquo;ve used them and debugging or following the application logic would be even harder than in callbacks and I&rsquo;m glad they were removed. And the new thing in Rails 4: concerns. They are great, expecially for shared behaviour. When you need to parameterize field name in several models, you can extract it to a module in concerns, and then include Parameterizable concern, some custom finders and factory methods also can be extracted into concerns. If you use the same before_filters in more than controller, extracting them to the concerns would be a good idea. In Presenters, such concern as <code>Presenters::Publishable</code> would be beneficial when you have articles, posts and some other models that act in a similar way, so introducing concerns and encouragement to extract similar behaviour was definitely a good idea.</p></p>
+
+<p><h3>Any other application layers?</h3></p>
+
+<p><p>Depending on your application, you may introduce additional layers like JSON representations of models, jobs that should be done in a background or XML importers, but they can be considered as presentation logic (jsons) or usecases / services (importers, background jobs). If XML importers are important part of your business logic, then maybe extracting them from usecases and treating in a special way would be beneficial.</p></p>
+
+<p><h2>Wrapping up</h3></p>
+
+<p><p>The concepts mentioned here might not be popular among some developers and be considered as over-engineering. When writing simple CMS, introducing services, form objects etc. probably is a premature optimization and models / contollers / helpers and maybe presenters would be sufficient, including writing business logic in ActiveRecord callbacks. But in more complex application applying some OOP techniques can save you (and other developers you work with) from a lot of problems.</p></p>
+
+<p><h2>Further reading</h2></p>
+
+<p><ul>
+  <li><a href="http://blog.codeclimate.com/blog/2012/10/17/7-ways-to-decompose-fat-activerecord-models" target="_blank">7 Patterns to Refactor Fat ActiveRecord Models</a></li>
+  <li><a href="http://samuelmullen.com/2013/05/the-problem-with-rails-callbacks/" target="_blank">The Problem With Rails Callbacks</a></li>
+  <li><a href="http://blog.steveklabnik.com/posts/2011-09-06-the-secret-to-rails-oo-design" target="_blank">The Secret to Rails OO Design</a></li>
+  <li><a href="http://objectsonrails.com" target="_blank">Objects On Rails</a></li>
+  <li><a href="http://solnic.eu/2011/08/01/making-activerecord-models-thin.html" target="_blank">Making ActiveRecord Models Thin</a></li>
+  <li><a href="http://blog.arkency.com/2013/09/services-what-they-are-and-why-we-need-them/" target="_blank">Services &ndash; what are they and why we need them?</a></li>
+</ul></p>
+
+<p><p class="meta small-p">Changelog: 09-10-2013 &ndash; Use <code>Comparable</code> module and <code>&lt;=></code> method for implementing comparison operators in RankedRole. Provide better example in <code>OrdersController</code>. Thanks <a href="http://www.reddit.com/user/yxhuvud" rel="nofollow" target="_blank">yxhuvud</a> for suggestions.</p></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Karol Galanciak</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-06T15:00:00+02:00" pubdate data-updated="true">Oct 6<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/callbacks/'>Callbacks</a>, <a class='category' href='/blog/categories/design-patterns/'>Design Patterns</a>, <a class='category' href='/blog/categories/oop/'>OOP</a>, <a class='category' href='/blog/categories/rails/'>Rails</a>, <a class='category' href='/blog/categories/refactoring/'>Refactoring</a>
+  
+</span>
+
+
+    </p>
+    <div class="meta top-line">
+      <div class="post-subscription">
+  <div id="mc_embed_signup">
+    <div id="mc_embed_signup_scroll">
+      <label for="mce-EMAIL">Do you want to take your developer skills to the next level? Subscribe to my newsletter and never miss another blog post!</label>
+      <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+      <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_62804f1b69c60e0c7966cddd6_7c71fb81df" tabindex="-1" value=""></div>
+      <div class="clear">
+      <a href="http://eepurl.com/duztq5" target="_blank" id="mc-embedded-subscribe" class="button">Yes, I want to be a better developer!</a>
+    </div>
+  </div>
+</div>
+
+    </div>
+    <div class="top-line">
+      
+        <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://Azdaroth.github.io/blog/2013/10/06/structuring-rails-applications/" data-via="Azdaroth" data-counturl="http://Azdaroth.github.io/blog/2013/10/06/structuring-rails-applications/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+      
+    </div>
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/08/02/app-deployment-with-capistrano-and-after-deployment-setup/" title="Previous Post: Rails applications deployment with Capistrano and after deployment setup">&laquo; Rails applications deployment with Capistrano and after deployment setup</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/01/04/test-driven-rails-part-1/" title="Next Post: Test Driven Rails – Part 1">Test Driven Rails – Part 1 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <img class="left" src="/images/me_formal.jpg" title="me:)" alt="Karol Galanciak - photo">
+  <p>Hi, my name is Karol Galanciak, I'm a technical polyglot and domain expert in vacation rental and fitness industries.</p>
+
+  <p>I specialize in building APIs, microservices architecture, working with legacy applications, building ambitious Single Page Applications and building payment processors for credit cards processing. Currently I'm working as CTO at <a href="https://www.bookingsync.com" target="_blank">BookingSync</a>.</p>
+
+  <p id="email-me"></p>
+</section>
+
+<script type="text/javascript">
+  (function(d, id, lhs, rhs) {
+    d.getElementById(id).innerHTML = "You can reach me at <a rel='nofollow' href='mailto:" + lhs + "@" + rhs + "'>" + lhs + "@" + rhs + "</a>";
+  })(window.document, 'email-me', 'karol.galanciak', 'gmail.com');
+</script>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization/">The Case for Before_validation Callback: Complex State Normalization</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/">Advanced Ember Data Customization - Different Model Types in Ember App and API for the Same Resource</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/">Exotic Ruby: Module.class_exec, Custom JSON and Liquid Drops in Action</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/">Rails Quick Tips: Temporarily Disabling Touching With ActiveRecord.no_touching</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function/">PostgreSQL Quick Tips: Working With Dates Using EXTRACT Function</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/Azdaroth">@Azdaroth</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'Azdaroth',
+            count: 6,
+            skip_forks: false,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+<section>
+   <h1>Twitter</h1>
+   <a class="twitter-timeline" href="https://twitter.com/Azdaroth" data-widget-id="357234540634329088">Tweets by @Azdaroth</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - Karol Galanciak -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'karolgalanciak';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://Azdaroth.github.io/blog/2013/10/06/structuring-rails-applications/';
+        var disqus_url = 'http://Azdaroth.github.io/blog/2013/10/06/structuring-rails-applications/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

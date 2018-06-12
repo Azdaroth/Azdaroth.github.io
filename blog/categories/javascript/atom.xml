@@ -1,0 +1,1126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: JavaScript | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
+  <link href="http://Azdaroth.github.io/blog/categories/javascript/atom.xml" rel="self"/>
+  <link href="http://Azdaroth.github.io/"/>
+  <updated>2018-06-12T17:11:48+02:00</updated>
+  <id>http://Azdaroth.github.io/</id>
+  <author>
+    <name><![CDATA[Karol Galanciak]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Ember Tips: Testing Outgoing HTTP Requests]]></title>
+    <link href="http://Azdaroth.github.io/blog/2017/06/25/ember-tips-testing-outgoing-http-requests/"/>
+    <updated>2017-06-25T22:00:00+02:00</updated>
+    <id>http://Azdaroth.github.io/blog/2017/06/25/ember-tips-testing-outgoing-http-requests</id>
+    <content type="html"><![CDATA[<p><strong>Ember.js</strong> is a web frontend framework and it&rsquo;s no surprise that majority of the applications deal with a lot of <strong>HTTP requests</strong>. But such fact has a lot of implications on the process of development of the Ember apps, especially when it comes to <strong>testing</strong>. For basic <code>GET</code> requests which don&rsquo;t include any query params or don&rsquo;t deal with pagination it&rsquo;s quite straight-forward &ndash; for those we just want to fetch some data, so we can check if proper objects are present as a side-effect of these requests. What about <code>POST</code>, <code>PATCH</code> or <code>DELETE</code> requests, where we can&rsquo;t easily test the side effects?</p>
+
+<p>Fortunately, thanks to the awesome tools such as <a href="https://github.com/pretenderjs/pretender" target="_blank">pretender</a> and <a href="https://github.com/samselikoff/ember-cli-mirage" target="_blank">ember-cli-mirage</a>, it&rsquo;s not a big problem.</p>
+
+<!--more-->
+
+
+<h2>Scenario #1: Testing if the request body sent in the outgoing request is right</h2>
+
+<p>Imagine that you are writing a classic sign-up for users. It would be quite useful to ensure that the right params are indeed sent to the <code>/api/users</code> endpoint (if that&rsquo;s the case).</p>
+
+<p>For dealing with HTTP requests and/or implementing a backend mock, <a href="https://github.com/samselikoff/ember-cli-mirage" target="_blank">ember-cli-mirage</a> addon is a great choice. The setup is beyond the scope of this article, but if you happen to not be familiar with <code>ember-cli-mirage</code>, I highly recommend reading the <a href="http://www.ember-cli-mirage.com" target="_blank">docs</a> which are very clear about the setup and its features.</p>
+
+<p>Let&rsquo;s assume that we have a proper route generated for the signup, let it be a <code>signup</code> route, a corresponding <code>signup</code> controller already handling a logic for the registration in one of its actions and that we have a <code>User</code> model with <code>email</code> and <code>password</code> attributes. Our scenario will be pretty simple: we want to make sure that after filling in <code>email</code> and <code>password</code> fields and clicking the <code>submit</code> button the request will be performed to <code>/api/users</code> with the right params. Here&rsquo;s our test for the signup feature:</p>
+
+<p>``` javascript my-awesome-app/tests/acceptance/sign-up.js
+/<em> global server </em>/
+import { test } from &lsquo;qunit&rsquo;;
+import moduleForAcceptance from &lsquo;book-me/tests/helpers/module-for-acceptance&rsquo;;</p>
+
+<p>moduleForAcceptance(&lsquo;Acceptance | sign up&rsquo;);
+test(&lsquo;user can successfully sign up&rsquo;, function(assert) {
+  assert.expect(1);</p>
+
+<p>  server.post(&lsquo;/api/users&rsquo;, function(schema)  {</p>
+
+<pre><code>const attributes = this.normalizedRequestAttrs();
+const expectedAttributes = {
+  email: 'example@email.com',
+  password: 'secretpassword'
+};
+
+assert.deepEqual(attributes, expectedAttributes, "attributes don't match the expected ones");
+
+return schema.users.create(attributes);
+</code></pre>
+
+<p>  });</p>
+
+<p>  visit(&lsquo;/signup&rsquo;);</p>
+
+<p>  andThen(() => {</p>
+
+<pre><code>fillIn('[data-test=signup-email]', "example@email.com");
+fillIn('[data-test=signup-password]', 'secretPassword');
+
+click('[data-test=submit-signup]');
+</code></pre>
+
+<p>  });
+});
+```</p>
+
+<p>In this acceptance test we visit the <code>signup</code> page, provide the email and password combo and we click on the submit button. There is only one simple assertion here: comparing the expected attributes against the normalized attributes from the requests to <code>/api/users</code> endpoint &ndash; we use normalized attributes to avoid dealing with JSONAPI format. To achieve that we provide a custom action handler which is very close to the default implementation for <code>POST</code> actions from <code>ember-cli-mirage</code>. The only extra step here is comparing the attributes.</p>
+
+<p>What if we want to just make sure that the request was performed to the given endpoint, but we don&rsquo;t care about the request body?</p>
+
+<h2>Scenario #2 Testing if the request was performed to the given endpoint</h2>
+
+<p>For this scenario imagine that we want to have a feature of deleting some tasks from the to-do list. The simplest way to make sure that the task will be removed would be checking if the <code>DELETE</code> request was performed to <code>/api/tasks/:id</code> endpoint. Again, let&rsquo;s assume that we already have a right implementation for this feature (too bad we didn&rsquo;t practice strict TDD to develop it properly).</p>
+
+<p>For this use case we will do something a bit different than the last time. First, let&rsquo;s add the right config for the <code>ember-cli-mirage</code> to handle CRUD actions for <code>tasks</code> using <code>resource</code> helper:</p>
+
+<p>``` javascript my-awesome-app/mirage/config.js
+export default function() {
+  this.namespace = &lsquo;api&rsquo;;</p>
+
+<p>  this.resource(&lsquo;users&rsquo;);
+}
+```</p>
+
+<p>And that&rsquo;s how our test could look like:</p>
+
+<p>``` javascript my-awesome-app/tests/acceptance/delete-task.js
+/<em> global server </em>/
+import { test } from &lsquo;qunit&rsquo;;
+import moduleForAcceptance from &lsquo;book-me/tests/helpers/module-for-acceptance&rsquo;;</p>
+
+<p>moduleForAcceptance(&lsquo;Acceptance | delete task&rsquo;);
+test(&lsquo;user can delete tasks&rsquo;, function(assert) {
+  assert.expect(1);</p>
+
+<p>  const task = server.create(&lsquo;task&rsquo;);</p>
+
+<p>  visit(&lsquo;/tasks&rsquo;);</p>
+
+<p>  click(&lsquo;[data-test=delete-task]&rsquo;);</p>
+
+<p>  andThen(() => {</p>
+
+<pre><code>const taskUrl = `/api/tasks/${task.id}`;
+const deleteTaskRequest = server.pretender.handledRequests.find((request) =&gt; {
+  return request.url === taskUrl &amp;&amp; request.method === 'DELETE';
+});
+
+assert.ok(deleteTaskRequest, 'delete task request should be performed');
+</code></pre>
+
+<p>  });
+});
+```</p>
+
+<p>Again, our test has a very simple structure: we visit the <code>tasks</code> route where all the tasks are displayed and delete the one we created in the test&rsquo;s setup. To make sure that the request was performed to the right endpoint we take advantage of the fact that <code>ember-cli-mirage</code> uses <code>pretender</code> under the hood which keeps track of all handled requests in <code>handledRequests</code> property. Thanks to this feature, we can identify our request based on the <strong>URL</strong> and the <strong>request method</strong>.</p>
+
+<h2>Wrapping Up</h2>
+
+<p>Testing <strong>outgoing requests</strong> in Ember might not be the most obvious thing to do. Fortunately, thanks to <a href="https://github.com/pretenderjs/pretender" target="_blank">pretender</a> and <a href="https://github.com/samselikoff/ember-cli-mirage" target="_blank">ember-cli-mirage</a>, we can easily verify both the <strong>URLs</strong> of the endpoints where the requests were performed to and the <strong>request body</strong> that was sent with the request.</p>
+
+<p>P.S. I&rsquo;ve just started <strong>writing a book</strong> about <strong>test-driving Ember</strong> applications. If you found this article useful, you are going to love it :). <strong>Subscribe</strong> to my newsletter to get updates and promotion code once it&rsquo;s released.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ember Tips: Managing Timeouts And Delays]]></title>
+    <link href="http://Azdaroth.github.io/blog/2017/04/30/ember-quick-tips-managing-timeouts-and-delays/"/>
+    <updated>2017-04-30T22:00:00+02:00</updated>
+    <id>http://Azdaroth.github.io/blog/2017/04/30/ember-quick-tips-managing-timeouts-and-delays</id>
+    <content type="html"><![CDATA[<p><strong>Timeouts</strong> and <strong>delays</strong> are quite extensively used in many applications when deferring execution of some action via <code>Ember.run.later</code> or debouncing via <code>Ember.run.debounce</code>. Having small amounts of tests executing such methods might not be a problem initially, but obviously, as the application grows, this can easily lead to <strong>slow test suite</strong> which takes minutes to finish due to the waiting for all the timeouts and delays in many places. Let&rsquo;s try to find the best solution to solve this problem.</p>
+
+<!--more-->
+
+
+<h2>Anatomy of The Problem</h2>
+
+<p>Imagine you are implementing a todo-list and want to add a <strong>destroy item feature</strong>. The obvious solution would be adding a button which would trigger some <code>destroy</code> action once a user clicks it. But the problem with such solution is that it doesn&rsquo;t offer the best <strong>UX</strong> as a user could easily destroy items <strong>by accident</strong>. A nicer way for such use cases is making a user hold the button for a certain period of time and only after this <strong>delay</strong> would the action be invoked, otherwise it won&rsquo;t be executed.</p>
+
+<p>A great news is that there is already an addon solving such problem: <a href="https://www.npmjs.com/package/ember-hold-button" target="_blank">ember-hold-button</a>. Let&rsquo;s create a very simple component handling the logic of displaying the item and deleting it after holding a button for 3 seconds using <code>ember-hold-button</code>:</p>
+
+<p>``` javascript app/components/display-todo-item.js
+import Ember from &lsquo;ember&rsquo;;</p>
+
+<p>const {
+  get,
+} = Ember;</p>
+
+<p>export default Ember.Component.extend({
+  actions: {</p>
+
+<pre><code>destroy() {
+  const item = get(this, 'item');
+
+  item.destroyRecord();
+},
+</code></pre>
+
+<p>  },
+});
+```</p>
+
+<p>
+<code>html app/templates/components/display-todo-item.hbs
+{{item.name}}
+{{#hold-button type="rectangle" action="destroy" delay=3000 data-test="destroy-item-btn"}}
+  Destroy
+{{/hold-button}}
+</code>
+</p>
+
+<p>Ok, cool, so the feature is done. What about integrations tests verifying that this feature works? Currently, it would take at least 3 seconds due to the waiting time + the runtime of the test itself, which is definitely too slow.</p>
+
+<h2>Solving The Problem</h2>
+
+<p>One way to fix this problem would be moving <code>delay</code> to computed property which would be configurable and by default make it equal to 3 seconds. The component would look like this in such case:</p>
+
+<p>``` javascript app/components/display-todo-item.js
+import Ember from &lsquo;ember&rsquo;;</p>
+
+<p>const {
+  get,
+} = Ember;</p>
+
+<p>export default Ember.Component.extend({
+  destroyActionDelay: 3000,</p>
+
+<p>  actions: {</p>
+
+<pre><code>destroy() {
+  const item = get(this, 'item');
+
+  item.destroyRecord();
+},
+</code></pre>
+
+<p>  },
+});
+```</p>
+
+<p>
+<code>html app/templates/components/display-todo-item.hbs
+{{item.name}}
+{{#hold-button type="rectangle" action="destroy" delay=destroyActionDelay data-test="destroy-item-btn"}}
+  Destroy
+{{/hold-button}}
+</code>
+</p>
+
+<p>To make integration tests fast, we would simply override the default value of <code>destroyActionDelay</code> and render the component in the test the following way:</p>
+
+<p>
+``` javascript tests/integration/components/display-todo-item-test.js
+// the rest of the tests</p>
+
+<p>this.render(hbs<code>{{display-todo-item item=item destroyActionDelay=0}}</code>);</p>
+
+<p>// the rest of the tests
+```
+</p>
+
+<p>This surely solves the problem for <strong>integration tests</strong>, but what about the <strong>acceptance ones</strong>? It would still take at least 3 seconds of waiting for this delay.</p>
+
+<p>For this purpose we could add a special function which would return the value for the delay <strong>based on the environment</strong>. For <strong>non-test</strong> we may want to return a provided value and for test environment some other value, which by default would be equal to 0 to make the tests fast. Let&rsquo;s add such a utility function and call it <code>timeoutForEnv</code>:</p>
+
+<p>``` javascript my-app/app/utils/timeout-for-env.js
+import config from &lsquo;my-app/config/environment&rsquo;;</p>
+
+<p>export default function timeoutForEnv(timeout, timeoutForTestEnv = 0) {
+  if (config.environment === &lsquo;test&rsquo;) {</p>
+
+<pre><code>return timeoutForTestEnv;
+</code></pre>
+
+<p>  } else {</p>
+
+<pre><code>return timeout;
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>And update the component:</p>
+
+<p>``` javascript app/components/display-todo-item.js
+import Ember from &lsquo;ember&rsquo;;
+import timeoutForEnv from &lsquo;my-app/utils/timeout-for-env&rsquo;;</p>
+
+<p>const {
+  get,
+} = Ember;</p>
+
+<p>export default Ember.Component.extend({
+  destroyActionDelay: timeoutForEnv(3000),</p>
+
+<p>  actions: {</p>
+
+<pre><code>destroy() {
+  const item = get(this, 'item');
+
+  item.destroyRecord();
+},
+</code></pre>
+
+<p>  },
+});
+```</p>
+
+<p>If we wanted for some reason to have a delay different than <code>0</code> for the test env, we could simply provide the value of the second argument:</p>
+
+<p>``` javascript app/components/display-todo-item.js
+import Ember from &lsquo;ember&rsquo;;
+import timeoutForEnv from &lsquo;my-app/utils/timeout-for-env&rsquo;;</p>
+
+<p>const {
+  get,
+} = Ember;</p>
+
+<p>export default Ember.Component.extend({
+  destroyActionDelay: timeoutForEnv(3000, 1000),</p>
+
+<p>  actions: {</p>
+
+<pre><code>destroy() {
+  const item = get(this, 'item');
+
+  item.destroyRecord();
+},
+</code></pre>
+
+<p>  },
+});
+```</p>
+
+<p>And that&rsquo;s it! It will work for both integration and acceptance tests.</p>
+
+<h2>Wrapping Up</h2>
+
+<p>Using a lot of <strong>timeouts</strong> and <strong>delays</strong> without special adjustments for tests can easily lead to a very <strong>slow test suite</strong> as the application grows. Fortunately, it&rsquo;s quite easy so solve such a problem by using <strong>environment-dependent</strong> config and setting the values to <code>0</code> for tests.</p>
+
+<p>P.S. I&rsquo;ve just started <strong>writing a book</strong> about <strong>test-driving Ember</strong> applications. If you found this article useful, you are going to love it :). <strong>Subscribe</strong> to my newsletter to get updates and promotion code once it&rsquo;s released.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Test Driven Ember - Testing Holding a Button]]></title>
+    <link href="http://Azdaroth.github.io/blog/2017/03/26/test-driven-ember-testing-holding-button/"/>
+    <updated>2017-03-26T23:00:00+02:00</updated>
+    <id>http://Azdaroth.github.io/blog/2017/03/26/test-driven-ember-testing-holding-button</id>
+    <content type="html"><![CDATA[<p>Thanks to the awesome tools in <strong>Ember ecosystem</strong> such as <a href="http://github.com/samselikoff/ember-cli-mirage/" target="_blank">ember-cli-mirage</a>, <a href="https://github.com/emberjs/ember-test-helpers" target="_blank">ember-qunit</a> or <a href="https://github.com/emberjs/ember-test-helpers" target"_blank">ember-test-helpers</a> writing majority of the tests is pretty straight-forward. Nevertheless, there are quite a few cases where <strong>simulating user&rsquo;s interaction</strong> is not that simple. An example of such use case would be <strong>holding a button</strong> for particular period of time triggering some side effect.</p>
+
+<!--more-->
+
+
+<h2>Anatomy of The Problem</h2>
+
+<p>Imagine you are implementing a feature of destroying some records in your application, e.g. the todo items from the list. It would be a bit unfortunate to destroy any item if a user <strong>accidentally clicked</strong> on the destroy button, so it might be a good idea to somehow make it harder to execute such an action. A simple approach would be displaying some alert <strong>asking user to confirm</strong> whether this item should be removed or not. This approach would get our job done, but it doesn&rsquo;t offer the best <strong>UX</strong>. What are the better options here?</p>
+
+<p>A pretty cool solution to this problem would be making user <strong>hold a delete button</strong> for a particular period of time, e.g. for 3 seconds. Holding this button for less than 3 seconds wouldn&rsquo;t destroy the item, so it would be impossible to accidentally delete anything.</p>
+
+<p>There is an addon which solves exactly this problem: <a href="https://www.npmjs.com/package/ember-hold-button" target="_blank">ember-hold-button</a>, so there is no need to reinvent the wheel. Let&rsquo;s add this to our application.</p>
+
+<h2>Adding Destroy Action</h2>
+
+<p>Let&rsquo;s start by installing <code>ember-hold-button</code> addon:</p>
+
+<p><code>
+ember install ember-hold-button
+</code></p>
+
+<p>and assume that we already have some component for displaying a single item with <code>destroy</code> action:</p>
+
+<p>``` javascript app/components/display-todo-item.js
+import Ember from &lsquo;ember&rsquo;;</p>
+
+<p>const {
+  get,
+} = Ember;</p>
+
+<p>export default Ember.Component.extend({
+  actions: {</p>
+
+<pre><code>destroy() {
+  const item = get(this, 'item');
+
+  item.destroyRecord();
+},
+</code></pre>
+
+<p>  },
+});
+```</p>
+
+<p>
+<code>html app/templates/components/display-todo-item.hbs
+{{item.name}}
+&lt;button {{action "destroy"}} data-test="destroy-item-btn"&gt;Destroy&lt;/button&gt;
+</code>
+</p>
+
+<p>and that the component was test-driven with the following test written before the actual implementation (TDD for FTW!):</p>
+
+<p>
+``` javascript tests/integration/components/display-todo-item-test.js
+import Ember from &lsquo;ember&rsquo;;
+import { moduleForComponent, test } from &lsquo;ember-qunit&rsquo;;
+import hbs from &lsquo;htmlbars-inline-precompile&rsquo;;</p>
+
+<p>const {
+  set,
+  RSVP,
+} = Ember;</p>
+
+<p>moduleForComponent(&lsquo;display-todo-item&rsquo;, &lsquo;Integration | Component | display todo item&rsquo;, {
+  integration: true
+});</p>
+
+<p>test(&lsquo;item can be destroyed&rsquo;, function(assert) {
+  assert.expect(1);</p>
+
+<p>  const {</p>
+
+<pre><code>$,
+</code></pre>
+
+<p>  } = this;</p>
+
+<p>  const item = Ember.Object.extend({</p>
+
+<pre><code>destroyRecord() {
+  assert.ok(true, 'item should be destoyed');
+
+  return RSVP.resolve(this);
+},
+</code></pre>
+
+<p>  });</p>
+
+<p>  set(this, &lsquo;item&rsquo;, item);</p>
+
+<p>  this.render(hbs<code>{{display-todo-item item=item}}</code>);</p>
+
+<p>  const $destroyBtn = $(&lsquo;[data-test=destroy-item-btn]&rsquo;);</p>
+
+<p>  $destroyBtn.click();
+});
+```
+</p>
+
+<p>Basically this test verifies that the <code>destroyRecord</code> method will be called on item after clicking the button.</p>
+
+<p>Let&rsquo;s add <code>hold-button</code> which will trigger <code>destroy</code> action after holding it for 3 seconds:</p>
+
+<p>
+<code>html app/templates/components/display-todo-item.hbs
+{{item.name}}
+{{#hold-button type="rectangle" action="destroy" delay=3000 data-test="destroy-item-btn"}}
+  Destroy
+{{/hold-button}}
+</code>
+</p>
+
+<p><code>delay</code> option will get the job done here to make it holdable for 3 seconds to trigger <code>destroy</code> action.</p>
+
+<p>The button is working great, but our test obviously is failing now! How can we simulate holding action in our integration tests?</p>
+
+<h2>Testing Holding Interaction</h2>
+
+<p>To solve that problem we should break the problem down into the single events. On desktop, pressing a button simply means triggering <code>mouseDown</code> event and releasing means trigger <code>mouseUp</code> event. On mobile that would be <code>touchStart</code> and <code>touchEnd</code> events accordingly.</p>
+
+<p>Based on how <code>hold-button</code> component works, we may suspect that there is some internal timer which starts counting time after triggering <code>mouseDown</code> (<code>touchStart</code>) event or a scheduler which executes the action if it was held for required period of time and cancels it if it was released before that period of time, which would mean cancelling timer on <code>mouseUp</code> event.</p>
+
+<p>After checking <a href="https://github.com/AddJam/ember-hold-button/blob/master/addon/components/hold-button.js" target="_blank">the internals</a>, it turns out this is exactly the case! Let&rsquo;s rewrite our test by triggering these events. We will also need two extra things as we are dealing with asynchronous actions:</p>
+
+<ul>
+<li><p><code>async()</code> / <code>done()</code> &ndash; To make sure QUnit will wait for an asynchronous operation to be finished we need to use <code>async()</code> function. That way QUnit will wait until <code>done()</code> is called. We will call <code>done()</code> after triggering <code>mouseUp</code> event. But we also need to wait until the action is executed. We will need <code>wait()</code> helper for that.</p></li>
+<li><p><code>wait()</code> &ndash; it forces run loop to process all the pending events. That way we ensure that the asynchronous operation have been executed (like calling <code>destroy</code> action after 3 seconds).</p></li>
+</ul>
+
+
+<p>Here&rsquo;s our new test:</p>
+
+<p>
+``` javascript tests/integration/components/display-todo-item-test.js
+import Ember from &lsquo;ember&rsquo;;
+import { moduleForComponent, test } from &lsquo;ember-qunit&rsquo;;
+import hbs from &lsquo;htmlbars-inline-precompile&rsquo;;
+import wait from &lsquo;ember-test-helpers/wait&rsquo;;</p>
+
+<p>const {
+  set,
+  RSVP,
+} = Ember;</p>
+
+<p>moduleForComponent(&lsquo;display-todo-item&rsquo;, &lsquo;Integration | Component | display todo item&rsquo;, {
+  integration: true
+});</p>
+
+<p>test(&lsquo;item can be destroyed&rsquo;, function (assert) {
+  assert.expect(1);</p>
+
+<p>  const {</p>
+
+<pre><code>$,
+</code></pre>
+
+<p>  } = this;</p>
+
+<p>  const item = Ember.Object.extend({</p>
+
+<pre><code>destroyRecord() {
+  assert.ok(true, 'item should be destoyed');
+
+  return RSVP.resolve(this);
+},
+</code></pre>
+
+<p>  });</p>
+
+<p>  set(this, &lsquo;item&rsquo;, item);</p>
+
+<p>  this.render(hbs<code>{{display-todo-item item=item}}</code>);</p>
+
+<p>  const $destroyBtn = $(&lsquo;[data-test=destroy-item-btn]&rsquo;);</p>
+
+<p>  $destroyBtn.mousedown();</p>
+
+<p>  wait().then(() => {</p>
+
+<pre><code>$destroyBtn.mouseup();
+done();
+</code></pre>
+
+<p>  });
+});
+```
+</p>
+
+<p>Nice! Our test is passing again. However, there is one serious problem: this test is quite slow as it waits 3 second for the action to finish. Can we make it somehow faster?</p>
+
+<h2>Making Our Test Faster</h2>
+
+<p>The answer is: yes. We just need to provide a way to make <code>delay</code> configurable from the outside. This can be simply done by introducing <code>destroyActionDelay</code> property with default value equal <code>3000</code> and allowing it to be modified. Let&rsquo;s start with applying this little change to the test:</p>
+
+<p>
+<code>javascript tests/integration/components/display-todo-item-test.js
+// the rest of the tests
+this.render(hbs`{{display-todo-item item=item destroyActionDelay=0}}`);
+</code>
+</p>
+
+<p>We don&rsquo;t care about waiting for 3 seconds in the tests, we just want to test if it works and to make it fast. <code>0</code> sounds like the most reasonable value in such case.</p>
+
+<p>And let&rsquo;s change few things in our component:</p>
+
+<p>``` javascript app/components/display-todo-item.js
+import Ember from &lsquo;ember&rsquo;;</p>
+
+<p>const {
+  get,
+} = Ember;</p>
+
+<p>export default Ember.Component.extend({
+  destroyActionDelay: 3000,</p>
+
+<p>  actions: {</p>
+
+<pre><code>destroy() {
+  const item = get(this, 'item');
+
+  item.destroyRecord();
+},
+</code></pre>
+
+<p>  },
+});
+```</p>
+
+<p>
+<code>html app/templates/components/display-todo-item.hbs
+{{item.name}}
+{{#hold-button type="rectangle" action="destroy" delay=destroyActionDelay data-test="destroy-item-btn"}}
+  Destroy
+{{/hold-button}}
+</code>
+</p>
+
+<p>And that&rsquo;s it! You can now enjoy the much faster test suite!</p>
+
+<h2>Wrapping Up</h2>
+
+<p>Testing holding a button for particular period of time doesn&rsquo;t sound like an obvious thing to do. Fortunately, with proper design and understanding the interaction from the <strong>browser&rsquo;s perspective</strong>, it isn&rsquo;t that hard to do and doesn&rsquo;t necessarily make your tests slower.</p>
+
+<p>P.S. I&rsquo;ve just started <strong>writing a book</strong> about <strong>test-driving Ember</strong> applications. If you found this article useful, you are going to love it :). <strong>Subscribe</strong> to my newsletter to get updates and promotion code once it&rsquo;s released.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[JavaScript Tips: Redefining userAgent property]]></title>
+    <link href="http://Azdaroth.github.io/blog/2017/02/26/javascript-tips-redefining-useragent-property/"/>
+    <updated>2017-02-26T23:00:00+01:00</updated>
+    <id>http://Azdaroth.github.io/blog/2017/02/26/javascript-tips-redefining-useragent-property</id>
+    <content type="html"><![CDATA[<p>Imagine a use case where you are trying to check if a user accessed your app from a <strong>mobile</strong> device or not. Most likely you will need to use <a href="https://developer.mozilla.org/en-US/docs/Web/API/NavigatorID/userAgent" target="_blank">navigator.userAgent</a>  property and craft some smart regular expression to test for the presence of particular expression, like <code>(/Mobi/.test(navigator.userAgent)</code> which seems to be the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent" target="_blank">recommended way</a> to do it. Ok, so we&rsquo;re almost done with our feature, we just need to add some tests to make sure it works as expected. But there&rsquo;s a problem &ndash; you can&rsquo;t redefine <code>userAgent</code> property with just using a setter! Fortunately, there is a way to solve this problem.</p>
+
+<!--more-->
+
+
+<h2>Anatomy of the problem</h2>
+
+<div class="img-center-wrapper">
+  <img src="/images/useragent/one_does_not_simply_override_useragent.jpg" title="'one does not simply override user agent'" >
+</div>
+
+
+<p>Let&rsquo;s check what happens when we try to override <code>navigator.userAgent</code> property with a setter in a browser.</p>
+
+<p>``` javascript</p>
+
+<blockquote><p>navigator.userAgent
+&lt; &ldquo;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_2) AppleWebKit/602.3.12 (KHTML, like Gecko) Version/10.0.2 Safari/602.3.12&rdquo;
+navigator.userAgent = &ldquo;Mobile&rdquo;
+&lt; &ldquo;Mobile&rdquo;
+navigator.userAgent
+&lt; &ldquo;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_2) AppleWebKit/602.3.12 (KHTML, like Gecko) Version/10.0.2 Safari/602.3.12&rdquo;
+```</p></blockquote>
+
+<p>Well, that&rsquo;s not exactly what we wanted to be returned. But we need to override this value somehow to test both behaviours &ndash; when the device is a mobile one and not a mobile one. Fortunately, <strong>JavaScript</strong> is quite powerful at this point and it&rsquo;s possibly to redefine such property using <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty" target="_blank"><code>Object.defineProperty</code></a>.</p>
+
+<h2>Object.defineProperty to the Rescue</h2>
+
+<p><code>Object.defineProperty</code> allows to define a new property or redefine an existing one on a  given object. The syntax is following:</p>
+
+<p><code>javascript
+Object.defineProperty(obj, prop, descriptor)
+</code></p>
+
+<p><code>descriptor</code> argument is a particularly interesting one &ndash; it allows to define a <code>value</code> of the property, a getter, a setter, whether the property should be <code>enumerable</code> (if it&rsquo;s going to be included when iterating over the properties), if it&rsquo;s <code>writable</code> (if the value can be changed with an assignment operator) and <code>configurable</code> (if the property can be changed and deleted from the object&rsquo;s properties).</p>
+
+<p>Looks like <code>value</code> is exactly what we need. Let&rsquo;s try it then:</p>
+
+<p>``` javascript</p>
+
+<blockquote><p>Object.defineProperty(window.navigator, &lsquo;userAgent&rsquo;, {
+  value: &lsquo;Mobile&rsquo;
+});</p>
+
+<p>navigator.userAgent;
+&lt; &ldquo;Mobile&rdquo;
+```</p></blockquote>
+
+<p>Looks good so far. What if we wanted to override this property again?</p>
+
+<p>``` javascript</p>
+
+<blockquote><p>navigator.userAgent = &lsquo;Desktop&rsquo;;</p>
+
+<p>navigator.userAgent;
+&lt; &ldquo;Mobile&rdquo;; // whooops
+```</p></blockquote>
+
+<p>Hmm, doesn&rsquo;t work, maybe let&rsquo;s try to redefine this propert again then?</p>
+
+<p>``` javascript</p>
+
+<blockquote><p>Object.defineProperty(window.navigator, &lsquo;userAgent&rsquo;, {
+  value: &lsquo;Mobile&rsquo;
+});</p></blockquote>
+
+<p>&lt; TypeError: Attempting to change value of a readonly property.
+```</p>
+
+<p>Apparently it&rsquo;s not that great as we thought it would be. However, that&rsquo;s not a problem! We just need to make this property either <code>configurable</code> or <code>writable</code>! Let&rsquo;s check both scenarios:</p>
+
+<p>``` javascript</p>
+
+<blockquote><p>Object.defineProperty(window.navigator, &lsquo;userAgent&rsquo;, {
+  value: &lsquo;Mobile&rsquo;,
+  configurable: true
+});</p>
+
+<p>navigator.userAgent;
+&lt; &ldquo;Mobile&rdquo;</p>
+
+<p>Object.defineProperty(window.navigator, &lsquo;userAgent&rsquo;, {
+  value: &lsquo;Desktop&rsquo;,
+  configurable: true
+});</p>
+
+<p>navigator.userAgent;
+&lt; &ldquo;Desktop&rdquo;</p>
+
+<p>navigator.userAgent = &ldquo;Mobile&rdquo;;</p>
+
+<p>navigator.userAgent;
+&lt; &ldquo;Desktop&rdquo; // setter won&rsquo;t work here!
+```</p></blockquote>
+
+<p>``` javascript</p>
+
+<blockquote><p>Object.defineProperty(window.navigator, &lsquo;userAgent&rsquo;, {
+  value: &lsquo;Mobile&rsquo;,
+  writable: true
+});</p>
+
+<p>navigator.userAgent;
+&lt; &ldquo;Mobile&rdquo;</p>
+
+<p>navigator.userAgent = &lsquo;Desktop&rsquo;;</p>
+
+<p>navigator.userAgent;
+&lt; &ldquo;Desktop&rdquo;</p>
+
+<p>Object.defineProperty(window.navigator, &lsquo;userAgent&rsquo;, {
+  value: &lsquo;Mobile&rsquo;,
+  writable: true
+});</p>
+
+<p>navigator.userAgent;
+&lt; &ldquo;Mobile&rdquo;
+```</p></blockquote>
+
+<p>Both of the ways work just fine, however, <code>writable</code> is a bit more flexible as it allows to change the <code>value</code> returned by a given property by redefining this property or using a simple setter. In case of <code>configurable</code> you can only redefine a property.</p>
+
+<h2>Wrapping Up</h2>
+
+<p>Maybe <strong>JavaScript</strong> has some odd parts, nevertheless, it&rsquo;s a quite powerful language. Changing the value of read-only properties is probably not a something do you will do often, but if you really need to do it, <code>Object.defineProperty</code> will be your friend.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[JavaScript: The Surprising Parts]]></title>
+    <link href="http://Azdaroth.github.io/blog/2017/01/22/javascript-the-surprising-parts/"/>
+    <updated>2017-01-22T22:45:00+01:00</updated>
+    <id>http://Azdaroth.github.io/blog/2017/01/22/javascript-the-surprising-parts</id>
+    <content type="html"><![CDATA[<p>Do you think you know all the surprising parts of <strong>JavaScript</strong>? Some of these "features" may look as if the language was broken, but it's not necessarily the case. Things like <strong>variables hoisting</strong>, <strong>variables scope</strong>, behaviour of <code>this</code> are quite intentional and besides just being different from most of other programming languages, there is nothing particularly wrong with them. However, there are still some things that are quite surprising about <strong>JavaScript</strong>. Let's take a look at some of them.</p>
+
+
+
+
+<!--more-->
+
+
+
+
+<h2>Surprise #1 - <code>parseInt</code> function</h2>
+
+
+
+
+<p>Imagine you have some numbers as strings and you want to convert them to integers. You could probably use <code>Number()</code> function to do that, but let's assume you are used to <code>parseInt()</code> function. Let's do some conversions then:</p>
+
+
+<p>``` js
+[&ldquo;1&rdquo;].map(parseInt);
+// [1]</p>
+
+<p>[&ldquo;1&rdquo;, 2, &ldquo;3&rdquo;, 4].map(parseInt);
+// => [1, NaN, NaN, NaN] // WUT ?!</p>
+
+<p>[&ldquo;1&rdquo;, 2, &ldquo;3&rdquo;, 4].map(parseFloat);
+// => [1, 2, 3, 4] // WUT&hellip;
+```</p>
+
+<p>Something is definitely wrong here. How could possibly <code>parseFloat()</code> work fine here and <code>parseInt()</code> not? Obviously <strong>JavaScript</strong> is broken, right?</p>
+
+
+
+
+<p>Not really. This is actually the expected behaviour. The difference between <code>parseFloat</code> and <code>parseInt()</code> is that <code>parseFloat()</code> takes only one argument (<code>string</code>), but <code>parseInt()</code>takes two arguments - <code>string</code> and... <code>radix</code>. To verify it, let's rewrite the mapping using an anonymous function:</p>
+
+
+<p><code>js
+["1", 2, "3", 4].map((number) =&gt; parseInt(number));
+// =&gt; [1, 2, 3, 4]
+</code></p>
+
+<p>When you pass simply <code>parseInt()</code> function as an argument to <code>map()</code>, the second argument (which is a current index) is going to be passed as <code>radix</code> to <code>parseInt</code>, which explains why it returns <code>NaN</code>. The equivalent of just passing <code>parseInt</code> looks like this:</p>
+
+
+<p><code>js
+["1", 2, "3", 4].map((number, index, array) =&gt; parseInt(number, index, array));
+</code></p>
+
+<p>As "odd" as it may look like, this is a perfectly valid behaviour and there is nothing wrong with <code>JavaScript</code> ;).</p>
+
+
+
+
+<h2>Surprise #2 - sorting</h2>
+
+
+
+
+<p>Now that we've learned how to parse integers in <strong>JavaScript</strong> like a boss, let's do some sorting:</p>
+
+
+<p><code>js
+[1, 20, 2, 100].sort();
+// =&gt; [1, 100, 2, 20] // WUT again...
+</code></p>
+
+<p>Again, something odd is going on here. However, this is the intended behavior - after consulting with <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Array/sort" target="_blank">docs</a>, we can learn that <code>sort()</code> converts all elements into strings and compares them in Unicode code point order. I think this might be a big surprise for a majority of developers performing sorting and seeing the result, but this behaviour is clearly documented. Due to the necessity of maintaing backwards compatibility, I wouldn't expect this behavior to change, so it's worth keeping it in mind.</p>
+
+
+
+
+<p>To perform sorting on integers you need to provide a <strong>compare function</strong>:</p>
+
+
+<p><code>js
+[1, 20, 2, 100].sort((a, b) =&gt; a - b);
+// =&gt; [1, 2, 20, 100]
+</code></p>
+
+<h2>Surprise #3 - <code>==</code> vs. <code>===</code></h2>
+
+
+
+
+<p>You've probably heard that you should never use <strong>double equals</strong> (loose equality) and just stick to <strong>triple equals</strong> (strict equaility). But following some rules without understanding the reasons behind them is never a good solution to a problem. Let's try to understand how these operators work.</p>
+
+
+
+
+<p><strong>Loose equality</strong> (<strong>==</strong>) compares two values after converting them to <strong>common type</strong>. After conversions (both of the values can be converted) the comparison is performed by strict equality (<strong>===</strong>). So what is a <strong>common type</strong> in this case?</p>
+
+
+
+
+<p>The easiest way to get the idea what happens when using <code>==</code> would be checking the table for conversion rules <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Equality_comparisons_and_sameness#Loose_equality_using" target="_blank">here</a> as it's not really something obvious (the details of how conversion works are described later in this article).</p>
+
+
+
+
+<p>So basically this table says that the following expressions will be truthy:</p>
+
+
+<p><code>js
+1 == "1";
+"1" == 1;
+new String("string") == "string";
+1 == { valueOf: function() { return 1; } }; // lulz, it's not a joke ;)
+1 == true;
+false == 0;
+"Fri Jan 01 2016 00:00:00 GMT+0100 (CET)" == new Date(2016, 0, 1)
+"1,2" == [1,2] // because why not?
+</code></p>
+
+<p>Seems quite "exotic", right? But is <strong>loose equality</strong> actually useful?</p>
+
+
+
+
+<p>Yes, it is. I can imagine 3 scenarios where it comes in handy.</p>
+
+
+
+
+<p>The first scenario would be comparing integers from the forms when you don't really care about strict equality and types:</p>
+
+
+<p><code>js
+if ($('.my-awesome-input').val() == 100) {
+  // do something here
+}
+</code></p>
+
+<p>In such case it may turn out that we don't really care if we compare strings or integers, either <code>"100"</code> and <code>100</code> are fine and we don't need to perform any explicit conversions.</p>
+
+
+
+
+<p>The second use case would be treating both <code>undefined</code> and <code>null</code> as the same thing meaning lack of some value. With strict equality we would need to check for both values:</p>
+
+
+<p>``` js
+x = getSomeValue();</p>
+
+<p>if (x !== undefined &amp;&amp; x !== null) {
+  // some logic
+}
+```</p>
+
+<p>Doesn't look that nice. We could clean it up with loose equality and simply check if something is not <code>null</code>-ish:</p>
+
+
+<p>``` js
+x = getSomeValue();</p>
+
+<p>if (x != null) {
+  // some logic
+}
+```</p>
+
+<p>The last use case would be comparing <strong>primitives</strong> and <strong>objects</strong>. It's especially useful when dealing with both primitive strings (<code>"simple string"</code>) and strings as objects (<code>new String("string as object")</code>:</p>
+
+
+<p>``` js
+x = getSomeValue();</p>
+
+<p>if (x != &ldquo;some special value&rdquo;) {
+  // some logic
+}
+```</p>
+
+<p>With strict equality we would probably need to explicitly convert objects to strings using <code>toString()</code>, which is not that bad, but loose equality looks arguably cleaner.</p>
+
+
+
+
+<h2>Surprise #4 - equality gotcha #1: <code>NaN</code></h2>
+
+
+
+
+<p>Do you know how to identify <strong>NaN</strong> in <strong>JavaScript</strong>. Sounds like a silly question, right? Well, not really, both of the following expressions are falsey:</p>
+
+
+<p><code>js
+NaN == NaN; // =&gt; false
+NaN === NaN; // =&gt; false
+</code></p>
+
+<p>Fortunately, there is still a way to check for <code>NaN</code>: it is the only value in JS that is not equal to itself:</p>
+
+
+<p><code>js
+NaN != NaN; // =&gt; true
+NaN !== NaN; // =&gt; true
+</code></p>
+
+<p>You could either take advantage of this behaviour or use <code>isNaN</code> function:</p>
+
+
+<p><code>js
+isNaN(NaN); // =&gt; true
+</code></p>
+
+<p>There is one more possibility to test for <code>NaN</code>: <code>Object.is</code> function, which is very similar to <strong>strict equality</strong>, but with few exceptions. One of those is comparing <code>NaN</code> values:</p>
+
+
+<p><code>js
+NaN === NaN // =&gt; false
+Object.is(NaN, NaN); // =&gt; true
+</code></p>
+
+<h2>Surprise #5 - equality gotcha #2: comparing objects</h2>
+
+
+
+
+<p>There is one more gotcha besides <code>NaN</code> when it comes to testing for equality: <strong>comparing objects</strong>. If you think you can easily compare arrays with the same elements or objects with the same keys and values, you might be quite surprised:</p>
+
+
+<p><code>js
+[1, 2, 3] == [1, 2, 3]; // false
+[1, 2, 3] === [1, 2, 3]; // false
+{ comparing: "objects" } == { comparing: "objects" }; // false
+{ comparing: "objects" } === { comparing: "objects" }; // false
+</code></p>
+
+<p>The reason behind it is quite simple though: <strong>strict equality</strong> doesn't compare the values, but identities instead. And two different objects are, well, different, unless they are referring to the exactly same thing.</p>
+
+
+
+
+<p>How about <strong>loose equality</strong>? As already discussed, if the types are the same, the values are compared using <strong>strict equality</strong>. It doesn't work with <code>Object.is</code> either. The only option for objects is to compare each key and associated value with the ones from the other object.</p>
+
+
+
+
+<h2>Surprise #6 - <code>instanceof</code> and <code>typeof</code></h2>
+
+
+
+
+<p>There seems to be a lot of confusion regarding those two and how use them in different contexts. Basically, <code>typeof</code> should be used for getting the basic <strong>JavaScript</strong> type of given <strong>expression</strong> (i.e. undefined, object, boolean, string, number, string, function or symbol) and <strong>instanceof</strong> should be used for checking if a prototype of a given constructor is present in expression's prototype chain. Even if they may seem to be similar at times, they should be used in very different use cases, check the following examples:</p>
+
+
+<p>``` js
+typeof &ldquo;basic string&rdquo;  // => &ldquo;string&rdquo;, it&rsquo;s a primitive so looks good so far
+typeof new String(&ldquo;basic string&rdquo; ) // => &ldquo;object&rdquo;, because it&rsquo;s no longer a primitive!</p>
+
+<p>&ldquo;basic string&rdquo; instanceof String // => false, because &ldquo;basic string&rdquo; is a primitive
+1 instanceof Number // => false, same reason, 1 is a primitive</p>
+
+<p>[] instanceof Array // => true
+[] instanceof Object // => true, array is not a primitive</p>
+
+<p>typeof [] // => &ldquo;object&rdquo;, there is no array primitive, it&rsquo;s still an object
+```</p>
+
+<p>Unforunately, it's not that easy in all cases. There are 2 exceptions regarding usage of <code>typeof</code> that are quite surprising.</p>
+
+
+
+
+<p>There is <strong>undefined</strong> type which would be returned for <code>undefined</code> expression, but what about <code>null</code>? Turns out that its type is <strong>object</strong>! There were some attempts to remove this confusion - like this proposal for introducing <a href="http://wiki.ecmascript.org/doku.php?id=harmony:typeof_null" target="_blank">null type</a> - but they were eventually rejected.</p>
+
+
+
+
+<p>And another suprise: <strong>NaN</strong>. What is the type of something that is not a number? Well, it's <strong>number</strong> of course ;). As funny as it sounds, it is in accordance with <a href="https://en.wikipedia.org/wiki/IEEE_floating_point" target="_blank">IEEE Standard for Floating-Point Arithmetic</a> and the concept of <code>NaN</code> is kind of number-ish, so this behaviour is somehow justified.</p>
+
+
+
+
+<h2>Surprise #7 - <code>Number.toFixed()</code> returning strings</h2>
+
+
+
+
+<p>Imagine you want to round some number in <strong>JavaScript</strong> and do some math with it. Apparently <code>Math.round()</code> is capable only of rounding to the nearest integer, so we need to find some better solution. There is <code>Number.toFixed()</code> function which seems to do the job. Let's try it out:</p>
+
+
+<p><code>js
+123.789.toFixed(1) + 2 // =&gt; 123.82, huh?
+</code></p>
+
+<p>Is math broken in JS? Not really. It's just the fact that <code>Number.toFixed()</code> returns a string, not a numeric type! And its intention is not really to perform rounding for math operations, it's only for formatting! Too bad there is no built-in function to do such simple operation, but if you expect a numeric type, you can just handle it with <code>+</code> <strong>unary prefix operator</strong>, which won't be used as an <strong>addition operator</strong>, but will perform <strong>conversion to number</strong> in such case:</p>
+
+
+<p><code>js
+const number = +123.789.toFixed(1);
+number // =&gt; 123.8
+</code></p>
+
+<h2>Surprise #8 - Plus (<code>+</code>) operator and results of addition</h2>
+
+
+
+
+<blockquote>"Adding stuff in JavaScript is simple, obvious and not surprising" - No one ever</blockquote>
+
+
+
+
+<p>Have you ever watched <a href="https://www.destroyallsoftware.com/talks/wat" target="_blank">Wat</a> by Gary Bernhardt? If not, I highly encourage you to do it now, it's absolutely hillarious and concerns a lot of "odd" parts of <strong>JavaScript</strong>.</p>
+
+
+
+
+<p>Let's try to explain most of those odd results when using <code>+</code> operator. Beware: once you finishing reading it, you will actually not find most of these results that surprising, it will be just "different". I'm not sure yet if it's a good or a bad thing :).</p>
+
+
+
+
+<p>Take a look at the following examples:</p>
+
+
+<p><code>js
+[] + [] // =&gt; ""
+[] + {} // =&gt; "[object Object]"
+{} + [] // =&gt; 0 // wut...
+{} + {} // =&gt; "[object Object][object Object]"
+[] + 1 // =&gt; "1" // it's a string!
+[1] + 2 =&gt; // =&gt; "12"
+[1, 2] + 2 // =&gt; "1,22"
+3 + true // =&gt; 4
+new Date(2016, 0 , 1) + 123 // =&gt; "Fri Jan 01 2016 00:00:00 GMT+0100 (CET)123"
+({ toString: function() { return "trolololo"; } }) + new Date(2016, 0 , 1) // =&gt; "trolololoFri Jan 01 2016 00:00:00 GMT+0100 (CET)"
+1 + { valueOf: function() { return 10; }, toString: function() { return 5; } } // =&gt; 11
+1 + { toString: function() { return 10; } } // =&gt; 11
+1 + undefined // =&gt; NaN
+1 + null // =&gt; 1
+</code></p>
+
+<div class="img-center-wrapper">
+  <img src="/images/js_results_not_so_wut.jpg" title="js_results_not_so_wut" alt="js_results_not_so_wut">
+</div>
+
+
+
+
+<p>All of these results may seem to be somehow exotic, but only one of them, maybe two at most, are exceptional. The basic thing before figuring out the result of those expressions is understanding what is happening under the hood. In <strong>JavaScript</strong> you can only add numbers and strings, all other types must be converted to one of thos before. The <code>+</code> operator basically converts each value to primitive (which are: undefined, null, booleans, numbers and strings). This convertion is handled by the internal operation called <code>ToPrimitive</code> which has the following signature: <code>ToPrimitive(input, PreferredType)</code>. The <code>PreferredType</code> can be either <strong>number</strong> or <strong>string</strong>. The algorithm of this operation is quite simple, here are the steps if <strong>string</strong> is the preferred type:</p>
+
+
+
+
+<ul>
+  <li>return <code>input</code> if it's already a primitive</li>
+  <li>If it's not a primitive, call <code>toString()</code> method on <code>input</code> and return the result if it's a primitive value</li>
+  <li>If it's not a primitive, call <code>valueOf()</code> method on <code>input</code> and return the result if it's a primitive value</li>
+  <li>If it's not a primitive, throw <code>TypeError</code></li>
+</ul>
+
+
+
+
+<p>For <code>number</code> as preferred type the only difference is the sequence of steps 2 and 3: <code>valueOf</code> method will be called first and if it doesn't return a primitive then <code>toString</code> method wil be called. In most cases <code>number</code> will be the preferred type, <code>string</code> will be used only when dealing with the instances of <code>Date</code>.</p>
+
+
+
+
+<p>Now that we know what is going on under the hood let's explain the results from the examples above.</p>
+
+
+
+
+<p>The result of calling <code>valueOf</code> method on <strong>objects</strong> (<code>{}</code>) and <strong>arrays</strong> (which technically are also objects) is simply the object itself, so it's not a primitive. However, for objects <code>toString()</code> method will return <code>"[object Object]"</code> and for arrays it will return empty string - <code>""</code>. Now we have primitives that can be added. From this point we can predict the results of operation like <code>{} + {}</code>, <code>[] + {}</code> or even:</p>
+
+
+<p><code>js
+1 + { valueOf: function() { return 10; }, toString: function() { return 5; } };
+</code></p>
+
+<p>and: </p>
+
+
+<p><code>
+1 + { toString: function() { return 10; } };
+</code></p>
+
+<p>If you remember that <string>string</string> is the preferred type for operations involving dates, the result of <code>({ toString: function() { return "surprise!"; } }) + new Date(2016, 0 , 1)</code> is not really surprising anymore. But how is it possible that <code>{} + []</code> returns <code>0</code>, not <code>"[object Object]"</code>?</p>
+
+
+
+
+<p>Most likely <code>{}</code> in the beginning is interpreted as an empty block and it's ignored. You can verify it by putting the empty object inside parentheses (<code>({}) + []</code>), the result will be <code>"[object Object]"</code>. So in fact that expression is interpreted as <code>+[]</code> which is very different from the addition! As I've already mentioned before, it's the <strong>unary prefix operator</strong> which performs conversion to number. For arrays the result of such conversion is simply 0.</p>
+
+
+
+
+<p>And why does <code>1 + undefined</code> return <code>NaN</code>? We can add only numbers and strings, <code>undefined</code> is neither of them, so it must be converted to a number in this case. The result of such operation is simply <code>NaN</code> and <code>1 + NaN</code> is still <code>NaN</code>.</p>
+
+
+
+
+<h2>Surprise #9 - No integers and floats - just numbers</h2>
+
+
+
+
+<p>In most programming languages there are different type of numbers, like integers and floats. What is again surprising about <strong>JavaScript</strong> is that all numbers are simply double precision floating point numbers! This has a huge impact of anything related to math, even for such things like precision. Take a look at the following example:</p>
+
+
+<p><code>
+9999999999999999 === 10000000000000000 // =&gt; true
+</code></p>
+
+<p>This is definitely not something that would be expected here. If you are planning to do any serious math in <strong>JavaScript</strong>, make sure you won't run into any issues caused by the implementation of the numbers.</p>
+
+
+
+
+<h2>Wrapping up</h2>
+
+
+
+
+<p><strong>JavaScript</strong> may sometimes seem like it's "broken" somehow, especially comparing to other programming languages. However, many of these features are quite <strong>intentional</strong> and others are consequences of some decisions. There are still few things that seem to be really odd, but after digging deeper they start to make sense (or at least don't look like some voodoo magic), so to avoid unfortunate surprises it's definitely worth learning about those odd parts of <strong>JavaScript</strong>.</p>
+
+
+
+]]></content>
+  </entry>
+  
+</feed>

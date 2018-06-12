@@ -1,0 +1,1053 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Automate to the max: instant Ubuntu Server setup with Chef - Karol Galanciak - Ruby on Rails and Ember.js consultant</title>
+  <meta name="author" content="Karol Galanciak">
+
+  
+  <meta name="description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  
+  <meta name="keywords" content="Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps">
+
+  
+  
+
+  <meta property="og:title" value="Automate to the max: instant Ubuntu Server setup with Chef - Karol Galanciak - Ruby on Rails and Ember.js consultant" />
+  <meta property="og:description" value="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications." />
+  <meta property="og:url" value="http://Azdaroth.github.io/blog/2014/07/10/automate-to-the-max-instant-ubuntu-server-setup-with-chef/" />
+  <meta property="og:type" content="website" />
+  
+  <meta property="og:site_name" content="Karol Galanciak - Ruby on Rails and Ember.js consultant"/>
+  <meta property="og:locale" content="en_US" />
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@Azdaroth">
+  <meta name="twitter:creator" content="@Azdaroth">
+  <meta name="twitter:title" content="Automate to the max: instant Ubuntu Server setup with Chef - Karol Galanciak - Ruby on Rails and Ember.js consultant">
+  <meta name="twitter:url" content="">
+  <meta name="twitter:description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://Azdaroth.github.io/blog/2014/07/10/automate-to-the-max-instant-ubuntu-server-setup-with-chef">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Karol Galanciak - Ruby on Rails and Ember.js consultant" type="application/atom+xml">
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "BlogPosting",
+      "mainEntityOfPage": {
+        "@type":"WebPage",
+        "@id": "http://Azdaroth.github.io/blog/2014/07/10/automate-to-the-max-instant-ubuntu-server-setup-with-chef"
+      },
+      "headline": "Automate to the max: instant Ubuntu Server setup with Chef - Karol Galanciak - Ruby on Rails and Ember.js consultant",
+        "image": {
+        "@type": "ImageObject",
+        "url": "",
+        "height": 640,
+        "width": 1024
+      },
+      "datePublished": "2014-07-10",
+      "dateModified": "2018-06-12",
+      "author": {
+        "@type": "Person",
+        "name": "Karol Galanciak"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Karol Galanciak",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://karolgalanciak.com/images/me_formal.jpg",
+          "width": 600,
+          "height": 60
+        }
+      },
+      "description": "Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.",
+      "keywords": "Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps"
+    }
+  </script>
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-42570582-1', 'auto');
+    ga('send', 'pageview');
+    ga('set', 'anonymizeIp', true);
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Karol Galanciak - Ruby on Rails and Ember.js consultant</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:Azdaroth.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">About Me</a></li>
+  <li><a href="/blog">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/test-driven-ember">Test-Driven Ember Book</a></li>
+  <li><a href="/presentations">Presentations</a></li>
+  <li><a href="/publications">Publications</a></li>
+  <li><a href="/open-source">Open Source</a></li>
+  <li><a href="/privacy-policy">Privacy Policy</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Automate to the Max: Instant Ubuntu Server Setup With Chef</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-10T20:00:00+02:00" pubdate data-updated="true">Jul 10<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>You&#8217;ve started developing new app and need server to deploy it. You can choose hosting platform like <a href="https://www.heroku.com" target="_blank">Heroku</a> or <a href="https://shellycloud.com" target="_blank">Shelly</a> which may turn out to be quite expensive if you want to host multiple apps. You can also set up your own server. Going with the latter option can be quite time consuming, especially if sysadministration is not you main responsibility and you have multiple servers to provision. I that case automation beyond simple Bash scripts is a must - time to meet <strong>Chef</strong>.</p>
+
+
+
+
+<!--more-->
+
+
+
+
+<h2>What is Chef?</h2>
+
+
+<p>Chef is the automation framework which uses Ruby DSL and helps provisioning new servers by automating the whole process. We are going to concentrate on Chef Solo where we set up all roles (like PostgreSQL server) on local machine and use them on our server, contrary to Chef Server which is a hub for configuration data that is automatically applied to all nodes (servers) connected with central server, quite useful when you need to manage serious amount of servers.</p>
+
+
+
+
+<p>We will also be using some other utilities - <strong>Knife</strong> (solo) which is a command line utility helpings us interact with server and <strong>Berkshelf</strong> - a bundler-like utility for Chef recipes.</p>
+
+
+
+
+<p><p>I&rsquo;m not going to write another tutorial explaining every possible detail of entire Chef DSL. The <a href="http://docs.opscode.com" target="_blank">documentation</a> is pretty good and there are also plenty of other resources you can learn from. I&rsquo;d rather like to explain the most important terms, show basic configuration, demonstrate how to write very simple recipe and at the end I am going to introduce my own cookbook that I use for servers&#8217; setup with <strong>Ubuntu Server 14.04</strong>. Why Ubuntu? Well, sysadministration is not my main responsibility and it&rsquo;s much easier to find solutions (or Chef cookbooks) for Ubuntu than any other distribution.</p>
+
+<p><p>After reading this post you should be able to setup every server instantly and have some basic understanding of what&rsquo;s going on.</p></p>
+
+<p><h2>Why use Chef?</h2></p>
+
+<p><p>You may wonder what are the benefits of using Chef over the Bash scripts. Firstly, Chef provides extremely expressive DSL, just take a look at the code below:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">template</span> <span class="s2">&quot;/etc/nginx/nginx.conf&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">owner</span> <span class="s2">&quot;root&quot;</span>
+</span><span class='line'>  <span class="n">group</span> <span class="s2">&quot;root&quot;</span>
+</span><span class='line'>  <span class="n">mode</span> <span class="s2">&quot;0644&quot;</span>
+</span><span class='line'>  <span class="n">source</span> <span class="s2">&quot;nginx.conf.erb&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+<p>You can have some general idea what it does, even if you don&rsquo;t know Chef. That way it&rsquo;s quite easy to find reusable recipes that you can customize to your requirements and write your own solutions.</p></p>
+
+<p><p>Another huge benefit is <strong>idempotence</strong> &ndash; you can apply the same recipes multiple times on your server and the state of the server will be exactly the same as after running them for the first time. If you change something in eg. configuration files, only these changes will be applied. Try achieving the same using shell scripts only ;).</p></p>
+
+<p><p>Once you understand Chef, provisioning new servers will be extremely easy and fast &ndash; it can be even limited to 2 commands if you use the same configuration for all servers.</p></p>
+
+<p><h2>Chef basics</h2></p>
+
+<p><h3>Terminology</h3></p>
+
+<p><p><strong>Node</strong></p></p>
+
+<p><p>A server (machine) we are going to set up and run Chef on.</p></p>
+
+<p><p><strong>Recipe</strong></p></p>
+
+<p><p>Basic unit in Chef for installing one thing, like PostgreSQL, ImageMagick, etc.</p></p>
+
+<p><p><strong>Cookbook</strong></p></p>
+
+<p><p>Collection of recipes, e.g. PostgreSQL cookbook.</p></p>
+
+<p><p><strong>Role</strong></p></p>
+
+<p><p>Combination of recipes that fulfill specific &ldquo;feature&rdquo; (or role) &ndash; PostgreSQL server role ,besides Postgres itself, may also require Monit configuration</p></p>
+
+<p><p><strong>Data bags</strong></p></p>
+
+<p><p>Files with data that may be required by some recipes, e.g. ssh keys that will be added to the authorized keys for deploy user.</p></p>
+
+<p><h3>Getting started</h3></p>
+
+<p><p>Let&rsquo;s start with creating directory for really simple chef recipe:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">mkdir</span> <span class="n">chef</span><span class="o">&ndash;</span><span class="n">simple</span><span class="o">&ndash;</span><span class="n">recipe</span>
+</span><span class='line'><span class="n">cd</span> <span class="n">chef</span><span class="o">&ndash;</span><span class="n">simple</span><span class="o">&ndash;</span><span class="n">recipe</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>and create Gemfile with chef, knife-solo and berkshelf gems:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">source</span> <span class="s1">&#39;<a href="https://rubygems.org&amp;#39;">https://rubygems.org&amp;#39;</a></span>
+</span><span class='line'>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;knife-solo&#39;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;chef&#39;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;berkshelf&#39;</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>Now we can initialize our project using Knife utility:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">knife</span> <span class="n">solo</span> <span class="n">init</span> <span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>You should be familiar with the generated directory structure after going through <em>terminology</em> part. You may wonder what&rsquo;s the difference between cookbooks and site-cookbooks directory: cookbooks is for storing, well, cookbooks, installed by Berkshelf and site-cookbooks is for our own cookbooks.</p></p>
+
+<p><p>Berskfile resembles closely Gemfile: to add new cookbooks just specify the name of cookbook:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">site</span> <span class="ss">:opscode</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">cookbook</span> <span class="s1">&#39;build-essential&#39;</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>In most cases I also specify git repository to have a quick reference to the cookbook:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">site</span> <span class="ss">:opscode</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">cookbook</span> <span class="s1">&#39;build-essential&#39;</span><span class="p">,</span> <span class="ss">git</span><span class="p">:</span> <span class="err">&#39;</span><span class="ss">https</span><span class="p">:</span><span class="sr">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">opscode</span><span class="o">&ndash;</span><span class="n">cookbooks</span><span class="o">/</span><span class="n">build</span><span class="o">&ndash;</span><span class="n">essential</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>To install all recipes use Berkshelf:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">berks</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>If you want cookbooks to be extracted to <code>cookbooks</code> directory:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">berks</span> <span class="n">install</span> <span class="o">&mdash;</span><span class="n">path</span> <span class="n">cookbooks</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><h3>Writing first Chef role &ndash; Nginx server</h3></p>
+
+<p><p>To understand the general idea behind Chef we are going to write pretty simple role for Nginx. It will take care of installing Nginx with some specified attributes in configuration file and setup monitoring with Monit. We also need to check if everything works. Fortunately, we don&rsquo;t need real server, <a href="http://www.vagrantup.com" target="_blank">Vagrant</a> will be perfect to set up a virtual environment. Just download it and follow the instructions below:</p></p>
+
+<p><p>Firstly, let&rsquo;s create directory for our server:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>mkdir ubuntu-server-14-04
+</span><span class='line'><span class="nb">cd </span>ubuntu-server-14-04
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>and install Ubuntu Server 14-04:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant init ubuntu-server-14-04 <a href="https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box">https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box</a>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>As you can see, the <code>Vagrantfile</code> was created. You may check it out but it&rsquo;s not necessary.</p></p>
+
+<p><p>To run Vagrant:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant up
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>To check if everything works, ssh on the virtual machine with Ubuntu Server:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant ssh
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>Now we have our node, let&rsquo;s prepare it for running Chef (the command below must be run within main Chef project directory):</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>knife solo prepare <a href="&#x6d;&#97;&#105;&#108;&#116;&#111;&#58;&#x76;&#x61;&#103;&#x72;&#97;&#x6e;&#x74;&#x40;&#49;&#50;&#55;&#x2e;&#x30;&#x2e;&#x30;&#x2e;&#49;">&#118;&#97;&#x67;&#114;&#x61;&#110;&#x74;&#x40;&#49;&#50;&#x37;&#46;&#48;&#x2e;&#x30;&#x2e;&#x31;</a> -p 2222 -i ~/.vagrant.d/insecure_private_key
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>Remember to use real system user name.</p></p>
+
+<p><p>Our virtual node can now run the Chef client. The command above has also generated <b>nodes/127.0.0.1.json</b> configuration file. Let&rsquo;s investigate the content: <code>run_list</code> is a list of all roles and recipes that will be applied on the node. You can add new roles/recipes just by specifying the name but it may be a good idea to be more explicit and specify whether it&rsquo;s a role or a recipe to avoid name collisions. In our case it will be:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;run_list&quot;</span>: <span class="o">[</span>
+</span><span class='line'>    <span class="s2">&quot;role[nginx]&quot;</span>
+</span><span class='line'>  <span class="o">]</span>,
+</span><span class='line'>  <span class="s2">&quot;automatic&quot;</span>: <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;ipaddress&quot;</span>: <span class="s2">&quot;127.0.0.1&quot;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+<p>Note: If you want to play a bit with the entire configuration discussed in this blog post, you may check it out <a href="https://github.com/Azdaroth/conf-chef-nginx-monit" target="_blank">here</a>.</p></p>
+
+<p><p>Let&rsquo;s create our nginx role:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>touch roles/nginx.json
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>Here&rsquo;s a basic template for roles:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;nginx&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Nginx server with Monit configuration&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;default_attributes&quot;</span><span class="p">:</span> <span class="p">{},</span>
+</span><span class='line'>  <span class="nt">&quot;json_class&quot;</span><span class="p">:</span> <span class="s2">&quot;Chef::Role&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;run_list&quot;</span><span class="p">:</span> <span class="p">[],</span>
+</span><span class='line'>  <span class="nt">&quot;chef_type&quot;</span><span class="p">:</span> <span class="s2">&quot;role&quot;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>The content is pretty self-explanatory: We need to specify name of the role and mark it to be role, so we use <code>Chef::Role</code> <code>json_class</code> and <code>role</code> as a <code>chef_type</code>. We can also provide some description. And what&rsquo;s the <code>default_attributes</code>? We will put there any configuration related parameters, once we set up basic template, you will know how it works.</p></p>
+
+<p><p>Let&rsquo;s create our custom cookbook for Nginx in site-cookbooks directory. It will consist of:</p></p>
+
+<p><ul>
+  <li>metadata.rb file &ndash; where we can specify some details like dependencies, supported operating systems, author of the cookbook etc.</li>
+  <li>recipes directory &ndash; with default.rb file which will contain all the commands that need to be executed to install Nginx.</li>
+  <li>templates directory &ndash; place for configuration files etc., we will put nginx.conf.erb template in <code>default</code> subdirectory.</li>
+</ul></p>
+
+<p><p>Why <code>default.rb</code> file name? You can write multiple recipes and specify their names, e.g. <code>monit-configuration::postgres</code>, <code>monit-configuration::nginx</code> but in our case we need just one recipe so the <code>default.rb</code> will be sufficient. Using <code>nginx::default</code> and <code>nginx</code> won&rsquo;t make any difference in this case. The same applies to the template files, that&rsquo;s why <code>nginx.conf.erb</code> is located in <code>templates/default/nginx.conf.erb</code>, not <code>templates/nginx.conf.erb</code></p></p>
+
+<p><p>Out metadata.rb can look like that:</p></p>
+
+<p><figure class='code'><figcaption><span>site-cookbooks/nginx/metadata.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">name</span>              <span class="s2">&quot;Nginx&quot;</span>
+</span><span class='line'><span class="n">maintainer</span>        <span class="s2">&quot;Karol Galanciak&quot;</span>
+</span><span class='line'><span class="n">maintainer_email</span>  <span class="s2">&quot;karol.galanciak@gmail.com&quot;</span>
+</span><span class='line'><span class="n">description</span>       <span class="s2">&quot;Installs Nginx&quot;</span>
+</span><span class='line'><span class="n">version</span>           <span class="s2">&quot;0.0.1&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">recipe</span> <span class="s2">&quot;nginx&quot;</span><span class="p">,</span> <span class="s2">&quot;Installs Nginx&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">supports</span> <span class="s2">&quot;ubuntu&quot;</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>What about the configuration file? We need some basic template and decide which attributes will be hardcoded and where we want to have an ability to customize them within our roles. Here&rsquo;s an example, based on <a href="https://library.linode.com/web-servers/nginx/configuration/basic" target="_blank">that one</a>:</p></p>
+
+<p><figure class='code'><figcaption><span>site-cookbooks/nginx/metadata.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">user</span> <span class="n">www</span><span class="o">&ndash;</span><span class="n">data</span><span class="p">;</span>
+</span><span class='line'><span class="n">worker_processes</span> <span class="mi">4</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">pid</span> <span class="sr">/var/</span><span class="n">run</span><span class="o">/</span><span class="n">nginx</span><span class="o">.</span><span class="n">pid</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">events</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">worker_connections</span> <span class="mi">768</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">http</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">sendfile</span> <span class="n">on</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">tcp_nopush</span> <span class="n">on</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">tcp_nodelay</span> <span class="n">on</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">keepalive_timeout</span> <span class="mi">65</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">types_hash_max_size</span> <span class="mi">2048</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">server_names_hash_bucket_size</span>  <span class="mi">64</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">include</span> <span class="sr">/etc/n</span><span class="n">ginx</span><span class="o">/</span><span class="n">mime</span><span class="o">.</span><span class="n">types</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">default_type</span> <span class="n">application</span><span class="o">/</span><span class="n">octet</span><span class="o">&ndash;</span><span class="n">stream</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">access_log</span> <span class="sr">/var/</span><span class="n">log</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">access</span><span class="o">.</span><span class="n">log</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">error_log</span> <span class="sr">/var/</span><span class="n">log</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">error</span><span class="o">.</span><span class="n">log</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">gzip</span> <span class="n">on</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">gzip_disable</span> <span class="s2">&quot;msie6&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">include</span> <span class="sr">/etc/n</span><span class="n">ginx</span><span class="o">/</span><span class="n">conf</span><span class="o">.</span><span class="n">d</span><span class="o">/<em>.</span><span class="n">conf</span><span class="p">;</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="sr">/etc/n</span><span class="n">ginx</span><span class="o">/</span><span class="n">sites</span><span class="o">&ndash;</span><span class="n">enabled</span><span class="o">/</em></span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>Just to keep it as simple as possible let&rsquo;s assume that we will want only <code>user</code> and <code>worker_processes</code> attributes to be customizable and <code>www-data</code> user will be our default with 4 worker processes. We can achieve that using <strong>erb</strong> templates and specifying default attributes for our <code>default.rb</code> recipe. Using attributes is pretty straight-forward: we need to create file for our recipe (in that case<code>default.rb</code>) file in attributes directory and use hash syntax on <code>default</code> object where <code>nginx</code> will be our namespace:</p></p>
+
+<p><figure class='code'><figcaption><span>attributes/default.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">default</span><span class="o">[</span><span class="s1">&#39;nginx&#39;</span><span class="o">][</span><span class="s1">&#39;user&#39;</span><span class="o">]</span>      <span class="o">=</span> <span class="s1">&#39;www-data&#39;</span>
+</span><span class='line'><span class="n">default</span><span class="o">[</span><span class="s1">&#39;nginx&#39;</span><span class="o">][</span><span class="s1">&#39;worker_processes&#39;</span><span class="o">]</span> <span class="o">=</span> <span class="s1">&#39;4&#39;</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>And how to access these values within our <code>nginx.conf.erb</code> template? The same way, hash syntax but with <code>node</code> object. So our template will look like this:</p></p>
+
+<p><figure class='code'><figcaption><span>templates/default/nginx.conf.erb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">user</span> <span class="o">&lt;</span><span class="sx">%= node[&#39;nginx&#39;][&#39;user&#39;] %&gt;;</span>
+</span><span class='line'><span class="sx">worker_processes &lt;%=</span> <span class="n">node</span><span class="o">[</span><span class="s1">&#39;nginx&#39;</span><span class="o">][</span><span class="s1">&#39;worker_processes&#39;</span><span class="o">]</span> <span class="o">%&gt;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">pid</span> <span class="sr">/var/</span><span class="n">run</span><span class="o">/</span><span class="n">nginx</span><span class="o">.</span><span class="n">pid</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">events</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">worker_connections</span> <span class="mi">768</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">http</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">sendfile</span> <span class="n">on</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">tcp_nopush</span> <span class="n">on</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">tcp_nodelay</span> <span class="n">on</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">keepalive_timeout</span> <span class="mi">65</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">types_hash_max_size</span> <span class="mi">2048</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">server_names_hash_bucket_size</span>  <span class="mi">64</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">include</span> <span class="sr">/etc/n</span><span class="n">ginx</span><span class="o">/</span><span class="n">mime</span><span class="o">.</span><span class="n">types</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">default_type</span> <span class="n">application</span><span class="o">/</span><span class="n">octet</span><span class="o">&ndash;</span><span class="n">stream</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">access_log</span> <span class="sr">/var/</span><span class="n">log</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">access</span><span class="o">.</span><span class="n">log</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">error_log</span> <span class="sr">/var/</span><span class="n">log</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">error</span><span class="o">.</span><span class="n">log</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">gzip</span> <span class="n">on</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">gzip_disable</span> <span class="s2">&quot;msie6&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">include</span> <span class="sr">/etc/n</span><span class="n">ginx</span><span class="o">/</span><span class="n">conf</span><span class="o">.</span><span class="n">d</span><span class="o">/<em>.</span><span class="n">conf</span><span class="p">;</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="sr">/etc/n</span><span class="n">ginx</span><span class="o">/</span><span class="n">sites</span><span class="o">&ndash;</span><span class="n">enabled</span><span class="o">/</em></span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+<p>We will be able to customize these attributes from our role and/or node definition.</p></p>
+
+<p><p>So we are left with the last part of installing Nginx: the recipe itself. Let&rsquo;s think how we want to this: we probably want to install <strong>Nginx</strong> &ndash; before that we may add <strong>ppa:nginx/stable</strong> repository to download the latest version, extract our template for configuration file and restart Nginx to use the new configuration. Fortunately, it looks very similar in Chef DSL:</p></p>
+
+<p><figure class='code'><figcaption><span>recipes/default.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bash</span> <span class="s1">&#39;add repo for Nginx&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">user</span> <span class="s1">&#39;root&#39;</span>
+</span><span class='line'>  <span class="n">code</span> <span class="o">&lt;&lt;&ndash;</span><span class="no">CODE</span>
+</span><span class='line'><span class="sh">    add-apt-repository ppa:nginx/stable</span>
+</span><span class='line'><span class="sh">    apt-get update</span>
+</span><span class='line'><span class="no">  CODE</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">package</span> <span class="s2">&quot;nginx&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">template</span> <span class="s2">&quot;/etc/nginx/nginx.conf&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">owner</span> <span class="s2">&quot;root&quot;</span>
+</span><span class='line'>  <span class="n">group</span> <span class="s2">&quot;root&quot;</span>
+</span><span class='line'>  <span class="n">mode</span> <span class="s2">&quot;0644&quot;</span>
+</span><span class='line'>  <span class="n">source</span> <span class="s2">&quot;nginx.conf.erb&quot;</span>
+</span><span class='line'>  <span class="n">notifies</span> <span class="ss">:run</span><span class="p">,</span> <span class="s2">&quot;execute[nginx-restart]&quot;</span><span class="p">,</span> <span class="ss">:immediately</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">execute</span> <span class="s2">&quot;nginx-restart&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">command</span> <span class="s2">&quot;/etc/init.d/nginx restart&quot;</span>
+</span><span class='line'>  <span class="n">action</span> <span class="ss">:nothing</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+<p>What&rsquo;s going on here?</p></p>
+
+<p><ol>
+  <li>We start with adding Nginx repository using <code>bash</code> method which is used for executing Bash scripts (as the name implies). We want to run in as <code>root</code> user and the script for adding repository is in <code>code</code> body.</li>
+  <li>In next step we tell Chef to install Nginx itself using package manager.</li>
+  <li>Then we want Chef to use our template file for configuration. Most of the parameters are pretty self-explanatory: root user will be the owner of the file, the file will belong to root group, we set permissions for the file, specify source in <code>templates</code> directory and we use notifications to take some action <code>immediately</code> (the other option is <code>delayed</code> taking action at the end of chef-client run). To specify action to take place we use <code>resource[name]</code> syntax.</li>
+  <li>In last step we define our action for restarting Nginx using Chef Execute provider: we specify the command to be run and action, which can be <code>:run</code>(will run the command) and <code>:nothing</code>(prevents from running the command &ndash; we use <code>:nothing</code> in this case as we use it in <code>notifies</code> method in <code>template</code>).</li>
+</ol></p>
+
+<p><p>And that&rsquo;s it. We are left with Monit config. We&rsquo;ve already written our own recipe for Nginx so let&rsquo;s use <a href="https://github.com/TalkingQuickly/monit-tlq" target="_blank">this</a> recipe for Monit itself and <a href="https://github.com/TalkingQuickly/monit_configs-tlq" target="_blank">that one</a> for Nginx configuration. Copy these two cookbooks to <code>Berksfile:</code></p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">cookbook</span> <span class="s1">&#39;monit_configs-tlq&#39;</span><span class="p">,</span> <span class="ss">git</span><span class="p">:</span> <span class="s1">&#39;git@github.com:TalkingQuickly/monit_configs-tlq.git&#39;</span><span class="p">,</span> <span class="ss">branch</span><span class="p">:</span> <span class="s1">&#39;master&#39;</span>
+</span><span class='line'><span class="n">cookbook</span> <span class="s1">&#39;monit-tlq&#39;</span><span class="p">,</span> <span class="ss">git</span><span class="p">:</span> <span class="s1">&#39;git@github.com:TalkingQuickly/monit-tlq.git&#39;</span><span class="p">,</span> <span class="ss">branch</span><span class="p">:</span> <span class="s1">&#39;master&#39;</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>And run:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>berks install
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>Let&rsquo;s get back to our <code>nginx.json</code> role definition. We need to specify attributes for nginx namespace: the default <code>user</code> as www-data is ok, so we will just set <code>worker_processes</code> to 2 and also add Monit configuration for Nginx. At the end the role will look like that:</p></p>
+
+<p><figure class='code'><figcaption><span>roles/nginx.json</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;nginx-server&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Nginx server&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;default_attributes&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;nginx&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nt">&quot;worker_processes&quot;</span><span class="p">:</span> <span class="s2">&quot;2&quot;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'>  <span class="nt">&quot;json_class&quot;</span><span class="p">:</span> <span class="s2">&quot;Chef::Role&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;run_list&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s2">&quot;nginx&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;monit_configs-tlq::nginx&quot;</span>
+</span><span class='line'>  <span class="p">],</span>
+</span><span class='line'>  <span class="nt">&quot;chef_type&quot;</span><span class="p">:</span> <span class="s2">&quot;role&quot;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>We will also need to install Monit itself. To check if everything works as it should, we will include email notifications. Let&rsquo;s define <code>monit</code> role:</p></p>
+
+<p><figure class='code'><figcaption><span>roles/monit.json</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;monit&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Monit&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;default_attributes&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;monit&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nt">&quot;notify_emails&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;email@example.com&quot;</span><span class="p">],</span>
+</span><span class='line'>      <span class="nt">&quot;enable_emails&quot;</span> <span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>      <span class="nt">&quot;mailserver&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nt">&quot;host&quot;</span> <span class="p">:</span> <span class="s2">&quot;smtp.gmail.com&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;port&quot;</span> <span class="p">:</span> <span class="s2">&quot;587&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;username&quot;</span> <span class="p">:</span> <span class="s2">&quot;email@example.com&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;password&quot;</span> <span class="p">:</span> <span class="s2">&quot;password&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;hostname&quot;</span> <span class="p">:</span> <span class="s2">&quot;hostname&quot;</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'>  <span class="nt">&quot;json_class&quot;</span><span class="p">:</span> <span class="s2">&quot;Chef::Role&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;run_list&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s2">&quot;monit-tlq&quot;</span>
+</span><span class='line'>  <span class="p">],</span>
+</span><span class='line'>  <span class="nt">&quot;chef_type&quot;</span><span class="p">:</span> <span class="s2">&quot;role&quot;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>Don&rsquo;t forget to put real data there ;). You may be wondering how did I know what attributes should I specify &ndash; in most cases these are documented but sometimes you will have to read the template files and check what kind of attributes you can customize and which are hardcoded.</p></p>
+
+<p><p>We have our roles defined, the last thing we need to do is to include them in node definition:</p></p>
+
+<p><figure class='code'><figcaption><span>nodes/127.0.0.1.json</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="nt">&quot;run_list&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s2">&quot;role[monit]&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;role[nginx]&quot;</span>
+</span><span class='line'>  <span class="p">],</span>
+</span><span class='line'>  <span class="nt">&quot;automatic&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;ipaddress&quot;</span><span class="p">:</span> <span class="s2">&quot;127.0.0.1&quot;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>So here is the final step &ndash; applying recipes on our node:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>knife solo cook <a href="&#109;&#x61;&#105;&#108;&#116;&#111;&#58;&#x76;&#x61;&#103;&#114;&#x61;&#x6e;&#116;&#x40;&#49;&#50;&#55;&#x2e;&#48;&#x2e;&#48;&#46;&#x31;">&#118;&#97;&#x67;&#x72;&#x61;&#110;&#x74;&#64;&#49;&#x32;&#55;&#46;&#48;&#46;&#x30;&#x2e;&#49;</a> -p 2222 -i /Users/system_user_name/.vagrant.d/insecure_private_key
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>The great thing about Chef is that you can change the values of attributes, apply them on the node and the chef-client will pick that change up. Just change <code>worker_processes</code> to 3 and watch what happens &ndash; Chef client will change the value of the attribute and restart Nginx.</p></p>
+
+<p><p>Note: applying the cookbooks on a real server is almost the same as working with Vagrant:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>knife solo prepare root@ip
+</span><span class='line'>knife solo cook root@ip
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><h2>Setting up complete server for Rails apps with Chef</h2></p>
+
+<p><p>Composing Chef cookbooks for your server can take a long time: reading all recipes / cookbooks, checking configuration etc. may be quite tedious, especially when doing if for the first time, so I decided to share with <a href="https://github.com/Azdaroth/chef-server-setup-template" target="_blank">my own</a> configuration which I&rsquo;m going to describe in this section (heavily inspired by <a href="https://github.com/TalkingQuickly" target="_blank"></a> Ben Dixon&rsquo;s recipes, author of <a href="https://leanpub.com/deploying_rails_applications" target="_blank">Reliably Deploying Rails Applications</a>).</p></p>
+
+<p><p>Let&rsquo;s take a look at the <a href="https://github.com/Azdaroth/chef-server-setup-template/blob/master/nodes/put_your_ip_address_here.json" target="_blank">node definition</a>. We have some new parameters: <code>environment</code> set to production &ndash; I will explain in a minute what is it for &ndash; and Debian <code>platform_family</code>. Next we&rsquo;ve got some recipes-related attributes. It could also be put in role definitions but I like keeping sensitive data in node definition:</p></p>
+
+<p><ul>
+  <li><strong>authorization</strong> &ndash; these attributes are related to <code>sudo</code> recipe &ndash; we assume that we are going to use <strong>deploy</strong> user which is going to have sudo access enabled. Also, the entire <strong>sysadmin</strong> group is going to have sudo access. We set <code>passwordless</code> to be false &ndash; the password will alwaus be required.</li>
+  <li><strong>monit</strong> &ndash; configuration for Monit concerning sending notifications and accessing via web interface. I would suggest having them enabled. However, if you decide not to enable them, just delete this section.</li>
+  <li><strong>postgresql</strong> &ndash; you must specify password hash for <code>postgres</code> user. You can generate it easily using openssl:</li>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  openssl passwd -1 <span class="s2">&quot;yourpassword&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+  <li><strong>security</strong> &ndash; we can set ssh port here. The important thing is that you will have to restart ssh service, even if you don&rsquo;t change the value. Restarting using Chef caused some exceptions that I couldn&rsquo;t handle so far, so remember to restart the service while sshing on your server after running Chef for the first time:</li>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  /etc/init.d/ssh restart
+</span></code></pre></td></tr></table></div></figure>
+</ul></p>
+
+<p><p>And the last thing is <code>run_list</code>:</p></p>
+
+<p><ul>
+  <li><strong>role[server]</strong> &ndash; responsible for basic server setup</li>
+  <li><strong>role[postgres-server]</strong> &ndash; install PostgreSQL and related stuff</li>
+  <li><strong>role[rails-app]</strong> &ndash; Ruby / Rails related components, like RVM, Rubies</li>
+  <li><strong>role[mongo-server]</strong> &ndash; installs MongoDB and sets up Monit monitoring</li>
+  <li><strong>role[redis-server]</strong> &ndash; installs Redis and sets up Monit monitoring</li>
+  <li><strong>role[memcached-server]</strong> &ndash; installs Elasticsearch and sets up Monit monitoring</li>
+  <li><strong>role[nginx]</strong> &ndash; installs Nginx with Passenger and sets up Monit monitoring.</li>
+</ul></p>
+
+<p><p>If you don&rsquo;t want to install some components, simply remove them from <code>run_list</code>.</p></p>
+
+<p><p>One more thing before we move to more detailed description of the roles: <code>data_bags</code> directory. It will be used for creating user (<strong>deploy</strong>), setting up password (again, password hash, not the plain password) and uploading ssh key. The <strong>deploy</strong> user is already specified in <code>deploy.json</code> file, so just paste your ssh key from <code>id_rsa.pub</code> and the password hash generated by:</p></p>
+
+<p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>openssl passwd -1 <span class="s2">&quot;yourpassword&quot;</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><p>As the attributes set in the node definition take precedence over the ones defined in roles, the important part in the server role is the <code>run_list</code>:</p>
+<ul>
+  <li><code>openssl</code> is responsible for managing passwords></li>
+  <li><code>build-essential</code> installs build-essential</li>
+  <li><code>chef-solo-search</code> &ndash; library related to data bags which helps with searching</li>
+  <li><code>sudo</code> and <code>users::sysadmins</code> were already discussed &ndash; they are responsible for creating users with specified password and giving sudo access</li>
+  <li><code>ssh_key_gen</code> generated ssh key for deploy user</li>
+  <li><code>basic-security-tlq</code> &ndash; based on <a href="https://github.com/TalkingQuickly/basic_security-tlq" target="_blank">this</a> recipe &ndash; deals with security. It installs fail2ban, ufw (firewall), unattended-upgrades packages and installs security updates automatically each day. It also modifies ssh settings (X11Forwarding is set to no, UsePAM to no and ssh port to specified value in node definition). It also enables 22, 80 (for Nginx) and specified ssh port in firewall and disables any other. You can add some rules for firewall using <code>firewall_allow</code> attributes in the following format:  {&ldquo;port&rdquo;: &ldquo;x&rdquo;, &ldquo;ip&rdquo;: &ldquo;xxx.xxx.xxx.xxx&rdquo;}</li>
+  <li><code>look-and-feel-tlq</code> &ndash; based on <a href="https://github.com/TalkingQuickly/look_and_feel-tlq" target="_blank">this</a> recipe (I had to comment out restarting ssh service) &ndash; installs htop, vim, unzip packages. Remeber that <code>environment</code> parameter? If set to <code>production</code>, it will display beautiful &ldquo;PRODUCTION&rdquo; banner while sshing ;).</li>
+  <li><code>monit-tlq</code> &ndash; installs Monit</li>
+  <li><code>monit_configs-tlq::system</code> &ndash; sets up Monit configuration for system. You should check <a href="https://github.com/TalkingQuickly/monit_configs-tlq/blob/master/templates/default/system.conf.erb" target="_blank">it</a> out and decide if you want to include it, you may receive some occasional spam about on eg. small VPS instances, which is not a good sign. Monit notifications shouldn&rsquo;t be neglected.</li>
+</ul></p>
+
+<p><p>Let&rsquo;s move to another role &ndash; Postgres server: basically it installs PostgreSQL (9.3), changes <code>pg_hba.conf</code> configuration using specified attributes, uses <strong>pgtune</strong> utility to provide better configuration parameters (based on the hardware) and thus performance and sets up Monit monitoring. If you need more customization, refer to the <a href="https://github.com/hw-cookbooks/postgresql" target="_blank">docs</a>.</p></p>
+
+<p><p>Next role deals with Ruby and Rails environment. The most important thing here is that it installs system-wide RVM, which is in my opinion much more convenient to work with on servers (development machine is a different story). Next, <code>deploy</code> user is added to rvm group, default Ruby version is specified and Rubies are installed. We also install Bundler and Passenger gems. You can check the <a href="https://github.com/fnichol/chef-rvm" target="_blank">docs</a> if you need further customization. And what about <code>rails_gem_dependencies-tlq</code> recipe? It installs some packages that you will probably need: curl, libcurl3, libcurl3-dev, <strong>imagemagick</strong>, libmagickwand-dev and nodejs. And one more thing: there might be a problem with RVM permissions (at time of writing this post, <a href="https://github.com/fnichol/chef-rvm/pull/257" target="_blank">this</a> pull request haven&rsquo;t been merged yet), so it may be a good idea to run: <code>rvm fix-permissions system</code> when sshing to your server for the first time.</p></p>
+
+<p><p>Another role is Mongo server &ndash; it installs Mongodb, sets up Monit monitoring and uses <strong>/home/data/mongodb</strong> directory for db, you may delete it if you want the default value.</p></p>
+
+<p><p>Next three roles are quite similar: they install Redis, Memcached and Elasticsearch and set up Monit configuration for each of them. Also, in case of Elasticsearch, it installs OpenJDK and gives possibility to customize the amount of allocated memory &ndash; you will probably  want to remove it, I keep it in a template, just to remember that it&rsquo;s a customizable attribute.</p></p>
+
+<p><p>And the last one role: Nginx role, which installs Nginx with Passenger and sets up monitoring with Monit. There were some problems with using RVM Ruby when dealing with Passenger so it required helper recipe for <code>rake</code> package. There are a lot of hardcoded values (Ruby version, Passenger version) so make sure they match the ones specified in Rails App role. If you want more customization, refer to the <a href="https://github.com/miketheman/nginx" target="_blank">docs</a>.</p></p>
+
+<p><h2>Wrapping up</h2></p>
+
+<p><p>That was pretty quick introduction to <strong>Chef</strong> and there might be a lot things that weren&rsquo;t made perfectly clear. Again, it was not the purpose of this post to explain every possible detail but to give you the general idea. I hope that after reading this blog post you will have some basic understanding how Chef and related utilities work, how to write your own recipes, fork other cookbooks and modify them to your taste and never again do the manual server setup. You also have pretty nice starting point &ndash; just clone the repo of my server template and apply to the nodes ;).</p></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Karol Galanciak</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-10T20:00:00+02:00" pubdate data-updated="true">Jul 10<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/chef/'>Chef</a>, <a class='category' href='/blog/categories/deployment/'>Deployment</a>, <a class='category' href='/blog/categories/server/'>Server</a>
+  
+</span>
+
+
+    </p>
+    <div class="meta top-line">
+      <div class="post-subscription">
+  <div id="mc_embed_signup">
+    <div id="mc_embed_signup_scroll">
+      <label for="mce-EMAIL">Do you want to take your developer skills to the next level? Subscribe to my newsletter and never miss another blog post!</label>
+      <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+      <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_62804f1b69c60e0c7966cddd6_7c71fb81df" tabindex="-1" value=""></div>
+      <div class="clear">
+      <a href="http://eepurl.com/duztq5" target="_blank" id="mc-embedded-subscribe" class="button">Yes, I want to be a better developer!</a>
+    </div>
+  </div>
+</div>
+
+    </div>
+    <div class="top-line">
+      
+        <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://Azdaroth.github.io/blog/2014/07/10/automate-to-the-max-instant-ubuntu-server-setup-with-chef/" data-via="Azdaroth" data-counturl="http://Azdaroth.github.io/blog/2014/07/10/automate-to-the-max-instant-ubuntu-server-setup-with-chef/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+      
+    </div>
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/04/27/you-dont-necessarily-need-gem-for-that-feature/" title="Previous Post: You don't (necessarily) need gem for that feature">&laquo; You don't (necessarily) need gem for that feature</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/09/17/rails-useful-patterns/" title="Next Post: Rails: Useful Patterns">Rails: Useful Patterns &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <img class="left" src="/images/me_formal.jpg" title="me:)" alt="Karol Galanciak - photo">
+  <p>Hi, my name is Karol Galanciak, I'm a technical polyglot and domain expert in vacation rental and fitness industries.</p>
+
+  <p>I specialize in building APIs, microservices architecture, working with legacy applications, building ambitious Single Page Applications and building payment processors for credit cards processing. Currently I'm working as CTO at <a href="https://www.bookingsync.com" target="_blank">BookingSync</a>.</p>
+
+  <p id="email-me"></p>
+</section>
+
+<script type="text/javascript">
+  (function(d, id, lhs, rhs) {
+    d.getElementById(id).innerHTML = "You can reach me at <a rel='nofollow' href='mailto:" + lhs + "@" + rhs + "'>" + lhs + "@" + rhs + "</a>";
+  })(window.document, 'email-me', 'karol.galanciak', 'gmail.com');
+</script>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization/">The Case for Before_validation Callback: Complex State Normalization</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/">Advanced Ember Data Customization - Different Model Types in Ember App and API for the Same Resource</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/">Exotic Ruby: Module.class_exec, Custom JSON and Liquid Drops in Action</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/">Rails Quick Tips: Temporarily Disabling Touching With ActiveRecord.no_touching</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function/">PostgreSQL Quick Tips: Working With Dates Using EXTRACT Function</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/Azdaroth">@Azdaroth</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'Azdaroth',
+            count: 6,
+            skip_forks: false,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+<section>
+   <h1>Twitter</h1>
+   <a class="twitter-timeline" href="https://twitter.com/Azdaroth" data-widget-id="357234540634329088">Tweets by @Azdaroth</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - Karol Galanciak -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'karolgalanciak';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://Azdaroth.github.io/blog/2014/07/10/automate-to-the-max-instant-ubuntu-server-setup-with-chef/';
+        var disqus_url = 'http://Azdaroth.github.io/blog/2014/07/10/automate-to-the-max-instant-ubuntu-server-setup-with-chef/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

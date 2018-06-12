@@ -1,0 +1,1131 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Rails applications deployment with Capistrano and after deployment setup - Karol Galanciak - Ruby on Rails and Ember.js consultant</title>
+  <meta name="author" content="Karol Galanciak">
+
+  
+  <meta name="description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  
+  <meta name="keywords" content="Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps">
+
+  
+  
+
+  <meta property="og:title" value="Rails applications deployment with Capistrano and after deployment setup - Karol Galanciak - Ruby on Rails and Ember.js consultant" />
+  <meta property="og:description" value="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications." />
+  <meta property="og:url" value="http://Azdaroth.github.io/blog/2013/08/02/app-deployment-with-capistrano-and-after-deployment-setup/" />
+  <meta property="og:type" content="website" />
+  
+  <meta property="og:site_name" content="Karol Galanciak - Ruby on Rails and Ember.js consultant"/>
+  <meta property="og:locale" content="en_US" />
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@Azdaroth">
+  <meta name="twitter:creator" content="@Azdaroth">
+  <meta name="twitter:title" content="Rails applications deployment with Capistrano and after deployment setup - Karol Galanciak - Ruby on Rails and Ember.js consultant">
+  <meta name="twitter:url" content="">
+  <meta name="twitter:description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://Azdaroth.github.io/blog/2013/08/02/app-deployment-with-capistrano-and-after-deployment-setup">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Karol Galanciak - Ruby on Rails and Ember.js consultant" type="application/atom+xml">
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "BlogPosting",
+      "mainEntityOfPage": {
+        "@type":"WebPage",
+        "@id": "http://Azdaroth.github.io/blog/2013/08/02/app-deployment-with-capistrano-and-after-deployment-setup"
+      },
+      "headline": "Rails applications deployment with Capistrano and after deployment setup - Karol Galanciak - Ruby on Rails and Ember.js consultant",
+        "image": {
+        "@type": "ImageObject",
+        "url": "",
+        "height": 640,
+        "width": 1024
+      },
+      "datePublished": "2013-08-02",
+      "dateModified": "2018-06-12",
+      "author": {
+        "@type": "Person",
+        "name": "Karol Galanciak"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Karol Galanciak",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://karolgalanciak.com/images/me_formal.jpg",
+          "width": 600,
+          "height": 60
+        }
+      },
+      "description": "Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.",
+      "keywords": "Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps"
+    }
+  </script>
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-42570582-1', 'auto');
+    ga('send', 'pageview');
+    ga('set', 'anonymizeIp', true);
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Karol Galanciak - Ruby on Rails and Ember.js consultant</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:Azdaroth.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">About Me</a></li>
+  <li><a href="/blog">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/test-driven-ember">Test-Driven Ember Book</a></li>
+  <li><a href="/presentations">Presentations</a></li>
+  <li><a href="/publications">Publications</a></li>
+  <li><a href="/open-source">Open Source</a></li>
+  <li><a href="/privacy-policy">Privacy Policy</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Rails Applications Deployment With Capistrano and After Deployment Setup</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-02T14:15:00+02:00" pubdate data-updated="true">Aug 2<span>nd</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>You&#8217;ve just setup your production server, but still haven&#8217;t deployed your app? Then this the right place for you. You are going to learn how to deploy your app to remote server, deal with some config files, create staging environment and setup monitoring tools.</p>
+
+
+
+
+<!--more-->
+
+
+<p></p>
+
+<h2>Introducing Capistrano</h2>
+
+
+
+
+<p>Capistrano is an excellent tool to automate your deployment process using Rake DSL. It allows you to deploy applications using various source control management systems like Git, run migrations on remote server, restart application and many more.</p>
+
+
+
+
+<h2>Application setup</h2>
+
+
+
+
+<p>Let&#8217;s start with creating Rails application: </p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>rails new dummy_app
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>add <code>capistrano</code>, <code>capistrano-ext</code>, <code>rvm-capistrano</code> (for RVM integration) and <code>pg</code> gems(for Postgres database) to your Gemfile:</p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;pg&#39;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;capistrano&#39;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;rvm-capistrano&#39;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;capistrano-ext&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p><b>NOTE:</b> When writing this article, the current Capistrano version was 2.15.5 which I believe is buggy as I had some problems with authentication while deploying. If you have the same problem, use 2.15.3 version instead.</p>
+
+
+
+
+<p>You should also uncomment this line: </p>
+
+
+
+
+<figure class='code'><figcaption><span>Gemfile</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;therubyracer&#39;</span><span class="p">,</span> <span class="ss">platforms</span><span class="p">:</span> <span class="ss">:ruby</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>And run bundle install.</p>
+
+
+
+
+<h2>Is my app secure?</h2>
+
+
+
+
+<p>Well, it depends. If you are the only person working on it, then you are safe. But if you aren&#8217;t, then your session secret is available to other people, which makes your app vulnerable to <a href="http://robertheaton.com/2013/07/22/how-to-hack-a-rails-app-using-its-secret-token/" target="_blank">carefully crafted attacks</a> and you should exclude it from your code repository. Initialize git repository in your application:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git init
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>And add to your <code>.gitignore</code> file the following line:</p>
+
+
+
+
+<figure class='code'><figcaption><span>.gitignore</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>/config/initializers/secret_token.rb
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h2>Database and staging environment config</h2>
+
+
+
+
+<p>Now, edit database configuration file (<code>config/database.yml</code>), so it looks similar to this:</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/database.yml</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">development</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">adapter</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">postgresql</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">host</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">localhost</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">database</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">dummy_app_test</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">username</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">dummy_app_user</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">password</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">my-secret-password</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">test</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">adapter</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">postgresql</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">host</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">localhost</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">database</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">dummy_app_test</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">username</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">dummy_app_user</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">password</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">my-secret-password</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">production</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">adapter</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">postgresql</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">host</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">localhost</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">database</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">dummy_app_production</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">username</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">dummy_app_user</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">password</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">my-secret-password</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">staging</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">adapter</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">postgresql</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">host</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">localhost</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">database</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">dummy_app_production</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">username</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">dummy_app_user</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">password</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">my-secret-password</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>There is one extra thing in this config: the staging environment. We are going to use pre-production environment for testing purposes. If you want to share the same database between production and staging, then leave this config as it is.</p>
+
+
+
+
+<p>You should also exclude <code>database.yml</code> from your code repository, not only for keeping your passwords secret, but also to prevent overriding local configuration when fetching code from repository - add to <code>.gitignore</code> file:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>/config/database.yml
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Staging environment should be close to production as much as possible, so copy the production.rb file and rename it to staging.rb: </p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>cp config/environments/production.rb config/environments/staging.rb
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h2>Capistrano configuration</h2>
+
+
+
+
+<p>To create configuration files, run</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>capify .
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>It will create two files: <code>config/deploy.rb</code> and <code>Capfile</code>. Start with editing <code>Capfile</code> and uncomment this line:</p>
+
+
+
+
+<figure class='code'><figcaption><span>Capfile</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">load</span> <span class="s1">&#39;deploy/assets&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Next, open the <code>deploy.rb</code> remove the default content, copy & paste the script below and adjust it according to the comments.</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/deploy.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;bundler/capistrano&quot;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;capistrano/ext/multistage&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;rvm/capistrano&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># General</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">set</span> <span class="ss">:keep_releases</span><span class="p">,</span> <span class="mi">5</span> <span class="c1"># or any other number of releases you would like to keep</span>
+</span><span class='line'><span class="n">ssh_options</span><span class="o">[</span><span class="ss">:port</span><span class="o">]</span> <span class="o">=</span> <span class="mi">12345</span> <span class="c1"># if you haven&#39;t changed anything in SSH config, set it to 22</span>
+</span><span class='line'><span class="n">ssh_options</span><span class="o">[</span><span class="ss">:forward_agent</span><span class="o">]</span> <span class="o">=</span> <span class="kp">true</span> <span class="c1"># forward ssh keys</span>
+</span><span class='line'><span class="n">default_run_options</span><span class="o">[</span><span class="ss">:pty</span><span class="o">]</span> <span class="o">=</span> <span class="kp">true</span> <span class="c1"># set for the password prommpt</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">set</span> <span class="ss">:application</span><span class="p">,</span> <span class="s2">&quot;dummy_app&quot;</span> <span class="c1"># set the name of you application here</span>
+</span><span class='line'><span class="n">set</span> <span class="ss">:user</span><span class="p">,</span> <span class="s2">&quot;deploy&quot;</span> <span class="c1"># and the server user name</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">set</span> <span class="ss">:stages</span><span class="p">,</span> <span class="o">[</span><span class="s2">&quot;staging&quot;</span><span class="p">,</span> <span class="s2">&quot;production&quot;</span><span class="o">]</span> <span class="c1"># Set staging and production environment</span>
+</span><span class='line'><span class="n">set</span> <span class="ss">:default_stage</span><span class="p">,</span> <span class="s2">&quot;staging&quot;</span> <span class="c1"># Use staging environment as the default one to prevent accidentally deploying to production</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">set</span> <span class="ss">:deploy_via</span><span class="p">,</span> <span class="ss">:remote_cache</span> <span class="c1"># it will only fetch from the repository on server, not clone the entire repository from scratch</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">set</span> <span class="ss">:use_sudo</span><span class="p">,</span> <span class="kp">false</span> <span class="c1"># do not use sudo</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Git</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">set</span> <span class="ss">:scm</span><span class="p">,</span> <span class="ss">:git</span> <span class="c1"># set git as a Source Code Manager</span>
+</span><span class='line'><span class="n">set</span> <span class="ss">:repository</span><span class="p">,</span>  <span class="s2">&quot;ssh://deploy@your.ip.goes.here:port/home/</span><span class="si">#{</span><span class="n">user</span><span class="si">}</span><span class="s2">/repos/</span><span class="si">#{</span><span class="n">application</span><span class="si">}</span><span class="s2">.git&quot;</span> <span class="c1"># point your repository here</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">set</span> <span class="ss">:branch</span><span class="p">,</span> <span class="s2">&quot;master&quot;</span> <span class="c1"># set git branch here</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Server</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">role</span> <span class="ss">:web</span><span class="p">,</span> <span class="s2">&quot;server.ip.goes.here&quot;</span> <span class="c1"># HTTP Server</span>
+</span><span class='line'><span class="n">role</span> <span class="ss">:app</span><span class="p">,</span> <span class="s2">&quot;server.ip.goes.here&quot;</span> <span class="c1"># server with your app</span>
+</span><span class='line'><span class="n">role</span> <span class="ss">:db</span><span class="p">,</span>  <span class="s2">&quot;server.ip.goes.here&quot;</span><span class="p">,</span> <span class="ss">:primary</span> <span class="o">=&gt;</span> <span class="kp">true</span> <span class="c1"># database server</span>
+</span><span class='line'><span class="n">role</span> <span class="ss">:db</span><span class="p">,</span>  <span class="s2">&quot;server.ip.goes.here&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Passenger</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">namespace</span> <span class="ss">:deploy</span> <span class="k">do</span>
+</span><span class='line'> <span class="n">task</span> <span class="ss">:start</span> <span class="k">do</span> <span class="p">;</span> <span class="k">end</span>
+</span><span class='line'> <span class="n">task</span> <span class="ss">:stop</span> <span class="k">do</span> <span class="p">;</span> <span class="k">end</span>
+</span><span class='line'> <span class="n">task</span> <span class="ss">:restart</span><span class="p">,</span> <span class="ss">:roles</span> <span class="o">=&gt;</span> <span class="ss">:app</span> <span class="k">do</span> <span class="c1"># restart your app after finalizing deployment</span>
+</span><span class='line'>   <span class="n">run</span> <span class="s2">&quot;touch </span><span class="si">#{</span><span class="n">current_path</span><span class="si">}</span><span class="s2">/tmp/restart.txt&quot;</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Symlinking</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">namespace</span> <span class="ss">:deploy</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">task</span> <span class="ss">:symlink_db</span><span class="p">,</span> <span class="ss">:roles</span> <span class="o">=&gt;</span> <span class="ss">:app</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">run</span> <span class="s2">&quot;ln -nfs </span><span class="si">#{</span><span class="n">deploy_to</span><span class="si">}</span><span class="s2">/shared/config/database.yml </span><span class="si">#{</span><span class="n">release_path</span><span class="si">}</span><span class="s2">/config/database.yml&quot;</span> <span class="c1"># This file is not included repository, so we will create a symlink </span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="n">task</span> <span class="ss">:symlink_secret_token</span><span class="p">,</span> <span class="ss">:roles</span> <span class="o">=&gt;</span> <span class="ss">:app</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">run</span> <span class="s2">&quot;ln -nfs </span><span class="si">#{</span><span class="n">deploy_to</span><span class="si">}</span><span class="s2">/shared/config/initializers/secret_token.rb </span><span class="si">#{</span><span class="n">release_path</span><span class="si">}</span><span class="s2">/config/initializers/secret_token.rb&quot;</span> <span class="c1"># This file is not included repository, so we will create a symlink </span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">before</span> <span class="s1">&#39;deploy:assets:precompile&#39;</span><span class="p">,</span> <span class="s1">&#39;deploy:symlink_db&#39;</span> <span class="c1"># callback: run this task before deploy:assets:precompile</span>
+</span><span class='line'><span class="n">before</span> <span class="s1">&#39;deploy:assets:precompile&#39;</span><span class="p">,</span> <span class="s1">&#39;deploy:symlink_secret_token&#39;</span> <span class="c1"># # callback: run this task before deploy:assets:precompile</span>
+</span><span class='line'><span class="n">after</span> <span class="s2">&quot;deploy&quot;</span><span class="p">,</span> <span class="s2">&quot;deploy:cleanup&quot;</span> <span class="c1"># delete old releases</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, create <code>deploy</code> directory in <code>config</code> directory and add <code>production.rb</code> and <code>staging.rb</code> files there. You have to specify paths, where the production and staging app instance will be deployed. Let&#8217;s edit the <code>production.rb</code> file:</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/deploy/production.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">set</span> <span class="ss">:deploy_to</span><span class="p">,</span> <span class="s2">&quot;/home/deploy/rails_projects/dummy_app&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>and <code>staging.rb</code>:</p>
+
+
+
+
+<figure class='code'><figcaption><span>config/deploy/production.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">set</span> <span class="ss">:deploy_to</span><span class="p">,</span> <span class="s2">&quot;/home/deploy/rails_projects/dummy_app_staging&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>That&#8217;s a basic configuration that should be sufficient in most cases. But Capistrano is a really sophisticated tool, you can specify diffrent servers for staging and production environment, diffrent git branches, diffrent repositories and many more. Just specify different settings in <code>production.rb</code> and <code>staging.rb</code> if you need to.</p>
+
+
+
+
+<h2>Deployment</h2>
+
+
+
+
+<p>Before deploying your app, you have to setup git repository. We will create just an empty repo in <code>/home/deploy/repos</code> directory on remote server: </p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>ssh your-server <span class="s2">&quot;mkdir /home/deploy/repos &amp;&amp; mkdir /home/deploy/repos/dummy_app.git  &amp;&amp; git init --bare /home/deploy/repos/dummy_app.git&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Keeping the Git repositories on deploy user might not be the best idea, especially when you want to give other people access to the repo, but it sufficient for demonstration purposes. In other cases, you should rather create seperate git user with a limited shell (git-shell) or use some sophisticated tools like Gitolite if you need to.</p>
+
+
+
+
+<p>Now we can commit all changes and deploy our application:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add --all
+</span><span class='line'>git commit -am <span class="s2">&quot;Setup deployment configuration&quot;</span>
+</span><span class='line'>git remote add origin ssh://deploy@your.ip.goes.here:port/home/deploy/repos/dummy_app.git
+</span><span class='line'>git push origin master
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>You are ready to deploy our application, but before that you need to setup databases and http server configuration. If you have any problem, check <a href="http://karolgalanciak.com/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql/" target="_blank">this one</a> out (remember about specifying appropriate rails_env). Firstly, let the Capistrano deal with creating all the neccessary directories in both staging and production environments:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>cap deploy:setup
+</span><span class='line'>cap production deploy:setup
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then check if directory permissions, utilities and other dependencies are correct:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>cap deploy:check
+</span><span class='line'>cap production deploy:check
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>In both cases you should have output ending with: <i>You appear to have all necessary dependencies installed.</i></p>
+
+
+
+
+<p>The last thing before deployment: we haven&#8217;t included <code>secret_token.rb</code> and <code>database.yml</code> files in repo, so we have to copy them on remote server:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>scp config/database.yml you-server:/home/deploy <span class="o">&amp;&amp;</span> scp config/initializers/secret_token.rb your-server:/home/deploy
+</span><span class='line'>ssh your_server <span class="s2">&quot;mkdir /home/deploy/rails_projects/dummy_app/shared/config &amp;&amp; mkdir /home/deploy/rails_projects/dummy_app_staging/shared/config&quot;</span>
+</span><span class='line'>ssh your_server <span class="s2">&quot;mkdir /home/deploy/rails_projects/dummy_app/shared/config/initializers &amp;&amp; mkdir /home/deploy/rails_projects/dummy_app_staging/shared/config/initializers&quot;</span>
+</span><span class='line'>ssh you_server <span class="s2">&quot;cp /home/deploy/database.yml /home/deploy/rails_projects/dummy_app/shared/config/database.yml &amp;&amp; mv /home/deploy/database.yml /home/deploy/rails_projects/dummy_app_staging/shared/config/database.yml&quot;</span>
+</span><span class='line'>ssh you_server <span class="s2">&quot;cp /home/deploy/secret_token.rb /home/deploy/rails_projects/dummy_app/shared/config/initializers/secret_token.rb &amp;&amp; mv /home/deploy/secret_token.rb /home/deploy/rails_projects/dummy_app_staging/shared/config/initializers/secret_token.rb&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>And you can deploy your application. Instead of <code>cap deploy</code>, use <code>cap deploy:cold</code> and <code>cap production deploy:cold</code> - it will deploy the app, run all migrations and run deploy start instead of <code>cap:restart</code>.</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>cap deploy:cold
+</span><span class='line'>cap production deploy:cold
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Done! You have just deployed your application. Next time use cap deploy or <code>cap deploy:migrations</code> to run migrations.</p>
+
+
+
+
+<h2>Monitoring with Monit</h2>
+
+
+
+
+<p>How do you know if everything is running correctly after deployment? Well, you don&#8217;t know, unless you install a monitoring tool. Monit is a great and easy to configure utility for managing and monitoring processes. Let&#8217;s start with installing Monit on remote server (I use CentOS Linux, there are some differences between distros, so the location of the files might be diffrent, e.g. on Debian, the configuration file is in <code>/etc/monit/monit.rc</code>):</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo yum install monit
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>and edit the configuration file:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo vi /etc/monit.conf
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Read carefully all the comments to get familiar with Monit. Then specify your configuration, e.g.:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># check services every minute</span>
+</span><span class='line'><span class="nb">set </span>daemon 60
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c"># monitor nginx</span>
+</span><span class='line'>check process nginx with pidfile /opt/nginx/logs/nginx.pid
+</span><span class='line'>  start <span class="nv">program</span> <span class="o">=</span> <span class="s2">&quot;/etc/init.d/nginx start&quot;</span>
+</span><span class='line'>  stop <span class="nv">program</span>  <span class="o">=</span> <span class="s2">&quot;/etc/init.d/nginx stop&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># monitor postgres</span>
+</span><span class='line'>check process postgres with pidfile /var/lib/pgsql/9.2/data/postmaster.pid
+</span><span class='line'>  start <span class="nv">program</span> <span class="o">=</span> <span class="s2">&quot;/etc/init.d/postgresql start&quot;</span>
+</span><span class='line'>  stop  <span class="nv">program</span> <span class="o">=</span> <span class="s2">&quot;/etc/init.d/postgresql stop&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># web interface setup</span>
+</span><span class='line'><span class="nb">set </span>httpd port 2812 and
+</span><span class='line'>  use address localhost
+</span><span class='line'>  allow username:<span class="s2">&quot;password&quot;</span> <span class="c"># specify username and password for http basic authentication</span>
+</span><span class='line'>  allow localhost
+</span><span class='line'>  allow @monit
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>There are a lot of available Monit recipies, e.g. <a href="http://mmonit.com/wiki/Monit/ConfigurationExamples" target="_blank">here</a>, so it is quite easy to setup. When you finish, restart Monit:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo monit reload
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Or if you haven&#8217;t started it yet:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo monit
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>To check status of processes being monitored, run: </p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo monit status
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>You don&#8217;t have to ssh on your server everytime you want to check the status, Monit comes with a very nice web interface. Here is a simple Nginx configuration, so that you will be able to access Monit via your-ip:1111/monit address:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>server <span class="o">{</span>
+</span><span class='line'>  listen 1111;
+</span><span class='line'>  server_name localhost;
+</span><span class='line'>
+</span><span class='line'>  location /monit/ <span class="o">{</span>
+</span><span class='line'>    proxy_pass http://127.0.0.1:2812/; <span class="c"># pass query to backend, replace /monit/ uri part to just /</span>
+</span><span class='line'>    proxy_set_header Host <span class="nv">$host</span>;
+</span><span class='line'>    proxy_set_header X-Real-IP <span class="nv">$remote_addr</span>;
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>Use password and username specified in Monit configuration.</p>
+
+
+
+
+<h2>Logrotate</h2>
+
+
+
+
+<p>After some time your Rails app logs and especially Nginx logs might be really large, so it is a good idea to somehow manage them. Fortunately, you can use system-built utility called Logrotate. Just open <code>/etc/logrotate.conf</code> and paste the configuration below (remember about changing path to your application):</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>/home/deploy/rails_projects/your_app_name/shared/log/*.log <span class="o">{</span>
+</span><span class='line'>  daily
+</span><span class='line'>  rotate 30
+</span><span class='line'>  missingok
+</span><span class='line'>  compress
+</span><span class='line'>  notifempty
+</span><span class='line'>  delaycompress
+</span><span class='line'>  sharedscripts
+</span><span class='line'>  copytruncate
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>￼￼￼￼￼￼￼￼￼￼￼￼
+</span><span class='line'>
+</span><span class='line'>/opt/nginx/logs/*.log <span class="o">{</span>
+</span><span class='line'>  daily
+</span><span class='line'>  rotate 30
+</span><span class='line'>  compress
+</span><span class='line'>  missingok
+</span><span class='line'>  notifempty
+</span><span class='line'>  delaycompress
+</span><span class='line'>  sharedscripts
+</span><span class='line'>
+</span><span class='line'>  postrotate
+</span><span class='line'>    <span class="o">[</span> ! -f /var/run/nginx.pid <span class="o">]</span> <span class="o">||</span> <span class="nb">kill</span> -USR1 <span class="sb">`</span>cat /var/run/nginx.pid<span class="sb">`</span>
+</span><span class='line'>  endscript <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Here is the options explanation:</p>
+
+
+
+
+<ul>
+<li><b>daily</b> - rotate the logs every day</li>
+<li><b>rotate 30</b> - rotate logs 30 times, after that delete the oldest</li>
+<li><b>missingok</b> - ignore if the file doesn&#8217;t exist</li>
+<li><b>compress</b> - compress logs with gzip</li>
+<li><b>notifempty</b> - leave file if the logs are empty</li>
+<li><b>delaycompress</b> - postpone compression of the file to the next cycle</li>
+<li><b>sharedscripts</b> - tell only once that the logs have been rotated, not several times for every group</a></li>
+<li><b>copytruncate</b> - copy the log file and and truncate the original one</li>
+<li><b>postrotate [ ! -f /var/run/nginx.pid ] || kill -USR1 `cat /var/run/nginx.pid` endscript</b> - tell Nginx that the logs have been rotated and use the new ones.</li>
+</ul>
+
+
+
+
+<p>And that&#8217;s is it! Cron by default runs logrotate every day.</p>
+
+
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Karol Galanciak</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-02T14:15:00+02:00" pubdate data-updated="true">Aug 2<span>nd</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/capistrano/'>Capistrano</a>, <a class='category' href='/blog/categories/deployment/'>Deployment</a>
+  
+</span>
+
+
+    </p>
+    <div class="meta top-line">
+      <div class="post-subscription">
+  <div id="mc_embed_signup">
+    <div id="mc_embed_signup_scroll">
+      <label for="mce-EMAIL">Do you want to take your developer skills to the next level? Subscribe to my newsletter and never miss another blog post!</label>
+      <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+      <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_62804f1b69c60e0c7966cddd6_7c71fb81df" tabindex="-1" value=""></div>
+      <div class="clear">
+      <a href="http://eepurl.com/duztq5" target="_blank" id="mc-embedded-subscribe" class="button">Yes, I want to be a better developer!</a>
+    </div>
+  </div>
+</div>
+
+    </div>
+    <div class="top-line">
+      
+        <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://Azdaroth.github.io/blog/2013/08/02/app-deployment-with-capistrano-and-after-deployment-setup/" data-via="Azdaroth" data-counturl="http://Azdaroth.github.io/blog/2013/08/02/app-deployment-with-capistrano-and-after-deployment-setup/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+      
+    </div>
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql/" title="Previous Post: CentOS 6.4 server setup with Ruby On Rails, Nginx and PostgreSQL">&laquo; CentOS 6.4 server setup with Ruby On Rails, Nginx and PostgreSQL</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/10/06/structuring-rails-applications/" title="Next Post: Structuring Rails applications">Structuring Rails applications &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <img class="left" src="/images/me_formal.jpg" title="me:)" alt="Karol Galanciak - photo">
+  <p>Hi, my name is Karol Galanciak, I'm a technical polyglot and domain expert in vacation rental and fitness industries.</p>
+
+  <p>I specialize in building APIs, microservices architecture, working with legacy applications, building ambitious Single Page Applications and building payment processors for credit cards processing. Currently I'm working as CTO at <a href="https://www.bookingsync.com" target="_blank">BookingSync</a>.</p>
+
+  <p id="email-me"></p>
+</section>
+
+<script type="text/javascript">
+  (function(d, id, lhs, rhs) {
+    d.getElementById(id).innerHTML = "You can reach me at <a rel='nofollow' href='mailto:" + lhs + "@" + rhs + "'>" + lhs + "@" + rhs + "</a>";
+  })(window.document, 'email-me', 'karol.galanciak', 'gmail.com');
+</script>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization/">The Case for Before_validation Callback: Complex State Normalization</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/">Advanced Ember Data Customization - Different Model Types in Ember App and API for the Same Resource</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/">Exotic Ruby: Module.class_exec, Custom JSON and Liquid Drops in Action</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/">Rails Quick Tips: Temporarily Disabling Touching With ActiveRecord.no_touching</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function/">PostgreSQL Quick Tips: Working With Dates Using EXTRACT Function</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/Azdaroth">@Azdaroth</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'Azdaroth',
+            count: 6,
+            skip_forks: false,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+<section>
+   <h1>Twitter</h1>
+   <a class="twitter-timeline" href="https://twitter.com/Azdaroth" data-widget-id="357234540634329088">Tweets by @Azdaroth</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - Karol Galanciak -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'karolgalanciak';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://Azdaroth.github.io/blog/2013/08/02/app-deployment-with-capistrano-and-after-deployment-setup/';
+        var disqus_url = 'http://Azdaroth.github.io/blog/2013/08/02/app-deployment-with-capistrano-and-after-deployment-setup/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

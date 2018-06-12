@@ -1,0 +1,1664 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>CentOS 6.4 server setup with Ruby On Rails, Nginx and PostgreSQL - Karol Galanciak - Ruby on Rails and Ember.js consultant</title>
+  <meta name="author" content="Karol Galanciak">
+
+  
+  <meta name="description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  
+  <meta name="keywords" content="Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps">
+
+  
+  
+
+  <meta property="og:title" value="CentOS 6.4 server setup with Ruby On Rails, Nginx and PostgreSQL - Karol Galanciak - Ruby on Rails and Ember.js consultant" />
+  <meta property="og:description" value="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications." />
+  <meta property="og:url" value="http://Azdaroth.github.io/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql/" />
+  <meta property="og:type" content="website" />
+  
+  <meta property="og:site_name" content="Karol Galanciak - Ruby on Rails and Ember.js consultant"/>
+  <meta property="og:locale" content="en_US" />
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@Azdaroth">
+  <meta name="twitter:creator" content="@Azdaroth">
+  <meta name="twitter:title" content="CentOS 6.4 server setup with Ruby On Rails, Nginx and PostgreSQL - Karol Galanciak - Ruby on Rails and Ember.js consultant">
+  <meta name="twitter:url" content="">
+  <meta name="twitter:description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://Azdaroth.github.io/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Karol Galanciak - Ruby on Rails and Ember.js consultant" type="application/atom+xml">
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "BlogPosting",
+      "mainEntityOfPage": {
+        "@type":"WebPage",
+        "@id": "http://Azdaroth.github.io/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql"
+      },
+      "headline": "CentOS 6.4 server setup with Ruby On Rails, Nginx and PostgreSQL - Karol Galanciak - Ruby on Rails and Ember.js consultant",
+        "image": {
+        "@type": "ImageObject",
+        "url": "",
+        "height": 640,
+        "width": 1024
+      },
+      "datePublished": "2013-07-19",
+      "dateModified": "2018-06-12",
+      "author": {
+        "@type": "Person",
+        "name": "Karol Galanciak"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Karol Galanciak",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://karolgalanciak.com/images/me_formal.jpg",
+          "width": 600,
+          "height": 60
+        }
+      },
+      "description": "Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.",
+      "keywords": "Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps"
+    }
+  </script>
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-42570582-1', 'auto');
+    ga('send', 'pageview');
+    ga('set', 'anonymizeIp', true);
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Karol Galanciak - Ruby on Rails and Ember.js consultant</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:Azdaroth.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">About Me</a></li>
+  <li><a href="/blog">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/test-driven-ember">Test-Driven Ember Book</a></li>
+  <li><a href="/presentations">Presentations</a></li>
+  <li><a href="/publications">Publications</a></li>
+  <li><a href="/open-source">Open Source</a></li>
+  <li><a href="/privacy-policy">Privacy Policy</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">CentOS 6.4 Server Setup With Ruby on Rails, Nginx and PostgreSQL</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-07-19T14:02:00+02:00" pubdate data-updated="true">Jul 19<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Server setup with the entire environment for Rails applications can be quite tricky, especially when you do it for the first time. Here is step by step guide how to setup CentOS 6.4 server with a basic environment for deploying Rails applications. I encourage you to choose CentOS Linux - it is a reliable distro (well, based on Red Hat Enterprise Linux), easy to handle and doesn&#8217;t require advanced Unix knowledge like Gentoo (especially while updating system related stuff).</p>
+
+
+
+
+<!--more-->
+
+
+<p></p>
+
+<h2>Initial setup</h2>
+
+
+
+
+<p>You need to ssh on your server:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>ssh root@your-ip
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Start with creating new user deploy:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>adduser deploy
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>And create password for the new user:</p>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>passwd deploy
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You shouldn&#8217;t use root user often, but you will need root privileges for performing many tasks, like installing stuff, so it is quite useful to edit sudo configuration - it will give deploy user an ability to perform all tasks which require root privileges by preceding command with <code>sudo</code>. Run:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>visudo
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>find section that looks like that:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">## Allow root to run any commands anywhere</span>
+</span><span class='line'>root    <span class="nv">ALL</span><span class="o">=(</span>ALL<span class="o">)</span>       ALL
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>and add the following line:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>deploy    <span class="nv">ALL</span><span class="o">=(</span>ALL<span class="o">)</span>       ALL
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>If you are not familiar with Vi editor, you have to press <code>a</code>, and then you can type :). When you finish hit escape and type <code>:wq!</code>.</p>
+
+
+
+
+<h2>Enhance security - configure SSH</h2>
+
+
+
+
+<p>You can easily make your server more secure by editing SSH configuration. Type:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vi /etc/ssh/sshd_config
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Here are some default options which you may change:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#Port 22</span>
+</span><span class='line'><span class="c">#PermitRootLogin yes</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Default 22 port for SSH is not insecure, but changing it to some other value will make it more difficult to compromise your server by automated attacks. Pick any number less than 65536 and uncomment this line.</p>
+
+
+
+
+<p>Another option is <code>PermitRootLogin</code> - change it to no to disable logging as root through ssh. You have root privileges by using <code>sudo</code>, so you don&#8217;t need to login as root anyway.</p>
+
+
+
+
+<p>If you are going to create some more users, but you don&#8217;t want them to login through ssh, add following line:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>AllowUsers deploy
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>When you are finished type:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>/etc/init.d/sshd reload
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Now, open <b>NEW</b> terminal window and check if everything works:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>ssh -p new-port deploy@your-ip
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h2>Uhh, what was that IP?</h2>
+
+
+
+
+<p>You can avoid typing your IP number on every login by using named hosts, which is quite simple: create or edit <code>~/.ssh/config</code> (on your local machine, not server) and add:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>Host some-awesome-server-name
+</span><span class='line'>Hostname your-ip-number
+</span><span class='line'>User deploy
+</span><span class='line'>Port your-port
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Now you can login on your server by:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>ssh some-awesome-server-name
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Amazing!</p>
+
+
+
+
+<p>But you can also skip password - you have to generate authentication keys on your local machine:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>ssh-keygen -t rsa
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>And that&#8217;s the entire output:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>Generating public/private rsa key pair.
+</span><span class='line'>Enter file in which to save the key <span class="o">(</span>/home/azdaroth/.ssh/id_rsa<span class="o">)</span>:
+</span><span class='line'>Created directory <span class="s1">&#39;/home/azdaroth/.ssh&#39;</span>.
+</span><span class='line'>Enter passphrase <span class="o">(</span>empty <span class="k">for </span>no passphrase<span class="o">)</span>:
+</span><span class='line'>Enter same passphrase again:
+</span><span class='line'>Your identification has been saved in /home/azdaroth/.ssh/id_rsa.
+</span><span class='line'>Your public key has been saved in /home/azdaroth/.ssh/id_rsa.pub.
+</span><span class='line'>The key fingerprint is:
+</span><span class='line'>d9:1c:0b:76:60:56:e0:af:cd:f3:93:c7:15:f5:dc:dc azdaroth@abyss
+</span><span class='line'>The key<span class="err">&#39;</span>s randomart image is:
+</span><span class='line'>+--<span class="o">[</span> RSA 2048<span class="o">]</span>----+
+</span><span class='line'>|        <span class="o">=</span>o.      |
+</span><span class='line'>|       + .      .|
+</span><span class='line'>|        + o    <span class="nv">o</span><span class="o">=</span>|
+</span><span class='line'>|       . B o   .E|
+</span><span class='line'>|        <span class="nv">S</span> <span class="o">=</span>     .|
+</span><span class='line'>|         +      .|
+</span><span class='line'>|        . +  o . |
+</span><span class='line'>|           oo o  |
+</span><span class='line'>|            .o   |
+</span><span class='line'>+-----------------+
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>What about the passphrase? It&#8217;s up to you. If you leave it blank, you can ssh on your server by just entering: ssh server-name and that&#8217;s all. Pretty nice, but if your local machine gets stolen, something really bad may happen with your server. So, you should enter a passphrase, at least on your laptop. The only downside of passphrase is that you will be asked to enter it on each login.</p>
+
+
+
+
+<p>To finish setup on your server, enter the following commands:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>mkdir ~/.ssh
+</span><span class='line'>touch ~/.ssh/authorized_keys
+</span><span class='line'>chmod 700 ~/.ssh
+</span><span class='line'>chmod 600 ~/.ssh/authorized_keys
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Setting these permissions is essential and ssh will stop working if <code>StrictModes</code> is set in configuration (and probably is by default). Now, copy your <b>PUBLIC</b> key to authorized_keys file on your server:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  cat ~/.ssh/id_rsa.pub | ssh server-name <span class="s2">&quot;cat &gt;&gt; ~/.ssh/authorized_keys&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h2>Installing prerequisites</h2>
+
+
+
+
+<p>You will need to install some libraries. Start with updates:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  sudo yum update
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>You will probably want to install some extra repositories (like Fedora Epel) to get some up-to-date packages. Run:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>wget http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+</span><span class='line'>wget http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+</span><span class='line'>sudo rpm -Uvh remi-release-6*.rpm epel-release-6*.rpm
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>And enable remi repository:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo vi /etc/yum.repos.d/remi.repo
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>In <code>[remi]</code> section set the enabled option to 1.</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="o">[</span>remi<span class="o">]</span>
+</span><span class='line'><span class="nv">name</span><span class="o">=</span>Les RPM de remi pour Enterprise Linux 6 - <span class="nv">$basearch</span>
+</span><span class='line'><span class="c">#baseurl=http://rpms.famillecollet.com/enterprise/6/remi/$basearch/</span>
+</span><span class='line'><span class="nv">mirrorlist</span><span class="o">=</span>http://rpms.famillecollet.com/enterprise/6/remi/mirror
+</span><span class='line'><span class="nv">enabled</span><span class="o">=</span>1
+</span><span class='line'><span class="nv">gpgcheck</span><span class="o">=</span>1
+</span><span class='line'><span class="nv">gpgkey</span><span class="o">=</span>file:///etc/pki/rpm-gpg/RPM-GPG-KEY-remi
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Now, you are going to install some packages, like RVM dependencies and other stuff.</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo yum install git-core openssl openssl-devel subversion curl curl-devel gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel  make bzip2 autoconf automake libtool bison sqlite-devel libxml2 libxml2-devel libxslt libxslt-devel libtool
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h2>RVM, Ruby and Rails</h2>
+
+
+
+
+<p>Now you can proceed to installing Ruby. We will use RVM - command-line tool, which makes managing multiple Ruby versions really easy. To install RVM enter:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="se">\c</span>url -L https://get.rvm.io | bash -s stable
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Carefully read generated output. If everything is ok, run</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">source</span> /home/deploy/.rvm/scripts/rvm
+</span><span class='line'><span class="nb">source</span> ~/.bashrc
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Make sure you have following lines in your <code>~/.bashrc</code> file :</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="o">[[</span> -s <span class="s2">&quot;$HOME/.rvm/scripts/rvm&quot;</span> <span class="o">]]</span> <span class="o">&amp;&amp;</span> . <span class="s2">&quot;$HOME/.rvm/scripts/rvm&quot;</span>
+</span><span class='line'><span class="nv">PATH</span><span class="o">=</span><span class="nv">$PATH</span>:<span class="nv">$HOME</span>/.rvm/bin <span class="c"># Add RVM to PATH for scripting</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>To check if everything was installed properly enter:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">type </span>rvm | head -1
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>It should return something like: <code>rvm is a function</code>. If not, reload terminal session (simply log out and log in again).</p>
+
+
+
+
+<p>And now you can install specified Ruby Version:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>rvm install 2.1.0
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Use installed Ruby version as the default one:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>rvm use 2.1.0
+</span><span class='line'>rvm use 2.1.0 --default
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Nice! You&#8217;ve successfully installed Ruby. Now, you can install Bundler and Rails.</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>gem install bundler rails
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h2>Nginx and Passenger</h2>
+
+
+
+
+<p>You will need an http server to run your applications. Nginx is fast, lightweight and easy to configure and Phusion Passenger module makes Nginx and Rails integration painless. Firstly, install Passenger gem:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>gem install passenger
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>and then, install Nginx with compiled Passenger module:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>rvmsudo passenger-install-nginx-module
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Choose the recommended install mode.</p>
+
+
+
+
+<p>Now, open the Nginx configuration file (<code>/opt/nginx/cong/nginx.conf</code> if you haven&#8217;t changed it during installation).</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo vi /opt/nginx/conf/nginx.conf
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Let&#8217;s change some default config. Change worker_processes to be equal to number of CPU cores. You can also enable gzip compression. Just add following lines:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>gzip on;
+</span><span class='line'>gzip_vary on;
+</span><span class='line'>gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Now setup your Rails application:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>server <span class="o">{</span>
+</span><span class='line'>  listen       80;
+</span><span class='line'>  server_name  some-example.com;
+</span><span class='line'>
+</span><span class='line'>  root /path-to-your-application/current/public;
+</span><span class='line'>  client_max_body_size 128M;
+</span><span class='line'>  passenger_enabled on;
+</span><span class='line'>  rails_env production;
+</span><span class='line'>
+</span><span class='line'>  location ~ ^/<span class="o">(</span>assets|images|javascripts|stylesheets|system<span class="o">)</span>/ <span class="o">{</span>
+</span><span class='line'>    expires max;
+</span><span class='line'>    add_header Cache-Control public;
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>At the end it should look like that:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#user  nobody;</span>
+</span><span class='line'>worker_processes  4;
+</span><span class='line'>
+</span><span class='line'><span class="c">#error_log  logs/error.log;</span>
+</span><span class='line'><span class="c">#error_log  logs/error.log  notice;</span>
+</span><span class='line'><span class="c">#error_log  logs/error.log  info;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c">#pid        logs/nginx.pid;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>events <span class="o">{</span>
+</span><span class='line'>  worker_connections  1024;
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>http <span class="o">{</span>
+</span><span class='line'>  passenger_root /home/azdaroth/.rvm/gems/ruby-2.1.0/gems/passenger-4.0.35;
+</span><span class='line'>  passenger_ruby /home/azdaroth/.rvm/wrappers/ruby-2.1.0/ruby;
+</span><span class='line'>
+</span><span class='line'>  include       mime.types;
+</span><span class='line'>  default_type  application/octet-stream;
+</span><span class='line'>
+</span><span class='line'>  <span class="c">#log_format  main  &#39;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#39;</span>
+</span><span class='line'>  <span class="c">#                  &#39;$status $body_bytes_sent &quot;$http_referer&quot; &#39;</span>
+</span><span class='line'>  <span class="c">#                  &#39;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#39;;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c">#access_log  logs/access.log  main;</span>
+</span><span class='line'>
+</span><span class='line'>  sendfile        on;
+</span><span class='line'>  <span class="c">#tcp_nopush     on;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c">#keepalive_timeout  0;</span>
+</span><span class='line'>  keepalive_timeout  65;
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  gzip on;
+</span><span class='line'>  gzip_vary on;
+</span><span class='line'>  gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+</span><span class='line'>
+</span><span class='line'>  server <span class="o">{</span>
+</span><span class='line'>    listen           80;
+</span><span class='line'>    server_name      localhost;
+</span><span class='line'>
+</span><span class='line'>    location / <span class="o">{</span>
+</span><span class='line'>      root   html;
+</span><span class='line'>      index  index.html index.htm;
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    error_page       500 502 503 504  /50x.html;
+</span><span class='line'>    <span class="nv">location</span> <span class="o">=</span> /50x.html <span class="o">{</span>
+</span><span class='line'>      root   html;
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  server <span class="o">{</span>
+</span><span class='line'>    listen       80;
+</span><span class='line'>    server_name  some-example.com;
+</span><span class='line'>
+</span><span class='line'>    root /path-to-your-application/current/public;
+</span><span class='line'>    client_max_body_size 128M;
+</span><span class='line'>    passenger_enabled on;
+</span><span class='line'>    rails_env production;
+</span><span class='line'>
+</span><span class='line'>    location ~ ^/<span class="o">(</span>assets|images|javascripts|stylesheets|system<span class="o">)</span>/ <span class="o">{</span>
+</span><span class='line'>      expires max;
+</span><span class='line'>      add_header Cache-Control public;
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>You should also use a neat little script for easier Nginx management. Open the following file:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo vi /etc/init.d/nginx
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>copy & paste script below:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#!/bin/sh</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c"># nginx - this script starts and stops the nginx daemin</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c"># chkconfig:   - 85 15 </span>
+</span><span class='line'><span class="c"># description:  Nginx is an HTTP(S) server, HTTP(S) reverse \</span>
+</span><span class='line'><span class="c">#               proxy and IMAP/POP3 proxy server</span>
+</span><span class='line'><span class="c"># processname: nginx</span>
+</span><span class='line'><span class="c"># config:      /opt/nginx/conf/nginx.conf</span>
+</span><span class='line'><span class="c"># pidfile:     /opt/nginx/logs/nginx.pid</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Source function library.</span>
+</span><span class='line'>. /etc/rc.d/init.d/functions
+</span><span class='line'>
+</span><span class='line'><span class="c"># Source networking configuration.</span>
+</span><span class='line'>. /etc/sysconfig/network
+</span><span class='line'>
+</span><span class='line'><span class="c"># Check that networking is up.</span>
+</span><span class='line'><span class="o">[</span> <span class="s2">&quot;$NETWORKING&quot;</span> <span class="o">=</span> <span class="s2">&quot;no&quot;</span> <span class="o">]</span> <span class="o">&amp;&amp;</span> <span class="nb">exit </span>0
+</span><span class='line'>
+</span><span class='line'><span class="nv">nginx</span><span class="o">=</span><span class="s2">&quot;/opt/nginx/sbin/nginx&quot;</span>
+</span><span class='line'><span class="nv">prog</span><span class="o">=</span><span class="k">$(</span>basename <span class="nv">$nginx</span><span class="k">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">NGINX_CONF_FILE</span><span class="o">=</span><span class="s2">&quot;/opt/nginx/conf/nginx.conf&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">lockfile</span><span class="o">=</span>/var/lock/subsys/nginx
+</span><span class='line'>
+</span><span class='line'>start<span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="o">[</span> -x <span class="nv">$nginx</span> <span class="o">]</span> <span class="o">||</span> <span class="nb">exit </span>5
+</span><span class='line'>    <span class="o">[</span> -f <span class="nv">$NGINX_CONF_FILE</span> <span class="o">]</span> <span class="o">||</span> <span class="nb">exit </span>6
+</span><span class='line'>    <span class="nb">echo</span> -n <span class="s2">$&quot;Starting $prog: &quot;</span>
+</span><span class='line'>    daemon <span class="nv">$nginx</span> -c <span class="nv">$NGINX_CONF_FILE</span>
+</span><span class='line'>    <span class="nv">retval</span><span class="o">=</span><span class="nv">$?</span>
+</span><span class='line'>    <span class="nb">echo</span>
+</span><span class='line'>    <span class="o">[</span> <span class="nv">$retval</span> -eq 0 <span class="o">]</span> <span class="o">&amp;&amp;</span> touch <span class="nv">$lockfile</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nv">$retval</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>stop<span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nb">echo</span> -n <span class="s2">$&quot;Stopping $prog: &quot;</span>
+</span><span class='line'>    killproc <span class="nv">$prog</span> -QUIT
+</span><span class='line'>    <span class="nv">retval</span><span class="o">=</span><span class="nv">$?</span>
+</span><span class='line'>    <span class="nb">echo</span>
+</span><span class='line'>    <span class="o">[</span> <span class="nv">$retval</span> -eq 0 <span class="o">]</span> <span class="o">&amp;&amp;</span> rm -f <span class="nv">$lockfile</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nv">$retval</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>restart<span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    configtest <span class="o">||</span> <span class="k">return</span> <span class="nv">$?</span>
+</span><span class='line'>    stop
+</span><span class='line'>    start
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>reload<span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    configtest <span class="o">||</span> <span class="k">return</span> <span class="nv">$?</span>
+</span><span class='line'>    <span class="nb">echo</span> -n <span class="s2">$&quot;Reloading $prog: &quot;</span>
+</span><span class='line'>    killproc <span class="nv">$nginx</span> -HUP
+</span><span class='line'>    <span class="nv">RETVAL</span><span class="o">=</span><span class="nv">$?</span>
+</span><span class='line'>    <span class="nb">echo</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>force_reload<span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    restart
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>configtest<span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>  <span class="nv">$nginx</span> -t -c <span class="nv">$NGINX_CONF_FILE</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>rh_status<span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    status <span class="nv">$prog</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>rh_status_q<span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    rh_status &gt;/dev/null 2&gt;&amp;1
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">case</span> <span class="s2">&quot;$1&quot;</span> in
+</span><span class='line'>    start<span class="o">)</span>
+</span><span class='line'>        rh_status_q <span class="o">&amp;&amp;</span> <span class="nb">exit </span>0
+</span><span class='line'>        <span class="nv">$1</span>
+</span><span class='line'>        ;;
+</span><span class='line'>    stop<span class="o">)</span>
+</span><span class='line'>        rh_status_q <span class="o">||</span> <span class="nb">exit </span>0
+</span><span class='line'>        <span class="nv">$1</span>
+</span><span class='line'>        ;;
+</span><span class='line'>    restart|configtest<span class="o">)</span>
+</span><span class='line'>        <span class="nv">$1</span>
+</span><span class='line'>        ;;
+</span><span class='line'>    reload<span class="o">)</span>
+</span><span class='line'>        rh_status_q <span class="o">||</span> <span class="nb">exit </span>7
+</span><span class='line'>        <span class="nv">$1</span>
+</span><span class='line'>        ;;
+</span><span class='line'>    force-reload<span class="o">)</span>
+</span><span class='line'>        force_reload
+</span><span class='line'>        ;;
+</span><span class='line'>    status<span class="o">)</span>
+</span><span class='line'>        rh_status
+</span><span class='line'>        ;;
+</span><span class='line'>    condrestart|try-restart<span class="o">)</span>
+</span><span class='line'>        rh_status_q <span class="o">||</span> <span class="nb">exit </span>0
+</span><span class='line'>            ;;
+</span><span class='line'>    *<span class="o">)</span>
+</span><span class='line'>        <span class="nb">echo</span> <span class="s2">$&quot;Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload|configtest}&quot;</span>
+</span><span class='line'>        <span class="nb">exit </span>2
+</span><span class='line'><span class="k">esac</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>and make it executable:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo chmod +x /etc/init.d/nginx
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Now you can control Nginx by few commands:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo service nginx start
+</span><span class='line'>sudo service nginx stop
+</span><span class='line'>sudo service nginx reload
+</span><span class='line'>sudo service nginx restart
+</span><span class='line'>sudo service nginx status
+</span><span class='line'>sudo service nginx configtest
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>To add Nginx to the default run levels, enter:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo /sbin/chkconfig nginx on
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h2>ImageMagick</h2>
+
+
+
+
+<p>This part is optional, but you will probably need ImageMagick in some applications - it is a powerful software for creating, editing and converting images. The ImageMagick version available in repositories is probably outdated, so we will compile it from source.</p>
+
+
+
+
+<p>Start with installing some delegates (you have to install them before compiling ImageMagick).</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo yum install libjpeg libjpeg-devel libpng-devel libpng-devel freetype freetype-devel libtiff-devel jasper-devel bzip2-devel giflib-devel ghostscript-devel
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>And compile it:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>wget http://www.imagemagick.org/download/ImageMagick.tar.gz
+</span><span class='line'>tar xvfz ImageMagick.tar.gz
+</span><span class='line'><span class="nb">cd </span>ImageMagick-6.8.8-2
+</span><span class='line'>./configure
+</span><span class='line'>make
+</span><span class='line'>sudo make install
+</span><span class='line'>sudo ldconfig /usr/local/lib
+</span><span class='line'>make check
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>Export <code>PATH</code> variable:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$PATH</span>:/usr/local/bin
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>And check if everything works:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>convert -version
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>You should get output similar to this:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>Version: ImageMagick 6.8.8-2 2013-07-18 Q16 http://www.imagemagick.org
+</span><span class='line'>Copyright: Copyright <span class="o">(</span>C<span class="o">)</span> 1999-2013 ImageMagick Studio LLC
+</span><span class='line'>Features: DPC OpenMP
+</span><span class='line'>Delegates: bzlib freetype jng jp2 jpeg png ps tiff xml zlib
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h2>PostgreSQL</h2>
+
+
+
+
+<p>So, the last step is installing PostgreSQL. Firstly, you have to modify <code>/etc/yum.repos.d/CentOS-Base.repo</code> file:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo vi /etc/yum.repos.d/CentOS-Base.repo
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>and in both <code>[base]</code> and <code>[updates]</code> sections add the following line:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">exclude</span><span class="o">=</span>postgresql*
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, install  PostgreSQL repository and PostgreSQL itself:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo rpm -Uvh http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.noarch.rpm
+</span><span class='line'>sudo yum install postgresql93 postgresql93-devel postgresql93-server postgresql93-libs postgresql93-contrib
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>You have to initialize database cluster before doing anything:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo /etc/init.d/postgresql-9.3 initdb
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>And you can start Postgres and add it do default run levels:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo service postgresql-9.3 start
+</span><span class='line'>sudo chkconfig --levels 235 postgresql-9.3 on
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>The very first thing you should do with Postgres is setting password for postgres user:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo su postgres
+</span><span class='line'>psql
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, you are in psql console. To change password, enter:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>alter user postgres with password <span class="s1">&#39;postgres-user-password&#39;</span>;
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Logout from postgres user and modify <code>/var/lib/pgsql/9.3/data/pg_hba.conf</code>:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo vi /var/lib/pgsql/9.3/data/pg_hba.conf
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>At the bottom of the file change authentication method to md5:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># TYPE  DATABASE        USER            ADDRESS                 METHOD</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># &quot;local&quot; is for Unix domain socket connections only</span>
+</span><span class='line'><span class="nb">local   </span>all             all                                     md5
+</span><span class='line'><span class="c"># IPv4 local connections:</span>
+</span><span class='line'>host    all             all             127.0.0.1/32            md5
+</span><span class='line'><span class="c"># IPv6 local connections:</span>
+</span><span class='line'>host    all             all             ::1/128                 md5
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>and restart Postgres:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo service postgresql-9.3 restart
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>To run psql console as deploy user just enter:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>psql postgres postgres
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>and create a new user and database:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>create user username with password <span class="s1">&#39;secretPassword&#39;</span>;
+</span><span class='line'>create database testdb <span class="nv">owner</span><span class="o">=</span>username;
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>And that&#8217;s it! Enjoy your server.</p>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Karol Galanciak</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-07-19T14:02:00+02:00" pubdate data-updated="true">Jul 19<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/deployment/'>Deployment</a>, <a class='category' href='/blog/categories/postgresql/'>PostgreSQL</a>, <a class='category' href='/blog/categories/rails/'>Rails</a>, <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/server/'>Server</a>, <a class='category' href='/blog/categories/unix/'>Unix</a>
+  
+</span>
+
+
+    </p>
+    <div class="meta top-line">
+      <div class="post-subscription">
+  <div id="mc_embed_signup">
+    <div id="mc_embed_signup_scroll">
+      <label for="mce-EMAIL">Do you want to take your developer skills to the next level? Subscribe to my newsletter and never miss another blog post!</label>
+      <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+      <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_62804f1b69c60e0c7966cddd6_7c71fb81df" tabindex="-1" value=""></div>
+      <div class="clear">
+      <a href="http://eepurl.com/duztq5" target="_blank" id="mc-embedded-subscribe" class="button">Yes, I want to be a better developer!</a>
+    </div>
+  </div>
+</div>
+
+    </div>
+    <div class="top-line">
+      
+        <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://Azdaroth.github.io/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql/" data-via="Azdaroth" data-counturl="http://Azdaroth.github.io/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+      
+    </div>
+    <p class="meta">
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/08/02/app-deployment-with-capistrano-and-after-deployment-setup/" title="Next Post: Rails applications deployment with Capistrano and after deployment setup">Rails applications deployment with Capistrano and after deployment setup &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <img class="left" src="/images/me_formal.jpg" title="me:)" alt="Karol Galanciak - photo">
+  <p>Hi, my name is Karol Galanciak, I'm a technical polyglot and domain expert in vacation rental and fitness industries.</p>
+
+  <p>I specialize in building APIs, microservices architecture, working with legacy applications, building ambitious Single Page Applications and building payment processors for credit cards processing. Currently I'm working as CTO at <a href="https://www.bookingsync.com" target="_blank">BookingSync</a>.</p>
+
+  <p id="email-me"></p>
+</section>
+
+<script type="text/javascript">
+  (function(d, id, lhs, rhs) {
+    d.getElementById(id).innerHTML = "You can reach me at <a rel='nofollow' href='mailto:" + lhs + "@" + rhs + "'>" + lhs + "@" + rhs + "</a>";
+  })(window.document, 'email-me', 'karol.galanciak', 'gmail.com');
+</script>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization/">The Case for Before_validation Callback: Complex State Normalization</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/">Advanced Ember Data Customization - Different Model Types in Ember App and API for the Same Resource</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/">Exotic Ruby: Module.class_exec, Custom JSON and Liquid Drops in Action</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/">Rails Quick Tips: Temporarily Disabling Touching With ActiveRecord.no_touching</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function/">PostgreSQL Quick Tips: Working With Dates Using EXTRACT Function</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/Azdaroth">@Azdaroth</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'Azdaroth',
+            count: 6,
+            skip_forks: false,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+<section>
+   <h1>Twitter</h1>
+   <a class="twitter-timeline" href="https://twitter.com/Azdaroth" data-widget-id="357234540634329088">Tweets by @Azdaroth</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - Karol Galanciak -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'karolgalanciak';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://Azdaroth.github.io/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql/';
+        var disqus_url = 'http://Azdaroth.github.io/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

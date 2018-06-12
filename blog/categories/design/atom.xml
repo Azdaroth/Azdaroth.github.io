@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Design | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
+  <link href="http://Azdaroth.github.io/blog/categories/design/atom.xml" rel="self"/>
+  <link href="http://Azdaroth.github.io/"/>
+  <updated>2018-06-12T17:11:48+02:00</updated>
+  <id>http://Azdaroth.github.io/</id>
+  <author>
+    <name><![CDATA[Karol Galanciak]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Exotic Ruby: Module.class_exec, custom JSON And Liquid Drops In Action]]></title>
+    <link href="http://Azdaroth.github.io/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/"/>
+    <updated>2018-03-27T21:30:00+02:00</updated>
+    <id>http://Azdaroth.github.io/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action</id>
+    <content type="html"><![CDATA[<p>Ruby has quite a lot of <strong>&ldquo;exotic&rdquo; features</strong> that are not used that often, but when you need to utilize some <strong>metaprogramming magic</strong>, you can easily take advantage of them. One of such features is <a href="http://ruby-doc.org/core-2.4.3/BasicObject.html#method-i-instance_exec">Object.instance_exec</a> which you might be familiar with if you&rsquo;ve ever built some more advanced DSL.</p>
+
+<p>The great thing about <code>Object#instance_exec</code> is that it allows to execute code <strong>within the context of a given object</strong> but it also gives possibility to <strong>pass arguments from the current context</strong>. Thanks to that, we can build some nice DSLs and other features like this:</p>
+
+<p><code>rb
+role_filter = -&gt;(role) { where(role: role) }
+role = "admin"
+User.all.instance_exec(role, &amp;role_filter) # same as User.all.where(role: "admin")
+</code></p>
+
+<p>An interesting thing is that there is a <strong>class</strong> equivalent of <code>Object#instance_exec</code> &ndash; <a href="http://ruby-doc.org/core-2.4.3/Module.html#method-i-class_exec">Module.class_exec</a>. It would be easy to figure out some theoretical example how it can be used but what could be the real-world use case where this is the best approach to solve the problem?</p>
+
+<!--more-->
+
+
+<h2>Anatomy Of The Problem</h2>
+
+<p>Imagine that you can have some custom JSON on every instance of some model and this JSON can have very different attributes on every instance depending on various conditions, like some category this model belongs to. To make it more complex, let&rsquo;s assume that the schema is customizable by the user so we can never really predict what kind of attributes are going to end up there.</p>
+
+<p>Our feature to implement is to provide some wrapper class for this custom JSON so that we don&rsquo;t need to operate on hashes but we can have some objects where we can access these attributes by invoking methods on this object.</p>
+
+<p>Using <a href="http://ruby-doc.org/stdlib-2.4.3/libdoc/ostruct/rdoc/OpenStruct.html">OpenStructs</a> sounds like the quickest solution to the problem but this is not going to be that easy in our case &ndash; we will need to expose this class to be used with <a href="https://github.com/Shopify/liquid">Liquid</a> templates, so that means we will need to inherit from <a href="https://github.com/Shopify/liquid/blob/4-0-stable/lib/liquid/drop.rb">Liquid::Drop</a>.</p>
+
+<p>How about creating some <code>Wrapper</code> class that would take the <code>payload</code> as an argument and use <a href="http://ruby-doc.org/core-2.4.3/Object.html#method-i-define_singleton_method">Object#define_singleton_method</a> in the constructor to define custom methods based on the keys and values in that payload? Defining singleton methods sounds like the right solution to the problem as indeed each instance might need different methods. Let&rsquo;s try that:</p>
+
+<p>``` rb</p>
+
+<h1>app/drops/wrapper.rb</h1>
+
+<p>class Wrapper &lt; Liquid::Drop
+  def initialize(payload)</p>
+
+<pre><code>@payload = payload
+
+payload.each do |key, value|
+  define_singleton_method key do
+    value
+  end
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Looks like it might be the answer to the problem:</p>
+
+<p>``` ruby
+payload =  { ruby: &ldquo;is freakin' awesome!&rdquo; }
+wrapper = Wrapper.new(payload)
+wrapper.ruby</p>
+
+<h1>=> &ldquo;is freakin' awesome!&rdquo;</h1>
+
+<p>```</p>
+
+<p>There is a huge problem with this solution though. These singleton methods are not going to be included in <code>Wrapper.public_instance_methods</code> array:</p>
+
+<p>``` rb
+Wrapper.public_instance_methods.include?(:ruby)</p>
+
+<h1>=> false</h1>
+
+<p>```</p>
+
+<p>It might not be a big issue in some cases, but it won&rsquo;t work with <a href="https://github.com/Shopify/liquid">Liquid</a> <a href="https://github.com/Shopify/liquid/blob/4-0-stable/lib/liquid/drop.rb#L64-L76">Drop</a>, which explicitly checks for <code>public_instance_methods</code>.</p>
+
+<p>Do we have any alternative that would be the most robust solution to this problem?</p>
+
+<h2>The Solution</h2>
+
+<p>The answer is yes! Although, the solution is going to be more tricky than the previous one.</p>
+
+<p>First, we will need to take advantage of using the constructor of <code>Class</code> itself and create anonymous classes inheriting from <code>Liquid::Drop</code>. The next step would be defining the required methods based on <code>payload</code>. But how can we do that if <code>payload</code> is not available in the context of this class? We will need to make it available somehow and execute the code within the context of this class.</p>
+
+<p>Fortunately, Ruby has got our back, and we can take advantage of <a href="http://ruby-doc.org/core-2.4.3/Module.html#method-i-class_exec">Module.class_exec</a> method which does exactly what we need here.</p>
+
+<p>Here is a potential implementation:</p>
+
+<p>``` rb
+payload =  { ruby: &ldquo;is freakin' awesome!&rdquo; }
+magic_drop_class = Class.new(Liquid::Drop)
+magic_drop_class.class_exec(payload) do |payload|
+  payload.each do |key, value|</p>
+
+<pre><code>define_method key do
+  value
+end
+</code></pre>
+
+<p>  end
+end
+example = magic_drop_class.new
+example.ruby</p>
+
+<h1>=> &ldquo;is freakin' awesome!&rdquo;</h1>
+
+<p>```</p>
+
+<p>And what about <code>public_instance_methods</code>?</p>
+
+<p>``` ruby
+magic_drop_class.public_instance_methods.include?(:ruby)</p>
+
+<h1>=> true</h1>
+
+<p>```</p>
+
+<p>That means we&rsquo;ve managed to achieve our goal!</p>
+
+<h2>Wrapping Up</h2>
+
+<p>Ruby is widely known for <strong>being powerful</strong> and allowing to easily do all kinds of things to objects, including <strong>modifying them on fly</strong> and <strong>executing the code within their context</strong>.  Thanks to that and uncommon methods like <a href="http://ruby-doc.org/core-2.4.3/Module.html#method-i-class_exec">Module.class_exec</a>, we can solve some <strong>tricky and rare problems</strong> with a very <strong>elegant solutions</strong>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[The aesthetics of Ruby - Kernel#itself method]]></title>
+    <link href="http://Azdaroth.github.io/blog/2017/12/26/the-aesthetics-of-ruby-kernel-number-itself-method/"/>
+    <updated>2017-12-26T20:30:00+01:00</updated>
+    <id>http://Azdaroth.github.io/blog/2017/12/26/the-aesthetics-of-ruby-kernel-number-itself-method</id>
+    <content type="html"><![CDATA[<p>Recently, I&rsquo;ve had quite a popular problem to solve: count the occurences of the given item in a collection. There are few ways to solve this problem &ndash; starting from using <code>Enumerable#inject</code> or <code>Enumerable#each_with_object</code> with an empty hash as an accumulator value and writing a code looking like this:</p>
+
+<p><code>rb
+collection.each_with_object({}) { |item, accum| accum[item] = accum[item].to_i + 1 }
+</code></p>
+
+<p>through a bit smarter way and taking advantage of the default hash value:</p>
+
+<p><code>rb
+collection.each_with_object(Hash.new(0)) { |item, accum| accum[item] = accum[item] + 1 }
+</code></p>
+
+<p>All these solutions look quite nice; however, there is one that looks particularly beautiful.</p>
+
+<!--more-->
+
+
+<h2>The Aesthetics of Ruby</h2>
+
+<p>An interesting way of solving this problem is by using <code>Enumerable#group_by</code> &ndash; we can simply group elements by themselves and count the occurences of each item. Here is one way to implement it:</p>
+
+<p><code>rb
+collection.group_by { |item| item }.map { |key, value| [key, value.count] }.to_h
+</code></p>
+
+<p>However, it doesn&rsquo;t look that great, especially for Ruby standard. We could do better. Ruby 2.4 adapted a very useful core extension from ActiveSupport: <a href="https://ruby-doc.org/core-2.4.0/Hash.html#method-i-transform_values" target="_blank"><code>Hash#transform_values</code></a>. Thanks to this addition, we could rewrite that to the following code:</p>
+
+<p><code>rb
+collection.group_by { |item| item }.transform_values(&amp;:count)
+</code></p>
+
+<p>Looks much better, but <code>group_by { |item| item }</code> could still be improved. Is there anything in Ruby that could help us in such case?</p>
+
+<p>It turns out there is! One of the additions in Ruby 2.2 was <a href="https://ruby-doc.org/core-2.2.0/Object.html#method-i-itself" target="_blank"><code>Kernel#itself</code></a>, which simply returns self. It might sound like an odd idea to introduce such method, but this is exactly something that we need:</p>
+
+<p><code>rb
+collection.group_by(&amp;:itself).transform_values(&amp;:count)
+</code></p>
+
+<p>This code looks just beautiful.</p>
+
+<h2>Wrapping up</h2>
+
+<p>Ruby code is known for being particularly pleasant to read and I&rsquo;m still happy that after several years I still feel immense joy when I discover interesting little things like <a href="https://ruby-doc.org/core-2.2.0/Object.html#method-i-itself" target="_blank"><code>Kernel#itself</code></a> which add up to the overall aesthetics of the language.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Traps on Rails - Overriding boolean methods in models]]></title>
+    <link href="http://Azdaroth.github.io/blog/2017/11/26/traps-on-rails-overriding-boolean-methods-in-models/"/>
+    <updated>2017-11-26T16:00:00+01:00</updated>
+    <id>http://Azdaroth.github.io/blog/2017/11/26/traps-on-rails-overriding-boolean-methods-in-models</id>
+    <content type="html"><![CDATA[<p>One very <strong>useful</strong> feature of <strong>ActiveRecord</strong> is automatically defining attribute readers and writers for all the columns for given tables. For the ones with <strong>boolean</strong> type, however, there is one more addition &ndash; defining an <strong>alias</strong> of the method with a question mark. Sometimes it might be useful to override this method and add some extra requirements for a given condition. However, this might not be such a good idea.</p>
+
+<!--more-->
+
+
+<h2>Anatomy of the problem</h2>
+
+<p>Imagine that you are developing some application, where users can be activated and deactivated from an admin panel. However, the application is not free, and every user that wants to access the application needs to buy a subscription. In that case, to check if the user is, in fact, active, you could override <code>User#active?</code> method and add some extra requirements regarding the subscription:</p>
+
+<p>``` rb</p>
+
+<h1>app/models/users.rb</h1>
+
+<p>class User &lt; ApplicationRecord
+  def active?</p>
+
+<pre><code>super &amp;&amp; valid_subscription?
+</code></pre>
+
+<p>  end</p>
+
+<p>  def valid_subscription?</p>
+
+<pre><code># somehow check if the subscription is valid
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>We are taking advantage of the fact that ActiveRecord defines the aliases for boolean columns which are the original column names' ending with a question mark, so for <code>active</code> boolean column we can expect that <code>active?</code> method will be defined, and it will work the same as <code>active</code> method.</p>
+
+<p>Ok, cool, we have our feature working and to check if a user is fully active, we call <code>User#active?</code> here and there. Our next requirement is exposing users in the API. Nothing too hard, we can add <a href="https://github.com/fotinakis/jsonapi-serializers"><code>jsonapi-serializers</code></a> gem and implement fully JSONAPI-compliant serializers. It turns out that we need to expose info if a user is active and not. Here is how our serializer could look like:</p>
+
+<p>``` rb</p>
+
+<h1>app/serializers/user.rb</h1>
+
+<p>class UserSerializer
+  include JSONAPI::Serializer</p>
+
+<p>  attribute :active
+  # other attributes
+end
+```</p>
+
+<p>It sounds like we are done here. But the truth is there is a nasty bug here! The serializer returns the value returned by <code>User#active</code>, not by <code>User#active?</code>!</p>
+
+<h2>What exactly went wrong here?</h2>
+
+<p>The primary thing that went wrongs here was being lazy about the naming and not introducing proper domain concepts. Somehow ActiveRecord made it even easier &ndash; there was already a method called <code>active?</code> defined based on the <code>active</code> column name, so the only thing that was necessary in that case to make our first feature work was overriding it and adding some extra condition because the idea of being &ldquo;active&rdquo; is kind of similar. But overriding boolean methods is never a good idea &ndash; it always implies that some concept is missing or is made implicit in the code.</p>
+
+<h2>A solution to the problem</h2>
+
+<p>A solution would be simply making this domain concept explicit. <code>User#active?</code> method doesn&rsquo;t check if the user is active is not, it rather checks if a user can access the application, so the better name for that method would be <code>User#can_access_application?</code></p>
+
+<p>It is quite possible that we might later need to add some extra features that are related to this feature, like checking if the user is active but cannot access the app or just simply checking the <code>active</code> flag itself. Our final model could look like this in the end:</p>
+
+<p>``` rb</p>
+
+<h1>app/models/users.rb</h1>
+
+<p>class User &lt; ApplicationRecord
+  def can_access_application?</p>
+
+<pre><code>active? &amp;&amp; valid_subscription?
+</code></pre>
+
+<p>  end</p>
+
+<p>  def cannot_access_application?</p>
+
+<pre><code>!can_access_application?
+</code></pre>
+
+<p>  end</p>
+
+<p>  # other methods
+end
+```</p>
+
+<p>We should also update the serializer:</p>
+
+<p>``` rb</p>
+
+<h1>app/serializers/user.rb</h1>
+
+<p>class UserSerializer
+  include JSONAPI::Serializer</p>
+
+<p>  attribute :active do</p>
+
+<pre><code>object.active
+</code></pre>
+
+<p>  end</p>
+
+<p>  attribute :can_access_application do</p>
+
+<pre><code>object.can_access_application?
+</code></pre>
+
+<p>  end</p>
+
+<p>  attribute :cannot_access_application do</p>
+
+<pre><code>object.cannot_access_application?
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>One could argue that this fix was not necessary and it was a developer&rsquo;s fault, and he or she should have checked the model if this method has not been overridden and adjust the serializer. That is somehow true, but if such code is deployed to production, it probably means that the reviewer of the code was not aware that there is a potential issue in the code and such things are really hard to spot &ndash; ActiveRecord adds those aliases for every boolean column so it might sound like a fair assumption that <code>User#active</code> and <code>User#active?</code> will return the same result.</p>
+
+<p>However, the truth is that not only did we minimize the risk of having the name collisions by those changes but we gained some extra flexibility, and it was quite straight-forward to differentiate between <code>User#active?</code>and <code>User#can_access_application?</code>. In a previous implementation, it was simply not possible with the question-mark methods.</p>
+
+<h2>Wrapping up</h2>
+
+<p>Naming is one of <a href="https://martinfowler.com/bliki/TwoHardThings.html" target="_blank">two hard problems in computer science</a> and it&rsquo;s a good idea to always make all the domain concepts properly named and explicit, even if it means adding more code &ndash; just because something is not explicit, doesn&rsquo;t mean it doesn&rsquo;t exist. When it comes to <strong>ActiveRecord</strong> models, an extra caution is more than recommended &ndash; such models mix both persistence and domain concepts and it&rsquo;s quite easy to hurt yourself in such case. Not overriding boolean methods generated by ActiveRecord and properly naming things sounds like a good rule of thumb to follow.</p>
+]]></content>
+  </entry>
+  
+</feed>

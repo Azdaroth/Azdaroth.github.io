@@ -1,0 +1,1229 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Test Driven Rails – Part 1 - Karol Galanciak - Ruby on Rails and Ember.js consultant</title>
+  <meta name="author" content="Karol Galanciak">
+
+  
+  <meta name="description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  
+  <meta name="keywords" content="Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps">
+
+  
+  
+
+  <meta property="og:title" value="Test Driven Rails – Part 1 - Karol Galanciak - Ruby on Rails and Ember.js consultant" />
+  <meta property="og:description" value="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications." />
+  <meta property="og:url" value="http://Azdaroth.github.io/blog/2014/01/04/test-driven-rails-part-1/" />
+  <meta property="og:type" content="website" />
+  
+  <meta property="og:site_name" content="Karol Galanciak - Ruby on Rails and Ember.js consultant"/>
+  <meta property="og:locale" content="en_US" />
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@Azdaroth">
+  <meta name="twitter:creator" content="@Azdaroth">
+  <meta name="twitter:title" content="Test Driven Rails – Part 1 - Karol Galanciak - Ruby on Rails and Ember.js consultant">
+  <meta name="twitter:url" content="">
+  <meta name="twitter:description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://Azdaroth.github.io/blog/2014/01/04/test-driven-rails-part-1">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Karol Galanciak - Ruby on Rails and Ember.js consultant" type="application/atom+xml">
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "BlogPosting",
+      "mainEntityOfPage": {
+        "@type":"WebPage",
+        "@id": "http://Azdaroth.github.io/blog/2014/01/04/test-driven-rails-part-1"
+      },
+      "headline": "Test Driven Rails – Part 1 - Karol Galanciak - Ruby on Rails and Ember.js consultant",
+        "image": {
+        "@type": "ImageObject",
+        "url": "",
+        "height": 640,
+        "width": 1024
+      },
+      "datePublished": "2014-01-04",
+      "dateModified": "2018-06-12",
+      "author": {
+        "@type": "Person",
+        "name": "Karol Galanciak"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Karol Galanciak",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://karolgalanciak.com/images/me_formal.jpg",
+          "width": 600,
+          "height": 60
+        }
+      },
+      "description": "Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.",
+      "keywords": "Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps"
+    }
+  </script>
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-42570582-1', 'auto');
+    ga('send', 'pageview');
+    ga('set', 'anonymizeIp', true);
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Karol Galanciak - Ruby on Rails and Ember.js consultant</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:Azdaroth.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">About Me</a></li>
+  <li><a href="/blog">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/test-driven-ember">Test-Driven Ember Book</a></li>
+  <li><a href="/presentations">Presentations</a></li>
+  <li><a href="/publications">Publications</a></li>
+  <li><a href="/open-source">Open Source</a></li>
+  <li><a href="/privacy-policy">Privacy Policy</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Test Driven Rails – Part 1</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-04T16:19:00+01:00" pubdate data-updated="true">Jan 4<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Testing is still one of the hottest topics when it comes to developing maintainable and business-critical applications. Ruby on Rails community embraces the importance of writings tests, yet there are so little resources about the Test-Driven Development or Behavior-Driven Development in Rails applications from a wider perspective. How should we test our application? Which tests are valuable and which don’t provide any value? What scenarios should be included in acceptance tests?</p>
+
+
+
+
+<!--more-->
+
+
+<p></p>
+
+<h2>Value of tests</h2>
+
+
+
+
+<p>If you aren’t yet into testing, you might have some doubts: what can you get from tests and how they can help you? In a few words, by writing tests:</p>
+
+
+
+
+<ol>
+  <li>You make sure that a feature is implemented properly.</li>
+  <li>You can refactor your code without fear of breaking entire application.</li>
+  <li>You have an instant feedback about your code design (unit tests).</li>
+</ol>
+
+
+
+
+<p>And how is that different from manually checking if everything works? Well, manual checking is already some kind of testing – you can click hundreds of buttons in a browser, fill tens of forms and test different scenarios, but doing it after each change in a code is an awful waste of time. Oh, and remember to test your entire app after Rails update or any gem update… So it is obvious that automated testing will save you a lot of time and will help you track any bugs. </p>
+
+
+
+
+<p>How about code design? The rule of thumb is that a clean code is easy to test. If your tests look awful and are difficult to follow, it probably means that the implementation is even worse. This mainly refers to the unit testing, which I will cover later.</p>
+
+
+
+
+<h2>TDD vs. BDD</h2>
+
+
+
+
+<p>You have probably seen many times how some developers advocate Behavior-Driven Development. How is that different from Test-Driven approach? The thing is that these two terms mean basically the same thing: writing acceptance tests for a feature and unit-testing your code, so that it can guide your design. It is not about acceptance vs. unit tests - BDD is not just about writing acceptance tests and TDD does not concentrate on unit testing. Testing done right includes both of them: if you write only acceptance tests, you just make sure that a feature works, but the code can be awful and difficult to maintain and the unit-tests alone cannot give you sufficient level of confidence that the entire app works, not only separate parts. </p>
+
+
+
+
+<h2>To mock or not to mock</h2>
+
+
+
+
+<p>
+Before discussing arguments for and against mocks and stubs, I should explain differences between them - stubs are fake objects with predetermined responses and mocks are about expectations and collaboration. Take a look at the following example:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">describe</span> <span class="no">SomeUsecase</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># some code with initializing object under the test and setting collaborators</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">context</span> <span class="err">“</span><span class="n">user</span> <span class="n">is</span> <span class="n">an</span> <span class="n">admin</span> <span class="err">“</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">it</span> <span class="err">“</span><span class="n">sends</span> <span class="n">a</span> <span class="n">notification</span><span class="err">”</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">allow</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">receive</span><span class="p">(</span><span class="ss">:admin?</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="kp">true</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">notifier</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">receive</span><span class="p">(</span><span class="ss">:deliver</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">usecase</span><span class="o">.</span><span class="n">call</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">context</span> <span class="err">“</span><span class="n">user</span> <span class="n">is</span> <span class="ow">not</span> <span class="n">an</span> <span class="n">admin</span><span class="err">”</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">it</span> <span class="err">“</span><span class="n">doesn</span><span class="err">’</span><span class="n">t</span> <span class="nb">send</span> <span class="n">a</span> <span class="n">notification</span><span class="err">”</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">allow</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">receive</span><span class="p">(</span><span class="ss">:admin?</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="kp">false</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">notifier</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span> <span class="n">receive</span><span class="p">(</span><span class="ss">:deliver</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">usecase</span><span class="o">.</span><span class="n">call</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In this usecase, a <code>user</code> has predetermined response when the <code>:admin?</code> message is sent – this is stub. Depending on the response, the  <code>:deliver</code> message is sent to the<code>notifier</code> or not – which is a mock. By using mocks, you discover how the objects interact with its’ collaborators and ensure that proper expectations are met.</p>
+
+
+
+
+<p>There are many arguments for using mocks and stubs, but also there are some valid issues against them. The most significant is that it can make your tests brittle, especially when you stub non-existent method (or mock). Because of that, many developers prefer to stay with integration tests using real objects. Fortunately, there are some solutions to prevent this problem. Since RSpec 3.0 (at time of writing this post the current version is beta1) the functionality of rspec-fire is merged into the core of the framework, which provides safe stubs that will inform you about stubbing non-existent method. You can also check <a href="https://www.relishapp.com/bogus/bogus/v/0-1-4/docs/getting-started" target="_blank">bogus</a> gem that provides similar functionality.</p>
+
+
+
+
+<p>What are the benefits of using mock objects? You can test in isolation, which will make your test-suite running much faster – you don’t have to talk to the database, send notifications, connect to an external API etc. – slow test suite can be really discouraging. And the other important aspect of using mock objects is the design: if you use real objects, you won’t get much feedback about your code design. Mock objects force you to write a clean and OOP code – if you don’t, tests will simply get really ugly, which is the symptom of bad design choices.</p>
+
+
+
+
+<p>While mocking there is an important rule to follow: only mock collaborators (peers), not the internals (like private methods – it’s an implementation detail) of the object  – if you think about doing so, then you should redesign your class. One more rule, which I don’t dogmatically follow, but is also important: only mock types you own. When you don’t own the API, you can’t be absolutely certain that the code will work in the future. It looks reasonable, but why would I treat more it like a suggestion? Consider ActiveRecord API – why wouldn’t you mock it? It is pretty stable and I can trust it won’t change, at least in the nearest future. If possible, you should implement own domain methods and treat ActiveRecord as an implementation detail – instead of calling <code>user.update(active: true)</code> in service object, you should use <code>activate</code> method: <code>user.activate</code> and define this method in the model layer, however, <code>update</code> might be sometimes the thing you need and then you can mock it.</p>
+
+
+<p></p>
+
+<h2>TDD rules and cycle</h2>
+
+
+
+
+<p>When you TDD, it is important to follow its’ cycle, which is: Red, Green, Refactor. What does it mean exactly? Before you write the production code, you should write failing test first (red), you have to see the test fails – if it never fails, it has basically no value. Then you should write minimal implementation for satisfying this test (green), and then you can refactor your code if required – you can move some code to private methods or extract it to separate classes and because you have tests, you make sure that you haven’t broken anything. </p>
+
+
+
+
+<p>Writing tests first for every line of the code is not always required. There are some cases, where a test won’t give you much value – remember: test itself is a code, which needs to be maintained - make sure you need it.</p>
+
+
+
+
+<h2>What not to test?</h2>
+
+
+
+
+<p>Before answering the question: how to write valuable tests, there are some issues that need to be discussed: what not to test? </p>
+
+
+
+
+<h3>Do not test ActiveRecord and friends</h3>
+
+
+
+
+<p>This may seem strange at first, but I’ve seen many tests having no real value and seemed as if ActiveRecord or ActiveModel cannot be trusted. Consider the following <code>User</code> model example:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">describe</span> <span class="no">User</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">subject</span> <span class="p">{</span>  <span class="no">User</span><span class="o">.</span><span class="n">new</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">specify</span> <span class="err">“</span><span class="n">user</span> <span class="n">without</span> <span class="nb">name</span> <span class="n">is</span> <span class="ow">not</span> <span class="n">valid</span><span class="err">”</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">subject</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span> <span class="n">be_valid</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>What kind of value does this test provide? The only scenario when this test might fail is when the model lacks of presence validation for name attribute. So either you are writing test for <code>ActiveModel::Validations</code> (believe me, it is already tested) or for the presence of the line of code with:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="n">validates</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>This test is even pretty useless as a spec for the model, because reading model itself is much more descriptive.</p>
+
+
+
+
+<p>What else falls into this category? Testing associations and relations – it is all about using them properly, there is no other way the test may fail. Do not test simple scopes as well, consider the following:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">scope</span> <span class="ss">:active</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">where</span><span class="p">(</span><span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Does it really make sense to write test for such code? What kind of value does it provide and how do you expect it to fail? ActiveRecord API is stable and can be trusted that it won’t change and <code>where</code> method will behave exactly the same.</p>
+
+
+
+
+<h3>Do not test generic CRUD controllers</h3>
+
+
+
+
+<p>What do I mean by generic CRUD controllers? Consider the following:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ArticlesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="vi">@articles</span> <span class="o">=</span> <span class="no">Article</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@article</span> <span class="o">=</span> <span class="no">Article</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">new</span>
+</span><span class='line'>    <span class="vi">@article</span> <span class="o">=</span> <span class="no">Article</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="vi">@article</span> <span class="o">=</span> <span class="no">Article</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">article_params</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="vi">@article</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>      <span class="n">flash</span><span class="o">[</span><span class="ss">:notice</span><span class="o">]</span> <span class="o">=</span> <span class="err">“</span><span class="no">Article</span> <span class="n">has</span> <span class="n">been</span> <span class="n">created</span><span class="o">.</span><span class="err">”</span>
+</span><span class='line'>      <span class="n">redirect_to</span> <span class="n">articles_path</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="n">render</span> <span class="ss">:new</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">edit</span>
+</span><span class='line'>    <span class="vi">@article</span> <span class="o">=</span> <span class="no">Article</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">update</span>
+</span><span class='line'>    <span class="vi">@article</span> <span class="o">=</span> <span class="no">Article</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="vi">@article</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">article_params</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">flash</span><span class="o">[</span><span class="ss">:notice</span><span class="o">]</span> <span class="o">=</span> <span class="err">“</span><span class="no">Article</span> <span class="n">has</span> <span class="n">been</span> <span class="n">updated</span><span class="o">.</span><span class="err">”</span>
+</span><span class='line'>      <span class="n">redirect_to</span> <span class="n">articles_path</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="n">render</span> <span class="ss">:edit</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">destroy</span>
+</span><span class='line'>    <span class="no">Article</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">destroy</span>
+</span><span class='line'>    <span class="n">flash</span><span class="o">[</span><span class="ss">:notice</span><span class="o">]</span> <span class="o">=</span> <span class="err">“</span><span class="no">Article</span> <span class="n">has</span> <span class="n">been</span> <span class="n">deleted</span><span class="o">.</span><span class="err">”</span>
+</span><span class='line'>    <span class="n">redirect_to</span> <span class="n">articles_path</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">article_params</span>
+</span><span class='line'>      <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:article</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:title</span><span class="p">,</span> <span class="ss">:content</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It’s a typical easy CRUD Rails controller, where you don’t even need to read the code to know, what it does. It is so generic that you could DRY it up with some metaprogramming and naming conventions, or simply use <a href="https://github.com/josevalim/inherited_resources" target="_blank">Inherited Resources</a> gem. In many Rails testing tutorials you can find a section with controllers’ testing, which look basically like that:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">describe</span> <span class="s2">&quot;#create&quot;</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">context</span> <span class="s2">&quot;valid attributes&quot;</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;saves article&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">expect</span> <span class="k">do</span>
+</span><span class='line'>        <span class="n">post</span> <span class="ss">:create</span><span class="p">,</span> <span class="ss">params</span><span class="p">:</span> <span class="p">{</span> <span class="ss">title</span><span class="p">:</span> <span class="s2">&quot;Article title&quot;</span><span class="p">,</span> <span class="ss">content</span><span class="p">:</span> <span class="s2">&quot;Some content&quot;</span> <span class="p">}</span>
+</span><span class='line'>      <span class="k">end</span><span class="o">.</span><span class="n">to</span> <span class="n">change</span><span class="p">(</span><span class="no">Article</span><span class="p">,</span> <span class="ss">:count</span><span class="p">)</span><span class="o">.</span><span class="n">by</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;redirects to articles page&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">post</span> <span class="ss">:create</span><span class="p">,</span> <span class="ss">params</span><span class="p">:</span> <span class="p">{</span> <span class="ss">title</span><span class="p">:</span> <span class="s2">&quot;Article title&quot;</span><span class="p">,</span> <span class="ss">content</span><span class="p">:</span> <span class="s2">&quot;Some content&quot;</span> <span class="p">}</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">redirect_to</span> <span class="n">articles_path</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">context</span> <span class="s2">&quot;invalid attributes&quot;</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;does not save article&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">expect</span> <span class="k">do</span>
+</span><span class='line'>        <span class="n">post</span> <span class="ss">:create</span><span class="p">,</span> <span class="ss">params</span><span class="p">:</span> <span class="p">{</span> <span class="ss">title</span><span class="p">:</span> <span class="s2">&quot;Article title&quot;</span> <span class="p">}</span>
+</span><span class='line'>      <span class="k">end</span><span class="o">.</span><span class="n">not_to</span> <span class="n">change</span><span class="p">(</span><span class="no">Article</span><span class="p">,</span> <span class="ss">:count</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;renders new template&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">post</span> <span class="ss">:create</span><span class="p">,</span> <span class="ss">params</span><span class="p">:</span> <span class="p">{</span> <span class="ss">title</span><span class="p">:</span> <span class="s2">&quot;Article title&quot;</span> <span class="p">}</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">render_template</span> <span class="s2">&quot;new&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>And add tests for the remaining six actions. How much value do these tests provide? It does everything what is expected from simple controller and the only reason it may fail is making a typo. The same thing applies to tests with mocks and stubs in controllers testing. Basically I see no point at all in writing tests for CRUD controllers. To make things easier and make sure it works, you can provide some generic solution like <a href="https://github.com/josevalim/inherited_resources" target="_blank">Inherited Resources</a> gem or use Rails scaffolding.</p>
+
+
+
+
+<p>The important thing is: you need to test controllers, but don’t do it for typical CRUD. Otherwise, you should thoroughly test your code, especially before_filters with some authorization and domain related logic.</p>
+
+
+
+
+<h3>Do not test Helpers</h3>
+
+
+
+
+<p>Helpers should be used in most cases for providing some generic HTML markup, for example:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">main_menu_link_to</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">{})</span>
+</span><span class='line'>  <span class="n">content_tag</span><span class="p">(</span><span class="ss">:li</span><span class="p">,</span> <span class="ss">class</span><span class="p">:</span> <span class="err">”</span><span class="n">main</span><span class="o">-</span><span class="n">menu</span><span class="err">”</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">link_to</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It probably doesn’t require test coverage. If you think about putting some model presentation logic in helpers, then you are doing it wrong and should look at presenters (e.g. <a href="https://github.com/drapergem/draper" target="_blank">Draper</a> gem).</p>
+
+
+
+
+<h3>Do not test trivial views</h3>
+
+
+
+
+<p>And what is trivial thing in views? Writing Capybara tests for titles can be counted here, also testing simple CRUD and flash messages (unless they are somehow critical for the application). Don’t write simple tests for editing an article and verifying that the title has been changed after update or the article has been deleted after clicking “Delete” button. Leave Capybara tests for some more complicated scenarios and critical parts of your app.</p>
+
+
+
+
+<h3>Do not use Cucumber</h3>
+
+
+
+
+<p>Cucumber seems to have significant popularity among developers. One argument for using Cucumber is that it helps non-technical people read and write tests and, e.g. sit with the client and let him/her write some scenarios. Yeah, right. Honestly, how many clients have you met who wrote any tests? Was it worth adding additional layer of complexity and maintaining it?</p>
+
+
+
+
+<p>Cucumber makes you duplicating your intentions – firstly, you write some scenarios and then implement in RSpec. Why not to implement them in RSpec alone, when Capybara DSL is extremely expressive? <del>Cucumber is the most overrated tool and in most cases it is simple waste of time with no benefits at all. If you use Cucumber in everyday testing, then take some time and think if you really need it and how valuable are these tests for you. If you haven’t tried Cucumber yet, don’t bother.</del>  If you use Cucumber in everyday testing, then take some time and think if you really need it and how valuable these tests are for you. If you haven’t tried Cucumber yet, make sure it solves your actual problems.</p>
+
+
+
+
+<h2>What needs to be tested</h2>
+
+
+
+
+<h3>Models</h3>
+
+
+
+
+<p>The important thing is that you shouldn’t put your business logic in models, so sometimes there won’t be that many things that requires testing in this layer. If you write custom validations, e.g. for URLs, zip codes etc., extract it to separate validator and test it on some generic model.</p>
+
+
+
+
+<p>Write tests for not trivial scopes, especially when you write raw complex SQL queries – some of them might be quite difficult to follow is much more convenient to verify query through tests, not e.g. in Rails Console or dbconsole.</p>
+
+
+
+
+<p>Scopes with some database specific queries should be tested – e.g. hstore or arrays in PostgreSQL. Some operators like <code>hstore ?& text[]</code> (which means: does hstore contain all specified keys?) might look mystical at first glance. It is quite beneficial to test drive this kind of functionality. Sometimes it is not that obvious, how to use this kind of scopes and what result can be expected, even with nice, descriptive name and tests can help as a documentation.</p>
+
+
+
+
+<p>Write tests for some domain methods  - when you have for instance User model, with attribute :active which can be either false or true, you can provide the following method:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">activate</span>
+</span><span class='line'>  <span class="n">update</span><span class="p">(</span><span class="ss">active</span><span class="p">:</span> <span class="kp">true</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>and test for it:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">{</span> <span class="no">FactoryGirl</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">:inactive_user</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="err">“</span><span class="c1">#activate” do</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="err">“</span><span class="n">makes</span> <span class="n">user</span> <span class="n">active</span><span class="err">”</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">activate</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">change</span> <span class="p">{</span> <span class="n">user</span><span class="o">.</span><span class="n">active</span> <span class="p">}</span><span class="o">.</span><span class="n">from</span><span class="p">(</span><span class="kp">false</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="kp">true</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h3>Controllers</h3>
+
+
+
+
+<p>Basically everything beyond the CRUD requires testing, especially some authorization-related logic. Consider the <code>ArticlesController</code> and the feature, when we don’t want to render inactive article for non-admin user:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ArticlesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">before_filter</span> <span class="ss">:allow_only_admin_for_inactive</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">[</span><span class="ss">:show</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># some code</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">allow_only_admin_for_inactive</span>
+</span><span class='line'>    <span class="n">article</span> <span class="o">=</span> <span class="no">Article</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">!</span><span class="n">article</span><span class="o">.</span><span class="n">active?</span> <span class="ow">and</span> <span class="o">!</span><span class="p">(</span><span class="n">current_user</span> <span class="ow">and</span> <span class="n">current_user</span><span class="o">.</span><span class="n">admin?</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">flash</span><span class="o">[</span><span class="ss">:error</span><span class="o">]</span> <span class="o">=</span> <span class="err">“</span><span class="no">Article</span> <span class="n">is</span> <span class="ow">not</span> <span class="n">active</span><span class="err">”</span>
+</span><span class='line'>      <span class="n">redirect_to</span> <span class="n">articles_path</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>Test for this before_filter should look like the following:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;spec_helper&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="no">ArticlesController</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">describe</span> <span class="s2">&quot;inactive article&quot;</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">let</span><span class="p">(</span><span class="ss">:article</span><span class="p">)</span> <span class="p">{</span> <span class="n">double</span><span class="p">(</span><span class="ss">:article</span><span class="p">,</span> <span class="n">active?</span><span class="p">:</span> <span class="kp">false</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="mi">1</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">before</span><span class="p">(</span><span class="ss">:each</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">allow</span><span class="p">(</span><span class="no">Article</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">receive</span><span class="p">(</span><span class="ss">:find</span><span class="p">)</span> <span class="p">{</span> <span class="n">article</span> <span class="p">}</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">describe</span> <span class="s2">&quot;user is logged in&quot;</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">context</span> <span class="s2">&quot;user is an admin&quot;</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">let</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">{</span> <span class="n">double</span><span class="p">(</span><span class="ss">:user</span><span class="p">,</span> <span class="n">admin?</span><span class="p">:</span> <span class="kp">true</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">it</span> <span class="s2">&quot;renders article&quot;</span> <span class="k">do</span>
+</span><span class='line'>          <span class="n">allow</span><span class="p">(</span><span class="n">controller</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">receive</span><span class="p">(</span><span class="ss">:current_user</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="n">admin</span><span class="p">)</span>
+</span><span class='line'>          <span class="n">get</span> <span class="ss">:show</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="n">article</span><span class="o">.</span><span class="n">id</span>
+</span><span class='line'>          <span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">render_template</span> <span class="ss">:show</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">context</span> <span class="s2">&quot;user is not an admin&quot;</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">let</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">{</span> <span class="n">double</span><span class="p">(</span><span class="no">User</span><span class="p">,</span> <span class="n">admin?</span><span class="p">:</span> <span class="kp">false</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">it</span> <span class="s2">&quot;redirects to articles path&quot;</span> <span class="k">do</span>
+</span><span class='line'>          <span class="n">allow</span><span class="p">(</span><span class="n">controller</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">receive</span><span class="p">(</span><span class="ss">:current_user</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+</span><span class='line'>          <span class="n">get</span> <span class="ss">:show</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="n">article</span><span class="o">.</span><span class="n">id</span>
+</span><span class='line'>          <span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">redirect_to</span> <span class="n">articles_path</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">context</span> <span class="s2">&quot;user is not logged in&quot;</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">before</span><span class="p">(</span><span class="ss">:each</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>          <span class="n">allow</span><span class="p">(</span><span class="n">controller</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">receive</span><span class="p">(</span><span class="ss">:current_user</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="kp">nil</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">it</span> <span class="s2">&quot;redirects to articles path&quot;</span> <span class="k">do</span>
+</span><span class='line'>          <span class="n">get</span> <span class="ss">:show</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="n">article</span><span class="o">.</span><span class="n">id</span>
+</span><span class='line'>          <span class="n">expect</span><span class="p">(</span><span class="n">flash</span><span class="o">[</span><span class="ss">:error</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span> <span class="n">be</span> <span class="kp">nil</span>
+</span><span class='line'>          <span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">redirect_to</span> <span class="n">root_path</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And that should be sufficient. If you have some complex authorization logic, then you should move it to separate class and write tests for this class, not test in controllers.</p>
+
+
+
+
+<p>How about acceptance tests for his feature? Well, it is quite simple and controller test gives me sufficient level of confidence that it works, so I believe that it is not needed.</p>
+
+
+
+
+<p>The good practice is to always use mock objects and stub everything in controllers, which is writing unit tests for controllers, not integration tests.</p>
+
+
+
+
+<h3>Presenters</h3>
+
+
+
+
+<p>Most of the time tests are not that essential for the presenters – they contain presentation logic, often related to nice formatting and, unless it is somehow business-critical, you don’t have to test it. If you have some complex logic, consider moving it to a separate class and write test for the new object (maybe <code>DateFormatter</code>?). Personally I write tests for methods, where few scenarios are possible (i.e. they contain conditionals) – it serves as a nice documentation and gives instant information how it works.</p>
+
+
+
+
+<p>I wouldn’t write test for the following usecase:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">InvestmentDecorator</span> <span class="o">&lt;</span> <span class="no">ApplicationDecorator</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># assuming that draper gem is used here</span>
+</span><span class='line'>  <span class="c1"># every investment has statistic_profile</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">display_areas_range</span>
+</span><span class='line'>    <span class="err">“</span><span class="no">Apartments</span><span class="err">’</span> <span class="n">areas</span> <span class="n">from</span> <span class="c1">#{statistic_profile.minimum_apartments_area} to #{statistic_profile.maximum_apartments_area} “</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>However, this may require testing:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">UserDecorator</span> <span class="o">&lt;</span> <span class="no">ApplicationDecorator</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">display</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">firstname</span><span class="o">.</span><span class="n">present?</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">surname</span><span class="o">.</span><span class="n">present?</span>
+</span><span class='line'>      <span class="err">“</span><span class="c1">#{model.firstname} #{model.surname}”</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="n">model</span><span class="o">.</span><span class="n">email</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Business logic - usecases, services, policy objects, value objects etc.</p>
+
+
+
+
+<p>Nothing to be discussed here – business logic requires 100% test coverage, as simple as that. It is essential for your application, so you cannot leave anything untested.</p>
+
+
+
+
+<h2>Views and acceptance testing</h2>
+
+
+
+
+<p>Acceptance tests might be difficult to maintain and they are slow, you should write them carefully and make sure that you are testing right stuff. Focus on critical features of your app. When you work on an e-commerce solution, buying process is essential (with different scenarios for registered user and guest user), rendering current shopping cart, sending notifications after completing order etc. When you have georegion specific content, you should write acceptance tests for it. You have some important UI implemented using Javascript? Don’t forget to write tests for it with <code>js: true</code> option in Capybara. Focus on critical parts and complex scenarios, not simple single features.</p>
+
+
+
+
+<h2>Integration tests</h2>
+
+
+
+
+<p>Acceptance tests shouldn’t cover every possible scenarios, it may get too slow and might not give sufficient feedback why something has failed. Leave it to integrations tests with – especially when you have some XML/JSON importing or you interact with 3rs party APIs. Don’t stub or mock anything there, use real objects.</p>
+
+
+
+
+<hr />
+
+
+
+
+<p>And that’s would be end for part 1. Part 2 will be more practice oriented with implementing specified feature using techniques described here.</p>
+
+
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Karol Galanciak</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-04T16:19:00+01:00" pubdate data-updated="true">Jan 4<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/bdd/'>BDD</a>, <a class='category' href='/blog/categories/rails/'>Rails</a>, <a class='category' href='/blog/categories/tdd/'>TDD</a>, <a class='category' href='/blog/categories/testing/'>Testing</a>
+  
+</span>
+
+
+    </p>
+    <div class="meta top-line">
+      <div class="post-subscription">
+  <div id="mc_embed_signup">
+    <div id="mc_embed_signup_scroll">
+      <label for="mce-EMAIL">Do you want to take your developer skills to the next level? Subscribe to my newsletter and never miss another blog post!</label>
+      <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+      <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_62804f1b69c60e0c7966cddd6_7c71fb81df" tabindex="-1" value=""></div>
+      <div class="clear">
+      <a href="http://eepurl.com/duztq5" target="_blank" id="mc-embedded-subscribe" class="button">Yes, I want to be a better developer!</a>
+    </div>
+  </div>
+</div>
+
+    </div>
+    <div class="top-line">
+      
+        <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://Azdaroth.github.io/blog/2014/01/04/test-driven-rails-part-1/" data-via="Azdaroth" data-counturl="http://Azdaroth.github.io/blog/2014/01/04/test-driven-rails-part-1/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+      
+    </div>
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/10/06/structuring-rails-applications/" title="Previous Post: Structuring Rails applications">&laquo; Structuring Rails applications</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/03/03/test-driven-rails-part-2/" title="Next Post: Test Driven Rails - Part 2">Test Driven Rails - Part 2 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <img class="left" src="/images/me_formal.jpg" title="me:)" alt="Karol Galanciak - photo">
+  <p>Hi, my name is Karol Galanciak, I'm a technical polyglot and domain expert in vacation rental and fitness industries.</p>
+
+  <p>I specialize in building APIs, microservices architecture, working with legacy applications, building ambitious Single Page Applications and building payment processors for credit cards processing. Currently I'm working as CTO at <a href="https://www.bookingsync.com" target="_blank">BookingSync</a>.</p>
+
+  <p id="email-me"></p>
+</section>
+
+<script type="text/javascript">
+  (function(d, id, lhs, rhs) {
+    d.getElementById(id).innerHTML = "You can reach me at <a rel='nofollow' href='mailto:" + lhs + "@" + rhs + "'>" + lhs + "@" + rhs + "</a>";
+  })(window.document, 'email-me', 'karol.galanciak', 'gmail.com');
+</script>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization/">The Case for Before_validation Callback: Complex State Normalization</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/">Advanced Ember Data Customization - Different Model Types in Ember App and API for the Same Resource</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/">Exotic Ruby: Module.class_exec, Custom JSON and Liquid Drops in Action</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/">Rails Quick Tips: Temporarily Disabling Touching With ActiveRecord.no_touching</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function/">PostgreSQL Quick Tips: Working With Dates Using EXTRACT Function</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/Azdaroth">@Azdaroth</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'Azdaroth',
+            count: 6,
+            skip_forks: false,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+<section>
+   <h1>Twitter</h1>
+   <a class="twitter-timeline" href="https://twitter.com/Azdaroth" data-widget-id="357234540634329088">Tweets by @Azdaroth</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - Karol Galanciak -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'karolgalanciak';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://Azdaroth.github.io/blog/2014/01/04/test-driven-rails-part-1/';
+        var disqus_url = 'http://Azdaroth.github.io/blog/2014/01/04/test-driven-rails-part-1/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

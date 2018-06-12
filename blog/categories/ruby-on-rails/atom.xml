@@ -1,0 +1,1258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Ruby on Rails | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
+  <link href="http://Azdaroth.github.io/blog/categories/ruby-on-rails/atom.xml" rel="self"/>
+  <link href="http://Azdaroth.github.io/"/>
+  <updated>2018-06-12T17:11:48+02:00</updated>
+  <id>http://Azdaroth.github.io/</id>
+  <author>
+    <name><![CDATA[Karol Galanciak]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Traps on Rails - Overriding boolean methods in models]]></title>
+    <link href="http://Azdaroth.github.io/blog/2017/11/26/traps-on-rails-overriding-boolean-methods-in-models/"/>
+    <updated>2017-11-26T16:00:00+01:00</updated>
+    <id>http://Azdaroth.github.io/blog/2017/11/26/traps-on-rails-overriding-boolean-methods-in-models</id>
+    <content type="html"><![CDATA[<p>One very <strong>useful</strong> feature of <strong>ActiveRecord</strong> is automatically defining attribute readers and writers for all the columns for given tables. For the ones with <strong>boolean</strong> type, however, there is one more addition &ndash; defining an <strong>alias</strong> of the method with a question mark. Sometimes it might be useful to override this method and add some extra requirements for a given condition. However, this might not be such a good idea.</p>
+
+<!--more-->
+
+
+<h2>Anatomy of the problem</h2>
+
+<p>Imagine that you are developing some application, where users can be activated and deactivated from an admin panel. However, the application is not free, and every user that wants to access the application needs to buy a subscription. In that case, to check if the user is, in fact, active, you could override <code>User#active?</code> method and add some extra requirements regarding the subscription:</p>
+
+<p>``` rb</p>
+
+<h1>app/models/users.rb</h1>
+
+<p>class User &lt; ApplicationRecord
+  def active?</p>
+
+<pre><code>super &amp;&amp; valid_subscription?
+</code></pre>
+
+<p>  end</p>
+
+<p>  def valid_subscription?</p>
+
+<pre><code># somehow check if the subscription is valid
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>We are taking advantage of the fact that ActiveRecord defines the aliases for boolean columns which are the original column names' ending with a question mark, so for <code>active</code> boolean column we can expect that <code>active?</code> method will be defined, and it will work the same as <code>active</code> method.</p>
+
+<p>Ok, cool, we have our feature working and to check if a user is fully active, we call <code>User#active?</code> here and there. Our next requirement is exposing users in the API. Nothing too hard, we can add <a href="https://github.com/fotinakis/jsonapi-serializers"><code>jsonapi-serializers</code></a> gem and implement fully JSONAPI-compliant serializers. It turns out that we need to expose info if a user is active and not. Here is how our serializer could look like:</p>
+
+<p>``` rb</p>
+
+<h1>app/serializers/user.rb</h1>
+
+<p>class UserSerializer
+  include JSONAPI::Serializer</p>
+
+<p>  attribute :active
+  # other attributes
+end
+```</p>
+
+<p>It sounds like we are done here. But the truth is there is a nasty bug here! The serializer returns the value returned by <code>User#active</code>, not by <code>User#active?</code>!</p>
+
+<h2>What exactly went wrong here?</h2>
+
+<p>The primary thing that went wrongs here was being lazy about the naming and not introducing proper domain concepts. Somehow ActiveRecord made it even easier &ndash; there was already a method called <code>active?</code> defined based on the <code>active</code> column name, so the only thing that was necessary in that case to make our first feature work was overriding it and adding some extra condition because the idea of being &ldquo;active&rdquo; is kind of similar. But overriding boolean methods is never a good idea &ndash; it always implies that some concept is missing or is made implicit in the code.</p>
+
+<h2>A solution to the problem</h2>
+
+<p>A solution would be simply making this domain concept explicit. <code>User#active?</code> method doesn&rsquo;t check if the user is active is not, it rather checks if a user can access the application, so the better name for that method would be <code>User#can_access_application?</code></p>
+
+<p>It is quite possible that we might later need to add some extra features that are related to this feature, like checking if the user is active but cannot access the app or just simply checking the <code>active</code> flag itself. Our final model could look like this in the end:</p>
+
+<p>``` rb</p>
+
+<h1>app/models/users.rb</h1>
+
+<p>class User &lt; ApplicationRecord
+  def can_access_application?</p>
+
+<pre><code>active? &amp;&amp; valid_subscription?
+</code></pre>
+
+<p>  end</p>
+
+<p>  def cannot_access_application?</p>
+
+<pre><code>!can_access_application?
+</code></pre>
+
+<p>  end</p>
+
+<p>  # other methods
+end
+```</p>
+
+<p>We should also update the serializer:</p>
+
+<p>``` rb</p>
+
+<h1>app/serializers/user.rb</h1>
+
+<p>class UserSerializer
+  include JSONAPI::Serializer</p>
+
+<p>  attribute :active do</p>
+
+<pre><code>object.active
+</code></pre>
+
+<p>  end</p>
+
+<p>  attribute :can_access_application do</p>
+
+<pre><code>object.can_access_application?
+</code></pre>
+
+<p>  end</p>
+
+<p>  attribute :cannot_access_application do</p>
+
+<pre><code>object.cannot_access_application?
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>One could argue that this fix was not necessary and it was a developer&rsquo;s fault, and he or she should have checked the model if this method has not been overridden and adjust the serializer. That is somehow true, but if such code is deployed to production, it probably means that the reviewer of the code was not aware that there is a potential issue in the code and such things are really hard to spot &ndash; ActiveRecord adds those aliases for every boolean column so it might sound like a fair assumption that <code>User#active</code> and <code>User#active?</code> will return the same result.</p>
+
+<p>However, the truth is that not only did we minimize the risk of having the name collisions by those changes but we gained some extra flexibility, and it was quite straight-forward to differentiate between <code>User#active?</code>and <code>User#can_access_application?</code>. In a previous implementation, it was simply not possible with the question-mark methods.</p>
+
+<h2>Wrapping up</h2>
+
+<p>Naming is one of <a href="https://martinfowler.com/bliki/TwoHardThings.html" target="_blank">two hard problems in computer science</a> and it&rsquo;s a good idea to always make all the domain concepts properly named and explicit, even if it means adding more code &ndash; just because something is not explicit, doesn&rsquo;t mean it doesn&rsquo;t exist. When it comes to <strong>ActiveRecord</strong> models, an extra caution is more than recommended &ndash; such models mix both persistence and domain concepts and it&rsquo;s quite easy to hurt yourself in such case. Not overriding boolean methods generated by ActiveRecord and properly naming things sounds like a good rule of thumb to follow.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[5 years of professional Ruby and Rails development - My Reflections]]></title>
+    <link href="http://Azdaroth.github.io/blog/2017/08/27/5-years-of-professional-ruby-and-rails-development-my-reflections/"/>
+    <updated>2017-08-27T23:00:00+02:00</updated>
+    <id>http://Azdaroth.github.io/blog/2017/08/27/5-years-of-professional-ruby-and-rails-development-my-reflections</id>
+    <content type="html"><![CDATA[<p>As hard as it is for me to believe, I already have over <strong>5 years</strong> of professional experience in <strong>Ruby and Rails</strong>. Throughout all these years my attitude towards Rails has been fluctuating between going from <strong>blind love</strong> to <strong>harsh critic</strong> (<strong>ActiveRecord</strong>, I&rsquo;m looking at you) ending with a bit more balanced but certainly a positive approach. Such time is long enough to have a meaningful opinion about the <strong>overall experience</strong> using any framework, so here are few points about Rails that I would particularly like to focus on in my reflections.</p>
+
+<!--more-->
+
+
+<h2>ActiveRecord and model layer</h2>
+
+<p>ActiveRecord is arguably the biggest and the most important part of Rails. Not only is it quite complex itself, but following the &ldquo;skinny controllers, fat models&rdquo; mantra often leads to creating huge models which extend <code>ActiveRecord::Base</code> making a huge part of virtually the majority of the applications. So what has been my experience with this layer for the last 5 years?</p>
+
+<p>When I was starting with Rails I naturally followed the default &ldquo;Rails Way&rdquo; which meant moving logic from the controllers to models, handling entire business logic in models' classes and adding callbacks here and there for the logic around persistence. And it was awesome initially! I was able to progress with all the features really fast, even in spite of lacking meaningful Rails experience.</p>
+
+<p>However, I started quite soon to experience some serious issues: I had to handle big part of the logic with a lot of conditionals depending on the context, some methods were handling logic for both creation of the records and the updates, but only with a slight difference, which added even more conditionals to that. The validation logic started to become complex which required conditional validations as well. And one day, when running some data migrations I used <code>update_attributes</code> instead of <code>update_columns</code> and tons of email notifications were sent to the users due to some callbacks that were responsible for sending notifications&hellip;</p>
+
+<p>At that point I pretty much lost control over the application logic as I was not able to tell any longer what something so fundamental as calling <code>update</code> or <code>save</code> can lead to. That was the time when my default policy regarding models started to be &ldquo;no callbacks ever, no conditional validations ever, ideally no logic at all.&rdquo; This approach worked for a while, but eventually it lead to some other issues like distributing similar logic between many objects (service objects and form object mostly), duplication of the logic and feature envy code smells, even though it was quite clear that the logic belonged to the models. Aparently, the anemic domain model approach didn&rsquo;t work as well as I had thought it would. Another case was that I was doing whatever it takes to avoid callbacks and lost quite a lot of time with fighting some gems that were coupled to the models via callbacks. That could have been a right thing to do from the &ldquo;purity&rdquo; perspective, but it wasn&rsquo;t the smartest decisision business wise &ndash; the purpose of the code is to serve the business and provide the required functionality, not to be possibly the purest solution. Maintainability is one thing, but it&rsquo;s easy to reach a point of diminishing return in most applications where more purity and better design doesn&rsquo;t necessarily lead to a greater business value, but takes definitely a lot of time.</p>
+
+<p>All those events lead to more balanced attitude that I have now towards ActiveRecord and model layer. Callbacks, complex conditional validations and other typical Rails Way techniques are far from being my preferred way of handling business logic and in general I consider those approaches harmful in the long-term perspective, but I clearly see how they can be beneficial in short-term perspective when developing MVP and the rapid speed of development is required and maintainability is secondary or when something can be cleverly handled even in more complex applications with minimum effort like e.g. in case of <a href="https://github.com/carrierwaveuploader/carrierwave" target="_blank">Carrierwave</a> callbacks, using <code>touch</code> and <code>dependent</code> associations' options etc.</p>
+
+<p>I also tend to put model-related logic in, well, models. Does it lead to fat models? Sometimes yes, In bigger applications than can easily lead to the models with 200-300 lines of code. But if the logic is cohesive and not really context-dependent I don&rsquo;t find it a big issue &ndash; the clarity is most often preserved and the maintainability is not negatively impacted. The important thing is to put there only a generic domain model logic, ideally not related to the persistence itself.</p>
+
+<p>Following that approach has been working pretty great for me and I don&rsquo;t really complain about ActiveRecord anymore. Maybe the architecture is a bit limiting and something like data mapper pattern would be more flexible. Or some methods like <code>update_attribute</code> / <code>update_columns</code> can be really confusing if used without a right reason or even more exotic features like <code>ActiveRecord.suppress</code> can lead to the code that is hard to reason about. Nervertheless, it is still possible to mantain models in a good shape using ActiveRecord and just the fact that something can do a lot of harm doesn&rsquo;t mean that it should not be there at all &ndash; it&rsquo;s a developer&rsquo;s responsibility to choose the tools and design for solving the problem wisely and in the maintainable way in the long run.</p>
+
+<h2>Lack of Higher Level Architecture</h2>
+
+<p>Rails is sometimes criticized for not providing higher-level architecture and there are a lot of solutions that are supposed to fill that hole (e.g. <a href="https://github.com/trailblazer/trailblazer" target="_blank">Trailblazer</a> which is a mini-framework providing form objects, operation classess and more). However, I don&rsquo;t necessarily think it&rsquo;s a bad decision.</p>
+
+<p>Models and controllers are generic enough that to some extent they can be pretty much similar in most of the applications. What about some higher level layers?</p>
+
+<p>There are plenty of gems implementing form objects, service objects and other layers and most often they are significantly different from each other. And just adding service objects or form objects might not be the best design decision ever. Maybe going full CQRS / Event Sourcing with write models and read models is better? And how would you know what should be the structure of service objects or operations or form objects or any other abstraction?</p>
+
+<p>It would probably be extremely difficult to find a solution that would satisfy most of the Rails developers and any attempt to add those layers to Rails could end up with conflicts about the implementaiton details and/or interfaces, which wouldn&rsquo;t be really productive.</p>
+
+<p>The current approch of focusing on existing layers is in my opinion the right one and any reasonably experienced developer should be able to figure out what kind of architectural approach would be the best fit for the given application.</p>
+
+<h2>ActiveSupport</h2>
+
+<p>Another layer that is arguably widely considered to be problematic is ActiveSupport, especially the monkeypatching part. I&rsquo;m not a fan of monkeypatching myself and I almost never do it, however, the core extentions provided by ActiveSupport are extremely useful and very convenient and I don&rsquo;t really remember having any major problems with them. I can agree that it might not be the most &ldquo;elegant&rdquo; solution from the purity perspective, but it gets the job done and does it well without causing problems in the long run for the application &ndash; this is ultimately the most important factor when it comes to a software engineering. I think the overall critique of ActiveSupport is a bit far-fetched and the practical negative implications of what ActiveSupport provides are negligible and there are quite a lot of positive outcomes which cannot be overlooked that easily.</p>
+
+<h2>What About Other Frameworks?</h2>
+
+<p>I&rsquo;ve had a chance to try some different frameworks than Rails throughout all these years &ndash; including Django (Python), Play (Java), Phoenix (Elixir), Meteor (JavaScript) or other Ruby frameworks &ndash; Sinatra and Hanami. They were quite fun to work with, but the productivity and the enjoyment of development couldn&rsquo;t possibly match the Rails experience. Obviously, the maturity of the ecosystem plays a huge role here and that&rsquo;s why some of the newer frameworks have a much harder time competing with Rails, nevertheless, even Rails out-of-box without any extra gems offers a great productivity which is significantly higher comparing to the other frameworks.</p>
+
+<h2>Future</h2>
+
+<p>Currently I don&rsquo;t see any framework that could possibly replace Rails in the near future, at least not for the generic webdevelopment. Phoenix, which somehow resembles Rails, might be the closest one, but in my opinion Elixir language and functional paradigm are much harder to learn than Ruby and Object Oriented Programming. Also, due to the much bigger community, maturity and overall ease of development in Rails, it might take quite a long time until Phoenix catches up, despite having some clear advantages over Ruby and Rails like speed and concurrency (thanks to Erlang virtual machine).</p>
+
+<h2>Wrapping Up</h2>
+
+<p>Ruby on Rails definitely made my professional life amazing and it&rsquo;s been a <strong>great joy</strong> to develop all the applications I&rsquo;ve had a chance to work on, despite few times when I had a bit negative attitude towards it. Even though there are some imperfections, Rails is still a <strong>number one choice</strong> for me for the majority of the cases and I don&rsquo;t see it moving anyway in the near future.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Decoding Rails Magic: How Does ActiveJob work?]]></title>
+    <link href="http://Azdaroth.github.io/blog/2016/09/25/decoding-rails-magic-how-does-activejob-work/"/>
+    <updated>2016-09-25T23:45:00+02:00</updated>
+    <id>http://Azdaroth.github.io/blog/2016/09/25/decoding-rails-magic-how-does-activejob-work</id>
+    <content type="html"><![CDATA[<p>Executing <strong>background jobs</strong> is quite a common feature in many of the web applications. Switching between different background processing frameworks used to be quite painful as most of them had different API for enqueuing jobs, enqueuing mailers and scheduling jobs. One of the great addition in <strong>Rails 4.2</strong> was a solution to this problem: <strong>ActiveJob</strong>, which provides extra layer on top of background jobs framework and unifies the API regardless of the queue adapter you use. But how exactly does it work? What are the requirements for adding new <strong>queue adapters</strong>? What kind of API does ActiveJob provide? Let’s dive deep into the codebase  and answer these and some other questions.</p>
+
+
+
+
+<!--more-->
+
+
+
+
+<h2>Anatomy of the job</h2>
+
+
+
+
+<p>Let’s start with some simple job class, let it be <code>MyAwesomeJob</code>:</p>
+
+
+<p>``` ruby app/jobs/my_awesome_job.rb
+class MyAwesomeJob &lt; ActiveJob::Base
+  def perform(user)</p>
+
+<pre><code>User::DoSomethingAwesome.call(user)
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>To enqueue a job we could simply write: <code>MyAwesomeJob.perform_later(some_user)</code> or if we wanted to schedule a job in some time in the future we could write: <code>MyAwesomeJob.set(wait: 12.hours).perform_later(some_user)</code> or <code>MyAwesomeJob.perform_now(some_user)</code> for executing the job immediately without enqueuing. But we never defined these methods, so what kind of extra work <strong>ActiveJob</strong> performs to make it happen?</p>
+
+
+
+
+<h2>Exploring internals of ActiveJob</h2>
+
+
+
+
+<p>To answer this question, let’s take a look at the <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/base.rb" target="_blank">ActiveJob::Base class</a>:</p>
+
+
+<p>``` ruby active_job/base.rb
+module ActiveJob
+  class Base</p>
+
+<pre><code>include Core
+include QueueAdapter
+include QueueName
+include QueuePriority
+include Enqueuing
+include Execution
+include Callbacks
+include Logging
+include Translation
+
+ActiveSupport.run_load_hooks(:active_job, self)
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>There are some interesting modules included in this class, which we will get to know in more details later, but let’s focus on the core API for now. Most likely this kind of logic would be defined in, well, <code>Core</code> module. Indeed, the <code>set</code> method is <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/core.rb#L59" target="_blank">there:</a></p>
+
+
+<p>``` ruby active_job/core.rb
+module ActiveJob
+  module Core</p>
+
+<pre><code>module ClassMethods
+  def set(options={})
+    ConfiguredJob.new(self, options)
+  end
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>It returns an instance of <code>ConfiguredJob</code> passing the job instance itself and arguments to the constructor. Let’s check what <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/configured_job.rb" target="_blank">ConfiguredJob</a> class is responsible for:</p>
+
+
+<p>``` ruby active_job/configured_job.rb
+module ActiveJob
+  class ConfiguredJob #:nodoc:</p>
+
+<pre><code>def initialize(job_class, options={})
+  @options = options
+  @job_class = job_class
+end
+
+def perform_now(*args)
+  @job_class.new(*args).perform_now
+end
+
+def perform_later(*args)
+  @job_class.new(*args).enqueue @options
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>We have 2 methods available here: <code>perform_now</code> and <code>perform_later</code>. Both of them create a new job instance with arguments passed to the method and they either call <code>perform_now</code> method on the job instance or call <code>enqueue</code> passing the options which are the arguments from the <code>set</code> method. </p>
+
+
+
+
+<p>Let’s go deeper and start with <code>perform_now</code> method: it’s defined inside <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/execution.rb#L15" target="_blank">Execution</a> module, which basically comes down to deserializing arguments if needed (there is <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/core.rb#L116" target="_blank">nothing</a> to deserialize when calling <code>perform_now</code> directly), and calling our <code>perform</code> method, which we defined in the job class. This logic is wrapped in <code>run_callbacks</code> block, which lets you define callbacks <code>before</code>, <code>around</code> and <code>after</code> the execution of <code>perform</code> method.</p>
+
+
+<p>``` ruby active_job/execution.rb
+module ActiveJob
+  module Execution</p>
+
+<pre><code>module ClassMethods
+  def perform_now(*args)
+    job_or_instantiate(*args).perform_now
+  end
+end
+
+# rest of the code which was removed for brevity
+
+def perform_now
+  deserialize_arguments_if_needed
+  run_callbacks :perform do
+    perform(*arguments)
+  end
+rescue =&gt; exception
+  rescue_with_handler(exception) || raise
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>These callbacks are defined inside <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/callbacks.rb" target="_blank">Callbacks</a> module, but its only responsibility is defining callbacks for <code>perform</code> and <code>enqueue</code> method, which help extend the behaviour of the jobs in a pretty unobtrusive manner. For example, if we wanted to log when the job is finished, we could add the following <code>after_perform</code> callback:</p>
+
+
+<p>``` ruby app/jobs/my_awesome_job.rb
+class MyAwesomeJob &lt; ActiveJob::Base
+  after_perform do |job|</p>
+
+<pre><code>Rails.logger.info "#{Time.current}: finished execution of the job: #{job.inspect}"
+</code></pre>
+
+<p>  end</p>
+
+<p>  def perform(user)</p>
+
+<pre><code>User::DoSomethingAwesome.call(user)
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Let’s get back to <code>perform_later</code> method from <code>ConfiguredJob</code>. We could expect <code>enqueue</code> method to be defined  in <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/enqueuing.rb">Enqueuing</a> module, which seems to be the case here as well:</p>
+
+
+<p>``` ruby active_job/enqueuing.rb
+module ActiveJob
+  module Enqueuing</p>
+
+<pre><code>def enqueue(options={})
+  self.scheduled_at = options[:wait].seconds.from_now.to_f if options[:wait]
+  self.scheduled_at = options[:wait_until].to_f if options[:wait_until]
+  self.queue_name   = self.class.queue_name_from_part(options[:queue]) if options[:queue]
+  self.priority     = options[:priority].to_i if options[:priority]
+  run_callbacks :enqueue do
+    if self.scheduled_at
+      self.class.queue_adapter.enqueue_at self, self.scheduled_at
+    else
+      self.class.queue_adapter.enqueue self
+    end
+  end
+  self
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>We can pass several options here - <code>scheduled_at</code> attribute could be configured with <code>wait</code>  (which will schedule a job in specified amount of seconds from current time) and <code>wait_until</code> (which will schedule a job at exact specified time). We can also enforce <code>queue</code> used for the job execution and set the <code>priority</code>. At the end, the method call is delegated to <code>queue_adapter</code>. This logic is wrapped in <code>run_callbacks</code> block, which lets you define callbacks <code>before</code>, <code>around</code> and <code>after</code> the execution of this code. </p>
+
+
+
+
+<p>In <code>Enqueueing</code> module we can also find  <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/enqueuing.rb#L17" target="_blank">perform_later</a> method, which is the part of most basic API of <strong>ActiveJob</strong> and it basically comes down to calling <code>enqueue</code> method without any extra <code>options</code> arguments.</p>
+
+
+<p>``` ruby active_job/enqueuing.rb
+module ActiveJob
+  module Enqueuing</p>
+
+<pre><code>extend ActiveSupport::Concern
+
+module ClassMethods
+  def perform_later(*args)
+    job_or_instantiate(*args).enqueue
+  end
+
+  protected
+    def job_or_instantiate(*args)
+      args.first.is_a?(self) ? args.first : new(*args)
+    end
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<h2>Queue Adapters</h2>
+
+
+
+
+<p>What is this <code>queue_adapter</code> to which we delegate the enqueueing? Let’s take a look at <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/queue_adapter.rb">QueueAdapter</a> module. Its responsibility is exposing reader and writer for <code>queue_adapter</code> accessor, which by default is <code>async</code> adapter. Assigning adapter is quite <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/queue_adapter.rb#L33" target="_blank">flexible</a> and we can pass here a string or a symbol (which will be used for the lookup of the proper adapter), instance of adapter itself or the class of the adapter (which is <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/queue_adapter.rb#L41" target="_blank">deprecated</a>).</p>
+
+
+<p>``` ruby active_job/queue_adapter.rb
+module ActiveJob
+  module QueueAdapter #:nodoc:</p>
+
+<pre><code>extend ActiveSupport::Concern
+
+included do
+  class_attribute :_queue_adapter, instance_accessor: false, instance_predicate: false
+  self.queue_adapter = :async
+end
+
+module ClassMethods
+  def queue_adapter
+    _queue_adapter
+  end
+
+  def queue_adapter=(name_or_adapter_or_class)
+    self._queue_adapter = interpret_adapter(name_or_adapter_or_class)
+  end
+
+  private
+
+  def interpret_adapter(name_or_adapter_or_class)
+    case name_or_adapter_or_class
+    when Symbol, String
+      ActiveJob::QueueAdapters.lookup(name_or_adapter_or_class).new
+    else
+      if queue_adapter?(name_or_adapter_or_class)
+        name_or_adapter_or_class
+      elsif queue_adapter_class?(name_or_adapter_or_class)
+        ActiveSupport::Deprecation.warn "Passing an adapter class is deprecated " \
+          "and will be removed in Rails 5.1. Please pass an adapter name " \
+          "(.queue_adapter = :#{name_or_adapter_or_class.name.demodulize.remove('Adapter').underscore}) " \
+          "or an instance (.queue_adapter = #{name_or_adapter_or_class.name}.new) instead."
+          name_or_adapter_or_class.new
+      else
+        raise ArgumentError
+      end
+    end
+  end
+
+  QUEUE_ADAPTER_METHODS = [:enqueue, :enqueue_at].freeze
+
+  def queue_adapter?(object)
+    QUEUE_ADAPTER_METHODS.all? { |meth| object.respond_to?(meth) }
+  end
+
+  def queue_adapter_class?(object)
+    object.is_a?(Class) &amp;&amp; QUEUE_ADAPTER_METHODS.all? { |meth| object.public_method_defined?(meth) }
+  end
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>All supported queue adapters are defined in <a href="https://github.com/rails/rails/tree/v5.0.0/activejob/lib/active_job/queue_adapters" target="_blank">queue_adapters</a> directory. There are quite a lot of adapters here, so let’s pick some of them.</p>
+
+
+
+
+<h3>Async Adapter</h3>
+
+
+
+
+<p>Let’s start with <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/queue_adapters/async_adapter.rb" target="_blank">AsyncAdapter</a> which is the default one. What is really interesting about this queue adapter is that it doesn’t use any extra services but runs jobs with an in-process thread pool. Under the hood it uses <a href="https://github.com/ruby-concurrency/concurrent-ruby" target="_blank">Concurrent Ruby</a>, which is a collection of modern tools for writing concurrent code, I highly recommend to check it further. We can pass <code>executor_options</code> to constructor, which are then used to create a new instance of <code>Scheduler</code>.</p>
+
+
+<p>``` ruby active_job/queue_adapters/async_adapter.rb
+module ActiveJob
+  module QueueAdapters</p>
+
+<pre><code>class AsyncAdapter
+  def initialize(**executor_options)
+    @scheduler = Scheduler.new(**executor_options)
+  end
+
+  def enqueue(job) #:nodoc:
+    @scheduler.enqueue JobWrapper.new(job), queue_name: job.queue_name
+  end
+
+  def enqueue_at(job, timestamp) #:nodoc:
+    @scheduler.enqueue_at JobWrapper.new(job), timestamp, queue_name: job.queue_name
+  end
+
+  def shutdown(wait: true) #:nodoc:
+    @scheduler.shutdown wait: wait
+  end
+
+  def immediate=(immediate) #:nodoc:
+    @scheduler.immediate = immediate
+  end
+
+  class JobWrapper #:nodoc:
+    def initialize(job)
+      job.provider_job_id = SecureRandom.uuid
+      @job_data = job.serialize
+    end
+
+    def perform
+      Base.execute @job_data
+    end
+  end
+
+  class Scheduler #:nodoc:
+    # code removed for brevity
+  end
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Remember how we could assign <code>queue adapter</code> for ActiveJob in multiple ways? That’s exactly the use case for assigning specific instance of the queue adapter, besides just passing a string / symbol (or class, but that way is deprecated). The <code>Scheduler</code> instance acts in fact like a queue backend and but specifics of how it works are beyond the scope of this article. Nevertheless, the thing to keep in mind is that it exposes two important methods: <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/queue_adapters/async_adapter.rb#L90">enqueue</a> and <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/queue_adapters/async_adapter.rb#L94" target="_blank">enqueue_at</a>:</p>
+
+
+<p>``` ruby active_job/queue_adapters/async_adapter.rb
+module ActiveJob
+  module QueueAdapters</p>
+
+<pre><code>class AsyncAdapter
+  class Scheduler #:nodoc:
+    DEFAULT_EXECUTOR_OPTIONS = {
+      min_threads:     0,
+      max_threads:     Concurrent.processor_count,
+      auto_terminate:  true,
+      idletime:        60, # 1 minute
+      max_queue:       0, # unlimited
+      fallback_policy: :caller_runs # shouldn't matter -- 0 max queue
+    }.freeze
+
+    attr_accessor :immediate
+
+    def initialize(**options)
+      self.immediate = false
+      @immediate_executor = Concurrent::ImmediateExecutor.new
+      @async_executor = Concurrent::ThreadPoolExecutor.new(DEFAULT_EXECUTOR_OPTIONS.merge(options))
+    end
+
+    def enqueue(job, queue_name:)
+      executor.post(job, &amp;:perform)
+    end
+
+    def enqueue_at(job, timestamp, queue_name:)
+      delay = timestamp - Time.current.to_f
+      if delay &gt; 0
+        Concurrent::ScheduledTask.execute(delay, args: [job], executor: executor, &amp;:perform)
+      else
+        enqueue(job, queue_name: queue_name)
+      end
+    end
+
+    def shutdown(wait: true)
+      @async_executor.shutdown
+      @async_executor.wait_for_termination if wait
+    end
+
+    def executor
+      immediate ? @immediate_executor : @async_executor
+    end
+  end
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>The main difference between these two methods is a timestamp (or lack of it) used for executing the job later. </p>
+
+
+
+
+<p>Let’s get back to top-level <code>AsyncAdapter</code> class. The primary interface that is required for all queue adapters to implement is two methods: <code>enqueue</code> and <code>enqueue_at</code>. For <code>Async</code> adapter, these methods simply pass instance of <code>JobWrapper</code> with <code>queue_name</code> and <code>timestamp</code> (only for <code>enqueue_at</code>):</p>
+
+
+<p>``` ruby active_job/queue_adapters/async_adapter.rb
+module ActiveJob
+  module QueueAdapters</p>
+
+<pre><code>class AsyncAdapter
+  def initialize(**executor_options)
+    @scheduler = Scheduler.new(**executor_options)
+  end
+
+  def enqueue(job) #:nodoc:
+    @scheduler.enqueue JobWrapper.new(job), queue_name: job.queue_name
+  end
+
+  def enqueue_at(job, timestamp) #:nodoc:
+    @scheduler.enqueue_at JobWrapper.new(job), timestamp, queue_name: job.queue_name
+  end
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>And what is this <code>JobWrapper</code>? It’s a simple abstraction for passing something that can serialize jobs and knows how to execute them:</p>
+
+
+<p>``` ruby active_job/queue_adapters/async_adapter.rb
+module ActiveJob
+  module QueueAdapters</p>
+
+<pre><code>class AsyncAdapter
+  class JobWrapper #:nodoc:
+    def initialize(job)
+      job.provider_job_id = SecureRandom.uuid
+      @job_data = job.serialize
+    end
+
+    def perform
+      Base.execute @job_data
+    end
+  end
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<h2>Serialization and deserialization</h2>
+
+
+
+
+<p>Let’s take a closer look how it works: <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/execution.rb#L20" target="_blank">execute</a> method is defined in <code>Execution</code> module and it basically comes down to deserializing job data (which was serialized in <code>JobWrapper</code> so that it can be enqueued)  and calling <code>perform_now</code>. This logic is wrapped with <code>run_callbacks</code> block so we can extend this logic by performing some action <code>before</code>, <code>around</code> or <code>after</code> execution logic:</p>
+
+
+<p>``` ruby active_job/execution.rb
+module ActiveJob
+  module Execution</p>
+
+<pre><code>module ClassMethods
+  def execute(job_data) #:nodoc:
+    ActiveJob::Callbacks.run_callbacks(:execute) do
+      job = deserialize(job_data)
+      job.perform_now
+    end
+  end
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p><code>deserialize</code> class method is defined inside <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/core.rb#L35" target="_blank">Core</a> module and what it does is creating a new instance of the job, deserializing data and returning the job:</p>
+
+
+<p>``` ruby active_job/core.rb
+module ActiveJob
+  module Execution</p>
+
+<pre><code>module ClassMethods
+  # Creates a new job instance from a hash created with +serialize+
+  def deserialize(job_data)
+    job = job_data['job_class'].constantize.new
+    job.deserialize(job_data)
+    job
+  end
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Before explaining what happens during the deserialization we should know how the serialized data look like -  it’s a hash containing name of the job class, job id, queue name, priority, locale and serialized arguments:</p>
+
+
+<p>``` ruby active_job/core.rb
+module ActiveJob
+  module Core</p>
+
+<pre><code>def serialize
+  {
+    'job_class'  =&gt; self.class.name,
+    'job_id'     =&gt; job_id,
+    'queue_name' =&gt; queue_name,
+    'priority'   =&gt; priority,
+    'arguments'  =&gt; serialize_arguments(arguments),
+    'locale'     =&gt; I18n.locale.to_s
+  }
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p><code>serialize_arguments</code> method delegates the serialization process to <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/arguments.rb#L43" target="_blank">ActiveJob::Arguments.serialize</a> method, which is mainly responsible for mapping ActiveRecord models from arguments to global ids:</p>
+
+
+<p>``` ruby active_job/core.rb
+module ActiveJob
+  module Core</p>
+
+<pre><code>private
+
+def serialize_arguments(serialized_args)
+  Arguments.serialize(serialized_args)
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p> Here’s an example how serialized arguments may look like:</p>
+
+
+<p>``` ruby</p>
+
+<blockquote><p>ActiveJob::Arguments.serialize([User.find(1), [123, User.find(2)], { &ldquo;current_user&rdquo; => User.find(3)}])
+=> [&ldquo;gid://app-name/User/1&rdquo;, [123, &ldquo;gid://app-name/User/2&rdquo;], {&ldquo;value&rdquo;=>&ldquo;gid://app-name/User/3&rdquo;}]
+```</p></blockquote>
+
+<p>This format can easily be used for enqueuing jobs in different queues.</p>
+
+
+
+
+<p>Just before the execution of the job, the data needs to be deserialized. Like <code>serialize</code> method, <code>deserialize</code> is defined in <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/core.rb#L106" target="_blank">Core</a> module and it assigns job id, queue name, priority, locale and serialized arguments to the job using its accessors. But the arguments are not deserialized just yet, so how does the execution with <code>perform_now</code> work?</p>
+
+
+
+
+<p>Remember how I mentioned before that there is nothing to be deserialized when using <code>perform_now</code> directly? In this case it will be a bit different as we operate on serialized arguments. Deserialization happens just before executing <code>perform</code> method in <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/core.rb#L115" target="_blank">deserialize_arguments_if_needed</a>.</p>
+
+
+<p>``` ruby activejob/lib/active_job/core.rb
+module ActiveJob
+  module Core</p>
+
+<pre><code>private
+
+def deserialize_arguments_if_needed
+  if defined?(@serialized_arguments) &amp;&amp; @serialized_arguments.present?
+    @arguments = deserialize_arguments(@serialized_arguments)
+    @serialized_arguments = nil
+  end
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Again, the deserialization is delegated to <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/arguments.rb#L50" target="_blank">Arguments</a> module and its primary responsibility is turning global ids into real models, so <code>gid://app-name/User/3</code> would be in fact a User record with id equal to 3.</p>
+
+
+
+
+<h2>Exploring more queue adapters</h2>
+
+
+
+
+<h3>Inline Adapter</h3>
+
+
+
+
+<p>Let’s explore some more adapters. Most likely you were using <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/queue_adapters/inline_adapter.rb">InlineAdapter</a> in integration tests for testing the side effects of executing some job. Its logic is very limited: since it’s for the inline execution, it doesn’t support enqueueing jobs for the future execution and <code>enqueue</code> method for performing logic merely calls <code>execute</code> method with serialized arguments:</p>
+
+
+<p>``` ruby activejob/queue_adapters/inline_adapter.rb
+class InlineAdapter
+  def enqueue(job) #:nodoc:</p>
+
+<pre><code>Base.execute(job.serialize)
+</code></pre>
+
+<p>  end</p>
+
+<p>  def enqueue_at(*) #:nodoc:</p>
+
+<pre><code>raise NotImplementedError, "Use a queueing backend to enqueue jobs in the future. Read more at http://guides.rubyonrails.org/active_job_basics.html"
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<h3>Sidekiq Adapter</h3>
+
+
+
+
+<p>Let’s check a queue adapter for one of the most commonly used frameworks for background processing - <a href="https://github.com/mperham/sidekiq" target="_blank">Sidekiq</a>. Sidekiq requires defining a class implementing <code>perform</code> instance method executing the logic of the job and inclusion of <code>Sidekiq::Worker</code> module to be enqueued in its queue. Just like <code>AsyncAdapter</code>, <code>SidekiqAdapter</code> uses internal <code>JobWrapper</code> class, which includes <code>Sidekiq::Worker</code> and implements <code>perform</code> method taking <code>job_data</code> as an argument and its logic is limited to delegating execution of the logic to <code>ActiveJob::Base.execute</code> method:</p>
+
+
+<p>``` ruby activejob/queue_adapters/sidekiq_adapter.rb
+class SidekiqAdapter
+  def enqueue(job) #:nodoc:</p>
+
+<pre><code>#Sidekiq::Client does not support symbols as keys
+job.provider_job_id = Sidekiq::Client.push \
+  'class'   =&gt; JobWrapper,
+  'wrapped' =&gt; job.class.to_s,
+  'queue'   =&gt; job.queue_name,
+  'args'    =&gt; [ job.serialize ]
+</code></pre>
+
+<p>  end</p>
+
+<p>  def enqueue_at(job, timestamp) #:nodoc:</p>
+
+<pre><code>job.provider_job_id = Sidekiq::Client.push \
+  'class'   =&gt; JobWrapper,
+  'wrapped' =&gt; job.class.to_s,
+  'queue'   =&gt; job.queue_name,
+  'args'    =&gt; [ job.serialize ],
+  'at'      =&gt; timestamp
+</code></pre>
+
+<p>  end</p>
+
+<p>  class JobWrapper #:nodoc:</p>
+
+<pre><code>include Sidekiq::Worker
+
+def perform(job_data)
+  Base.execute job_data
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Again, like every other adapter, <code>SidekiqAdapter</code> implements <code>enqueue</code> and <code>enqueue_at</code> methods and both of them push jobs to Sidekiq’s queue by passing some meta info that is later used for identifying proper job class, executing in specific queue and of course the serialized arguments. As an extra argument, <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/queue_adapters/sidekiq_adapter.rb#L33" target="_blank">enqueue_at</a> passes timestamp for executing the job at specific time. Pushing a job to Sidekiq queue returns internal job id which is then assigned to <code>provider_job_id</code> attribute.</p>
+
+
+
+
+<h3>DelayedJob Adapter</h3>
+
+
+
+
+<p>Let’s take a look at adapter for arguably most common choice backed by application’s database - DelayedJob. The pattern is exactly the same as for Sidekiq Adapter: We have <code>enqueue</code> and <code>enqueue_at</code> methods and both of them push the job to the queue with extra info about queue name, priority and, for <code>enqueue_at</code> method, the time to run the job at. Just like <code>SidekiqAdapter</code>, it wraps serialized job with internal <code>JobWrapper</code> instance which delegates execution of the logic to <code>ActiveJob::Base.execute</code>. At the end, the internal job id from DelayedJob’s queue is assigned to <code>provider_job_id</code> attribute:</p>
+
+
+<p>``` ruby activejob/queue_adatpers/delayed_job_adapter.rb
+class DelayedJobAdapter
+  def enqueue(job) #:nodoc:</p>
+
+<pre><code>delayed_job = Delayed::Job.enqueue(JobWrapper.new(job.serialize), queue: job.queue_name, priority: job.priority)
+job.provider_job_id = delayed_job.id
+delayed_job
+</code></pre>
+
+<p>  end</p>
+
+<p>  def enqueue_at(job, timestamp) #:nodoc:</p>
+
+<pre><code>delayed_job = Delayed::Job.enqueue(JobWrapper.new(job.serialize), queue: job.queue_name, priority: job.priority, run_at: Time.at(timestamp))
+job.provider_job_id = delayed_job.id
+delayed_job
+</code></pre>
+
+<p>  end</p>
+
+<p>  class JobWrapper #:nodoc:</p>
+
+<pre><code>attr_accessor :job_data
+
+def initialize(job_data)
+  @job_data = job_data
+end
+
+def perform
+  Base.execute(job_data)
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<h3>TestAdapter</h3>
+
+
+
+
+<p>Have you ever needed to test which jobs were enqueued or performed when executing some specs? There’s a good change you were using test helpers provided by ActiveJob or <a href="https://github.com/gocardless/rspec-activejob" target="_blank">rspec-activejob</a> for that. All these assertions are quite easy to handle thanks to <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/queue_adapters/test_adapter.rb" target="_blank">TestAdapter</a> which exposes some extra API for keeping track of enqueued and performed jobs adding <code>enqueued_jobs</code> and <code>peformed_jobs</code> attributes, which are populated when calling <code>enqueue</code> and <code>enqueue_at</code> methods. You can also configure if the jobs should be actually executed by changing <code>perform_enqueued_jobs</code> and <code>perform_enqueued_at_jobs</code> flags.  You can also whitelist which jobs could be enqueued with <code>filter</code> attribute.</p>
+
+
+<p>``` ruby activejob/queue_adapters/test_adapter.rb
+class TestAdapter
+  attr_accessor(:perform_enqueued_jobs, :perform_enqueued_at_jobs, :filter)
+  attr_writer(:enqueued_jobs, :performed_jobs)</p>
+
+<p>  # Provides a store of all the enqueued jobs with the TestAdapter so you can check them.
+  def enqueued_jobs</p>
+
+<pre><code>@enqueued_jobs ||= []
+</code></pre>
+
+<p>  end</p>
+
+<p>  # Provides a store of all the performed jobs with the TestAdapter so you can check them.
+  def performed_jobs</p>
+
+<pre><code>@performed_jobs ||= []
+</code></pre>
+
+<p>  end</p>
+
+<p>  def enqueue(job) #:nodoc:</p>
+
+<pre><code>return if filtered?(job)
+
+job_data = job_to_hash(job)
+enqueue_or_perform(perform_enqueued_jobs, job, job_data)
+</code></pre>
+
+<p>  end</p>
+
+<p>  def enqueue_at(job, timestamp) #:nodoc:</p>
+
+<pre><code>return if filtered?(job)
+
+job_data = job_to_hash(job, at: timestamp)
+enqueue_or_perform(perform_enqueued_at_jobs, job, job_data)
+</code></pre>
+
+<p>  end</p>
+
+<p>  private</p>
+
+<p>  def job_to_hash(job, extras = {})</p>
+
+<pre><code>{ job: job.class, args: job.serialize.fetch('arguments'), queue: job.queue_name }.merge!(extras)
+</code></pre>
+
+<p>  end</p>
+
+<p>  def enqueue_or_perform(perform, job, job_data)</p>
+
+<pre><code>if perform
+  performed_jobs &amp;lt;&amp;lt; job_data
+  Base.execute job.serialize
+else
+  enqueued_jobs &amp;lt;&amp;lt; job_data
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  def filtered?(job)</p>
+
+<pre><code>filter &amp;amp;&amp;amp; !Array(filter).include?(job.class)
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<h2>Wrapping up</h2>
+
+
+
+
+<p>We’ve learned quite a lot how <code>ActiveJob</code> works under the hood - what kind of public API is available and how to extend it with custom queue adapters.  Even though understanding the internals of Rails may require some effort and time, it’s worth going deeper and exploring the architecture of the framework we use for everyday development. Here are some key takeaways:</p>
+
+
+
+
+<ul>
+  <li>You can provide the exact instance of queue adapter for ActiveJob, not only a string or symbol, which lets you pass some extra configuration options</li>
+  <li>Adapter pattern is a great choice when we have several services with different interfaces but we want to have one unified interface for using all of them</li>
+  <li>Most of the ActiveJob's logic is divided into modules (which seems to be a common pattern in other layers of Rails), but benefits of doing so are unclear: why Execution is a separate module from Core? What kind of benefits does splitting queue-related logic to QueuePriority, QueueName and QueueAdapter give? I don’t really see it as a way to decouple code as e.g. <code>Enqueuing</code> module depends on logic from QueueName, yet it’s not required explicitly, it just depends on existence of <code>queue_adapter</code> attribute. It would be more clear if Base or Core module acted like a facade and delegated responsibilities to some other classes. If anyone knows any reason behind this kind of design, please write it in a comment, I’m really curious about it.</li>
+  <li>To support another background jobs execution framework, you just need to add a queue adapter class implementing <code>enqueue</code> and <code>enequeue_at</code> methods which under the hood would push the job to the queue and delegate  execution of the logic to <code>ActiveJob::Base.execute</code> method passing the serialised job as an argument.</li>
+  <li>Rails internals are not that scary :)</li>
+</ul>
+
+
+
+
+<p>If there’s any particular part of Rails that seems "magical" and you would like to see it decoded, let me know in the comments, I want to make sure I cover the needs of my readers.</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Little-known but useful Rails features: ActiveRecord.extending]]></title>
+    <link href="http://Azdaroth.github.io/blog/2016/08/30/little-known-but-useful-rails-features-activerecord-querymethods-dot-extending/"/>
+    <updated>2016-08-30T12:00:00+02:00</updated>
+    <id>http://Azdaroth.github.io/blog/2016/08/30/little-known-but-useful-rails-features-activerecord-querymethods-dot-extending</id>
+    <content type="html"><![CDATA[<p>Every now and then I discover some features in <strong>Rails</strong> that are not that (arguably) commonly used, but there are some use cases when they turn out to be super useful and the <strong>best tool</strong> for the job. One of them would definitely be a nice addition to <code>ActiveRecord::QueryMethods</code> - <code>extending</code> method. Let’s see how it could be used in the <strong>Rails apps</strong>.</p>
+
+
+
+
+<!--more-->
+
+
+
+
+<h2>ActiveRecord::QueryMethods.extending - a great tool for managing common scopes</h2>
+
+
+
+
+<p>Imagine you are developing an <strong>API</strong> in your Rails application from where you will be fetching data periodically. To avoid getting all the records every time (which may end up with tons of unnecessary requests) and returning only the changed records since the last time they were fetched, you may want to implement some scope that will be returning records updated from given date that may look like this:</p>
+
+
+<p><code>rb
+scope :updated_from, -&gt;(datetime) { where("updated_at &gt;= ?", datetime) }
+</code></p>
+
+<p>To handle this logic in <strong>API</strong>, we could implement a generic method returning either all records or records updated from given date, depending on the presence of <code>updated_from</code> param:</p>
+
+
+<p>``` rb
+def fetch_records(model_class, params)
+  records = model_class.all
+  if updated_from = ActiveRecord::Type::DateTime.new.type_cast_from_user(params[:updated_from])</p>
+
+<pre><code>records = records.updated_from(updated_from)
+</code></pre>
+
+<p>  end
+  records
+end
+```</p>
+
+<p>If that was the case only for one or two models, we could just add <code>updated_from</code> scope to them and that would be all. What if we needed it in plenty of other models as well?</p>
+
+
+
+
+<p>One way to solve this problem would be defining <code>updated_from</code> <strong>scope</strong> in <code>ApplicationRecord</code> and letting the models <strong>inherit</strong> it from this base class:</p>
+
+
+<p>``` rb
+class ApplicationRecord &lt; ActiveRecord::Base
+  self.abstract_class = true</p>
+
+<p>  scope :updated_from, &ndash;>(datetime) { where(&ldquo;updated_at >= ?&rdquo;, datetime) }
+end
+```</p>
+
+<p>The problem with this solution is that <code>updated_from</code> scope would be available for all the models, even for the ones that won’t really need it. Another way would be extracting <code>updated_from</code> to <code>HasUpdatedFrom</code> models' <strong>concern</strong>:</p>
+
+
+<p>``` rb
+module HasUpdatedFrom
+  extend ActiveSupport::Concern</p>
+
+<p>  included do</p>
+
+<pre><code>scope :updated_from, -&gt;(datetime) { where("updated_at &gt;= ?", datetime) }
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>and including it in all the models that will be using that scope, but it’s a bit cumbersome. Fortunately, there’a a <strong>perfect solution</strong> for such problem in Rails: <a href="http://apidock.com/rails/ActiveRecord/QueryMethods/extending" target="_blank">ActiveRecord::QueryMethods.extending</a>, which lets you extend a collection with additional methods. In this case, we could simply define <code>updated_from</code> method in <code>HasUpdatedFrom</code> module: </p>
+
+
+<p>``` rb
+module HasUpdatedFrom
+  def updated_from(datetime)</p>
+
+<pre><code>where("updated_at &gt;= ?", datetime)
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>and use <code>ActiveRecord::QueryMethods.extending</code> in our <code>fetch_records</code> method just like this:</p>
+
+
+<p>``` rb
+def fetch_records(model_class, params)
+  records = model_class.all
+  if updated_from = ActiveRecord::Type::DateTime.new.type_cast_from_user(params[:updated_from])</p>
+
+<pre><code>records = records.extending(HasUpdatedFrom).updated_from(updated_from)
+</code></pre>
+
+<p>  end
+  records
+end
+```</p>
+
+<p>and that’s it! You won’t need to remember about including proper concern in every model used in such API or defining any scopes in <code>ApplicationRecord</code> and inheriting them in models that won’t ever use them, just use <code>ActiveRecord::QueryMethods.extending</code> and <strong>extend your collection</strong> with extra methods only when you need them.</p>
+
+
+
+
+<h2>Wrapping up</h2>
+
+
+
+
+<p><code>ActiveRecord::QueryMethods.extending</code> is not that commonly used Rails feature, but it’s definitely a useful one for managing common scopes in your models.</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Decoding Rails Magic: How Does Calling Class Methods On Mailers Work]]></title>
+    <link href="http://Azdaroth.github.io/blog/2016/07/31/decoding-rails-magic-how-does-calling-class-methods-on-mailers-work/"/>
+    <updated>2016-07-31T21:15:00+02:00</updated>
+    <id>http://Azdaroth.github.io/blog/2016/07/31/decoding-rails-magic-how-does-calling-class-methods-on-mailers-work</id>
+    <content type="html"><![CDATA[<p>Have you ever wondered how it is possible that calling <strong>class methods</strong> on <strong>mailers</strong> work in Rails, even though you only define some instance methods in those classes? It seems like it’s quite common question, especially when you see the mailers in action for the first time. Apparently, there is some Ruby "magic" involved here, so let’s try to <b>decode</b> it and check what happens under the hood.</p>
+
+
+
+
+<!--more-->
+
+
+
+
+<h2>Anatomy of ActionMailer mailers</h2>
+
+
+
+
+<p>Let’s start with adding a very simple <code>WelcomeMailer</code> as an example:</p>
+
+
+<p>``` ruby app/mailers/welcome_mailer.rb
+class WelcomeMailer &lt; ApplicationMailer
+  def welcome(user)</p>
+
+<pre><code>@user = user
+mail to: user.email
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>If we wanted to send <code>welcome</code> email to some <code>user</code>, we would write the following code:</p>
+
+
+<p><code>ruby
+WelcomeMailer.welcome(user).deliver_now
+</code></p>
+
+<p>It’s quite interesting that it works just like that, even though we have never defined any class method in <code>WelcomeMailer</code>.  Most likely it’s handled with <code>method_missing</code> magic in <code>ActionMailer::Base</code>. To verify that, let’s dive into Rails source code. In <a href="https://github.com/rails/rails/blob/v5.0.0/actionmailer/lib/action_mailer/base.rb#L561" target="_blank">ActionMailer::Base class</a> we indeed have <code>method_missing</code> defined for class methods:</p>
+
+
+<p>``` ruby
+def method_missing(method_name, *args) # :nodoc:
+  if action_methods.include?(method_name.to_s)</p>
+
+<pre><code>MessageDelivery.new(self, method_name, *args)
+</code></pre>
+
+<p>  else</p>
+
+<pre><code>super
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Basically, any <strong>action method</strong> defined in mailer class will be intercepted by <code>method_missing</code> and will return an instance of <code>MessageDelivery</code>, otherwise it runs the default implementation. And where do <code>action methods</code> come from? <code>ActionMailer::Base</code> inherits from <code>AbstractController::Base</code>, so it works exactly the same as for controllers - it returns a set of public instance methods of a given class.</p>
+
+
+
+
+<p>We now have a better idea what actually happens when we call class methods on mailers, but it still doesn’t answer the questions: how is the mailer instantiated and how is the instance method called on it? To investigate it further, we need to check <a href="https://github.com/rails/rails/blob/v5.0.0/actionmailer/lib/action_mailer/message_delivery.rb" target="_blank">MessageDelivery</a> class. We are particularly interested in <a href="https://github.com/rails/rails/blob/v5.0.0/actionmailer/lib/action_mailer/message_delivery.rb#L94" target="_blank">deliver_now</a> method (could be any other delivery method, but let’s stick to this single one) with the following body:</p>
+
+
+<p>``` ruby
+def deliver_now
+  processed_mailer.handle_exceptions do</p>
+
+<pre><code>message.deliver
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Looks like <a href="https://github.com/rails/rails/blob/v5.0.0/actionmailer/lib/action_mailer/message_delivery.rb#L103" target="_blank">processed_mailer</a> is the key method that we were looking for:</p>
+
+
+<p>``` ruby
+def processed_mailer
+  @processed_mailer ||= @mailer_class.new.tap do |mailer|</p>
+
+<pre><code>mailer.process @action, *@args
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>This method creates the instance of the mailer, calls <code>process</code> method with <code>@action</code> argument (which is the name of the instance method) and with <code>@args</code>, which are the arguments passed to the class method and in the end it returns the created instance of the mailer. Inside <code>handle_exceptions</code> the  <code>deliver</code> method is called. And where does this one come from? <code>MessageDelivery</code> inherits from <code>Delegator</code> class and <a href="https://github.com/rails/rails/blob/v5.0.0/actionmailer/lib/action_mailer/message_delivery.rb#L26" target="_blank">delegates</a>  all the method calls for methods not implemented by <code>MessageDelivery</code> to <code>processed_mailer.message</code>, which is the attribute defined in our mailer instance itself.</p>
+
+
+
+
+<p>And that’s it! It took a bit switching between different methods and classes to understand the entire flow and what happens under the hood, but it’s clear that such interface hiding all the complexity is quite convenient.</p>
+
+
+
+
+<h2>Wrapping up</h2>
+
+
+
+
+<p>Some parts of Rails may contain a lot of "magic" which makes understanding the details more difficult. However, thanks to that magic, the usage of these parts is greatly simplified by the nice abstraction and easy to use interface, which is exactly the case with Rails mailers.</p>
+
+]]></content>
+  </entry>
+  
+</feed>

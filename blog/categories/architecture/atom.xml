@@ -1,0 +1,1495 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: architecture | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
+  <link href="http://Azdaroth.github.io/blog/categories/architecture/atom.xml" rel="self"/>
+  <link href="http://Azdaroth.github.io/"/>
+  <updated>2018-06-12T17:11:48+02:00</updated>
+  <id>http://Azdaroth.github.io/</id>
+  <author>
+    <name><![CDATA[Karol Galanciak]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Scaling Up Rails Applications With PostgreSQL Table Partitioning - Part 3]]></title>
+    <link href="http://Azdaroth.github.io/blog/2016/07/10/scaling-up-rails-applications-with-postgresql-table-partitioning-part-3/"/>
+    <updated>2016-07-10T23:50:00+02:00</updated>
+    <id>http://Azdaroth.github.io/blog/2016/07/10/scaling-up-rails-applications-with-postgresql-table-partitioning-part-3</id>
+    <content type="html"><![CDATA[<p>After publishing recent blog posts about table partitioning - its <a href="https://karolgalanciak.com/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/" target="_blank">SQL basics part</a> and <a href="https://karolgalanciak.com/blog/2016/06/12/scaling-up-rails-applications-with-postgresql-table-partitioning-part-2/" target="_blank">how to use in in Rails application</a> I was asked quite a few times what is the real <b>performance gain</b> when using <strong>table partitioning</strong>. This is a great question, so let's answer it by performing some benchmarks.</p>
+
+
+
+
+<!--more-->
+
+
+
+
+<h2>Setting up data for benchmarking</h2>
+
+
+
+
+<p>As the table partitioning is intended to be used in Rails application, it makes most sense to perform benchmark with ActiveRecord's overhead as well - we want to have some real-world comparison.</p>
+
+
+
+
+<p>In the two previous parts we were discussing <code>orders</code> example, so let's do the same here. We can start with generating model:</p>
+
+
+<p><code>rb
+rails generate Order
+</code></p>
+
+<p>For benchmarking use case without table partitioning we don't really need to change much, just add an index for <code>created_at</code> column:</p>
+
+
+<p>``` rb
+class CreateOrders &lt; ActiveRecord::Migration
+  def change</p>
+
+<pre><code>create_table :orders do |t|
+  t.timestamps null: false
+end
+
+add_index :orders, :created_at
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>In case of partitioning, however, we need to set up some extra tables. We can reuse the examples from <a href="https://karolgalanciak.com/blog/2016/06/12/scaling-up-rails-applications-with-postgresql-table-partitioning-part-2/" target="_blank">part 2</a>. Let's add the partitoned gem to the Gemfile:</p>
+
+
+<p><code>rb
+gem 'activerecord-redshift-adapter',  git: "git@github.com:arp/activerecord-redshift-adapter.git", branch: "rails4-compatibility"
+gem 'partitioned', git: "git@github.com:dkhofer/partitioned.git", branch: "rails-4-2"
+</code></p>
+
+<p>And set up <code>Order</code> model with the base class for partitioning by year (all the details are explained in <a href="https://karolgalanciak.com/blog/2016/06/12/scaling-up-rails-applications-with-postgresql-table-partitioning-part-2/" target="_blank">part 2</a>):</p>
+
+
+<p>``` rb
+class PartitionedByCreatedAtYearly &lt; Partitioned::ByYearlyTimeField
+  self.abstract_class = true</p>
+
+<p>  def self.partition_time_field</p>
+
+<pre><code>:created_at
+</code></pre>
+
+<p>  end</p>
+
+<p>  partitioned do |partition|</p>
+
+<pre><code>partition.index :id, unique: true
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p><code>rb
+class Order &lt; PartitionedByCreatedAtYearly
+end
+</code></p>
+
+<p>Finally, we can set up the migration:</p>
+
+
+<p>``` rb
+class CreateOrders &lt; ActiveRecord::Migration
+  def up</p>
+
+<pre><code>create_table :orders do |t|
+  t.timestamps null: false
+end
+
+add_index :orders, :created_at
+
+Order.create_infrastructure
+dates = Order.partition_generate_range(Date.today, Date.today + 4.year)
+Order.create_new_partition_tables(dates)
+</code></pre>
+
+<p>  end</p>
+
+<p>  def down</p>
+
+<pre><code>Order.delete_infrastructure
+drop_table :orders
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>For sample data let's start with creating 1 million orders for every year from 2016 to 2020. This should be enough to make the tables moderately big for real-world example and perform some meaningful benchmarking. Here's the code to create these records with random date from given year: </p>
+
+
+<p>``` rb
+[2016, 2017, 2018, 2019, 2020].each do |current_year|
+  dates_range = Date.new(current_year, 1, 1)..Date.new(current_year, 12, 31)
+  Order.transaction do</p>
+
+<pre><code>1000000.times do
+  Order.create(created_at: dates_range.to_a.sample)
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Don't expect this one to finish fast ;).</p>
+
+
+
+
+<p>To get even better idea about the performance difference, we could also test the queries with different amount of data. After each benchmark we could create additional 250 000 records for each year and rerun benchmarks. This could be reapeated until we reach 2 mln records in each table (10 mln in total) so that way we would have data for 5 different orders' amount.</p>
+
+
+
+
+<h2>Benchmark methodology</h2>
+
+
+
+
+<p>To have a meaningful benchmark that can be applicable to some real-world app, we need to test the queries that are likely to happen. For that purpose we can try selecting all orders, orders from particular year, from several years, from past few months and we could also try finding some orders with random id. We should also limit the amount of records we return, well, unless we want to kill the local machine ;). Counting the amount of orders for different date ranges would also be a nice addition. For partitioned tables we could also throw in some additional benchmarks comparing the performance between selecting orders from given partitioned child table and from master table and letting the PostgreSQL figure out how to handle the query (i.e. using constraint exclusion for filtering tables).</p>
+
+
+
+
+<p>In this case we don't really care about exact time for each query, but rather the ratio of query time (or iterations per seconds) for partitioned and not-partitioned table. Counting iterations per seconds for every query with <a href="https://github.com/evanphx/benchmark-ips">banchmark-ips</a> will be perfect for that. To calculate this ratio (let's call it Partioned To Not Partioned Ratio) we would just need to divide the result from partitioned table by the result from non-partitioned table.</p>
+
+
+
+
+<p>The amount of data is quite an important factor for this benchmark, especially with comparison to some <strong>PostgreSQL</strong> config settings. The size of orders table for different amount is the following:</p>
+
+
+<p><code>
+1,00 mln orders each -  5,00 mln total) - 249 MB
+1,25 mln orders each -  6,25 mln total) - 311 MB
+1,50 mln orders each -  7,50 mln total) - 373 MB
+1,75 mln orders each -  8,75 mln total) - 436 MB
+2,00 mln orders each - 10,00 mln total) - 498 MB
+</code></p>
+
+<p>These are the most essential config settings on my local machine which were used during the benchmark:</p>
+
+
+<p><code>
+shared_buffers = 128MB
+temp_buffers = 8MB
+work_mem = 4MB
+maintenance_work_mem = 64MB
+constraint_exclusion = partition
+</code></p>
+
+<p>From our benchmark's perspective, <code>shared_buffers</code> and <code>constraint_exclusion</code> parameters are the crucial ones - <code>shared_buffers</code>determines how much memory can be used for caching tables and <code>constraint_exclusion</code> will prevent scanning all child tables if the query conditions make it clear it is not required.</p>
+
+
+
+
+<p>Here's the final benchmark code, for patitioned tables:</p>
+
+
+<p>``` rb
+require &lsquo;benchmark/ips&rsquo;</p>
+
+<p>Benchmark.ips do |x|
+  x.config(time: 45, warmup: 2)</p>
+
+<p>  x.report(&ldquo;select_all&rdquo;) { Order.limit(1000) }
+  x.report(&ldquo;select_all_count&rdquo;) { Order.count }
+  x.report(&ldquo;select_2016&rdquo;) { Order.where(&ldquo;created_at >= &lsquo;2016-01-01&rsquo; AND created_at &lt;= &lsquo;2016-12-31&rsquo;&rdquo;).limit(1000) }
+  x.report(&ldquo;select_2016_count&rdquo;) { Order.where(&ldquo;created_at >= &lsquo;2016-01-01&rsquo; AND created_at &lt;= &lsquo;2016-12-31&rsquo;&rdquo;).count }
+  x.report(&ldquo;select_2016_partitioned&rdquo;) {  Order.from_partition(Date.new(2016)).limit(1000) }
+  x.report(&ldquo;select_2016_partitioned_count&rdquo;) {  Order.from_partition(Date.new(2016)).count }
+  x.report(&ldquo;select_2018&rdquo;) { Order.where(&ldquo;created_at >= &lsquo;2018-01-01&rsquo; AND created_at &lt;= &lsquo;2018-12-31&rsquo;&rdquo;).limit(1000) }
+  x.report(&ldquo;select_2018_count&rdquo;) { Order.where(&ldquo;created_at >= &lsquo;2018-01-01&rsquo; AND created_at &lt;= &lsquo;2018-12-31&rsquo;&rdquo;).count }
+  x.report(&ldquo;select_2018_partitioned&rdquo;) { Order.from_partition(Date.new(2018)).limit(1000) }
+  x.report(&ldquo;select_2018_partitioned_count&rdquo;) { Order.from_partition(Date.new(2018)).count }
+  x.report(&ldquo;select_2020&rdquo;) { Order.where(&ldquo;created_at >= &lsquo;2020-01-01&rsquo; AND created_at &lt;= &lsquo;2020-12-31&rsquo;&rdquo;).limit(100) }
+  x.report(&ldquo;select_2020_count&rdquo;) { Order.where(&ldquo;created_at >= &lsquo;2020-01-01&rsquo; AND created_at &lt;= &lsquo;2020-12-31&rsquo;&rdquo;).count }
+  x.report(&ldquo;select_2020_partitioned&rdquo;) { Order.from_partition(Date.new(2020)).limit(1000) }
+  x.report(&ldquo;select_2020_partitioned_count&rdquo;) { Order.from_partition(Date.new(2020)).count }
+  x.report(&ldquo;select_2016_2019&rdquo;) { Order.where(&ldquo;created_at >= &lsquo;2016-01-01&rsquo; AND created_at &lt;= &lsquo;2019-12-31&rsquo;&rdquo;).limit(1000) }
+  x.report(&ldquo;select_2016_2019_count&rdquo;) { Order.where(&ldquo;created_at >= &lsquo;2016-01-01&rsquo; AND created_at &lt;= &lsquo;2019-12-31&rsquo;&rdquo;).count }
+  x.report(&ldquo;select_2018_2020&rdquo;) { Order.where(&ldquo;created_at >= &lsquo;2018-01-01&rsquo; AND created_at &lt;= &lsquo;2020-12-31&rsquo;&rdquo;).limit(1000) }
+  x.report(&ldquo;select_2018_2020_count&rdquo;) { Order.where(&ldquo;created_at >= &lsquo;2018-01-01&rsquo; AND created_at &lt;= &lsquo;2020-12-31&rsquo;&rdquo;).count }
+  x.report(&ldquo;select_last_3_months&rdquo;) { Order.where(&ldquo;created_at >= ?&rdquo;, 3.months.ago).limit(1000) }
+  x.report(&ldquo;select_last_3_months_count&rdquo;) { Order.where(&ldquo;created_at >= ?&rdquo;, 3.months.ago).count }
+  x.report(&ldquo;select_last_6_months&rdquo;) { Order.where(&ldquo;created_at >= ?&rdquo;, 6.months.ago).limit(1000) }
+  x.report(&ldquo;select_last_6_months_count&rdquo;) { Order.where(&ldquo;created_at >= ?&rdquo;, 6.months.ago).count }
+  x.report(&ldquo;select_random_order&rdquo;) { Order.find(rand(5000000)) }</p>
+
+<p>  x.compare!
+end
+```</p>
+
+<p>and for tables without partitioning:</p>
+
+
+<p>``` rb
+require &lsquo;benchmark/ips&rsquo;</p>
+
+<p>Benchmark.ips do |x|
+  x.config(time: 45, warmup: 2)</p>
+
+<p>  x.report(&ldquo;select_all&rdquo;) { Order.limit(1000) }
+  x.report(&ldquo;select_all_count&rdquo;) { Order.count }
+  x.report(&ldquo;select_2016&rdquo;) { Order.where(&ldquo;created_at >= &lsquo;2016-01-01&rsquo; AND created_at &lt;= &lsquo;2016-12-31&rsquo;&rdquo;).limit(1000) }
+  x.report(&ldquo;select_2016_count&rdquo;) { Order.where(&ldquo;created_at >= &lsquo;2016-01-01&rsquo; AND created_at &lt;= &lsquo;2016-12-31&rsquo;&rdquo;).count }
+  x.report(&ldquo;select_2018&rdquo;) { Order.where(&ldquo;created_at >= &lsquo;2018-01-01&rsquo; AND created_at &lt;= &lsquo;2018-12-31&rsquo;&rdquo;).limit(1000) }
+  x.report(&ldquo;select_2018_count&rdquo;) { Order.where(&ldquo;created_at >= &lsquo;2018-01-01&rsquo; AND created_at &lt;= &lsquo;2018-12-31&rsquo;&rdquo;).count }
+  x.report(&ldquo;select_2020&rdquo;) { Order.where(&ldquo;created_at >= &lsquo;2020-01-01&rsquo; AND created_at &lt;= &lsquo;2020-12-31&rsquo;&rdquo;).limit(100) }
+  x.report(&ldquo;select_2020_count&rdquo;) { Order.where(&ldquo;created_at >= &lsquo;2020-01-01&rsquo; AND created_at &lt;= &lsquo;2020-12-31&rsquo;&rdquo;).count }
+  x.report(&ldquo;select_2016_2019&rdquo;) { Order.where(&ldquo;created_at >= &lsquo;2016-01-01&rsquo; AND created_at &lt;= &lsquo;2019-12-31&rsquo;&rdquo;).limit(1000) }
+  x.report(&ldquo;select_2016_2019_count&rdquo;) { Order.where(&ldquo;created_at >= &lsquo;2016-01-01&rsquo; AND created_at &lt;= &lsquo;2019-12-31&rsquo;&rdquo;).count }
+  x.report(&ldquo;select_2018_2020&rdquo;) { Order.where(&ldquo;created_at >= &lsquo;2018-01-01&rsquo; AND created_at &lt;= &lsquo;2020-12-31&rsquo;&rdquo;).limit(1000) }
+  x.report(&ldquo;select_2018_2020_count&rdquo;) { Order.where(&ldquo;created_at >= &lsquo;2018-01-01&rsquo; AND created_at &lt;= &lsquo;2020-12-31&rsquo;&rdquo;).count }
+  x.report(&ldquo;select_last_3_months&rdquo;) { Order.where(&ldquo;created_at >= ?&rdquo;, 3.months.ago).limit(1000) }
+  x.report(&ldquo;select_last_3_months_count&rdquo;) { Order.where(&ldquo;created_at >= ?&rdquo;, 3.months.ago).count }
+  x.report(&ldquo;select_last_6_months&rdquo;) { Order.where(&ldquo;created_at >= ?&rdquo;, 6.months.ago).limit(1000) }
+  x.report(&ldquo;select_last_6_months_count&rdquo;) { Order.where(&ldquo;created_at >= ?&rdquo;, 6.months.ago).count }
+  x.report(&ldquo;select_random_order&rdquo;) { Order.find(rand(5000000)) }</p>
+
+<p>  x.compare!
+end
+```</p>
+
+<p>Each operation will run for 45 seconds. We also need to include some warmup, otherwise the results would be less accurate.</p>
+
+
+
+
+<h2>Benchmark results</h2>
+
+
+
+
+<p>Here are the results of the benchmarks:</p>
+
+
+<p>```
+partitioned with 5 mln orders (1 mln orders per table)</p>
+
+<p>Comparison:</p>
+
+<p>select_all:                     74897.5 i/s
+select_all_count:               1.9 i/s &ndash; 40047.58x slower
+select_2016:                    44578.5 i/s &ndash; 1.68x slower
+select_2016_count:              4.8 i/s &ndash; 15640.07x slower
+select_2016_partitioned:        57904.0 i/s &ndash; 1.29x slower
+select_2016_partitioned_count:  12.7 i/s &ndash; 5882.06x slower
+select_2018:                    45989.3 i/s &ndash; 1.63x slower
+select_2018_count:              4.9 i/s &ndash; 15263.65x slower
+select_2018_partitioned:        58718.1 i/s &ndash; 1.28x slower
+select_2018_partitioned_count:  13.7 i/s &ndash; 5475.04x slower
+select_2020:                    49474.6 i/s &ndash; 1.51x slower
+select_2020_count:              5.3 i/s &ndash; 14206.52x slower
+select_2020_partitioned:        64135.2 i/s &ndash; 1.17x slower
+select_2020_partitioned_count:  14.1 i/s &ndash; 5310.68x slower
+select_2016_2019:               49829.4 i/s &ndash; 1.50x slower
+select_2016_2019_count:         1.3 i/s &ndash; 58027.53x slower
+select_2018_2020:               49869.1 i/s &ndash; 1.50x slower
+select_2018_2020_count:         1.7 i/s &ndash; 43108.82x slower
+select_last_3_months:           3904.2 i/s &ndash; 19.18x slower
+select_last_3_months_count:     1.3 i/s &ndash; 55527.51x slower
+select_last_6_months:           3909.1 i/s &ndash; 19.16x slower
+select_last_6_months_count:     1.3 i/s &ndash; 56307.51x slower
+select_random_order:            2629.8 i/s &ndash; 28.48x slower
+```</p>
+
+<p>```
+no partitions with 5 mln orders</p>
+
+<p>Comparison:
+select_all:                   81600.5 i/s
+select_all_count:             2.6 i/s &ndash; 31546.89x slower
+select_2016:                  50899.1 i/s &ndash; 1.60x slower
+select_2016_count:            2.4 i/s &ndash; 34118.71x slower
+select_2018:                  49785.5 i/s &ndash; 1.64x slower
+select_2018_count:            2.3 i/s &ndash; 35518.36x slower
+select_2020:                  50353.3 i/s &ndash; 1.62x slower
+select_2020_count:            2.2 i/s &ndash; 36477.64x slower
+select_2016_2019:             50161.9 i/s &ndash; 1.63x slower
+select_2016_2019_count:       1.2 i/s &ndash; 69940.19x slower
+select_2018_2020:             50317.3 i/s &ndash; 1.62x slower
+select_2018_2020_count:       1.4 i/s &ndash; 59057.02x slower
+select_last_3_months:         3907.2 i/s &ndash; 20.88x slower
+select_last_3_months_count:   1.5 i/s &ndash; 55355.65x slower
+select_last_6_months:         3904.1 i/s &ndash; 20.90x slower
+select_last_6_months_count:   1.5 i/s &ndash; 54201.25x slower
+select_random_order:          2395.9 i/s &ndash; 34.06x slower
+```</p>
+
+<p>```
+partitioned with 6,25 mln orders (1,25 mln orders per table)</p>
+
+<p>Comparison:
+select_all:                     73717.9 i/s
+select_all_count:               1.4 i/s &ndash; 51747.39x slower
+select_2016:                    44895.7 i/s &ndash; 1.64x slower
+select_2016_count:              3.9 i/s &ndash; 19133.01x slower
+select_2016_partitioned:        57672.1 i/s &ndash; 1.28x slower
+select_2016_partitioned_count:  10.2 i/s &ndash; 7211.72x slower
+select_2018:                    45076.8 i/s &ndash; 1.64x slower
+select_2018_count:              3.7 i/s &ndash; 19909.78x slower
+select_2018_partitioned:        57480.8 i/s &ndash; 1.28x slower
+select_2018_partitioned_count:  10.3 i/s &ndash; 7177.85x slower
+select_2020:                    44549.7 i/s &ndash; 1.65x slower
+select_2020_count:              3.8 i/s &ndash; 19585.29x slower
+select_2020_partitioned:        58816.4 i/s &ndash; 1.25x slower
+select_2020_partitioned_count:  10.3 i/s &ndash; 7167.61x slower
+select_2016_2019:               45154.9 i/s &ndash; 1.63x slower
+select_2016_2019_count:         0.9 i/s &ndash; 78001.75x slower
+select_2018_2020:               44243.8 i/s &ndash; 1.67x slower
+select_2018_2020_count:         1.3 i/s &ndash; 57270.76x slower
+select_last_3_months:           3607.3 i/s &ndash; 20.44x slower
+select_last_3_months_count:     1.0 i/s &ndash; 72969.17x slower
+select_last_6_months:           3650.9 i/s &ndash; 20.19x slower
+select_last_6_months_count:     1.0 i/s &ndash; 73116.36x slower
+select_random_order:            2734.6 i/s &ndash; 26.96x slower
+```</p>
+
+<p>```
+no partitions with 6,25 mln orders</p>
+
+<p>Comparison:
+select_all:                    81474.7 i/s
+select_all_count:              2.0 i/s &ndash; 40681.89x slower
+select_2016:                   51134.3 i/s &ndash; 1.59x slower
+select_2016_count:             4.8 i/s &ndash; 17008.37x slower
+select_2018:                   51037.4 i/s &ndash; 1.60x slower
+select_2018_count:             4.8 i/s &ndash; 16942.96x slower
+select_2020:                   51078.8 i/s &ndash; 1.60x slower
+select_2020_count:             4.8 i/s &ndash; 17054.96x slower
+select_2016_2019:              50950.0 i/s &ndash; 1.60x slower
+select_2016_2019_count:        0.9 i/s &ndash; 86364.33x slower
+select_2018_2020:              50587.6 i/s &ndash; 1.61x slower
+select_2018_2020_count:        1.1 i/s &ndash; 72926.49x slower
+select_last_3_months:          3889.7 i/s &ndash; 20.95x slower
+select_last_3_months_count:    1.2 i/s &ndash; 67447.88x slower
+select_last_6_months:          3917.4 i/s &ndash; 20.80x slower
+select_last_6_months_count:    1.2 i/s &ndash; 67757.10x slower
+select_random_order:           3052.7 i/s &ndash; 26.69x slower</p>
+
+<p>```</p>
+
+<p>```
+partitioned with 7,5 mln orders (1,5 mln orders per table)</p>
+
+<p>Comparison:
+select_all:                      73455.4 i/s
+select_all_count:                1.2 i/s &ndash; 60875.32x slower
+select_2016:                     45358.7 i/s &ndash; 1.62x slower
+select_2016_count:               3.2 i/s &ndash; 23066.47x slower
+select_2016_partitioned:         57730.7 i/s &ndash; 1.27x slower
+select_2016_partitioned_count:   9.0 i/s &ndash; 8161.54x slower
+select_2018:                     47094.5 i/s &ndash; 1.56x slower
+select_2018_count:               3.3 i/s &ndash; 22478.03x slower
+select_2018_partitioned:         59741.3 i/s &ndash; 1.23x slower
+select_2018_partitioned_count:   8.9 i/s &ndash; 8289.60x slower
+select_2020:                     46247.4 i/s &ndash; 1.59x slower
+select_2020_count:               3.2 i/s &ndash; 23056.21x slower
+select_2020_partitioned:         58764.7 i/s &ndash; 1.25x slower
+select_2020_partitioned_count:   8.8 i/s &ndash; 8318.22x slower
+select_2016_2019:                44424.4 i/s &ndash; 1.65x slower
+select_2016_2019_count:          0.8 i/s &ndash; 94546.45x slower
+select_2018_2020:                45202.2 i/s &ndash; 1.63x slower
+select_2018_2020_count:          1.1 i/s &ndash; 68131.10x slower
+select_last_3_months:            3530.4 i/s &ndash; 20.81x slower
+select_last_3_months_count:      0.8 i/s &ndash; 89367.97x slower
+select_last_6_months:            3473.7 i/s &ndash; 21.15x slower
+select_last_6_months_count:      0.8 i/s &ndash; 92414.10x slower
+select_random_order:             1224.6 i/s &ndash; 59.98x slower
+```</p>
+
+<p>```
+no partitions with 7,5 mln orders</p>
+
+<p>Comparison:
+select_all:                   81357.1 i/s
+select_all_count:             1.6 i/s &ndash; 52303.23x slower
+select_2016:                  45865.5 i/s &ndash; 1.77x slower
+select_2016_count:            3.8 i/s &ndash; 21673.22x slower
+select_2018:                  49084.3 i/s &ndash; 1.66x slower
+select_2018_count:            3.7 i/s &ndash; 21837.91x slower
+select_2020:                  48963.7 i/s &ndash; 1.66x slower
+select_2020_count:            3.8 i/s &ndash; 21364.75x slower
+select_2016_2019:             49560.5 i/s &ndash; 1.64x slower
+select_2016_2019_count:       0.7 i/s &ndash; 109331.83x slower
+select_2018_2020:             47704.7 i/s &ndash; 1.71x slower
+select_2018_2020_count:       0.8 i/s &ndash; 96387.27x slower
+select_last_3_months:         3614.5 i/s &ndash; 22.51x slower
+select_last_3_months_count:   0.9 i/s &ndash; 88464.34x slower
+select_last_6_months:         3732.7 i/s &ndash; 21.80x slower
+select_last_6_months_count:   0.9 i/s &ndash; 85721.04x slower
+select_random_order:          2433.7 i/s &ndash; 33.43x slower
+```</p>
+
+<p>```
+partitioned with 8,75 mln orders (1,75 mln orders per table)</p>
+
+<p>Comparison:
+select_all:                      69684.2 i/s
+select_all_count:                1.0 i/s &ndash; 68219.96x slower
+select_2016:                     44071.1 i/s &ndash; 1.58x slower
+select_2016_count:               2.7 i/s &ndash; 26202.73x slower
+select_2016_partitioned:         56547.4 i/s &ndash; 1.23x slower
+select_2016_partitioned_count:   7.1 i/s &ndash; 9790.82x slower
+select_2018:                     44275.5 i/s &ndash; 1.57x slower
+select_2018_count:               2.8 i/s &ndash; 25299.18x slower
+select_2018_partitioned:         59494.0 i/s &ndash; 1.17x slower
+select_2018_partitioned_count:   7.8 i/s &ndash; 8963.99x slower
+select_2020:                     48330.6 i/s &ndash; 1.44x slower
+select_2020_count:               2.9 i/s &ndash; 24392.21x slower
+select_2020_partitioned:         61583.6 i/s &ndash; 1.13x slower
+select_2020_partitioned_count:   7.7 i/s &ndash; 9056.91x slower
+select_2016_2019:                48135.1 i/s &ndash; 1.45x slower
+select_2016_2019_count:          0.7 i/s &ndash; 100006.51x slower
+select_2018_2020:                47873.0 i/s &ndash; 1.46x slower
+select_2018_2020_count:          1.0 i/s &ndash; 72089.48x slower
+select_last_3_months:            3789.7 i/s &ndash; 18.39x slower
+select_last_3_months_count:      0.7 i/s &ndash; 93772.85x slower
+select_last_6_months:            3743.8 i/s &ndash; 18.61x slower
+select_last_6_months_count:      0.7 i/s &ndash; 104123.34x slower
+select_random_order:             1594.8 i/s &ndash; 43.70x slower
+```</p>
+
+<p>```
+no partitions with 8,75 mln orders</p>
+
+<p>Comparison:
+select_all:                    78650.3 i/s
+select_all_count:              1.4 i/s &ndash; 57896.82x slower
+select_2016:                   49334.2 i/s &ndash; 1.59x slower
+select_2016_count:             2.8 i/s &ndash; 28319.15x slower
+select_2018:                   49795.5 i/s &ndash; 1.58x slower
+select_2018_count:             2.8 i/s &ndash; 27838.51x slower
+select_2020:                   49627.9 i/s &ndash; 1.58x slower
+select_2020_count:             2.9 i/s &ndash; 27517.70x slower
+select_2016_2019:              50133.2 i/s &ndash; 1.57x slower
+select_2016_2019_count:        0.7 i/s &ndash; 118255.69x slower
+select_2018_2020:              49375.8 i/s &ndash; 1.59x slower
+select_2018_2020_count:        0.7 i/s &ndash; 108822.92x slower
+select_last_3_months:          3574.1 i/s &ndash; 22.01x slower
+select_last_3_months_count:    0.8 i/s &ndash; 97753.55x slower
+select_last_6_months:          3562.1 i/s &ndash; 22.08x slower
+select_last_6_months_count:    0.8 i/s &ndash; 99605.90x slower
+select_random_order:           3419.0 i/s &ndash; 23.00x slower
+```</p>
+
+<p>```
+partitioned with 10 mln orders (2 mln orders per table)</p>
+
+<p>Comparison:
+select_all:                      73071.4 i/s
+select_all_count:                0.9 i/s &ndash; 77393.87x slower
+select_2016:                     46767.5 i/s &ndash; 1.56x slower
+select_2016_count:               2.5 i/s &ndash; 29518.12x slower
+select_2016_partitioned:         59404.4 i/s &ndash; 1.23x slower
+select_2016_partitioned_count:   6.6 i/s &ndash; 11005.71x slower
+select_2018:                     47674.2 i/s &ndash; 1.53x slower
+select_2018_count:               2.4 i/s &ndash; 30309.30x slower
+select_2018_partitioned:         58371.9 i/s &ndash; 1.25x slower
+select_2018_partitioned_count:   6.5 i/s &ndash; 11256.61x slower
+select_2020:                     46546.0 i/s &ndash; 1.57x slower
+select_2020_count:               2.3 i/s &ndash; 31198.92x slower
+select_2020_partitioned:         58862.7 i/s &ndash; 1.24x slower
+select_2020_partitioned_count:   6.3 i/s &ndash; 11672.16x slower
+select_2016_2019:                46781.4 i/s &ndash; 1.56x slower
+select_2016_2019_count:          0.6 i/s &ndash; 122988.06x slower
+select_2018_2020:                46147.2 i/s &ndash; 1.58x slower
+select_2018_2020_count:          0.8 i/s &ndash; 90296.27x slower
+select_last_3_months:            3699.8 i/s &ndash; 19.75x slower
+select_last_3_months_count:      0.6 i/s &ndash; 116559.31x slower
+select_last_6_months:            3716.8 i/s &ndash; 19.66x slower
+select_last_6_months_count:      0.6 i/s &ndash; 121600.00x slower
+select_random_order:             1548.6 i/s &ndash; 47.19x slower
+```</p>
+
+<p>```
+no partitions with 10 mln orders</p>
+
+<p>Comparison:
+select_all:                    77376.3 i/s
+select_all_count:              1.2 i/s &ndash; 66625.00x slower
+select_2016:                   46285.5 i/s &ndash; 1.67x slower
+select_2016_count:             2.3 i/s &ndash; 33061.51x slower
+select_2018:                   47121.7 i/s &ndash; 1.64x slower
+select_2018_count:             2.4 i/s &ndash; 32082.74x slower
+select_2020:                   50322.0 i/s &ndash; 1.54x slower
+select_2020_count:             2.5 i/s &ndash; 31443.35x slower
+select_2016_2019:              48615.7 i/s &ndash; 1.59x slower
+select_2016_2019_count:        0.6 i/s &ndash; 135045.30x slower
+select_2018_2020:              49185.5 i/s &ndash; 1.57x slower
+select_2018_2020_count:        0.7 i/s &ndash; 114814.42x slower
+select_last_3_months:          3781.1 i/s &ndash; 20.46x slower
+select_last_3_months_count:    0.7 i/s &ndash; 106257.71x slower
+select_last_6_months:          3737.8 i/s &ndash; 20.70x slower
+select_last_6_months_count:    0.7 i/s &ndash; 107643.07x slower
+select_random_order:           3655.0 i/s &ndash; 21.17x slower
+```</p>
+
+<p>That way we've obtained iterations per second for different queries. Let's calculate now the ratio of query time for partitionied and not partitioned table. To get the better idea about the relation between the ratios for different orders' amount, I put the results on the graph (due to the proportions you may want to see them in better quality by clicking the link below each graph).</p>
+
+
+<p>```
+| Orders amount (mln) | Select All Partitioned To Not Partitioned Ratio |
+|&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&ndash;|&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&ndash;|
+|        5,00         |                    0,917                        |
+|        6,25         |                    0,905                        |
+|        7,50         |                    0,903                        |
+|        8,75         |                    0,886                        |
+|       10,00         |                    0,944                        |</p>
+
+<p>```
+<img src="/images/partitioned_benchmark_graphs/select_all_graph.png" title="&lsquo;select_all_graph&rsquo; &lsquo;select_all_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_all_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select All Count Partitioned To Not Partitioned Ratio |
+|---------------------|--------------------------------------------------------|
+|        5,00         |                      0,731                             |
+|        6,25         |                      0,700                             |
+|        7,50         |                      0,750                             |
+|        8,75         |                      0,714                             |
+|       10,00         |                      0,750                             |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_all_count_graph.png" title="&lsquo;select_all_count&rsquo; &lsquo;select_all_count&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_all_count_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2016 Partitioned (master table) To Not Partitioned Ratio |
+|---------------------|------------------------------------------------------------------|
+|        5,00         |                         0,876                                    |
+|        6,25         |                         0,878                                    |
+|        7,50         |                         0,989                                    |
+|        8,75         |                         0,893                                    |
+|       10,00         |                         1,010                                    |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2016_p_to_np_master_graph.png" title="&lsquo;select_2016_p_to_np_master_graph&rsquo; &lsquo;select_2016_p_to_np_master_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2016_p_to_np_master_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2016 Partitioned (child table) To Not Partitioned Ratio  |
+|---------------------|------------------------------------------------------------------|
+|        5,00         |                         1,138                                    |
+|        6,25         |                         1,128                                    |
+|        7,50         |                         1,259                                    |
+|        8,75         |                         1,146                                    |
+|       10,00         |                         1,283                                    |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2016_p_to_np_child_graph.png" title="&lsquo;select_2016_p_to_np_child_graph&rsquo; &lsquo;select_2016_p_to_np_child_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2016_p_to_np_child_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2016 Partitioned (child table) To Master Table Ratio       |
+|---------------------|--------------------------------------------------------------------|
+|        5,00         |                         1,299                                      |
+|        6,25         |                         1,285                                      |
+|        7,50         |                         1,273                                      |
+|        8,75         |                         1,283                                      |
+|       10,00         |                         1,270                                      |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2016_p_to_p_graph.png" title="&lsquo;select_2016_p_to_p_graph&rsquo; &lsquo;select_2016_p_to_p_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2016_p_to_p_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2016 Count Partitioned (master table) To Not Partitioned Ratio |
+|---------------------|------------------------------------------------------------------------|
+|        5,00         |                            2,000                                       |
+|        6,25         |                            0,813                                       |
+|        7,50         |                            0,842                                       |
+|        8,75         |                            0,964                                       |
+|       10,00         |                            1,087                                       |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2016_count_p_to_np_master_graph.png" title="&lsquo;select_2016_count_p_to_np_master_graph&rsquo; &lsquo;select_2016_count_p_to_np_master_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2016_count_p_to_np_master_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2016 Count Partitioned (child table) To Not Partitioned Ratio |
+|---------------------|-----------------------------------------------------------------------|
+|        5,00         |                                5,292                                  |
+|        6,25         |                                2,125                                  |
+|        7,50         |                                2,368                                  |
+|        8,75         |                                2,536                                  |
+|       10,00         |                                2,870                                  |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2016_count_p_to_np_child_graph.png" title="&lsquo;select_2016_count_p_to_np_child_graph&rsquo; &lsquo;select_2016_count_p_to_np_child_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2016_count_p_to_np_child_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2016 Count Partitioned (child table) To Master Table Ratio |
+|---------------------|--------------------------------------------------------------------|
+|        5,00         |                               2,649                                |
+|        6,25         |                               2,615                                |
+|        7,50         |                               2,813                                |
+|        8,75         |                               2,630                                |
+|       10,00         |                               2,640                                |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2016_count_p_to_p_graph.png" title="&lsquo;select_2016_count_p_to_p_graph&rsquo; &lsquo;select_2016_count_p_to_p_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2016_count_p_to_p_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2018 Partitioned (master table) To Not Partitioned Ratio |
+|---------------------|------------------------------------------------------------------|
+|        5,00         |                          0,924                                   |
+|        6,25         |                          0,883                                   |
+|        7,50         |                          0,959                                   |
+|        8,75         |                          0,889                                   |
+|       10,00         |                          1,012                                   |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2018_p_to_np_master_graph.png" title="&lsquo;select_2018_p_to_np_master_graph&rsquo; &lsquo;select_2018_p_to_np_master_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2018_p_to_np_master_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2018 Partitioned (child table) To Not Partitioned Ratio |
+|---------------------|-----------------------------------------------------------------|
+|        5,00         |                           1,179                                 |
+|        6,25         |                           1,126                                 |
+|        7,50         |                           1,217                                 |
+|        8,75         |                           1,195                                 |
+|       10,00         |                           1,239                                 |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2018_p_to_np_child_graph.png" title="&lsquo;select_2018_p_to_np_child_graph&rsquo; &lsquo;select_2018_p_to_np_child_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2018_p_to_np_child_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2018 Partitioned (child table) To Master Table Ratio |
+|---------------------|--------------------------------------------------------------|
+|        5,00         |                           1,277                              |
+|        6,25         |                           1,275                              |
+|        7,50         |                           1,269                              |
+|        8,75         |                           1,344                              |
+|       10,00         |                           1,244                              |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2018_p_to_p_graph.png" title="&lsquo;select_2018_p_to_p_graph&rsquo; &lsquo;select_2018_p_to_p_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2018_p_to_p_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2018 Count Partitioned (master table) To Not Partitioned Ratio |
+|---------------------|------------------------------------------------------------------------|
+|        5,00         |                            2,130                                       |
+|        6,25         |                            0,771                                       |
+|        7,50         |                            0,892                                       |
+|        8,75         |                            1,000                                       |
+|       10,00         |                            1,000                                       |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2018_count_p_to_np_master_graph.png" title="&lsquo;select_2018_count_p_to_np_master_graph&rsquo; &lsquo;select_2018_count_p_to_np_master_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2018_count_p_to_np_master_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2018 Count Partitioned (child table) To Not Partitioned Ratio |
+|---------------------|-----------------------------------------------------------------------|
+|        5,00         |                           5,957                                       |
+|        6,25         |                           2,146                                       |
+|        7,50         |                           2,405                                       |
+|        8,75         |                           2,786                                       |
+|       10,00         |                           2,708                                       |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2018_count_p_to_np_child_graph.png" title="&lsquo;select_2018_count_p_to_np_child_graph&rsquo; &lsquo;select_2018_count_p_to_np_child_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2018_count_p_to_np_child_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2018 Count Partitioned (child table) To Master Table Ratio |
+|---------------------|--------------------------------------------------------------------|
+|        5,00         |                              2,796                                 |
+|        6,25         |                              2,784                                 |
+|        7,50         |                              2,697                                 |
+|        8,75         |                              2,786                                 |
+|       10,00         |                              2,708                                 |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2018_count_p_to_p_graph.png" title="&lsquo;select_2018_count_p_to_p_graph&rsquo; &lsquo;select_2018_count_p_to_p_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2018_count_p_to_p_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2020 Partitioned (master tables) To Not Partitioned Ratio |
+|---------------------|-------------------------------------------------------------------|
+|        5,00         |                            0,983                                  |
+|        6,25         |                            0,873                                  |
+|        7,50         |                            0,945                                  |
+|        8,75         |                            0,984                                  |
+|       10,00         |                            0,925                                  |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2020_p_to_np_master_graph.png" title="&lsquo;select_2020_p_to_np_master_graph&rsquo; &lsquo;select_2020_p_to_np_master_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2020_p_to_np_master_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2020 Partitioned (child table) To Not Partitioned Ratio |
+|---------------------|-----------------------------------------------------------------|
+|        5,00         |                             1,274                               |
+|        6,25         |                             1,151                               |
+|        7,50         |                             1,200                               |
+|        8,75         |                             1,241                               |
+|       10,00         |                             1,170                               |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2020_p_to_np_child_graph.png" title="&lsquo;select_2020_p_to_np_child_graph&rsquo; &lsquo;select_2020_p_to_np_child_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2020_p_to_np_child_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2020 Partitioned (child table) To Master Table Ratio |
+|---------------------|--------------------------------------------------------------|
+|        5,00         |                            1,296                             |
+|        6,25         |                            1,320                             |
+|        7,50         |                            1,270                             |
+|        8,75         |                            1,274                             |
+|       10,00         |                            1,265                             |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2020_p_to_p_graph.png" title="&lsquo;select_2020_p_to_p_graph&rsquo; &lsquo;select_2020_p_to_p_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2020_p_to_p_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2020 Count Partitioned (master table) To Not Partitioned Ratio |
+|---------------------|------------------------------------------------------------------------|
+|        5,00         |                            2,409                                       |
+|        6,25         |                            0,792                                       |
+|        7,50         |                            0,842                                       |
+|        8,75         |                            1,000                                       |
+|       10,00         |                            0,920                                       |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2020_count_p_to_np_master_graph.png" title="&lsquo;select_2020_count_p_to_np_master_graph&rsquo; &lsquo;select_2020_count_p_to_np_master_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2020_count_p_to_np_master_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2020 Count Partitioned (child table) To Not Partitioned Ratio |
+|---------------------|-----------------------------------------------------------------------|
+|        5,00         |                               6,227                                   |
+|        6,25         |                               2,146                                   |
+|        7,50         |                               2,316                                   |
+|        8,75         |                               2,656                                   |
+|       10,00         |                               2,520                                   |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2020_count_p_to_np_child_graph.png" title="&lsquo;select_2020_count_p_to_np_child_graph&rsquo; &lsquo;select_2020_count_p_to_np_child_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2020_count_p_to_np_child_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2020 Count Partitioned (child table) To Master Table Ratio |
+|---------------------|--------------------------------------------------------------------|
+|        5,00         |                              2,660                                 |
+|        6,25         |                              2,711                                 |
+|        7,50         |                              2,750                                 |
+|        8,75         |                              2,656                                 |
+|       10,00         |                              2,739                                 |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2020_count_p_to_p_graph.png" title="&lsquo;select_2020_count_p_to_p_graph&rsquo; &lsquo;select_2020_count_p_to_p_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2020_count_p_to_p_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2016-2019 Partitioned To Not Partitioned Ratio |
+|---------------------|--------------------------------------------------------|
+|        5,00         |                       0,993                            |
+|        6,25         |                       0,886                            |
+|        7,50         |                       0,896                            |
+|        8,75         |                       0,960                            |
+|       10,00         |                       0,962                            |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2016-2019_p_to_np_graph.png" title="&lsquo;select_2016-2019_p_to_np_graph&rsquo; &lsquo;select_2016-2019_p_to_np_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2016-2019_p_to_np_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2016-2019 Count Partitioned To Not Partitioned Ratio |
+|---------------------|--------------------------------------------------------------|
+|        5,00         |                            1,083                             |
+|        6,25         |                            1,000                             |
+|        7,50         |                            1,143                             |
+|        8,75         |                            1,000                             |
+|       10,00         |                            1,000                             |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2016-2019_count_p_to_np_graph.png" title="&lsquo;select_2016-select_2016-2019_count_p_to_np_graph&rsquo; &lsquo;select_2016-2019_count_p_to_np_graph-2019_p_to_np_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2016-2019_count_p_to_np_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2018-2020 Partitioned To Not Partitioned Ratio           |
+|---------------------|------------------------------------------------------------------|
+|        5,00         |                          0,991                                   |
+|        6,25         |                          0,875                                   |
+|        7,50         |                          0,948                                   |
+|        8,75         |                          0,970                                   |
+|       10,00         |                          0,938                                   |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2018-2020_p_to_np_graph.png" title="&lsquo;select_2018-2020_p_to_np_graph&rsquo; &lsquo;select_2018-2020_p_to_np_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2018-2020_p_to_np_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select 2018-2020 Count Partitioned To Not Partitioned Ratio |
+|---------------------|--------------------------------------------------------------|
+|        5,00         |                          1,214                               |
+|        6,25         |                          1,182                               |
+|        7,50         |                          1,375                               |
+|        8,75         |                          1,429                               |
+|       10,00         |                          1,143                               |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_2018-2020_count_p_to_np_graph.png" title="&lsquo;select_2018-2020_count_p_to_np_graph&rsquo; &lsquo;2020_count_p_to_np_graph-2020_p_to_np_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_2018-2020_count_p_to_np_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select Last 3 Months Partitioned To Not Partitioned Ratio |
+|---------------------|------------------------------------------------------------|
+|        5,00         |                            0,999                           |
+|        6,25         |                            0,927                           |
+|        7,50         |                            0,977                           |
+|        8,75         |                            1,060                           |
+|       10,00         |                            0,978                           |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_last_3_months_graph.png" title="&lsquo;select_last_3_months_graph&rsquo; &lsquo;select_last_3_months_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_last_3_months_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select Last 3 Months Count Partitioned To Not Partitioned Ratio |
+|---------------------|------------------------------------------------------------------|
+|        5,00         |                            0,867                                 |
+|        6,25         |                            0,833                                 |
+|        7,50         |                            0,889                                 |
+|        8,75         |                            0,875                                 |
+|       10,00         |                            0,857                                 |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_last_3_months_count_graph.png" title="&lsquo;select_last_3_months_count_graph&rsquo; &lsquo;select_last_3_months_count_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_last_3_months_count_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select Last 6 Months Partitioned To Not Partitioned Ratio |
+|---------------------|------------------------------------------------------------|
+|        5,00         |                         1,001                              |
+|        6,25         |                         0,932                              |
+|        7,50         |                         0,931                              |
+|        8,75         |                         1,051                              |
+|       10,00         |                         0,994                              |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_last_6_months_graph.png" title="&lsquo;select_last_3_months_graph&rsquo; &lsquo;select_last_6_months_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_last_6_months_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select Last 6 Months Count Partitioned To Not Partitioned Ratio |
+|---------------------|------------------------------------------------------------------|
+|        5,00         |                          0,867                                   |
+|        6,25         |                          0,833                                   |
+|        7,50         |                          0,889                                   |
+|        8,75         |                          0,875                                   |
+|       10,00         |                          0,857                                   |
+</code>
+<img src="/images/partitioned_benchmark_graphs/select_last_6_months_count_graph.png" title="&lsquo;select_last_6_months_count_graph&rsquo; &lsquo;select_last_6_months_count_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_last_6_months_count_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p><code>
+| Orders amount (mln) |  Select Random Partitioned To Not Partitioned Ratio |
+|---------------------|-----------------------------------------------------|
+|        5,00         |                          1,098                      |
+|        6,25         |                          0,896                      |
+|        7,50         |                          0,503                      |
+|        8,75         |                          0,466                      |
+|       10,00         |                          0,424                      |
+</code></p>
+
+<p><img src="/images/partitioned_benchmark_graphs/select_random_graph.png" title="&lsquo;select_random_graph&rsquo; &lsquo;select_random_graph&rsquo;" ></p>
+
+<p class="center">
+  <a href="http://Azdaroth.github.io/images/partitioned_benchmark_graphs/select_random_graph.png" target="_blank">See in better quality</a>
+</p>
+
+
+
+
+<p>Let's break down these benchmarks to several groups:</p>
+
+
+
+
+<p>For selecting all records and counting them the obvious conclusion is that for partitioned tables the queries are slower: slightly slower for just selecting them and noticeably slower for counting them. For selecting all orders, the ratio of partitioned to not partitioned tables query times most likely decreases as the tables' size grow and for counting it is not clear: the data doesn't show any regular correlation, we could expect the ratio would also decrease for the larger amount of data, however, we can't really tell based on this benchmark, which even suggests it could be a constant value. Nevertheless, table partitioning isn't the best idea if the queries are primarily run across all the tables.</p>
+
+
+
+
+<p>The results for selecting orders (queries for orders from years: 2016, 2018, 2020) only from specific date range which matches the constraints for children partitioned tabled look quite interesting: The more records we have, the better ratio (in favour of table of partitioning) we get. Table partitioning doesn't always yield better results when the child table is not specified (see: Partitioned (master table) To Not Partitioned Ratio), but there's a certain size of the tables when we get the ratio above 1, which means queries for partitioned tables (even without specifying a child table) are faster. When selecting from partitioned child table (see: Partitioned (child table) To Not Partitioned Ratio) the queries are faster for partitioned tables regardless of the size, which was expected. Depending on the size of the table, the difference can be quite significant, up to 28%. The data is not clear enough to be certain about the correlation with amount of orders / table size (substantial irregularity for orders from years 2020), but probably the bigger the tables are, the bigger difference of query time between partitioned and not partitioned tables, similarly to the case when the child table is not specified. The difference between explicitly running queries against a specific child table and running against a master table and relying on constraints exclusion it quite surprising: I was expecting only a slight difference, however, specifying a child table can make the queries up to 35% faster. There is a possibility this difference decreases slowly the more records there are in the tables, however, we would need more benchmarks to prove or disprove this hypothesis as there is another possibility of having costant ratio.</p>
+
+
+
+
+<p>The general correlation for counting the records which can be put in the specific partitioned child tables is the same as for selecting the orders: the more records in the tables, the better performance table partitioning yields. When the child table is not specified, counting records can be faster for not partitioned tables until we reach a certain size where table partitioning seems to be a better choice performance-wise. For counting orders from all the years (2016, 2018, 2020) for 5 mln orders, the ratios are significantly different comparing to the values for higher amount of orders, which can't be easily explained. It's quite interesting that it happened for the queries for all the tables used in the benchmark, which might be worth investigating further, however, I would treat them as irrelevant in this case and not consider them at all. When the partitioned table is specified, the results are always better in favour of table partitioning - we can expect queries to be more than 2 times faster, even up to almost 3 times faster. Similarly to selecting the orders, the ratio of running queries against child table and master table is either a constant or slightly decreases as the amount of orders grows.</p>
+
+
+
+
+<p>For selecting records form multiple children tables, the Partioned To Not Partitioned Ratio is lower than 1, which means that table partitioning would be a inferior choice for such queries, regardless of the size. However, the difference is not that significant. On the other hand, for counting the records it looks like table partitioning yields better performance, which is especially clear for 2018-2020 range, but we can't tell what's the correlation with the amount of orders based on the obtained results.</p>
+
+
+
+
+<p>The performance for selecting records from last N months (here 3 and 6 accordingly) is quite similar for both partitioned and not partitioned strategies (ratio close to 1), which doesn't change when the amount of orders grows. However, counting records is significantly slower, but the ratio most likely remains constant as the table gets bigger.</p>
+
+
+
+
+<p>Initially, there seems to be no difference in query time between selecting orders from partitioned and not-partitioned table, but as the amount of orders grows, the performance keeps getting worse considerably, which is expected as the constraints exclusion can't be applied in such case.</p>
+
+
+
+
+<p>To sum up:</p>
+
+
+
+
+<ul>
+  <li>The larger amount of records, the better performance table partitioning yields</li>
+  <li>Table partitioning is not optimal for all type of queries, it should be mostly used when querying only a subset of records covered by a particular child table</li>
+  <li>Specifying exact child table yields much better peformance than querying master table and relying on constraint exclusion</li>
+</ul>
+
+
+
+
+<h2>Wrapping up</h2>
+
+
+
+
+<p>Even though table partitioning requires some extra overhead and may be tricky to get started with, it is clear that the performance benefits of using it may outweight the costs when applying to the right queries. However, we need to be aware that it is not the perfect choice for all the queries and in some cases it can deteriorate the performance.</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Scaling Up Rails Applications With PostgreSQL Table Partitioning - Part 2]]></title>
+    <link href="http://Azdaroth.github.io/blog/2016/06/12/scaling-up-rails-applications-with-postgresql-table-partitioning-part-2/"/>
+    <updated>2016-06-12T22:45:00+02:00</updated>
+    <id>http://Azdaroth.github.io/blog/2016/06/12/scaling-up-rails-applications-with-postgresql-table-partitioning-part-2</id>
+    <content type="html"><![CDATA[<p>In the previous <a href="https://karolgalanciak.com/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/" target="_blank">blog post</a> we learned some basics about <strong>table partitioning</strong>: how it works and what kind of problems it solves. So far we've been discussing mostly basic concepts with raw <strong>SQL</strong> examples. But the essential question in our case would be: how to make it work inside <strong>Rails application</strong> then? Let's see what we can do about it.</p>
+
+
+
+
+<!--more-->
+
+
+
+
+<h2>Partitioning tables with <code>partitioned</code> gem</h2>
+
+
+
+
+<p>It turns out there's no built-in support for table partitioning in ActiveRecord. Fortunately, there's a gem that makes it pretty straight-forward to apply this concept to your models: <a href="https://github.com/fiksu/partitioned" target="_blank">partitioned</a>. Not only does it have several strategies for partitioning (e.g. by foreign key or by yearly / weekly / monthly and you can easily create custom ones by subclassing base class and defining proper methods) making it easy to perform <strong>CRUD</strong> operations when dealing with multiple tables, but it also provides some methods to create and destroy infrastructure (separate schema for partitioned tables) and some helper methods for generating tables based on partitioning criteria, even with indexes and constraints! Let's get back to example from previous the blog post with orders. Firstly, add <code>partitioned</code> gem to the Gemfile. Unfortunately, there are some issues with compatibility with Rails 4.2 at the time I was experimenting with it, so it might be necessary to use some forks. The following combination should work with Rails 4.2.6:</p>
+
+
+<p><code>
+gem 'activerecord-redshift-adapter',  git: "git@github.com:arp/activerecord-redshift-adapter.git", branch: "rails4-compatibility"
+gem 'partitioned', git: "git@github.com:dkhofer/partitioned.git", branch: "rails-4-2"
+</code></p>
+
+<p>and of course run <code>bundle install</code>. Now we can generate model:</p>
+
+
+<p><code>
+rails generate model Order
+</code></p>
+
+<p>Firstly, let's set up the partitioned Order model. To handle partitioning strategy for separate tables for every year based on <code>created_at</code> column, we could define the following base class:</p>
+
+
+<p>``` ruby app/models/partitioned_by_created_at_yearly.rb
+class PartitionedByCreatedAtYearly &lt; Partitioned::ByYearlyTimeField
+  self.abstract_class = true</p>
+
+<p>  def self.partition_time_field</p>
+
+<pre><code>:created_at
+</code></pre>
+
+<p>  end</p>
+
+<p>  partitioned do |partition|</p>
+
+<pre><code>partition.index :id, unique: true
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>This class inherits from <code>Partitioned::ByYearlyTimeField</code> to handle exactly the strategy we need for orders. We set this class to be an abstract one to make it clear it's not related to any table in the database. We also need to provide <code>partition_time_field</code>, in our case it's <code>created_at</code> column. In <code>partitioned</code> block we can define some extra constraints and indexes that will be used when creating children tables. The next thing would be to make it a parent class for <code>Order</code> model:</p>
+
+
+<p><code>ruby app/models/order.rb
+class Order &lt; PartitionedByCreatedAtYearly
+end
+</code></p>
+
+<h2>Creating migration for partitioned tables</h2>
+
+
+
+
+<p>Let's get back to our migration. What we want to do is to create <code>orders</code> table, a schema for children partitioned tables of orders and the tables themselves for the next several years. We could do it the following way:</p>
+
+
+<p>``` sql
+class CreateOrders &lt; ActiveRecord::Migration
+  def up</p>
+
+<pre><code>create_table :orders do |t|
+
+  t.timestamps null: false
+end
+
+Order.create_infrastructure
+dates = Order.partition_generate_range(Date.today, Date.today + 5.year)
+Order.create_new_partition_tables(dates)
+</code></pre>
+
+<p>  end</p>
+
+<p>  def down</p>
+
+<pre><code>Order.delete_infrastructure
+drop_table :orders
+</code></pre>
+
+<p>  end
+end</p>
+
+<p>```</p>
+
+<p>The gem also provides excellent helper method <code>partition_generate_range</code> to help with setting up new partition tables. That way we will generate tables handling orders from 2016 to 2021. Now you can simply run <code>rake db:migrate</code>.</p>
+
+
+
+
+<h2>CRUD operations on partitioned tables</h2>
+
+
+
+
+<p>So far we've managed to set up the database for handling table partitioning. But the essential question is: can our app handle management of these tables? Will it insert / update / delete records to and from proper tables? Let's play with some operations to find out:</p>
+
+
+<p>```</p>
+
+<blockquote><p>Order.create
+   (0.1ms)  BEGIN
+  SQL (11.7ms)  INSERT INTO &ldquo;orders_partitions&rdquo;.&ldquo;p2016&rdquo; (&ldquo;created_at&rdquo;, &ldquo;updated_at&rdquo;) VALUES ($1, $2) RETURNING &ldquo;id&rdquo;  [[&ldquo;created_at&rdquo;, &ldquo;2016-06-03 17:21:36.221268&rdquo;], [&ldquo;updated_at&rdquo;, &ldquo;2016-06-03 17:21:36.221268&rdquo;]]
+   (5.9ms)  COMMIT
+Order.create(created_at: 1.year.from_now)
+   (0.1ms)  BEGIN
+  SQL (0.8ms)  INSERT INTO &ldquo;orders_partitions&rdquo;.&ldquo;p2017&rdquo; (&ldquo;created_at&rdquo;, &ldquo;updated_at&rdquo;) VALUES ($1, $2) RETURNING &ldquo;id&rdquo;  [[&ldquo;created_at&rdquo;, &ldquo;2017-06-03 17:25:05.413114&rdquo;], [&ldquo;updated_at&rdquo;, &ldquo;2016-06-03 17:25:05.414208&rdquo;]]
+   (121.4ms)  COMMIT
+ => #<Order id: 2, created_at: "2017-06-03 17:25:05", updated_at: "2016-06-03 17:25:05">
+Order.create(created_at: 2.years.from_now)
+   (0.1ms)  BEGIN
+  SQL (0.3ms)  INSERT INTO &ldquo;orders_partitions&rdquo;.&ldquo;p2018&rdquo; (&ldquo;created_at&rdquo;, &ldquo;updated_at&rdquo;) VALUES ($1, $2) RETURNING &ldquo;id&rdquo;  [[&ldquo;created_at&rdquo;, &ldquo;2018-06-03 17:25:11.634532&rdquo;], [&ldquo;updated_at&rdquo;, &ldquo;2016-06-03 17:25:11.635389&rdquo;]]
+   (2.1ms)  COMMIT
+ => #<Order id: 3, created_at: "2018-06-03 17:25:11", updated_at: "2016-06-03 17:25:11"></p>
+
+<p>Order.all
+  Order Load (0.6ms)  SELECT &ldquo;orders&rdquo;.<em> FROM &ldquo;orders&rdquo;
+ => #&lt;ActiveRecord::Relation [#<Order id: 1, created_at: "2016-06-03 17:21:36", updated_at: "2016-06-03 17:21:36">, #<Order id: 2, created_at: "2017-06-03 17:25:05", updated_at: "2016-06-03 17:25:05">, #<Order id: 3, created_at: "2018-06-03 17:25:11", updated_at: "2016-06-03 17:25:11">]>
+Order.all.count
+   (0.6ms)  SELECT COUNT(</em>) FROM &ldquo;orders&rdquo;
+ => 3</p>
+
+<p>Order.find(1)
+  Order Load (0.3ms)  SELECT  &ldquo;orders&rdquo;.* FROM &ldquo;orders&rdquo; WHERE &ldquo;orders&rdquo;.&ldquo;id&rdquo; = $1 LIMIT 1  [[&ldquo;id&rdquo;, 1]]
+ => #<Order id: 1, created_at: "2016-06-03 17:21:36", updated_at: "2016-06-03 17:21:36"></p>
+
+<p>Order.from_partition(Date.new(2017, 1, 1)).find(2)
+  Order Load (0.3ms)  SELECT  &ldquo;orders&rdquo;.* FROM &ldquo;orders_partitions&rdquo;.&ldquo;p2017&rdquo; &ldquo;orders&rdquo; WHERE &ldquo;orders&rdquo;.&ldquo;id&rdquo; = $1 LIMIT 1  [[&ldquo;id&rdquo;, 2]]
+ => #<Order id: 2, created_at: "2017-06-03 17:25:05", updated_at: "2016-06-03 17:25:05"></p>
+
+<p>Order.from_partition(Date.new(2017, 1, 1)).find(2).update!(updated_at: 5.years.from_now)
+  Order Load (0.3ms)  SELECT  &ldquo;orders&rdquo;.* FROM &ldquo;orders_partitions&rdquo;.&ldquo;p2017&rdquo; &ldquo;orders&rdquo; WHERE &ldquo;orders&rdquo;.&ldquo;id&rdquo; = $1 LIMIT 1  [[&ldquo;id&rdquo;, 2]]
+   (0.1ms)  BEGIN
+  SQL (0.2ms)  UPDATE &ldquo;orders_partitions&rdquo;.&ldquo;p2017&rdquo; SET &ldquo;updated_at&rdquo; = $1, &ldquo;created_at&rdquo; = $2 WHERE &ldquo;orders_partitions&rdquo;.&ldquo;p2017&rdquo;.&ldquo;id&rdquo; = 2  [[&ldquo;updated_at&rdquo;, &ldquo;2021-06-03 17:29:07.077931&rdquo;], [&ldquo;created_at&rdquo;, &ldquo;2017-06-03 17:25:05.413114&rdquo;]]
+   (1.7ms)  COMMIT</p>
+
+<p>Order.from_partition(Date.new(2018, 1, 1)).find(3).destroy
+  Order Load (0.3ms)  SELECT  &ldquo;orders&rdquo;.* FROM &ldquo;orders_partitions&rdquo;.&ldquo;p2018&rdquo; &ldquo;orders&rdquo; WHERE &ldquo;orders&rdquo;.&ldquo;id&rdquo; = $1 LIMIT 1  [[&ldquo;id&rdquo;, 3]]
+   (0.1ms)  BEGIN
+  SQL (0.3ms)  DELETE FROM &ldquo;orders_partitions&rdquo;.&ldquo;p2018&rdquo; WHERE &ldquo;orders_partitions&rdquo;.&ldquo;p2018&rdquo;.&ldquo;id&rdquo; = $1  [[&ldquo;id&rdquo;, 3]]
+   (1.7ms)  COMMIT</p>
+
+<p>Order.from_partition(Date.new(2017, 1, 1)).update_all(updated_at: Time.zone.now)
+  SQL (1.6ms)  UPDATE &ldquo;orders_partitions&rdquo;.&ldquo;p2017&rdquo; &ldquo;orders&rdquo; SET &ldquo;updated_at&rdquo; = &lsquo;2016-06-03 17:30:59.926682&rsquo;</p>
+
+<p>Order.from_partition(Date.new(2017, 1, 1)).destroy_all
+  Order Load (0.3ms)  SELECT &ldquo;orders&rdquo;.* FROM &ldquo;orders_partitions&rdquo;.&ldquo;p2017&rdquo; &ldquo;orders&rdquo;
+   (0.1ms)  BEGIN
+  SQL (0.2ms)  DELETE FROM &ldquo;orders_partitions&rdquo;.&ldquo;p2017&rdquo; WHERE &ldquo;orders_partitions&rdquo;.&ldquo;p2017&rdquo;.&ldquo;id&rdquo; = $1  [[&ldquo;id&rdquo;, 2]]
+   (1.6ms)  COMMIT
+```</p></blockquote>
+
+<p>Awesome! Looks like all the CRUD operations work without any problems! We even have extremely helpful query method <code>from_partition</code> to scope queries to the specific child table.</p>
+
+
+
+
+<h2>Wrapping up</h2>
+
+
+
+
+<p>Table partitioning might a great solution to solve database performance issues. Even though it's not supported out-of-the-box by Rails, you can easily integrate it with your app thanks to <a href="https://github.com/fiksu/partitioned" target="_blank">partitioned</a> gem.</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Scaling Up Rails Applications With PostgreSQL Table Partitioning - Part 1]]></title>
+    <link href="http://Azdaroth.github.io/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/"/>
+    <updated>2016-06-05T22:00:00+02:00</updated>
+    <id>http://Azdaroth.github.io/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1</id>
+    <content type="html"><![CDATA[<p>You've probably heard many times that the database is the bottleneck of many web applications. This isn't necessarily true. Often it happens that some heavy queries can be substiantially optimized, making them really efficient and fast. As the time passes by, however, the data can remarkably grow in size, especially in several years time which can indeed make the database a bottleneck - the tables are huge and don't fit into memory any longer, the indexes are even bigger making queries much slower and you can't really optimize further any query. In many cases deleting old records that are no longer used is not an option - they still can have some value, e.g. for data analysis or statystical purposes. Fortunately, it's not a dead end. You can make your database performance great again with a new secret weapon: table partitioning.</p>
+
+
+
+
+<!--more-->
+
+
+
+
+<h2>Table partitioning and inheritance 101</h2>
+
+
+
+
+<p>To put it in simple words, table partitioning is about splitting one big table into several smaller units. In <strong>PostgreSQL</strong> it can be done by creating <strong>master table</strong> serving as a template for other <strong>children tables</strong> that will inherit from it. <strong>Master table</strong> contains no data and you shouldn't add any indexes and unique constraints to it. However, if you need some <code>CHECK CONSTRAINTS</code> in all <strong>children tables</strong>, it is a good idea to add them to <strong>master table</strong> as they will be inherited. Due to inheritance mechanism, there is no point in adding any columns to <strong>children tables</strong> either. Creating tables inheriting from other tables is pretty straight-forward - you just need to use <code>INHERITS</code> clause:</p>
+
+
+<p>``` sql
+CREATE TABLE orders(
+  id serial NOT NULL,
+  client_id integer NOT NULL,
+  created_at timestamp without time zone NOT NULL,
+  updated_at timestamp without time zone NOT NULL
+);</p>
+
+<p>CREATE TABLE other_orders() INHERITS (orders);
+```</p>
+
+<p>and that's it - all columns and extra constraints will be defined on <code>other_orders</code> thanks to inheritance from <code>orders</code> table.</p>
+
+
+
+
+<h2>Defining constraints for partitioning criteria</h2>
+
+
+
+
+<p>As we are going to split one big table into the smaller ones, we need to have some criterium that would be used to decide which table should we put the data in. We can do it either by range (e.g. <code>created_at</code> between 01.01.2016 and 31.12.2016) or by value (<code>client_id</code> equal to 100). To ensure we have only the valid data which always satisfy out partitioning criterium, we should add proper <code>CHECK CONSTRAINTS</code> as guard statements. To make sure the orders in particular table were e.g. created at 2016, we could add the following constraint:</p>
+
+
+<p><code>sql
+CHECK (created_at &gt;= DATE '2016-01-01' AND created_at &lt;= DATE '2016-12-31')
+</code></p>
+
+<p>If we were to create tables for orders for the upcoming few years (assuming that we want to cover entire year in each of them), we could do the following:</p>
+
+<p>```sql
+CREATE TABLE orders_2016 (</p>
+
+<pre><code>CHECK (created_at &gt;= DATE '2016-01-01' AND created_at &lt;= DATE '2016-12-31')
+</code></pre>
+
+<p>) INHERITS (orders);
+CREATE TABLE orders_2017 (</p>
+
+<pre><code>CHECK (created_at &gt;= DATE '2017-01-01' AND created_at &lt;= DATE '2017-12-31')
+</code></pre>
+
+<p>) INHERITS (orders);
+CREATE TABLE orders_2018 (</p>
+
+<pre><code>CHECK (created_at &gt;= DATE '2018-01-01' AND created_at &lt;= DATE '2018-12-31')
+</code></pre>
+
+<p>) INHERITS (orders);
+```</p>
+
+<p>Beware of potential gotcha when defining <code>CHECK CONSTRAINTS</code>. Take a look at the following example:</p>
+
+
+<p><code>sql
+CHECK (client_id &gt;= 1 AND client_id &lt;= 1000);
+CHECK (client_id &gt;= 1000 AND client_id &lt;= 2000);
+</code></p>
+
+<p>In this case orders with <code>client_id</code> equal to 1000 could be inserted to any of these tables. Make sure the constraints are not inclusive on the same value when using ranges to avoid such problems.</p>
+
+
+
+
+<h2>Performance optimization</h2>
+
+
+
+
+<p>To provide decent performance it is also important to make <code>constraint_exclusion </code> in <code>postgresql.conf</code> enabled. You can set it either to <code>on</code> or <code>partition</code>:</p>
+
+
+<p><code>
+constraint_exclusion = on # on, off, or partition
+</code></p>
+
+<p>or</p>
+
+<p><code>
+constraint_exclusion = partition  # on, off, or partition
+</code></p>
+
+<p>That way we can avoid scanning all children tables when the <code>CHECK CONSTRAINTS</code> exclude them based on query conditions. Compare the query plans between queries with <code>constraint_exclusion</code> disabled and enabled:</p>
+
+
+<p>``` sql</p>
+
+<h1>SET constraint_exclusion = off;</h1>
+
+<p>SET</p>
+
+<h1>EXPLAIN (ANALYZE ON, BUFFERS ON) SELECT * FROM orders WHERE created_at >= DATE &lsquo;2018-01-01&rsquo; AND created_at &lt;= DATE &lsquo;2018-12-31&rsquo;;</h1>
+
+<pre><code>                                             QUERY PLAN
+</code></pre>
+
+<hr />
+
+<p> Append  (cost=0.00..97.95 rows=25 width=24) (actual time=0.001..0.001 rows=0 loops=1)
+   &ndash;>  Seq Scan on orders  (cost=0.00..0.00 rows=1 width=24) (actual time=0.001..0.001 rows=0 loops=1)</p>
+
+<pre><code>     Filter: ((created_at &gt;= '2018-01-01'::date) AND (created_at &lt;= '2018-12-31'::date))
+</code></pre>
+
+<p>   &ndash;>  Seq Scan on orders_2016  (cost=0.00..32.65 rows=8 width=24) (actual time=0.000..0.000 rows=0 loops=1)</p>
+
+<pre><code>     Filter: ((created_at &gt;= '2018-01-01'::date) AND (created_at &lt;= '2018-12-31'::date))
+</code></pre>
+
+<p>   &ndash;>  Seq Scan on orders_2017  (cost=0.00..32.65 rows=8 width=24) (actual time=0.000..0.000 rows=0 loops=1)</p>
+
+<pre><code>     Filter: ((created_at &gt;= '2018-01-01'::date) AND (created_at &lt;= '2018-12-31'::date))
+</code></pre>
+
+<p>   &ndash;>  Seq Scan on orders_2018  (cost=0.00..32.65 rows=8 width=24) (actual time=0.000..0.000 rows=0 loops=1)</p>
+
+<pre><code>     Filter: ((created_at &gt;= '2018-01-01'::date) AND (created_at &lt;= '2018-12-31'::date))
+</code></pre>
+
+<p>```</p>
+
+<p>``` sql</p>
+
+<h1>SET constraint_exclusion = partition;</h1>
+
+<p>SET</p>
+
+<h1>EXPLAIN SELECT * FROM orders WHERE created_at >= DATE &lsquo;2018-01-01&rsquo; AND created_at &lt;= DATE &lsquo;2018-12-31&rsquo;;</h1>
+
+<pre><code>                                     QUERY PLAN
+</code></pre>
+
+<hr />
+
+<p> Append  (cost=0.00..32.65 rows=9 width=24)
+   &ndash;>  Seq Scan on orders  (cost=0.00..0.00 rows=1 width=24)</p>
+
+<pre><code>     Filter: ((created_at &gt;= '2018-01-01'::date) AND (created_at &lt;= '2018-12-31'::date))
+</code></pre>
+
+<p>   &ndash;>  Seq Scan on orders_2018  (cost=0.00..32.65 rows=8 width=24)</p>
+
+<pre><code>     Filter: ((created_at &gt;= '2018-01-01'::date) AND (created_at &lt;= '2018-12-31'::date))
+</code></pre>
+
+<p>(5 rows)
+```</p>
+
+<p>We wanted to select only the orders created on 2018, so there is no need to scan other children tables that don't contain such data.</p>
+
+
+
+
+<p>The difference between <code>on</code> and <code>partition</code> setting is that the former checks constraints for all tables and the latter only for children tables inheriting from parent table (and also when using <code>UNION ALL</code> subqueries).</p>
+
+
+
+
+<h2>Create new records easily with triggers</h2>
+
+
+
+
+<p>Having multiple tables is certainly difficult to manage when creating new records. Always remembering that they should be inserted to a specific table can be cumbersome. Fortunately, there's an excellent solution for this problem: PostgreSQL triggers! If you are not familiar with them, you can read my previous <a href="https://karolgalanciak.com/blog/2016/05/06/when-validation-is-not-enough-postgresql-triggers-for-data-integrity/" target="_blank">blog post</a> about database triggers.</p>
+
+
+
+
+<p>We can automate the insertion process by checking the value of <code>created_at</code> and decide which table it should be put in. Here's an example how we could approach it:</p>
+
+
+<p>``` sql
+CREATE OR REPLACE FUNCTION orders_create_function()
+RETURNS TRIGGER AS $$
+BEGIN</p>
+
+<pre><code>IF (NEW.created_at &gt;= DATE '2016-01-01' AND
+     NEW.created_at &lt;= DATE '2016-12-31') THEN
+    INSERT INTO orders_2016 VALUES (NEW.*);
+ELSIF ( NEW.created_at &gt;= DATE '2017-01-01' AND
+        NEW.created_at &lt;= DATE '2017-21-31' ) THEN
+    INSERT INTO orders_2017 VALUES (NEW.*);
+ELSIF (NEW.created_at &gt;= created_at '2018-01-01' AND
+        NEW.created_at &lt;= created_at '2018-12-31') THEN
+    INSERT INTO orders_2018 VALUES (NEW.*);
+ELSE
+    RAISE EXCEPTION 'Date out of range, probably child table is missing';
+END IF;
+RETURN NULL;
+</code></pre>
+
+<p>END;
+$$
+LANGUAGE plpgsql;</p>
+
+<p>CREATE TRIGGER orders_create_trigger
+BEFORE INSERT ON orders
+FOR EACH ROW EXECUTE PROCEDURE orders_create_function();
+```</p>
+
+<p>There's a potential gotcha though: as we as we are dealing with multiple tables, the <code>id</code> of the orders might not necessarily be unique across all of them. When creating new records we can ensure that the next id will be based on "global" sequence for partitioned tables, but it still gives a possibility to have duplicated ids in some tables, e.g. by accidental update of the id. Probably the best way to make sure there are no duplicates in all partitioned tables would be using <strong>uuid</strong> which most likely will be unique.</p>
+
+
+
+
+<h2>Wrapping up</h2>
+
+
+
+
+<p>Table partitioning might be a great solution to improve performance of your application when the amount of data in tables is huge (especially when they don't fit into memory any longer). In the first part, we learned some basics from raw SQL perspective about table partitioning. In the next one we will be applying this concept to real-world Rails application.</p>
+
+]]></content>
+  </entry>
+  
+</feed>

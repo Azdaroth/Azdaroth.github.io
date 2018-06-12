@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: design patterns | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
+  <link href="http://Azdaroth.github.io/blog/categories/design-patterns/atom.xml" rel="self"/>
+  <link href="http://Azdaroth.github.io/"/>
+  <updated>2018-06-12T17:11:48+02:00</updated>
+  <id>http://Azdaroth.github.io/</id>
+  <author>
+    <name><![CDATA[Karol Galanciak]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Ember and ES7: decorators]]></title>
+    <link href="http://Azdaroth.github.io/blog/2015/12/02/ember-and-es7-decorators/"/>
+    <updated>2015-12-02T23:30:00+01:00</updated>
+    <id>http://Azdaroth.github.io/blog/2015/12/02/ember-and-es7-decorators</id>
+    <content type="html"><![CDATA[<p>ES6 introduced plenty of useful features such as modules, arrow functions, let variables, destructuring, classes and many more which made writing JS code much readable and enjoyable. Thanks to <a href="https://babeljs.io" target="_blank">Babel</a>, a JavaScript transpiler, it's been pretty painless to use them all in the applications. If you happen to develop EmberJS apps and use <a href="http://www.ember-cli.com" target="_blank">ember-cli</a>, you don't probably think much about Babel or any transpilation as these features are a natural part of every Ember application. But the new features didn't end with ES6, we're going to have even more of them in ES7 (2016). Some of them can already be used, thanks again to Babel. In this blogpost I'm going to explore a very powerful concept which of decorators.</p>
+
+
+
+
+<!--more-->
+
+
+
+
+<h2>Decorators - what are they and how to use them?</h2>
+
+
+
+
+<p>Decorators are expressions (functions) taking <code>target</code>, <code>name</code> and <code>descriptors</code> as arguments and allowing to modify classes and properties using declarative syntax at design time. It sounds interesting, but doesn't say much what exactly it does. Let's check some basic example and examine what these arguments are and how to apply the decorator:</p>
+
+
+<p>``` javascript
+function describe(target, name, descriptor) {
+  console.log(target);
+  console.log(name);
+  console.log(descriptor);
+}</p>
+
+<p>class User {
+  @describe
+  doSomething() {</p>
+
+<pre><code>console.log("Hey, I did it!")
+</code></pre>
+
+<p>  }
+}
+new User().doSomething();
+=> [Log] User
+=> [Log] doSomething
+=> [Log] {value: function, enumerable: false, configurable: true, writable: true}
+=> [Log] Hey, I did it!
+```</p>
+
+<p>The decorator function is invoked obviously before the decorated method's body. To apply decorator you need to preceed the name of the decorator with <code>@</code> (you can also pass some arguments there, but we will discuss it later). What about the arguments in the decorator functions? Basically, <code>target</code> is the object whose property is being decorated, <code>name</code> is, well, name of the property and <code>descriptor</code> is the property descriptor. The most interesting key in the descriptor is <code>value</code> which has the reference to the decorated function. That means we can modify the original function! Let's say we have some heavy computation going on in some function and we want to log how long it takes to do something. That basically means we want to have some time references before executing and after executing function so that we can subtract one from another. Well, as we have reference to the original function that's going to be pretty easy, we can just define new function and call the original one from there! Let's check this out:</p>
+
+
+<p>``` javascript
+function measureable(target, name, descriptor) {
+  let originalFunction = descriptor.value;</p>
+
+<p>  descriptor.value = function() {</p>
+
+<pre><code>let startTime = new Date();
+// do something heavy here
+let result = originalFunction.apply(target, arguments);
+let endTime = new Date();
+console.log((endTime - startTime) / 1000);
+return result;
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>And that's it! We extended the original function in a really elegant and unobtrusive manner. Notice that we still pass the arguments to the original function with JS <code>arguments</code>. If you are familiar with Python, you've probably been using the decorators in the similar way. The cool thing is that syntax (<code>@</code>) is even the same :). </p>
+
+
+
+
+<p>Decorators can also be applied to classes. However, In that case we won't have name and descriptor, only the first argument - <code>target</code> - which is going to be the constructor of the class. So what are the use cases for decorating classes?</p>
+
+
+
+
+<p>How about implementing mixins? An ideal interface would be something like <code>@mixin(myAwesomeFunctions)</code>. It happens that classes are just a sugar and adding instance functions is just defining properties onto the <code>prototype</code>. We have a reference to the constructor, so if we create e.g. <code>User</code> class, we can add new functions to its prototype the following way:</p>
+
+
+<p><code>javascript
+User.prototype[functionName] = func;
+</code></p>
+
+<p>How about <code>mixin</code> decorator taking arguments? Not a problem, we just need to define function which returns another function that will be applied:</p>
+
+
+<p>``` javascript
+function mixin(functions) {
+  return function(target) {</p>
+
+<pre><code>// assuming that `functions` is the JS objects with keys as functions names and values as functions that's going to copy them to target's (class constructor in this context) prototype
+Object.assign(target.prototype, functions);
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>And that's how we can use it:</p>
+
+
+<p>```
+let mixinFunctions = {
+  displayName: function() {</p>
+
+<pre><code>console.log(`My name is ${this.name}`);
+</code></pre>
+
+<p>  }
+}</p>
+
+<p>@mixin(mixinFunctions)
+class User {
+  constructor(name) {</p>
+
+<pre><code>this.name = name;
+</code></pre>
+
+<p>  }
+}</p>
+
+<p>new User(&lsquo;Lazar&rsquo;).displayName();
+=> [Log] My name is Lazar
+```</p>
+
+<p>Quite powerful. Let's see if we can do anything interesting in Ember with the decorators.</p>
+
+
+
+
+<h2>Decorators and Ember</h2>
+
+
+
+
+<p>To get started with decorators you just need to enable them in <code>ember-cli-build.js</code>:</p>
+
+
+<p>``` javascript
+var EmberApp = require(&lsquo;ember-cli/lib/broccoli/ember-app&rsquo;);</p>
+
+<p>module.exports = function(defaults) {
+  var app = new EmberApp({</p>
+
+<pre><code>babel: {
+  optional: ['es7.decorators']
+},
+</code></pre>
+
+<p>  });</p>
+
+<p>  return app.toTree();
+};</p>
+
+<p>```</p>
+
+<p>The awesome thing is that we can use decorators for computed properties syntax! It just requires installing <a href="https://github.com/rwjblue/ember-computed-decorators" target="_blank">ember-computed-decorators</a> addon. Let's see what kind of benefits this addon has to offer. Imagine we have some <code>User</code> model with <code>firstName</code> and <code>lastName</code> properties and we want to add <code>fullName</code> computed property:</p>
+
+
+<p>``` javascript
+/<em> global Big </em>/
+import Ember from &lsquo;ember&rsquo;;
+import DS from &lsquo;ember-data&rsquo;;</p>
+
+<p>export default DS.Model.extend({
+  firstName: DS.attr(),
+  lastName: DS.attr(),</p>
+
+<p>  fullname: function() {</p>
+
+<pre><code>return `${this.get('firstName'} ${this.get('lastName'}`;
+</code></pre>
+
+<p>  }.property(&lsquo;firstName&rsquo;, &lsquo;lastName&rsquo;)
+});
+```</p>
+
+<p>But it just doesn't look right, <code>property</code> called on function may seem a bit magical. Well, we can use <code>Ember.computed</code>:</p>
+
+
+<p><code>javascript
+fullname: Ember.computed('firstName', 'lastName', function() {
+  return `${this.get('firstName'} ${this.get('lastName'}`;
+}
+</code></p>
+
+<p>but that's pretty heavy. Also using <code>this.get</code> is far from ideal in both cases. How about defining normal function taking some arguments and applying a decorator?</p>
+
+
+<p>``` javascript
+/<em> global Big </em>/
+import Ember from &lsquo;ember&rsquo;;
+import DS from &lsquo;ember-data&rsquo;;
+import computed from &lsquo;ember-computed-decorators&rsquo;;</p>
+
+<p>export default DS.Model.extend({
+  firstName: DS.attr(),
+  lastName: DS.attr(),</p>
+
+<p>  @computed(&lsquo;firstName&rsquo;, &lsquo;lastName&rsquo;)
+  fullname(firstName, lastName) {</p>
+
+<pre><code>return `${firstName'} ${lastName}`;
+</code></pre>
+
+<p>  }
+});
+```</p>
+
+<p>This looks perfect now. There are plenty of more computed decorators implemented in <code>ember-computed-decorators</code> addon, I encourage you to check all of them.</p>
+
+
+
+
+<p>The only problem is that the new syntax doesn't play nicely with JSHint. The policy of JSHint is to support features that are Stage 2 of standardization process, which is not the case yet for decorators. The current workaround is to add some extra config to <code>.jshintrc</code>:</p>
+
+
+<p><code>javascript
+"ignoreDelimiters": [
+  { "start": "start-non-standard", "end": "end-non-standard" }
+]
+</code></p>
+
+<p>and use computed decorators the following way:</p>
+
+
+<p>``` javascript
+//start-non-standard
+import computed from &lsquo;ember-computed-decorators&rsquo;;
+//end-non-standard</p>
+
+<p>//start-non-standard
+@computed(&lsquo;firstName&rsquo;, &lsquo;lastName&rsquo;)
+//end-non-standard
+fullname(firstName, lastName) {
+  return <code>${firstName'} ${lastName}</code>;
+}
+```</p>
+
+<h2>Wrapping up</h2>
+
+
+
+
+<p>Decorators are an excellent addition to JavaScript world. It can greatly simplify code in JS applications, especially very common things like Ember computed properties. Thanks to Babel it's quite easy to start using them even now.</p>
+
+
+
+
+<p>Next time we are going to explore <code>async / await</code> and how they improve JavaScript experience.</p>
+
+]]></content>
+  </entry>
+  
+</feed>

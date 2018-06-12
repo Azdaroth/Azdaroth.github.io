@@ -1,0 +1,734 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Test Driven Ember - Testing Holding a Button - Karol Galanciak - Ruby on Rails and Ember.js consultant</title>
+  <meta name="author" content="Karol Galanciak">
+
+  
+  <meta name="description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  
+  <meta name="keywords" content="Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps">
+
+  
+  
+
+  <meta property="og:title" value="Test Driven Ember - Testing Holding a Button - Karol Galanciak - Ruby on Rails and Ember.js consultant" />
+  <meta property="og:description" value="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications." />
+  <meta property="og:url" value="http://Azdaroth.github.io/blog/2017/03/26/test-driven-ember-testing-holding-button/" />
+  <meta property="og:type" content="website" />
+  
+  <meta property="og:site_name" content="Karol Galanciak - Ruby on Rails and Ember.js consultant"/>
+  <meta property="og:locale" content="en_US" />
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@Azdaroth">
+  <meta name="twitter:creator" content="@Azdaroth">
+  <meta name="twitter:title" content="Test Driven Ember - Testing Holding a Button - Karol Galanciak - Ruby on Rails and Ember.js consultant">
+  <meta name="twitter:url" content="">
+  <meta name="twitter:description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://Azdaroth.github.io/blog/2017/03/26/test-driven-ember-testing-holding-button">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Karol Galanciak - Ruby on Rails and Ember.js consultant" type="application/atom+xml">
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "BlogPosting",
+      "mainEntityOfPage": {
+        "@type":"WebPage",
+        "@id": "http://Azdaroth.github.io/blog/2017/03/26/test-driven-ember-testing-holding-button"
+      },
+      "headline": "Test Driven Ember - Testing Holding a Button - Karol Galanciak - Ruby on Rails and Ember.js consultant",
+        "image": {
+        "@type": "ImageObject",
+        "url": "",
+        "height": 640,
+        "width": 1024
+      },
+      "datePublished": "2017-03-26",
+      "dateModified": "2018-06-12",
+      "author": {
+        "@type": "Person",
+        "name": "Karol Galanciak"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Karol Galanciak",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://karolgalanciak.com/images/me_formal.jpg",
+          "width": 600,
+          "height": 60
+        }
+      },
+      "description": "Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.",
+      "keywords": "Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps"
+    }
+  </script>
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-42570582-1', 'auto');
+    ga('send', 'pageview');
+    ga('set', 'anonymizeIp', true);
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Karol Galanciak - Ruby on Rails and Ember.js consultant</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:Azdaroth.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">About Me</a></li>
+  <li><a href="/blog">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/test-driven-ember">Test-Driven Ember Book</a></li>
+  <li><a href="/presentations">Presentations</a></li>
+  <li><a href="/publications">Publications</a></li>
+  <li><a href="/open-source">Open Source</a></li>
+  <li><a href="/privacy-policy">Privacy Policy</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Test Driven Ember - Testing Holding a Button</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-03-26T23:00:00+02:00" pubdate data-updated="true">Mar 26<span>th</span>, 2017</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Thanks to the awesome tools in <strong>Ember ecosystem</strong> such as <a href="http://github.com/samselikoff/ember-cli-mirage/" target="_blank">ember-cli-mirage</a>, <a href="https://github.com/emberjs/ember-test-helpers" target="_blank">ember-qunit</a> or <a href="https://github.com/emberjs/ember-test-helpers" target"_blank">ember-test-helpers</a> writing majority of the tests is pretty straight-forward. Nevertheless, there are quite a few cases where <strong>simulating user&rsquo;s interaction</strong> is not that simple. An example of such use case would be <strong>holding a button</strong> for particular period of time triggering some side effect.</p>
+
+<!--more-->
+
+
+<h2>Anatomy of The Problem</h2>
+
+<p>Imagine you are implementing a feature of destroying some records in your application, e.g. the todo items from the list. It would be a bit unfortunate to destroy any item if a user <strong>accidentally clicked</strong> on the destroy button, so it might be a good idea to somehow make it harder to execute such an action. A simple approach would be displaying some alert <strong>asking user to confirm</strong> whether this item should be removed or not. This approach would get our job done, but it doesn&rsquo;t offer the best <strong>UX</strong>. What are the better options here?</p>
+
+<p>A pretty cool solution to this problem would be making user <strong>hold a delete button</strong> for a particular period of time, e.g. for 3 seconds. Holding this button for less than 3 seconds wouldn&rsquo;t destroy the item, so it would be impossible to accidentally delete anything.</p>
+
+<p>There is an addon which solves exactly this problem: <a href="https://www.npmjs.com/package/ember-hold-button" target="_blank">ember-hold-button</a>, so there is no need to reinvent the wheel. Let&rsquo;s add this to our application.</p>
+
+<h2>Adding Destroy Action</h2>
+
+<p>Let&rsquo;s start by installing <code>ember-hold-button</code> addon:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ember install ember-hold-button</span></code></pre></td></tr></table></div></figure>
+
+
+<p>and assume that we already have some component for displaying a single item with <code>destroy</code> action:</p>
+
+<figure class='code'><figcaption><span>app/components/display-todo-item.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kr">import</span> <span class="nx">Ember</span> <span class="nx">from</span> <span class="s1">&#39;ember&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kr">const</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">get</span><span class="p">,</span>
+</span><span class='line'><span class="p">}</span> <span class="o">=</span> <span class="nx">Ember</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kr">export</span> <span class="k">default</span> <span class="nx">Ember</span><span class="p">.</span><span class="nx">Component</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+</span><span class='line'>  <span class="nx">actions</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">destroy</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="kr">const</span> <span class="nx">item</span> <span class="o">=</span> <span class="nx">get</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">&#39;item&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nx">item</span><span class="p">.</span><span class="nx">destroyRecord</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>app/templates/components/display-todo-item.hbs</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>{{item.name}}
+</span><span class='line'><span class="nt">&lt;button</span> <span class="err">{{</span><span class="na">action</span> <span class="err">&quot;</span><span class="na">destroy</span><span class="err">&quot;}}</span> <span class="na">data-test=</span><span class="s">&quot;destroy-item-btn&quot;</span><span class="nt">&gt;</span>Destroy<span class="nt">&lt;/button&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>and that the component was test-driven with the following test written before the actual implementation (TDD for FTW!):</p>
+
+<figure class='code'><figcaption><span>tests/integration/components/display-todo-item-test.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kr">import</span> <span class="nx">Ember</span> <span class="nx">from</span> <span class="s1">&#39;ember&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="kr">import</span> <span class="p">{</span> <span class="nx">moduleForComponent</span><span class="p">,</span> <span class="nx">test</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;ember-qunit&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="kr">import</span> <span class="nx">hbs</span> <span class="nx">from</span> <span class="s1">&#39;htmlbars-inline-precompile&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kr">const</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">set</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">RSVP</span><span class="p">,</span>
+</span><span class='line'><span class="p">}</span> <span class="o">=</span> <span class="nx">Ember</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">moduleForComponent</span><span class="p">(</span><span class="s1">&#39;display-todo-item&#39;</span><span class="p">,</span> <span class="s1">&#39;Integration | Component | display todo item&#39;</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">integration</span><span class="o">:</span> <span class="kc">true</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">test</span><span class="p">(</span><span class="s1">&#39;item can be destroyed&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">assert</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">assert</span><span class="p">.</span><span class="nx">expect</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kr">const</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">$</span><span class="p">,</span>
+</span><span class='line'>  <span class="p">}</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kr">const</span> <span class="nx">item</span> <span class="o">=</span> <span class="nx">Ember</span><span class="p">.</span><span class="nb">Object</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+</span><span class='line'>    <span class="nx">destroyRecord</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="s1">&#39;item should be destoyed&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">return</span> <span class="nx">RSVP</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">set</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">&#39;item&#39;</span><span class="p">,</span> <span class="nx">item</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="nx">hbs</span><span class="err">`</span><span class="p">{{</span><span class="nx">display</span><span class="o">-</span><span class="nx">todo</span><span class="o">-</span><span class="nx">item</span> <span class="nx">item</span><span class="o">=</span><span class="nx">item</span><span class="p">}}</span><span class="err">`</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kr">const</span> <span class="nx">$destroyBtn</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;[data-test=destroy-item-btn]&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">$destroyBtn</span><span class="p">.</span><span class="nx">click</span><span class="p">();</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Basically this test verifies that the <code>destroyRecord</code> method will be called on item after clicking the button.</p>
+
+<p>Let&rsquo;s add <code>hold-button</code> which will trigger <code>destroy</code> action after holding it for 3 seconds:</p>
+
+<figure class='code'><figcaption><span>app/templates/components/display-todo-item.hbs</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>{{item.name}}
+</span><span class='line'>{{#hold-button type=&quot;rectangle&quot; action=&quot;destroy&quot; delay=3000 data-test=&quot;destroy-item-btn&quot;}}
+</span><span class='line'>  Destroy
+</span><span class='line'>{{/hold-button}}
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>delay</code> option will get the job done here to make it holdable for 3 seconds to trigger <code>destroy</code> action.</p>
+
+<p>The button is working great, but our test obviously is failing now! How can we simulate holding action in our integration tests?</p>
+
+<h2>Testing Holding Interaction</h2>
+
+<p>To solve that problem we should break the problem down into the single events. On desktop, pressing a button simply means triggering <code>mouseDown</code> event and releasing means trigger <code>mouseUp</code> event. On mobile that would be <code>touchStart</code> and <code>touchEnd</code> events accordingly.</p>
+
+<p>Based on how <code>hold-button</code> component works, we may suspect that there is some internal timer which starts counting time after triggering <code>mouseDown</code> (<code>touchStart</code>) event or a scheduler which executes the action if it was held for required period of time and cancels it if it was released before that period of time, which would mean cancelling timer on <code>mouseUp</code> event.</p>
+
+<p>After checking <a href="https://github.com/AddJam/ember-hold-button/blob/master/addon/components/hold-button.js" target="_blank">the internals</a>, it turns out this is exactly the case! Let&rsquo;s rewrite our test by triggering these events. We will also need two extra things as we are dealing with asynchronous actions:</p>
+
+<ul>
+<li><p><code>async()</code> / <code>done()</code> &ndash; To make sure QUnit will wait for an asynchronous operation to be finished we need to use <code>async()</code> function. That way QUnit will wait until <code>done()</code> is called. We will call <code>done()</code> after triggering <code>mouseUp</code> event. But we also need to wait until the action is executed. We will need <code>wait()</code> helper for that.</p></li>
+<li><p><code>wait()</code> &ndash; it forces run loop to process all the pending events. That way we ensure that the asynchronous operation have been executed (like calling <code>destroy</code> action after 3 seconds).</p></li>
+</ul>
+
+
+<p>Here&rsquo;s our new test:</p>
+
+<figure class='code'><figcaption><span>tests/integration/components/display-todo-item-test.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kr">import</span> <span class="nx">Ember</span> <span class="nx">from</span> <span class="s1">&#39;ember&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="kr">import</span> <span class="p">{</span> <span class="nx">moduleForComponent</span><span class="p">,</span> <span class="nx">test</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;ember-qunit&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="kr">import</span> <span class="nx">hbs</span> <span class="nx">from</span> <span class="s1">&#39;htmlbars-inline-precompile&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="kr">import</span> <span class="nx">wait</span> <span class="nx">from</span> <span class="s1">&#39;ember-test-helpers/wait&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kr">const</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">set</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">RSVP</span><span class="p">,</span>
+</span><span class='line'><span class="p">}</span> <span class="o">=</span> <span class="nx">Ember</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">moduleForComponent</span><span class="p">(</span><span class="s1">&#39;display-todo-item&#39;</span><span class="p">,</span> <span class="s1">&#39;Integration | Component | display todo item&#39;</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">integration</span><span class="o">:</span> <span class="kc">true</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">test</span><span class="p">(</span><span class="s1">&#39;item can be destroyed&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">assert</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">assert</span><span class="p">.</span><span class="nx">expect</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kr">const</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">$</span><span class="p">,</span>
+</span><span class='line'>  <span class="p">}</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kr">const</span> <span class="nx">item</span> <span class="o">=</span> <span class="nx">Ember</span><span class="p">.</span><span class="nb">Object</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+</span><span class='line'>    <span class="nx">destroyRecord</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="s1">&#39;item should be destoyed&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">return</span> <span class="nx">RSVP</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">set</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">&#39;item&#39;</span><span class="p">,</span> <span class="nx">item</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="nx">hbs</span><span class="err">`</span><span class="p">{{</span><span class="nx">display</span><span class="o">-</span><span class="nx">todo</span><span class="o">-</span><span class="nx">item</span> <span class="nx">item</span><span class="o">=</span><span class="nx">item</span><span class="p">}}</span><span class="err">`</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kr">const</span> <span class="nx">$destroyBtn</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;[data-test=destroy-item-btn]&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">$destroyBtn</span><span class="p">.</span><span class="nx">mousedown</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">wait</span><span class="p">().</span><span class="nx">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">$destroyBtn</span><span class="p">.</span><span class="nx">mouseup</span><span class="p">();</span>
+</span><span class='line'>    <span class="nx">done</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Nice! Our test is passing again. However, there is one serious problem: this test is quite slow as it waits 3 second for the action to finish. Can we make it somehow faster?</p>
+
+<h2>Making Our Test Faster</h2>
+
+<p>The answer is: yes. We just need to provide a way to make <code>delay</code> configurable from the outside. This can be simply done by introducing <code>destroyActionDelay</code> property with default value equal <code>3000</code> and allowing it to be modified. Let&rsquo;s start with applying this little change to the test:</p>
+
+<figure class='code'><figcaption><span>tests/integration/components/display-todo-item-test.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="c1">// the rest of the tests</span>
+</span><span class='line'><span class="k">this</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="nx">hbs</span><span class="err">`</span><span class="p">{{</span><span class="nx">display</span><span class="o">-</span><span class="nx">todo</span><span class="o">-</span><span class="nx">item</span> <span class="nx">item</span><span class="o">=</span><span class="nx">item</span> <span class="nx">destroyActionDelay</span><span class="o">=</span><span class="mi">0</span><span class="p">}}</span><span class="err">`</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We don&rsquo;t care about waiting for 3 seconds in the tests, we just want to test if it works and to make it fast. <code>0</code> sounds like the most reasonable value in such case.</p>
+
+<p>And let&rsquo;s change few things in our component:</p>
+
+<figure class='code'><figcaption><span>app/components/display-todo-item.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kr">import</span> <span class="nx">Ember</span> <span class="nx">from</span> <span class="s1">&#39;ember&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kr">const</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">get</span><span class="p">,</span>
+</span><span class='line'><span class="p">}</span> <span class="o">=</span> <span class="nx">Ember</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kr">export</span> <span class="k">default</span> <span class="nx">Ember</span><span class="p">.</span><span class="nx">Component</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+</span><span class='line'>  <span class="nx">destroyActionDelay</span><span class="o">:</span> <span class="mi">3000</span><span class="p">,</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">actions</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">destroy</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="kr">const</span> <span class="nx">item</span> <span class="o">=</span> <span class="nx">get</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">&#39;item&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nx">item</span><span class="p">.</span><span class="nx">destroyRecord</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>app/templates/components/display-todo-item.hbs</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>{{item.name}}
+</span><span class='line'>{{#hold-button type=&quot;rectangle&quot; action=&quot;destroy&quot; delay=destroyActionDelay data-test=&quot;destroy-item-btn&quot;}}
+</span><span class='line'>  Destroy
+</span><span class='line'>{{/hold-button}}
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And that&rsquo;s it! You can now enjoy the much faster test suite!</p>
+
+<h2>Wrapping Up</h2>
+
+<p>Testing holding a button for particular period of time doesn&rsquo;t sound like an obvious thing to do. Fortunately, with proper design and understanding the interaction from the <strong>browser&rsquo;s perspective</strong>, it isn&rsquo;t that hard to do and doesn&rsquo;t necessarily make your tests slower.</p>
+
+<p>P.S. I&rsquo;ve just started <strong>writing a book</strong> about <strong>test-driving Ember</strong> applications. If you found this article useful, you are going to love it :). <strong>Subscribe</strong> to my newsletter to get updates and promotion code once it&rsquo;s released.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Karol Galanciak</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-03-26T23:00:00+02:00" pubdate data-updated="true">Mar 26<span>th</span>, 2017</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ember/'>Ember</a>, <a class='category' href='/blog/categories/javascript/'>JavaScript</a>, <a class='category' href='/blog/categories/quick-tips/'>Quick Tips</a>, <a class='category' href='/blog/categories/tdd/'>TDD</a>, <a class='category' href='/blog/categories/testing/'>Testing</a>
+  
+</span>
+
+
+    </p>
+    <div class="meta top-line">
+      <div class="post-subscription">
+  <div id="mc_embed_signup">
+    <div id="mc_embed_signup_scroll">
+      <label for="mce-EMAIL">Do you want to take your developer skills to the next level? Subscribe to my newsletter and never miss another blog post!</label>
+      <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+      <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_62804f1b69c60e0c7966cddd6_7c71fb81df" tabindex="-1" value=""></div>
+      <div class="clear">
+      <a href="http://eepurl.com/duztq5" target="_blank" id="mc-embedded-subscribe" class="button">Yes, I want to be a better developer!</a>
+    </div>
+  </div>
+</div>
+
+    </div>
+    <div class="top-line">
+      
+        <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://Azdaroth.github.io/blog/2017/03/26/test-driven-ember-testing-holding-button/" data-via="Azdaroth" data-counturl="http://Azdaroth.github.io/blog/2017/03/26/test-driven-ember-testing-holding-button/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+      
+    </div>
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2017/02/26/javascript-tips-redefining-useragent-property/" title="Previous Post: JavaScript Tips: Redefining userAgent property">&laquo; JavaScript Tips: Redefining userAgent property</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2017/04/30/ember-quick-tips-managing-timeouts-and-delays/" title="Next Post: Ember Tips: Managing Timeouts And Delays">Ember Tips: Managing Timeouts And Delays &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <img class="left" src="/images/me_formal.jpg" title="me:)" alt="Karol Galanciak - photo">
+  <p>Hi, my name is Karol Galanciak, I'm a technical polyglot and domain expert in vacation rental and fitness industries.</p>
+
+  <p>I specialize in building APIs, microservices architecture, working with legacy applications, building ambitious Single Page Applications and building payment processors for credit cards processing. Currently I'm working as CTO at <a href="https://www.bookingsync.com" target="_blank">BookingSync</a>.</p>
+
+  <p id="email-me"></p>
+</section>
+
+<script type="text/javascript">
+  (function(d, id, lhs, rhs) {
+    d.getElementById(id).innerHTML = "You can reach me at <a rel='nofollow' href='mailto:" + lhs + "@" + rhs + "'>" + lhs + "@" + rhs + "</a>";
+  })(window.document, 'email-me', 'karol.galanciak', 'gmail.com');
+</script>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization/">The Case for Before_validation Callback: Complex State Normalization</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/">Advanced Ember Data Customization - Different Model Types in Ember App and API for the Same Resource</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/">Exotic Ruby: Module.class_exec, Custom JSON and Liquid Drops in Action</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/">Rails Quick Tips: Temporarily Disabling Touching With ActiveRecord.no_touching</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function/">PostgreSQL Quick Tips: Working With Dates Using EXTRACT Function</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/Azdaroth">@Azdaroth</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'Azdaroth',
+            count: 6,
+            skip_forks: false,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+<section>
+   <h1>Twitter</h1>
+   <a class="twitter-timeline" href="https://twitter.com/Azdaroth" data-widget-id="357234540634329088">Tweets by @Azdaroth</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - Karol Galanciak -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'karolgalanciak';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://Azdaroth.github.io/blog/2017/03/26/test-driven-ember-testing-holding-button/';
+        var disqus_url = 'http://Azdaroth.github.io/blog/2017/03/26/test-driven-ember-testing-holding-button/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

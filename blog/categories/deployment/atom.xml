@@ -1,0 +1,1838 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Deployment | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
+  <link href="http://Azdaroth.github.io/blog/categories/deployment/atom.xml" rel="self"/>
+  <link href="http://Azdaroth.github.io/"/>
+  <updated>2018-06-12T17:11:48+02:00</updated>
+  <id>http://Azdaroth.github.io/</id>
+  <author>
+    <name><![CDATA[Karol Galanciak]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Automate to the max: instant Ubuntu Server setup with Chef]]></title>
+    <link href="http://Azdaroth.github.io/blog/2014/07/10/automate-to-the-max-instant-ubuntu-server-setup-with-chef/"/>
+    <updated>2014-07-10T20:00:00+02:00</updated>
+    <id>http://Azdaroth.github.io/blog/2014/07/10/automate-to-the-max-instant-ubuntu-server-setup-with-chef</id>
+    <content type="html"><![CDATA[<p>You've started developing new app and need server to deploy it. You can choose hosting platform like <a href="https://www.heroku.com" target="_blank">Heroku</a> or <a href="https://shellycloud.com" target="_blank">Shelly</a> which may turn out to be quite expensive if you want to host multiple apps. You can also set up your own server. Going with the latter option can be quite time consuming, especially if sysadministration is not you main responsibility and you have multiple servers to provision. I that case automation beyond simple Bash scripts is a must - time to meet <strong>Chef</strong>.</p>
+
+
+
+
+<!--more-->
+
+
+
+
+<h2>What is Chef?</h2>
+
+
+<p>Chef is the automation framework which uses Ruby DSL and helps provisioning new servers by automating the whole process. We are going to concentrate on Chef Solo where we set up all roles (like PostgreSQL server) on local machine and use them on our server, contrary to Chef Server which is a hub for configuration data that is automatically applied to all nodes (servers) connected with central server, quite useful when you need to manage serious amount of servers.</p>
+
+
+
+
+<p>We will also be using some other utilities - <strong>Knife</strong> (solo) which is a command line utility helpings us interact with server and <strong>Berkshelf</strong> - a bundler-like utility for Chef recipes.</p>
+
+
+
+
+<p><p>I&rsquo;m not going to write another tutorial explaining every possible detail of entire Chef DSL. The <a href="http://docs.opscode.com" target="_blank">documentation</a> is pretty good and there are also plenty of other resources you can learn from. I&rsquo;d rather like to explain the most important terms, show basic configuration, demonstrate how to write very simple recipe and at the end I am going to introduce my own cookbook that I use for servers' setup with <strong>Ubuntu Server 14.04</strong>. Why Ubuntu? Well, sysadministration is not my main responsibility and it&rsquo;s much easier to find solutions (or Chef cookbooks) for Ubuntu than any other distribution.</p>
+
+<p><p>After reading this post you should be able to setup every server instantly and have some basic understanding of what&rsquo;s going on.</p></p>
+
+<p><h2>Why use Chef?</h2></p>
+
+<p><p>You may wonder what are the benefits of using Chef over the Bash scripts. Firstly, Chef provides extremely expressive DSL, just take a look at the code below:</p></p>
+
+<p><code>ruby
+template "/etc/nginx/nginx.conf" do
+  owner "root"
+  group "root"
+  mode "0644"
+  source "nginx.conf.erb"
+end
+</code>
+<p>You can have some general idea what it does, even if you don&rsquo;t know Chef. That way it&rsquo;s quite easy to find reusable recipes that you can customize to your requirements and write your own solutions.</p></p>
+
+<p><p>Another huge benefit is <strong>idempotence</strong> &ndash; you can apply the same recipes multiple times on your server and the state of the server will be exactly the same as after running them for the first time. If you change something in eg. configuration files, only these changes will be applied. Try achieving the same using shell scripts only ;).</p></p>
+
+<p><p>Once you understand Chef, provisioning new servers will be extremely easy and fast &ndash; it can be even limited to 2 commands if you use the same configuration for all servers.</p></p>
+
+<p><h2>Chef basics</h2></p>
+
+<p><h3>Terminology</h3></p>
+
+<p><p><strong>Node</strong></p></p>
+
+<p><p>A server (machine) we are going to set up and run Chef on.</p></p>
+
+<p><p><strong>Recipe</strong></p></p>
+
+<p><p>Basic unit in Chef for installing one thing, like PostgreSQL, ImageMagick, etc.</p></p>
+
+<p><p><strong>Cookbook</strong></p></p>
+
+<p><p>Collection of recipes, e.g. PostgreSQL cookbook.</p></p>
+
+<p><p><strong>Role</strong></p></p>
+
+<p><p>Combination of recipes that fulfill specific &ldquo;feature&rdquo; (or role) &ndash; PostgreSQL server role ,besides Postgres itself, may also require Monit configuration</p></p>
+
+<p><p><strong>Data bags</strong></p></p>
+
+<p><p>Files with data that may be required by some recipes, e.g. ssh keys that will be added to the authorized keys for deploy user.</p></p>
+
+<p><h3>Getting started</h3></p>
+
+<p><p>Let&rsquo;s start with creating directory for really simple chef recipe:</p></p>
+
+<p><code>
+mkdir chef-simple-recipe
+cd chef-simple-recipe
+</code></p>
+
+<p><p>and create Gemfile with chef, knife-solo and berkshelf gems:</p></p>
+
+<p>``` ruby
+source &lsquo;<a href="https://rubygems.org">https://rubygems.org</a>&rsquo;</p>
+
+<p>gem &lsquo;knife-solo&rsquo;
+gem &lsquo;chef&rsquo;
+gem &lsquo;berkshelf&rsquo;
+```</p>
+
+<p><p>Now we can initialize our project using Knife utility:</p></p>
+
+<p><code>
+knife solo init .
+</code></p>
+
+<p><p>You should be familiar with the generated directory structure after going through <em>terminology</em> part. You may wonder what&rsquo;s the difference between cookbooks and site-cookbooks directory: cookbooks is for storing, well, cookbooks, installed by Berkshelf and site-cookbooks is for our own cookbooks.</p></p>
+
+<p><p>Berskfile resembles closely Gemfile: to add new cookbooks just specify the name of cookbook:</p></p>
+
+<p>```
+site :opscode</p>
+
+<p>cookbook &lsquo;build-essential&rsquo;
+```</p>
+
+<p><p>In most cases I also specify git repository to have a quick reference to the cookbook:</p></p>
+
+<p>```
+site :opscode</p>
+
+<p>cookbook &lsquo;build-essential&rsquo;, git: &lsquo;<a href="https://github.com/opscode-cookbooks/build-essential">https://github.com/opscode-cookbooks/build-essential</a>
+```</p>
+
+<p><p>To install all recipes use Berkshelf:</p></p>
+
+<p><code>
+berks install
+</code></p>
+
+<p><p>If you want cookbooks to be extracted to <code>cookbooks</code> directory:</p></p>
+
+<p><code>
+berks install --path cookbooks
+</code></p>
+
+<p><h3>Writing first Chef role &ndash; Nginx server</h3></p>
+
+<p><p>To understand the general idea behind Chef we are going to write pretty simple role for Nginx. It will take care of installing Nginx with some specified attributes in configuration file and setup monitoring with Monit. We also need to check if everything works. Fortunately, we don&rsquo;t need real server, <a href="http://www.vagrantup.com" target="_blank">Vagrant</a> will be perfect to set up a virtual environment. Just download it and follow the instructions below:</p></p>
+
+<p><p>Firstly, let&rsquo;s create directory for our server:</p></p>
+
+<p><code>bash
+mkdir ubuntu-server-14-04
+cd ubuntu-server-14-04
+</code></p>
+
+<p><p>and install Ubuntu Server 14-04:</p></p>
+
+<p><code>bash
+vagrant init ubuntu-server-14-04 https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box
+</code></p>
+
+<p><p>As you can see, the <code>Vagrantfile</code> was created. You may check it out but it&rsquo;s not necessary.</p></p>
+
+<p><p>To run Vagrant:</p></p>
+
+<p><code>
+vagrant up
+</code></p>
+
+<p><p>To check if everything works, ssh on the virtual machine with Ubuntu Server:</p></p>
+
+<p><code>
+vagrant ssh
+</code></p>
+
+<p><p>Now we have our node, let&rsquo;s prepare it for running Chef (the command below must be run within main Chef project directory):</p></p>
+
+<p><code>
+knife solo prepare vagrant@127.0.0.1 -p 2222 -i ~/.vagrant.d/insecure_private_key
+</code></p>
+
+<p><p>Remember to use real system user name.</p></p>
+
+<p><p>Our virtual node can now run the Chef client. The command above has also generated <b>nodes/127.0.0.1.json</b> configuration file. Let&rsquo;s investigate the content: <code>run_list</code> is a list of all roles and recipes that will be applied on the node. You can add new roles/recipes just by specifying the name but it may be a good idea to be more explicit and specify whether it&rsquo;s a role or a recipe to avoid name collisions. In our case it will be:</p></p>
+
+<p>```
+{
+  &ldquo;run_list&rdquo;: [</p>
+
+<pre><code>"role[nginx]"
+</code></pre>
+
+<p>  ],
+  &ldquo;automatic&rdquo;: {</p>
+
+<pre><code>"ipaddress": "127.0.0.1"
+</code></pre>
+
+<p>  }
+}
+```
+<p>Note: If you want to play a bit with the entire configuration discussed in this blog post, you may check it out <a href="https://github.com/Azdaroth/conf-chef-nginx-monit" target="_blank">here</a>.</p></p>
+
+<p><p>Let&rsquo;s create our nginx role:</p></p>
+
+<p><code>
+touch roles/nginx.json
+</code></p>
+
+<p><p>Here&rsquo;s a basic template for roles:</p></p>
+
+<p><code>json
+{
+  "name": "nginx",
+  "description": "Nginx server with Monit configuration",
+  "default_attributes": {},
+  "json_class": "Chef::Role",
+  "run_list": [],
+  "chef_type": "role"
+}
+</code></p>
+
+<p><p>The content is pretty self-explanatory: We need to specify name of the role and mark it to be role, so we use <code>Chef::Role</code> <code>json_class</code> and <code>role</code> as a <code>chef_type</code>. We can also provide some description. And what&rsquo;s the <code>default_attributes</code>? We will put there any configuration related parameters, once we set up basic template, you will know how it works.</p></p>
+
+<p><p>Let&rsquo;s create our custom cookbook for Nginx in site-cookbooks directory. It will consist of:</p></p>
+
+<p><ul>
+  <li>metadata.rb file &ndash; where we can specify some details like dependencies, supported operating systems, author of the cookbook etc.</li>
+  <li>recipes directory &ndash; with default.rb file which will contain all the commands that need to be executed to install Nginx.</li>
+  <li>templates directory &ndash; place for configuration files etc., we will put nginx.conf.erb template in <code>default</code> subdirectory.</li>
+</ul></p>
+
+<p><p>Why <code>default.rb</code> file name? You can write multiple recipes and specify their names, e.g. <code>monit-configuration::postgres</code>, <code>monit-configuration::nginx</code> but in our case we need just one recipe so the <code>default.rb</code> will be sufficient. Using <code>nginx::default</code> and <code>nginx</code> won&rsquo;t make any difference in this case. The same applies to the template files, that&rsquo;s why <code>nginx.conf.erb</code> is located in <code>templates/default/nginx.conf.erb</code>, not <code>templates/nginx.conf.erb</code></p></p>
+
+<p><p>Out metadata.rb can look like that:</p></p>
+
+<p>``` ruby site-cookbooks/nginx/metadata.rb
+name              &ldquo;Nginx&rdquo;
+maintainer        &ldquo;Karol Galanciak&rdquo;
+maintainer_email  &ldquo;<a href="&#109;&#97;&#x69;&#x6c;&#116;&#111;&#58;&#x6b;&#x61;&#x72;&#111;&#108;&#x2e;&#103;&#97;&#x6c;&#x61;&#x6e;&#x63;&#105;&#x61;&#x6b;&#x40;&#103;&#x6d;&#x61;&#105;&#x6c;&#x2e;&#x63;&#111;&#x6d;">&#x6b;&#x61;&#x72;&#111;&#x6c;&#x2e;&#x67;&#97;&#108;&#x61;&#x6e;&#x63;&#x69;&#x61;&#107;&#64;&#103;&#x6d;&#x61;&#x69;&#x6c;&#46;&#x63;&#111;&#x6d;</a>&rdquo;
+description       &ldquo;Installs Nginx&rdquo;
+version           &ldquo;0.0.1&rdquo;</p>
+
+<p>recipe &ldquo;nginx&rdquo;, &ldquo;Installs Nginx&rdquo;</p>
+
+<p>supports &ldquo;ubuntu&rdquo;
+```</p>
+
+<p><p>What about the configuration file? We need some basic template and decide which attributes will be hardcoded and where we want to have an ability to customize them within our roles. Here&rsquo;s an example, based on <a href="https://library.linode.com/web-servers/nginx/configuration/basic" target="_blank">that one</a>:</p></p>
+
+<p>```
+user www-data;
+worker_processes 4;</p>
+
+<p>pid /var/run/nginx.pid;</p>
+
+<p>events {
+  worker_connections 768;
+}</p>
+
+<p>http {</p>
+
+<p>  sendfile on;
+  tcp_nopush on;
+  tcp_nodelay on;
+  keepalive_timeout 65;
+  types_hash_max_size 2048;
+  server_names_hash_bucket_size  64;</p>
+
+<p>  include /etc/nginx/mime.types;
+  default_type application/octet-stream;</p>
+
+<p>  access_log /var/log/nginx/access.log;
+  error_log /var/log/nginx/error.log;</p>
+
+<p>  gzip on;
+  gzip_disable &ldquo;msie6&rdquo;;</p>
+
+<p>  include /etc/nginx/conf.d/<em>.conf;
+  include /etc/nginx/sites-enabled/</em>;
+}
+```</p>
+
+<p><p>Just to keep it as simple as possible let&rsquo;s assume that we will want only <code>user</code> and <code>worker_processes</code> attributes to be customizable and <code>www-data</code> user will be our default with 4 worker processes. We can achieve that using <strong>erb</strong> templates and specifying default attributes for our <code>default.rb</code> recipe. Using attributes is pretty straight-forward: we need to create file for our recipe (in that case<code>default.rb</code>) file in attributes directory and use hash syntax on <code>default</code> object where <code>nginx</code> will be our namespace:</p></p>
+
+<p><code>ruby attributes/default.rb
+default['nginx']['user']      = 'www-data'
+default['nginx']['worker_processes'] = '4'
+</code></p>
+
+<p><p>And how to access these values within our <code>nginx.conf.erb</code> template? The same way, hash syntax but with <code>node</code> object. So our template will look like this:</p></p>
+
+<p>``` ruby templates/default/nginx.conf.erb
+user &lt;%= node[&lsquo;nginx&rsquo;][&lsquo;user&rsquo;] %>;
+worker_processes &lt;%= node[&lsquo;nginx&rsquo;][&lsquo;worker_processes&rsquo;] %>;</p>
+
+<p>pid /var/run/nginx.pid;</p>
+
+<p>events {
+  worker_connections 768;
+}</p>
+
+<p>http {</p>
+
+<p>  sendfile on;
+  tcp_nopush on;
+  tcp_nodelay on;
+  keepalive_timeout 65;
+  types_hash_max_size 2048;
+  server_names_hash_bucket_size  64;</p>
+
+<p>  include /etc/nginx/mime.types;
+  default_type application/octet-stream;</p>
+
+<p>  access_log /var/log/nginx/access.log;
+  error_log /var/log/nginx/error.log;</p>
+
+<p>  gzip on;
+  gzip_disable &ldquo;msie6&rdquo;;</p>
+
+<p>  include /etc/nginx/conf.d/<em>.conf;
+  include /etc/nginx/sites-enabled/</em>;
+}
+```
+<p>We will be able to customize these attributes from our role and/or node definition.</p></p>
+
+<p><p>So we are left with the last part of installing Nginx: the recipe itself. Let&rsquo;s think how we want to this: we probably want to install <strong>Nginx</strong> &ndash; before that we may add <strong>ppa:nginx/stable</strong> repository to download the latest version, extract our template for configuration file and restart Nginx to use the new configuration. Fortunately, it looks very similar in Chef DSL:</p></p>
+
+<p>``` ruby recipes/default.rb</p>
+
+<p>bash &lsquo;add repo for Nginx&rsquo; do
+  user &lsquo;root&rsquo;
+  code &lt;&lt;-CODE</p>
+
+<pre><code>add-apt-repository ppa:nginx/stable
+apt-get update
+</code></pre>
+
+<p>  CODE
+end</p>
+
+<p>package &ldquo;nginx&rdquo;</p>
+
+<p>template &ldquo;/etc/nginx/nginx.conf&rdquo; do
+  owner &ldquo;root&rdquo;
+  group &ldquo;root&rdquo;
+  mode &ldquo;0644&rdquo;
+  source &ldquo;nginx.conf.erb&rdquo;
+  notifies :run, &ldquo;execute[nginx-restart]&rdquo;, :immediately
+end</p>
+
+<p>execute &ldquo;nginx-restart&rdquo; do
+  command &ldquo;/etc/init.d/nginx restart&rdquo;
+  action :nothing
+end
+```
+<p>What&rsquo;s going on here?</p></p>
+
+<p><ol>
+  <li>We start with adding Nginx repository using <code>bash</code> method which is used for executing Bash scripts (as the name implies). We want to run in as <code>root</code> user and the script for adding repository is in <code>code</code> body.</li>
+  <li>In next step we tell Chef to install Nginx itself using package manager.</li>
+  <li>Then we want Chef to use our template file for configuration. Most of the parameters are pretty self-explanatory: root user will be the owner of the file, the file will belong to root group, we set permissions for the file, specify source in <code>templates</code> directory and we use notifications to take some action <code>immediately</code> (the other option is <code>delayed</code> taking action at the end of chef-client run). To specify action to take place we use <code>resource[name]</code> syntax.</li>
+  <li>In last step we define our action for restarting Nginx using Chef Execute provider: we specify the command to be run and action, which can be <code>:run</code>(will run the command) and <code>:nothing</code>(prevents from running the command &ndash; we use <code>:nothing</code> in this case as we use it in <code>notifies</code> method in <code>template</code>).</li>
+</ol></p>
+
+<p><p>And that&rsquo;s it. We are left with Monit config. We&rsquo;ve already written our own recipe for Nginx so let&rsquo;s use <a href="https://github.com/TalkingQuickly/monit-tlq" target="_blank">this</a> recipe for Monit itself and <a href="https://github.com/TalkingQuickly/monit_configs-tlq" target="_blank">that one</a> for Nginx configuration. Copy these two cookbooks to <code>Berksfile:</code></p></p>
+
+<p><code>ruby
+cookbook 'monit_configs-tlq', git: 'git@github.com:TalkingQuickly/monit_configs-tlq.git', branch: 'master'
+cookbook 'monit-tlq', git: 'git@github.com:TalkingQuickly/monit-tlq.git', branch: 'master'
+</code></p>
+
+<p><p>And run:</p></p>
+
+<p><code>bash
+berks install
+</code></p>
+
+<p><p>Let&rsquo;s get back to our <code>nginx.json</code> role definition. We need to specify attributes for nginx namespace: the default <code>user</code> as www-data is ok, so we will just set <code>worker_processes</code> to 2 and also add Monit configuration for Nginx. At the end the role will look like that:</p></p>
+
+<p>``` json roles/nginx.json
+{
+  &ldquo;name&rdquo;: &ldquo;nginx-server&rdquo;,
+  &ldquo;description&rdquo;: &ldquo;Nginx server&rdquo;,
+  &ldquo;default_attributes&rdquo;: {</p>
+
+<pre><code>"nginx": {
+  "worker_processes": "2"
+}
+</code></pre>
+
+<p>  },
+  &ldquo;json_class&rdquo;: &ldquo;Chef::Role&rdquo;,
+  &ldquo;run_list&rdquo;: [</p>
+
+<pre><code>"nginx",
+"monit_configs-tlq::nginx"
+</code></pre>
+
+<p>  ],
+  &ldquo;chef_type&rdquo;: &ldquo;role&rdquo;
+}
+```</p>
+
+<p><p>We will also need to install Monit itself. To check if everything works as it should, we will include email notifications. Let&rsquo;s define <code>monit</code> role:</p></p>
+
+<p>``` json roles/monit.json
+{
+  &ldquo;name&rdquo;: &ldquo;monit&rdquo;,
+  &ldquo;description&rdquo;: &ldquo;Monit&rdquo;,
+  &ldquo;default_attributes&rdquo;: {</p>
+
+<pre><code>"monit": {
+  "notify_emails" : ["email@example.com"],
+  "enable_emails" : true,
+  "mailserver" : {
+    "host" : "smtp.gmail.com",
+    "port" : "587",
+    "username" : "email@example.com",
+    "password" : "password",
+    "hostname" : "hostname"
+  }
+}
+</code></pre>
+
+<p>  },
+  &ldquo;json_class&rdquo;: &ldquo;Chef::Role&rdquo;,
+  &ldquo;run_list&rdquo;: [</p>
+
+<pre><code>"monit-tlq"
+</code></pre>
+
+<p>  ],
+  &ldquo;chef_type&rdquo;: &ldquo;role&rdquo;
+}
+```</p>
+
+<p><p>Don&rsquo;t forget to put real data there ;). You may be wondering how did I know what attributes should I specify &ndash; in most cases these are documented but sometimes you will have to read the template files and check what kind of attributes you can customize and which are hardcoded.</p></p>
+
+<p><p>We have our roles defined, the last thing we need to do is to include them in node definition:</p></p>
+
+<p>``` json nodes/127.0.0.1.json
+{
+  &ldquo;run_list&rdquo;: [</p>
+
+<pre><code>"role[monit]",
+"role[nginx]"
+</code></pre>
+
+<p>  ],
+  &ldquo;automatic&rdquo;: {</p>
+
+<pre><code>"ipaddress": "127.0.0.1"
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p><p>So here is the final step &ndash; applying recipes on our node:</p></p>
+
+<p><code>bash
+knife solo cook vagrant@127.0.0.1 -p 2222 -i /Users/system_user_name/.vagrant.d/insecure_private_key
+</code></p>
+
+<p><p>The great thing about Chef is that you can change the values of attributes, apply them on the node and the chef-client will pick that change up. Just change <code>worker_processes</code> to 3 and watch what happens &ndash; Chef client will change the value of the attribute and restart Nginx.</p></p>
+
+<p><p>Note: applying the cookbooks on a real server is almost the same as working with Vagrant:</p></p>
+
+<p><code>
+knife solo prepare root@ip
+knife solo cook root@ip
+</code></p>
+
+<p><h2>Setting up complete server for Rails apps with Chef</h2></p>
+
+<p><p>Composing Chef cookbooks for your server can take a long time: reading all recipes / cookbooks, checking configuration etc. may be quite tedious, especially when doing if for the first time, so I decided to share with <a href="https://github.com/Azdaroth/chef-server-setup-template" target="_blank">my own</a> configuration which I&rsquo;m going to describe in this section (heavily inspired by <a href="https://github.com/TalkingQuickly" target="_blank"></a> Ben Dixon&rsquo;s recipes, author of <a href="https://leanpub.com/deploying_rails_applications" target="_blank">Reliably Deploying Rails Applications</a>).</p></p>
+
+<p><p>Let&rsquo;s take a look at the <a href="https://github.com/Azdaroth/chef-server-setup-template/blob/master/nodes/put_your_ip_address_here.json" target="_blank">node definition</a>. We have some new parameters: <code>environment</code> set to production &ndash; I will explain in a minute what is it for &ndash; and Debian <code>platform_family</code>. Next we&rsquo;ve got some recipes-related attributes. It could also be put in role definitions but I like keeping sensitive data in node definition:</p></p>
+
+<p><ul>
+  <li><strong>authorization</strong> &ndash; these attributes are related to <code>sudo</code> recipe &ndash; we assume that we are going to use <strong>deploy</strong> user which is going to have sudo access enabled. Also, the entire <strong>sysadmin</strong> group is going to have sudo access. We set <code>passwordless</code> to be false &ndash; the password will alwaus be required.</li>
+  <li><strong>monit</strong> &ndash; configuration for Monit concerning sending notifications and accessing via web interface. I would suggest having them enabled. However, if you decide not to enable them, just delete this section.</li>
+  <li><strong>postgresql</strong> &ndash; you must specify password hash for <code>postgres</code> user. You can generate it easily using openssl:</li>
+<code>bash
+  openssl passwd -1 "yourpassword"
+</code>
+  <li><strong>security</strong> &ndash; we can set ssh port here. The important thing is that you will have to restart ssh service, even if you don&rsquo;t change the value. Restarting using Chef caused some exceptions that I couldn&rsquo;t handle so far, so remember to restart the service while sshing on your server after running Chef for the first time:</li>
+<code>bash
+  /etc/init.d/ssh restart
+</code>
+</ul></p>
+
+<p><p>And the last thing is <code>run_list</code>:</p></p>
+
+<p><ul>
+  <li><strong>role[server]</strong> &ndash; responsible for basic server setup</li>
+  <li><strong>role[postgres-server]</strong> &ndash; install PostgreSQL and related stuff</li>
+  <li><strong>role[rails-app]</strong> &ndash; Ruby / Rails related components, like RVM, Rubies</li>
+  <li><strong>role[mongo-server]</strong> &ndash; installs MongoDB and sets up Monit monitoring</li>
+  <li><strong>role[redis-server]</strong> &ndash; installs Redis and sets up Monit monitoring</li>
+  <li><strong>role[memcached-server]</strong> &ndash; installs Elasticsearch and sets up Monit monitoring</li>
+  <li><strong>role[nginx]</strong> &ndash; installs Nginx with Passenger and sets up Monit monitoring.</li>
+</ul></p>
+
+<p><p>If you don&rsquo;t want to install some components, simply remove them from <code>run_list</code>.</p></p>
+
+<p><p>One more thing before we move to more detailed description of the roles: <code>data_bags</code> directory. It will be used for creating user (<strong>deploy</strong>), setting up password (again, password hash, not the plain password) and uploading ssh key. The <strong>deploy</strong> user is already specified in <code>deploy.json</code> file, so just paste your ssh key from <code>id_rsa.pub</code> and the password hash generated by:</p></p>
+
+<p><code>bash
+openssl passwd -1 "yourpassword"
+</code></p>
+
+<p><p>As the attributes set in the node definition take precedence over the ones defined in roles, the important part in the server role is the <code>run_list</code>:</p>
+<ul>
+  <li><code>openssl</code> is responsible for managing passwords></li>
+  <li><code>build-essential</code> installs build-essential</li>
+  <li><code>chef-solo-search</code> &ndash; library related to data bags which helps with searching</li>
+  <li><code>sudo</code> and <code>users::sysadmins</code> were already discussed &ndash; they are responsible for creating users with specified password and giving sudo access</li>
+  <li><code>ssh_key_gen</code> generated ssh key for deploy user</li>
+  <li><code>basic-security-tlq</code> &ndash; based on <a href="https://github.com/TalkingQuickly/basic_security-tlq" target="_blank">this</a> recipe &ndash; deals with security. It installs fail2ban, ufw (firewall), unattended-upgrades packages and installs security updates automatically each day. It also modifies ssh settings (X11Forwarding is set to no, UsePAM to no and ssh port to specified value in node definition). It also enables 22, 80 (for Nginx) and specified ssh port in firewall and disables any other. You can add some rules for firewall using <code>firewall_allow</code> attributes in the following format:  {&ldquo;port&rdquo;: &ldquo;x&rdquo;, &ldquo;ip&rdquo;: &ldquo;xxx.xxx.xxx.xxx&rdquo;}</li>
+  <li><code>look-and-feel-tlq</code> &ndash; based on <a href="https://github.com/TalkingQuickly/look_and_feel-tlq" target="_blank">this</a> recipe (I had to comment out restarting ssh service) &ndash; installs htop, vim, unzip packages. Remeber that <code>environment</code> parameter? If set to <code>production</code>, it will display beautiful &ldquo;PRODUCTION&rdquo; banner while sshing ;).</li>
+  <li><code>monit-tlq</code> &ndash; installs Monit</li>
+  <li><code>monit_configs-tlq::system</code> &ndash; sets up Monit configuration for system. You should check <a href="https://github.com/TalkingQuickly/monit_configs-tlq/blob/master/templates/default/system.conf.erb" target="_blank">it</a> out and decide if you want to include it, you may receive some occasional spam about on eg. small VPS instances, which is not a good sign. Monit notifications shouldn&rsquo;t be neglected.</li>
+</ul></p>
+
+<p><p>Let&rsquo;s move to another role &ndash; Postgres server: basically it installs PostgreSQL (9.3), changes <code>pg_hba.conf</code> configuration using specified attributes, uses <strong>pgtune</strong> utility to provide better configuration parameters (based on the hardware) and thus performance and sets up Monit monitoring. If you need more customization, refer to the <a href="https://github.com/hw-cookbooks/postgresql" target="_blank">docs</a>.</p></p>
+
+<p><p>Next role deals with Ruby and Rails environment. The most important thing here is that it installs system-wide RVM, which is in my opinion much more convenient to work with on servers (development machine is a different story). Next, <code>deploy</code> user is added to rvm group, default Ruby version is specified and Rubies are installed. We also install Bundler and Passenger gems. You can check the <a href="https://github.com/fnichol/chef-rvm" target="_blank">docs</a> if you need further customization. And what about <code>rails_gem_dependencies-tlq</code> recipe? It installs some packages that you will probably need: curl, libcurl3, libcurl3-dev, <strong>imagemagick</strong>, libmagickwand-dev and nodejs. And one more thing: there might be a problem with RVM permissions (at time of writing this post, <a href="https://github.com/fnichol/chef-rvm/pull/257" target="_blank">this</a> pull request haven&rsquo;t been merged yet), so it may be a good idea to run: <code>rvm fix-permissions system</code> when sshing to your server for the first time.</p></p>
+
+<p><p>Another role is Mongo server &ndash; it installs Mongodb, sets up Monit monitoring and uses <strong>/home/data/mongodb</strong> directory for db, you may delete it if you want the default value.</p></p>
+
+<p><p>Next three roles are quite similar: they install Redis, Memcached and Elasticsearch and set up Monit configuration for each of them. Also, in case of Elasticsearch, it installs OpenJDK and gives possibility to customize the amount of allocated memory &ndash; you will probably  want to remove it, I keep it in a template, just to remember that it&rsquo;s a customizable attribute.</p></p>
+
+<p><p>And the last one role: Nginx role, which installs Nginx with Passenger and sets up monitoring with Monit. There were some problems with using RVM Ruby when dealing with Passenger so it required helper recipe for <code>rake</code> package. There are a lot of hardcoded values (Ruby version, Passenger version) so make sure they match the ones specified in Rails App role. If you want more customization, refer to the <a href="https://github.com/miketheman/nginx" target="_blank">docs</a>.</p></p>
+
+<p><h2>Wrapping up</h2></p>
+
+<p><p>That was pretty quick introduction to <strong>Chef</strong> and there might be a lot things that weren&rsquo;t made perfectly clear. Again, it was not the purpose of this post to explain every possible detail but to give you the general idea. I hope that after reading this blog post you will have some basic understanding how Chef and related utilities work, how to write your own recipes, fork other cookbooks and modify them to your taste and never again do the manual server setup. You also have pretty nice starting point &ndash; just clone the repo of my server template and apply to the nodes ;).</p></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Rails applications deployment with Capistrano and after deployment setup]]></title>
+    <link href="http://Azdaroth.github.io/blog/2013/08/02/app-deployment-with-capistrano-and-after-deployment-setup/"/>
+    <updated>2013-08-02T14:15:00+02:00</updated>
+    <id>http://Azdaroth.github.io/blog/2013/08/02/app-deployment-with-capistrano-and-after-deployment-setup</id>
+    <content type="html"><![CDATA[<p>You've just setup your production server, but still haven't deployed your app? Then this the right place for you. You are going to learn how to deploy your app to remote server, deal with some config files, create staging environment and setup monitoring tools.</p>
+
+
+
+
+<!--more-->
+
+
+<p></p>
+
+<h2>Introducing Capistrano</h2>
+
+
+
+
+<p>Capistrano is an excellent tool to automate your deployment process using Rake DSL. It allows you to deploy applications using various source control management systems like Git, run migrations on remote server, restart application and many more.</p>
+
+
+
+
+<h2>Application setup</h2>
+
+
+
+
+<p>Let's start with creating Rails application: </p>
+
+
+<p><code>bash
+rails new dummy_app
+</code></p>
+
+<p>add <code>capistrano</code>, <code>capistrano-ext</code>, <code>rvm-capistrano</code> (for RVM integration) and <code>pg</code> gems(for Postgres database) to your Gemfile:</p>
+
+
+<p><code>ruby Gemfile
+gem 'pg'
+gem 'capistrano'
+gem 'rvm-capistrano'
+gem 'capistrano-ext'
+</code></p>
+
+<p><b>NOTE:</b> When writing this article, the current Capistrano version was 2.15.5 which I believe is buggy as I had some problems with authentication while deploying. If you have the same problem, use 2.15.3 version instead.</p>
+
+
+
+
+<p>You should also uncomment this line: </p>
+
+
+<p><code>ruby Gemfile
+gem 'therubyracer', platforms: :ruby
+</code></p>
+
+<p>And run bundle install.</p>
+
+
+
+
+<h2>Is my app secure?</h2>
+
+
+
+
+<p>Well, it depends. If you are the only person working on it, then you are safe. But if you aren't, then your session secret is available to other people, which makes your app vulnerable to <a href="http://robertheaton.com/2013/07/22/how-to-hack-a-rails-app-using-its-secret-token/" target="_blank">carefully crafted attacks</a> and you should exclude it from your code repository. Initialize git repository in your application:</p>
+
+
+<p><code>bash
+git init
+</code></p>
+
+<p>And add to your <code>.gitignore</code> file the following line:</p>
+
+
+<p><code>bash .gitignore
+/config/initializers/secret_token.rb
+</code></p>
+
+<h2>Database and staging environment config</h2>
+
+
+
+
+<p>Now, edit database configuration file (<code>config/database.yml</code>), so it looks similar to this:</p>
+
+
+<p>``` yaml config/database.yml
+development:
+  adapter: postgresql
+  host: localhost
+  database: dummy_app_test
+  username: dummy_app_user
+  password: my-secret-password</p>
+
+<p>test:
+  adapter: postgresql
+  host: localhost
+  database: dummy_app_test
+  username: dummy_app_user
+  password: my-secret-password</p>
+
+<p>production:
+  adapter: postgresql
+  host: localhost
+  database: dummy_app_production
+  username: dummy_app_user
+  password: my-secret-password</p>
+
+<p>staging:
+  adapter: postgresql
+  host: localhost
+  database: dummy_app_production
+  username: dummy_app_user
+  password: my-secret-password
+```</p>
+
+<p>There is one extra thing in this config: the staging environment. We are going to use pre-production environment for testing purposes. If you want to share the same database between production and staging, then leave this config as it is.</p>
+
+
+
+
+<p>You should also exclude <code>database.yml</code> from your code repository, not only for keeping your passwords secret, but also to prevent overriding local configuration when fetching code from repository - add to <code>.gitignore</code> file:</p>
+
+
+<p><code>bash
+/config/database.yml
+</code></p>
+
+<p>Staging environment should be close to production as much as possible, so copy the production.rb file and rename it to staging.rb: </p>
+
+
+<p><code>bash
+cp config/environments/production.rb config/environments/staging.rb
+</code></p>
+
+<h2>Capistrano configuration</h2>
+
+
+
+
+<p>To create configuration files, run</p>
+
+
+<p><code>bash
+capify .
+</code></p>
+
+<p>It will create two files: <code>config/deploy.rb</code> and <code>Capfile</code>. Start with editing <code>Capfile</code> and uncomment this line:</p>
+
+
+<p><code>ruby Capfile
+load 'deploy/assets'
+</code></p>
+
+<p>Next, open the <code>deploy.rb</code> remove the default content, copy & paste the script below and adjust it according to the comments.</p>
+
+
+<p>``` ruby config/deploy.rb
+require &ldquo;bundler/capistrano&rdquo;
+require &lsquo;capistrano/ext/multistage&rsquo;
+require &ldquo;rvm/capistrano&rdquo;</p>
+
+<h1>General</h1>
+
+<p>set :keep_releases, 5 # or any other number of releases you would like to keep
+ssh_options[:port] = 12345 # if you haven&rsquo;t changed anything in SSH config, set it to 22
+ssh_options[:forward_agent] = true # forward ssh keys
+default_run_options[:pty] = true # set for the password prommpt</p>
+
+<p>set :application, &ldquo;dummy_app&rdquo; # set the name of you application here
+set :user, &ldquo;deploy&rdquo; # and the server user name</p>
+
+<p>set :stages, [&ldquo;staging&rdquo;, &ldquo;production&rdquo;] # Set staging and production environment
+set :default_stage, &ldquo;staging&rdquo; # Use staging environment as the default one to prevent accidentally deploying to production</p>
+
+<p>set :deploy_via, :remote_cache # it will only fetch from the repository on server, not clone the entire repository from scratch</p>
+
+<p>set :use_sudo, false # do not use sudo</p>
+
+<h1>Git</h1>
+
+<p>set :scm, :git # set git as a Source Code Manager
+set :repository,  &ldquo;ssh://deploy@your.ip.goes.here:port/home/#{user}/repos/#{application}.git&rdquo; # point your repository here</p>
+
+<p>set :branch, &ldquo;master&rdquo; # set git branch here</p>
+
+<h1>Server</h1>
+
+<p>role :web, &ldquo;server.ip.goes.here&rdquo; # HTTP Server
+role :app, &ldquo;server.ip.goes.here&rdquo; # server with your app
+role :db,  &ldquo;server.ip.goes.here&rdquo;, :primary => true # database server
+role :db,  &ldquo;server.ip.goes.here&rdquo;</p>
+
+<h1>Passenger</h1>
+
+<p>namespace :deploy do
+ task :start do ; end
+ task :stop do ; end
+ task :restart, :roles => :app do # restart your app after finalizing deployment
+   run &ldquo;touch #{current_path}/tmp/restart.txt&rdquo;
+ end
+end</p>
+
+<h1>Symlinking</h1>
+
+<p>namespace :deploy do
+  task :symlink_db, :roles => :app do</p>
+
+<pre><code>run "ln -nfs #{deploy_to}/shared/config/database.yml #{release_path}/config/database.yml" # This file is not included repository, so we will create a symlink 
+</code></pre>
+
+<p>  end
+  task :symlink_secret_token, :roles => :app do</p>
+
+<pre><code>run "ln -nfs #{deploy_to}/shared/config/initializers/secret_token.rb #{release_path}/config/initializers/secret_token.rb" # This file is not included repository, so we will create a symlink 
+</code></pre>
+
+<p>  end
+end</p>
+
+<p>before &lsquo;deploy:assets:precompile&rsquo;, &lsquo;deploy:symlink_db&rsquo; # callback: run this task before deploy:assets:precompile
+before &lsquo;deploy:assets:precompile&rsquo;, &lsquo;deploy:symlink_secret_token&rsquo; # # callback: run this task before deploy:assets:precompile
+after &ldquo;deploy&rdquo;, &ldquo;deploy:cleanup&rdquo; # delete old releases
+```</p>
+
+<p>Now, create <code>deploy</code> directory in <code>config</code> directory and add <code>production.rb</code> and <code>staging.rb</code> files there. You have to specify paths, where the production and staging app instance will be deployed. Let's edit the <code>production.rb</code> file:</p>
+
+
+<p><code>ruby config/deploy/production.rb
+set :deploy_to, "/home/deploy/rails_projects/dummy_app"
+</code></p>
+
+<p>and <code>staging.rb</code>:</p>
+
+
+<p><code>ruby config/deploy/production.rb
+set :deploy_to, "/home/deploy/rails_projects/dummy_app_staging"
+</code></p>
+
+<p>That's a basic configuration that should be sufficient in most cases. But Capistrano is a really sophisticated tool, you can specify diffrent servers for staging and production environment, diffrent git branches, diffrent repositories and many more. Just specify different settings in <code>production.rb</code> and <code>staging.rb</code> if you need to.</p>
+
+
+
+
+<h2>Deployment</h2>
+
+
+
+
+<p>Before deploying your app, you have to setup git repository. We will create just an empty repo in <code>/home/deploy/repos</code> directory on remote server: </p>
+
+
+<p><code>bash
+ssh your-server "mkdir /home/deploy/repos &amp;&amp; mkdir /home/deploy/repos/dummy_app.git  &amp;&amp; git init --bare /home/deploy/repos/dummy_app.git"
+</code></p>
+
+<p>Keeping the Git repositories on deploy user might not be the best idea, especially when you want to give other people access to the repo, but it sufficient for demonstration purposes. In other cases, you should rather create seperate git user with a limited shell (git-shell) or use some sophisticated tools like Gitolite if you need to.</p>
+
+
+
+
+<p>Now we can commit all changes and deploy our application:</p>
+
+
+<p><code>bash
+git add --all
+git commit -am "Setup deployment configuration"
+git remote add origin ssh://deploy@your.ip.goes.here:port/home/deploy/repos/dummy_app.git
+git push origin master
+</code></p>
+
+<p>You are ready to deploy our application, but before that you need to setup databases and http server configuration. If you have any problem, check <a href="http://karolgalanciak.com/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql/" target="_blank">this one</a> out (remember about specifying appropriate rails_env). Firstly, let the Capistrano deal with creating all the neccessary directories in both staging and production environments:</p>
+
+
+<p><code>bash
+cap deploy:setup
+cap production deploy:setup
+</code></p>
+
+<p>Then check if directory permissions, utilities and other dependencies are correct:</p>
+
+
+<p><code>bash
+cap deploy:check
+cap production deploy:check
+</code></p>
+
+<p>In both cases you should have output ending with: <i>You appear to have all necessary dependencies installed.</i></p>
+
+
+
+
+<p>The last thing before deployment: we haven't included <code>secret_token.rb</code> and <code>database.yml</code> files in repo, so we have to copy them on remote server:</p>
+
+
+<p><code>bash
+scp config/database.yml you-server:/home/deploy &amp;&amp; scp config/initializers/secret_token.rb your-server:/home/deploy
+ssh your_server "mkdir /home/deploy/rails_projects/dummy_app/shared/config &amp;&amp; mkdir /home/deploy/rails_projects/dummy_app_staging/shared/config"
+ssh your_server "mkdir /home/deploy/rails_projects/dummy_app/shared/config/initializers &amp;&amp; mkdir /home/deploy/rails_projects/dummy_app_staging/shared/config/initializers"
+ssh you_server "cp /home/deploy/database.yml /home/deploy/rails_projects/dummy_app/shared/config/database.yml &amp;&amp; mv /home/deploy/database.yml /home/deploy/rails_projects/dummy_app_staging/shared/config/database.yml"
+ssh you_server "cp /home/deploy/secret_token.rb /home/deploy/rails_projects/dummy_app/shared/config/initializers/secret_token.rb &amp;&amp; mv /home/deploy/secret_token.rb /home/deploy/rails_projects/dummy_app_staging/shared/config/initializers/secret_token.rb"
+</code></p>
+
+<p>And you can deploy your application. Instead of <code>cap deploy</code>, use <code>cap deploy:cold</code> and <code>cap production deploy:cold</code> - it will deploy the app, run all migrations and run deploy start instead of <code>cap:restart</code>.</p>
+
+
+<p><code>bash
+cap deploy:cold
+cap production deploy:cold
+</code></p>
+
+<p>Done! You have just deployed your application. Next time use cap deploy or <code>cap deploy:migrations</code> to run migrations.</p>
+
+
+
+
+<h2>Monitoring with Monit</h2>
+
+
+
+
+<p>How do you know if everything is running correctly after deployment? Well, you don't know, unless you install a monitoring tool. Monit is a great and easy to configure utility for managing and monitoring processes. Let's start with installing Monit on remote server (I use CentOS Linux, there are some differences between distros, so the location of the files might be diffrent, e.g. on Debian, the configuration file is in <code>/etc/monit/monit.rc</code>):</p>
+
+
+<p><code>bash
+sudo yum install monit
+</code></p>
+
+<p>and edit the configuration file:</p>
+
+
+<p><code>bash
+sudo vi /etc/monit.conf
+</code></p>
+
+<p>Read carefully all the comments to get familiar with Monit. Then specify your configuration, e.g.:</p>
+
+
+<p>``` bash</p>
+
+<h1>check services every minute</h1>
+
+<p>set daemon 60</p>
+
+<h1>monitor nginx</h1>
+
+<p>check process nginx with pidfile /opt/nginx/logs/nginx.pid
+  start program = &ldquo;/etc/init.d/nginx start&rdquo;
+  stop program  = &ldquo;/etc/init.d/nginx stop&rdquo;</p>
+
+<h1>monitor postgres</h1>
+
+<p>check process postgres with pidfile /var/lib/pgsql/9.2/data/postmaster.pid
+  start program = &ldquo;/etc/init.d/postgresql start&rdquo;
+  stop  program = &ldquo;/etc/init.d/postgresql stop&rdquo;</p>
+
+<h1>web interface setup</h1>
+
+<p>set httpd port 2812 and
+  use address localhost
+  allow username:&ldquo;password&rdquo; # specify username and password for http basic authentication
+  allow localhost
+  allow @monit
+```</p>
+
+<p>There are a lot of available Monit recipies, e.g. <a href="http://mmonit.com/wiki/Monit/ConfigurationExamples" target="_blank">here</a>, so it is quite easy to setup. When you finish, restart Monit:</p>
+
+
+<p><code>bash
+sudo monit reload
+</code></p>
+
+<p>Or if you haven't started it yet:</p>
+
+
+<p><code>bash
+sudo monit
+</code></p>
+
+<p>To check status of processes being monitored, run: </p>
+
+
+<p><code>bash
+sudo monit status
+</code></p>
+
+<p>You don't have to ssh on your server everytime you want to check the status, Monit comes with a very nice web interface. Here is a simple Nginx configuration, so that you will be able to access Monit via your-ip:1111/monit address:</p>
+
+
+<p>``` bash
+server {
+  listen 1111;
+  server_name localhost;</p>
+
+<p>  location /monit/ {</p>
+
+<pre><code>proxy_pass http://127.0.0.1:2812/; # pass query to backend, replace /monit/ uri part to just /
+proxy_set_header Host $host;
+proxy_set_header X-Real-IP $remote_addr;
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>Use password and username specified in Monit configuration.</p>
+
+
+
+
+<h2>Logrotate</h2>
+
+
+
+
+<p>After some time your Rails app logs and especially Nginx logs might be really large, so it is a good idea to somehow manage them. Fortunately, you can use system-built utility called Logrotate. Just open <code>/etc/logrotate.conf</code> and paste the configuration below (remember about changing path to your application):</p>
+
+
+<p>``` bash</p>
+
+<p>/home/deploy/rails_projects/your_app_name/shared/log/*.log {
+  daily
+  rotate 30
+  missingok
+  compress
+  notifempty
+  delaycompress
+  sharedscripts
+  copytruncate
+}
+￼￼￼￼￼￼￼￼￼￼￼￼</p>
+
+<p>/opt/nginx/logs/*.log {
+  daily
+  rotate 30
+  compress
+  missingok
+  notifempty
+  delaycompress
+  sharedscripts</p>
+
+<p>  postrotate</p>
+
+<pre><code>[ ! -f /var/run/nginx.pid ] || kill -USR1 `cat /var/run/nginx.pid`
+</code></pre>
+
+<p>  endscript }</p>
+
+<p>```</p>
+
+<p>Here is the options explanation:</p>
+
+
+
+
+<ul>
+<li><b>daily</b> - rotate the logs every day</li>
+<li><b>rotate 30</b> - rotate logs 30 times, after that delete the oldest</li>
+<li><b>missingok</b> - ignore if the file doesn't exist</li>
+<li><b>compress</b> - compress logs with gzip</li>
+<li><b>notifempty</b> - leave file if the logs are empty</li>
+<li><b>delaycompress</b> - postpone compression of the file to the next cycle</li>
+<li><b>sharedscripts</b> - tell only once that the logs have been rotated, not several times for every group</a></li>
+<li><b>copytruncate</b> - copy the log file and and truncate the original one</li>
+<li><b>postrotate [ ! -f /var/run/nginx.pid ] || kill -USR1 `cat /var/run/nginx.pid` endscript</b> - tell Nginx that the logs have been rotated and use the new ones.</li>
+</ul>
+
+
+
+
+<p>And that's is it! Cron by default runs logrotate every day.</p>
+
+
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[CentOS 6.4 server setup with Ruby On Rails, Nginx and PostgreSQL]]></title>
+    <link href="http://Azdaroth.github.io/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql/"/>
+    <updated>2013-07-19T14:02:00+02:00</updated>
+    <id>http://Azdaroth.github.io/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql</id>
+    <content type="html"><![CDATA[<p>Server setup with the entire environment for Rails applications can be quite tricky, especially when you do it for the first time. Here is step by step guide how to setup CentOS 6.4 server with a basic environment for deploying Rails applications. I encourage you to choose CentOS Linux - it is a reliable distro (well, based on Red Hat Enterprise Linux), easy to handle and doesn't require advanced Unix knowledge like Gentoo (especially while updating system related stuff).</p>
+
+
+
+
+<!--more-->
+
+
+<p></p>
+
+<h2>Initial setup</h2>
+
+
+
+
+<p>You need to ssh on your server:</p>
+
+
+<p><code>bash
+ssh root@your-ip
+</code></p>
+
+<p>Start with creating new user deploy:</p>
+
+
+<p><code>bash
+adduser deploy
+</code></p>
+
+<p>And create password for the new user:</p>
+
+
+<p><code>bash
+passwd deploy
+</code></p>
+
+<p>You shouldn't use root user often, but you will need root privileges for performing many tasks, like installing stuff, so it is quite useful to edit sudo configuration - it will give deploy user an ability to perform all tasks which require root privileges by preceding command with <code>sudo</code>. Run:</p>
+
+
+<p><code>bash
+visudo
+</code></p>
+
+<p>find section that looks like that:</p>
+
+
+<p>``` bash</p>
+
+<h2>Allow root to run any commands anywhere</h2>
+
+<p>root    ALL=(ALL)       ALL
+```</p>
+
+<p>and add the following line:</p>
+
+
+<p><code>bash
+deploy    ALL=(ALL)       ALL
+</code></p>
+
+<p>If you are not familiar with Vi editor, you have to press <code>a</code>, and then you can type :). When you finish hit escape and type <code>:wq!</code>.</p>
+
+
+
+
+<h2>Enhance security - configure SSH</h2>
+
+
+
+
+<p>You can easily make your server more secure by editing SSH configuration. Type:</p>
+
+
+<p><code>bash
+vi /etc/ssh/sshd_config
+</code></p>
+
+<p>Here are some default options which you may change:</p>
+
+
+<p>``` bash</p>
+
+<h1>Port 22</h1>
+
+<h1>PermitRootLogin yes</h1>
+
+<p>```</p>
+
+<p>Default 22 port for SSH is not insecure, but changing it to some other value will make it more difficult to compromise your server by automated attacks. Pick any number less than 65536 and uncomment this line.</p>
+
+
+
+
+<p>Another option is <code>PermitRootLogin</code> - change it to no to disable logging as root through ssh. You have root privileges by using <code>sudo</code>, so you don't need to login as root anyway.</p>
+
+
+
+
+<p>If you are going to create some more users, but you don't want them to login through ssh, add following line:</p>
+
+
+<p><code>bash
+AllowUsers deploy
+</code></p>
+
+<p>When you are finished type:</p>
+
+
+<p><code>bash
+/etc/init.d/sshd reload
+</code></p>
+
+<p>Now, open <b>NEW</b> terminal window and check if everything works:</p>
+
+
+<p><code>bash
+ssh -p new-port deploy@your-ip
+</code></p>
+
+<h2>Uhh, what was that IP?</h2>
+
+
+
+
+<p>You can avoid typing your IP number on every login by using named hosts, which is quite simple: create or edit <code>~/.ssh/config</code> (on your local machine, not server) and add:</p>
+
+
+<p><code>bash
+Host some-awesome-server-name
+Hostname your-ip-number
+User deploy
+Port your-port
+</code></p>
+
+<p>Now you can login on your server by:</p>
+
+
+<p><code>bash
+ssh some-awesome-server-name
+</code></p>
+
+<p>Amazing!</p>
+
+
+
+
+<p>But you can also skip password - you have to generate authentication keys on your local machine:</p>
+
+
+<p><code>bash
+ssh-keygen -t rsa
+</code></p>
+
+<p>And that's the entire output:</p>
+
+
+<p><code>bash
+Generating public/private rsa key pair.
+Enter file in which to save the key (/home/azdaroth/.ssh/id_rsa):
+Created directory '/home/azdaroth/.ssh'.
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /home/azdaroth/.ssh/id_rsa.
+Your public key has been saved in /home/azdaroth/.ssh/id_rsa.pub.
+The key fingerprint is:
+d9:1c:0b:76:60:56:e0:af:cd:f3:93:c7:15:f5:dc:dc azdaroth@abyss
+The key's randomart image is:
++--[ RSA 2048]----+
+|        =o.      |
+|       + .      .|
+|        + o    o=|
+|       . B o   .E|
+|        S =     .|
+|         +      .|
+|        . +  o . |
+|           oo o  |
+|            .o   |
++-----------------+
+</code></p>
+
+<p>What about the passphrase? It's up to you. If you leave it blank, you can ssh on your server by just entering: ssh server-name and that's all. Pretty nice, but if your local machine gets stolen, something really bad may happen with your server. So, you should enter a passphrase, at least on your laptop. The only downside of passphrase is that you will be asked to enter it on each login.</p>
+
+
+
+
+<p>To finish setup on your server, enter the following commands:</p>
+
+
+<p><code>bash
+mkdir ~/.ssh
+touch ~/.ssh/authorized_keys
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+</code></p>
+
+<p>Setting these permissions is essential and ssh will stop working if <code>StrictModes</code> is set in configuration (and probably is by default). Now, copy your <b>PUBLIC</b> key to authorized_keys file on your server:</p>
+
+
+<p><code>bash
+  cat ~/.ssh/id_rsa.pub | ssh server-name "cat &gt;&gt; ~/.ssh/authorized_keys"
+</code></p>
+
+<h2>Installing prerequisites</h2>
+
+
+
+
+<p>You will need to install some libraries. Start with updates:</p>
+
+
+<p><code>bash
+  sudo yum update
+</code></p>
+
+<p>You will probably want to install some extra repositories (like Fedora Epel) to get some up-to-date packages. Run:</p>
+
+
+<p><code>bash
+wget http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+wget http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+sudo rpm -Uvh remi-release-6*.rpm epel-release-6*.rpm
+</code></p>
+
+<p>And enable remi repository:</p>
+
+
+<p><code>bash
+sudo vi /etc/yum.repos.d/remi.repo
+</code></p>
+
+<p>In <code>[remi]</code> section set the enabled option to 1.</p>
+
+
+<p>``` bash
+[remi]
+name=Les RPM de remi pour Enterprise Linux 6 &ndash; $basearch</p>
+
+<h1>baseurl=<a href="http://rpms.famillecollet.com/enterprise/6/remi/$basearch/">http://rpms.famillecollet.com/enterprise/6/remi/$basearch/</a></h1>
+
+<p>mirrorlist=<a href="http://rpms.famillecollet.com/enterprise/6/remi/mirror">http://rpms.famillecollet.com/enterprise/6/remi/mirror</a>
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-remi
+```</p>
+
+<p>Now, you are going to install some packages, like RVM dependencies and other stuff.</p>
+
+
+<p><code>bash
+sudo yum install git-core openssl openssl-devel subversion curl curl-devel gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel  make bzip2 autoconf automake libtool bison sqlite-devel libxml2 libxml2-devel libxslt libxslt-devel libtool
+</code></p>
+
+<h2>RVM, Ruby and Rails</h2>
+
+
+
+
+<p>Now you can proceed to installing Ruby. We will use RVM - command-line tool, which makes managing multiple Ruby versions really easy. To install RVM enter:</p>
+
+
+<p><code>bash
+\curl -L https://get.rvm.io | bash -s stable
+</code></p>
+
+<p>Carefully read generated output. If everything is ok, run</p>
+
+
+<p><code>bash
+source /home/deploy/.rvm/scripts/rvm
+source ~/.bashrc
+</code></p>
+
+<p>Make sure you have following lines in your <code>~/.bashrc</code> file :</p>
+
+
+<p><code>bash
+[[ -s "$HOME/.rvm/scripts/rvm" ]] &amp;&amp; . "$HOME/.rvm/scripts/rvm"
+PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
+</code></p>
+
+<p>To check if everything was installed properly enter:</p>
+
+
+<p><code>bash
+type rvm | head -1
+</code></p>
+
+<p>It should return something like: <code>rvm is a function</code>. If not, reload terminal session (simply log out and log in again).</p>
+
+
+
+
+<p>And now you can install specified Ruby Version:</p>
+
+
+<p><code>bash
+rvm install 2.1.0
+</code></p>
+
+<p>Use installed Ruby version as the default one:</p>
+
+
+<p><code>bash
+rvm use 2.1.0
+rvm use 2.1.0 --default
+</code></p>
+
+<p>Nice! You've successfully installed Ruby. Now, you can install Bundler and Rails.</p>
+
+
+<p><code>
+gem install bundler rails
+</code></p>
+
+<h2>Nginx and Passenger</h2>
+
+
+
+
+<p>You will need an http server to run your applications. Nginx is fast, lightweight and easy to configure and Phusion Passenger module makes Nginx and Rails integration painless. Firstly, install Passenger gem:</p>
+
+
+<p><code>bash
+gem install passenger
+</code></p>
+
+<p>and then, install Nginx with compiled Passenger module:</p>
+
+
+<p><code>bash
+rvmsudo passenger-install-nginx-module
+</code></p>
+
+<p>Choose the recommended install mode.</p>
+
+
+
+
+<p>Now, open the Nginx configuration file (<code>/opt/nginx/cong/nginx.conf</code> if you haven't changed it during installation).</p>
+
+
+<p><code>bash
+sudo vi /opt/nginx/conf/nginx.conf
+</code></p>
+
+<p>Let's change some default config. Change worker_processes to be equal to number of CPU cores. You can also enable gzip compression. Just add following lines:</p>
+
+
+<p><code>bash
+gzip on;
+gzip_vary on;
+gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+</code></p>
+
+<p>Now setup your Rails application:</p>
+
+
+<p>``` bash
+server {
+  listen       80;
+  server_name  some-example.com;</p>
+
+<p>  root /path-to-your-application/current/public;
+  client_max_body_size 128M;
+  passenger_enabled on;
+  rails_env production;</p>
+
+<p>  location ~ ^/(assets|images|javascripts|stylesheets|system)/ {</p>
+
+<pre><code>expires max;
+add_header Cache-Control public;
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>At the end it should look like that:</p>
+
+
+<p>``` bash</p>
+
+<h1>user  nobody;</h1>
+
+<p>worker_processes  4;</p>
+
+<h1>error_log  logs/error.log;</h1>
+
+<h1>error_log  logs/error.log  notice;</h1>
+
+<h1>error_log  logs/error.log  info;</h1>
+
+<h1>pid        logs/nginx.pid;</h1>
+
+<p>events {
+  worker_connections  1024;
+}</p>
+
+<p>http {
+  passenger_root /home/azdaroth/.rvm/gems/ruby-2.1.0/gems/passenger-4.0.35;
+  passenger_ruby /home/azdaroth/.rvm/wrappers/ruby-2.1.0/ruby;</p>
+
+<p>  include       mime.types;
+  default_type  application/octet-stream;</p>
+
+<p>  #log_format  main  &lsquo;$remote_addr &ndash; $remote_user [$time_local] &ldquo;$request&rdquo; &rsquo;
+  #                  &lsquo;$status $body_bytes_sent &ldquo;$http_referer&rdquo; &rsquo;
+  #                  &lsquo;&ldquo;$http_user_agent&rdquo; &ldquo;$http_x_forwarded_for&rdquo;&rsquo;;</p>
+
+<p>  #access_log  logs/access.log  main;</p>
+
+<p>  sendfile        on;
+  #tcp_nopush     on;</p>
+
+<p>  #keepalive_timeout  0;
+  keepalive_timeout  65;</p>
+
+<p>  gzip on;
+  gzip_vary on;
+  gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;</p>
+
+<p>  server {</p>
+
+<pre><code>listen           80;
+server_name      localhost;
+
+location / {
+  root   html;
+  index  index.html index.htm;
+}
+
+error_page       500 502 503 504  /50x.html;
+location = /50x.html {
+  root   html;
+}
+</code></pre>
+
+<p>  }</p>
+
+<p>  server {</p>
+
+<pre><code>listen       80;
+server_name  some-example.com;
+
+root /path-to-your-application/current/public;
+client_max_body_size 128M;
+passenger_enabled on;
+rails_env production;
+
+location ~ ^/(assets|images|javascripts|stylesheets|system)/ {
+  expires max;
+  add_header Cache-Control public;
+}
+</code></pre>
+
+<p>  }
+}</p>
+
+<p>```</p>
+
+<p>You should also use a neat little script for easier Nginx management. Open the following file:</p>
+
+
+<p><code>bash
+sudo vi /etc/init.d/nginx
+</code></p>
+
+<p>copy & paste script below:</p>
+
+
+<p>``` bash</p>
+
+<h1>!/bin/sh</h1>
+
+<p>#</p>
+
+<h1>nginx &ndash; this script starts and stops the nginx daemin</h1>
+
+<p>#</p>
+
+<h1>chkconfig:   &ndash; 85 15</h1>
+
+<h1>description:  Nginx is an HTTP(S) server, HTTP(S) reverse \</h1>
+
+<h1>proxy and IMAP/POP3 proxy server</h1>
+
+<h1>processname: nginx</h1>
+
+<h1>config:      /opt/nginx/conf/nginx.conf</h1>
+
+<h1>pidfile:     /opt/nginx/logs/nginx.pid</h1>
+
+<h1>Source function library.</h1>
+
+<p>. /etc/rc.d/init.d/functions</p>
+
+<h1>Source networking configuration.</h1>
+
+<p>. /etc/sysconfig/network</p>
+
+<h1>Check that networking is up.</h1>
+
+<p>[ &ldquo;$NETWORKING&rdquo; = &ldquo;no&rdquo; ] &amp;&amp; exit 0</p>
+
+<p>nginx=&ldquo;/opt/nginx/sbin/nginx&rdquo;
+prog=$(basename $nginx)</p>
+
+<p>NGINX_CONF_FILE=&ldquo;/opt/nginx/conf/nginx.conf&rdquo;</p>
+
+<p>lockfile=/var/lock/subsys/nginx</p>
+
+<p>start() {</p>
+
+<pre><code>[ -x $nginx ] || exit 5
+[ -f $NGINX_CONF_FILE ] || exit 6
+echo -n $"Starting $prog: "
+daemon $nginx -c $NGINX_CONF_FILE
+retval=$?
+echo
+[ $retval -eq 0 ] &amp;&amp; touch $lockfile
+return $retval
+</code></pre>
+
+<p>}</p>
+
+<p>stop() {</p>
+
+<pre><code>echo -n $"Stopping $prog: "
+killproc $prog -QUIT
+retval=$?
+echo
+[ $retval -eq 0 ] &amp;&amp; rm -f $lockfile
+return $retval
+</code></pre>
+
+<p>}</p>
+
+<p>restart() {</p>
+
+<pre><code>configtest || return $?
+stop
+start
+</code></pre>
+
+<p>}</p>
+
+<p>reload() {</p>
+
+<pre><code>configtest || return $?
+echo -n $"Reloading $prog: "
+killproc $nginx -HUP
+RETVAL=$?
+echo
+</code></pre>
+
+<p>}</p>
+
+<p>force_reload() {</p>
+
+<pre><code>restart
+</code></pre>
+
+<p>}</p>
+
+<p>configtest() {
+  $nginx -t -c $NGINX_CONF_FILE
+}</p>
+
+<p>rh_status() {</p>
+
+<pre><code>status $prog
+</code></pre>
+
+<p>}</p>
+
+<p>rh_status_q() {</p>
+
+<pre><code>rh_status &gt;/dev/null 2&gt;&amp;1
+</code></pre>
+
+<p>}</p>
+
+<p>case &ldquo;$1&rdquo; in</p>
+
+<pre><code>start)
+    rh_status_q &amp;&amp; exit 0
+    $1
+    ;;
+stop)
+    rh_status_q || exit 0
+    $1
+    ;;
+restart|configtest)
+    $1
+    ;;
+reload)
+    rh_status_q || exit 7
+    $1
+    ;;
+force-reload)
+    force_reload
+    ;;
+status)
+    rh_status
+    ;;
+condrestart|try-restart)
+    rh_status_q || exit 0
+        ;;
+*)
+    echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload|configtest}"
+    exit 2
+</code></pre>
+
+<p>esac
+```</p>
+
+<p>and make it executable:</p>
+
+
+<p><code>bash
+sudo chmod +x /etc/init.d/nginx
+</code></p>
+
+<p>Now you can control Nginx by few commands:</p>
+
+
+<p><code>bash
+sudo service nginx start
+sudo service nginx stop
+sudo service nginx reload
+sudo service nginx restart
+sudo service nginx status
+sudo service nginx configtest
+</code></p>
+
+<p>To add Nginx to the default run levels, enter:</p>
+
+
+<p><code>bash
+sudo /sbin/chkconfig nginx on
+</code></p>
+
+<h2>ImageMagick</h2>
+
+
+
+
+<p>This part is optional, but you will probably need ImageMagick in some applications - it is a powerful software for creating, editing and converting images. The ImageMagick version available in repositories is probably outdated, so we will compile it from source.</p>
+
+
+
+
+<p>Start with installing some delegates (you have to install them before compiling ImageMagick).</p>
+
+
+<p><code>bash
+sudo yum install libjpeg libjpeg-devel libpng-devel libpng-devel freetype freetype-devel libtiff-devel jasper-devel bzip2-devel giflib-devel ghostscript-devel
+</code></p>
+
+<p>And compile it:</p>
+
+
+<p><code>bash
+wget http://www.imagemagick.org/download/ImageMagick.tar.gz
+tar xvfz ImageMagick.tar.gz
+cd ImageMagick-6.8.8-2
+./configure
+make
+sudo make install
+sudo ldconfig /usr/local/lib
+make check
+</code></p>
+
+<p>Export <code>PATH</code> variable:</p>
+
+
+<p><code>bash
+export PATH=$PATH:/usr/local/bin
+</code></p>
+
+<p>And check if everything works:</p>
+
+
+<p><code>bash
+convert -version
+</code></p>
+
+<p>You should get output similar to this:</p>
+
+
+<p><code>bash
+Version: ImageMagick 6.8.8-2 2013-07-18 Q16 http://www.imagemagick.org
+Copyright: Copyright (C) 1999-2013 ImageMagick Studio LLC
+Features: DPC OpenMP
+Delegates: bzlib freetype jng jp2 jpeg png ps tiff xml zlib
+</code></p>
+
+<h2>PostgreSQL</h2>
+
+
+
+
+<p>So, the last step is installing PostgreSQL. Firstly, you have to modify <code>/etc/yum.repos.d/CentOS-Base.repo</code> file:</p>
+
+
+<p><code>bash
+sudo vi /etc/yum.repos.d/CentOS-Base.repo
+</code></p>
+
+<p>and in both <code>[base]</code> and <code>[updates]</code> sections add the following line:</p>
+
+
+<p><code>bash
+exclude=postgresql*
+</code></p>
+
+<p>Now, install  PostgreSQL repository and PostgreSQL itself:</p>
+
+
+<p><code>bash
+sudo rpm -Uvh http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.noarch.rpm
+sudo yum install postgresql93 postgresql93-devel postgresql93-server postgresql93-libs postgresql93-contrib
+</code></p>
+
+<p>You have to initialize database cluster before doing anything:</p>
+
+
+<p><code>bash
+sudo /etc/init.d/postgresql-9.3 initdb
+</code></p>
+
+<p>And you can start Postgres and add it do default run levels:</p>
+
+
+<p><code>bash
+sudo service postgresql-9.3 start
+sudo chkconfig --levels 235 postgresql-9.3 on
+</code></p>
+
+<p>The very first thing you should do with Postgres is setting password for postgres user:</p>
+
+
+<p><code>bash
+sudo su postgres
+psql
+</code></p>
+
+<p>Now, you are in psql console. To change password, enter:</p>
+
+
+<p><code>bash
+alter user postgres with password 'postgres-user-password';
+</code></p>
+
+<p>Logout from postgres user and modify <code>/var/lib/pgsql/9.3/data/pg_hba.conf</code>:</p>
+
+
+<p><code>bash
+sudo vi /var/lib/pgsql/9.3/data/pg_hba.conf
+</code></p>
+
+<p>At the bottom of the file change authentication method to md5:</p>
+
+
+<p>``` bash</p>
+
+<h1>TYPE  DATABASE        USER            ADDRESS                 METHOD</h1>
+
+<h1>&ldquo;local&rdquo; is for Unix domain socket connections only</h1>
+
+<p>local   all             all                                     md5</p>
+
+<h1>IPv4 local connections:</h1>
+
+<p>host    all             all             127.0.0.1/32            md5</p>
+
+<h1>IPv6 local connections:</h1>
+
+<p>host    all             all             ::1/128                 md5
+```</p>
+
+<p>and restart Postgres:</p>
+
+
+<p><code>bash
+sudo service postgresql-9.3 restart
+</code></p>
+
+<p>To run psql console as deploy user just enter:</p>
+
+
+<p><code>bash
+psql postgres postgres
+</code></p>
+
+<p>and create a new user and database:</p>
+
+
+<p><code>bash
+create user username with password 'secretPassword';
+create database testdb owner=username;
+</code></p>
+
+<p>And that's it! Enjoy your server.</p>
+
+]]></content>
+  </entry>
+  
+</feed>

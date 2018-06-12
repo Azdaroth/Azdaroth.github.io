@@ -1,0 +1,682 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Scaling Up Rails Applications With PostgreSQL Table Partitioning - Part 1 - Karol Galanciak - Ruby on Rails and Ember.js consultant</title>
+  <meta name="author" content="Karol Galanciak">
+
+  
+  <meta name="description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  
+  <meta name="keywords" content="Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps">
+
+  
+  
+
+  <meta property="og:title" value="Scaling Up Rails Applications With PostgreSQL Table Partitioning - Part 1 - Karol Galanciak - Ruby on Rails and Ember.js consultant" />
+  <meta property="og:description" value="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications." />
+  <meta property="og:url" value="http://Azdaroth.github.io/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/" />
+  <meta property="og:type" content="website" />
+  
+  <meta property="og:site_name" content="Karol Galanciak - Ruby on Rails and Ember.js consultant"/>
+  <meta property="og:locale" content="en_US" />
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@Azdaroth">
+  <meta name="twitter:creator" content="@Azdaroth">
+  <meta name="twitter:title" content="Scaling Up Rails Applications With PostgreSQL Table Partitioning - Part 1 - Karol Galanciak - Ruby on Rails and Ember.js consultant">
+  <meta name="twitter:url" content="">
+  <meta name="twitter:description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://Azdaroth.github.io/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Karol Galanciak - Ruby on Rails and Ember.js consultant" type="application/atom+xml">
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "BlogPosting",
+      "mainEntityOfPage": {
+        "@type":"WebPage",
+        "@id": "http://Azdaroth.github.io/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1"
+      },
+      "headline": "Scaling Up Rails Applications With PostgreSQL Table Partitioning - Part 1 - Karol Galanciak - Ruby on Rails and Ember.js consultant",
+        "image": {
+        "@type": "ImageObject",
+        "url": "",
+        "height": 640,
+        "width": 1024
+      },
+      "datePublished": "2016-06-05",
+      "dateModified": "2018-06-12",
+      "author": {
+        "@type": "Person",
+        "name": "Karol Galanciak"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Karol Galanciak",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://karolgalanciak.com/images/me_formal.jpg",
+          "width": 600,
+          "height": 60
+        }
+      },
+      "description": "Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.",
+      "keywords": "Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps"
+    }
+  </script>
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-42570582-1', 'auto');
+    ga('send', 'pageview');
+    ga('set', 'anonymizeIp', true);
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Karol Galanciak - Ruby on Rails and Ember.js consultant</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:Azdaroth.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">About Me</a></li>
+  <li><a href="/blog">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/test-driven-ember">Test-Driven Ember Book</a></li>
+  <li><a href="/presentations">Presentations</a></li>
+  <li><a href="/publications">Publications</a></li>
+  <li><a href="/open-source">Open Source</a></li>
+  <li><a href="/privacy-policy">Privacy Policy</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Scaling Up Rails Applications With PostgreSQL Table Partitioning - Part 1</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-06-05T22:00:00+02:00" pubdate data-updated="true">Jun 5<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>You&#8217;ve probably heard many times that the database is the bottleneck of many web applications. This isn&#8217;t necessarily true. Often it happens that some heavy queries can be substiantially optimized, making them really efficient and fast. As the time passes by, however, the data can remarkably grow in size, especially in several years time which can indeed make the database a bottleneck - the tables are huge and don&#8217;t fit into memory any longer, the indexes are even bigger making queries much slower and you can&#8217;t really optimize further any query. In many cases deleting old records that are no longer used is not an option - they still can have some value, e.g. for data analysis or statystical purposes. Fortunately, it&#8217;s not a dead end. You can make your database performance great again with a new secret weapon: table partitioning.</p>
+
+
+
+
+<!--more-->
+
+
+
+
+<h2>Table partitioning and inheritance 101</h2>
+
+
+
+
+<p>To put it in simple words, table partitioning is about splitting one big table into several smaller units. In <strong>PostgreSQL</strong> it can be done by creating <strong>master table</strong> serving as a template for other <strong>children tables</strong> that will inherit from it. <strong>Master table</strong> contains no data and you shouldn&#8217;t add any indexes and unique constraints to it. However, if you need some <code>CHECK CONSTRAINTS</code> in all <strong>children tables</strong>, it is a good idea to add them to <strong>master table</strong> as they will be inherited. Due to inheritance mechanism, there is no point in adding any columns to <strong>children tables</strong> either. Creating tables inheriting from other tables is pretty straight-forward - you just need to use <code>INHERITS</code> clause:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">orders</span><span class="p">(</span>
+</span><span class='line'>  <span class="n">id</span> <span class="nb">serial</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">client_id</span> <span class="nb">integer</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">created_at</span> <span class="k">timestamp</span> <span class="k">without</span> <span class="n">time</span> <span class="k">zone</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">updated_at</span> <span class="k">timestamp</span> <span class="k">without</span> <span class="n">time</span> <span class="k">zone</span> <span class="k">NOT</span> <span class="k">NULL</span>
+</span><span class='line'><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">other_orders</span><span class="p">()</span> <span class="k">INHERITS</span> <span class="p">(</span><span class="n">orders</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>and that&#8217;s it - all columns and extra constraints will be defined on <code>other_orders</code> thanks to inheritance from <code>orders</code> table.</p>
+
+
+
+
+<h2>Defining constraints for partitioning criteria</h2>
+
+
+
+
+<p>As we are going to split one big table into the smaller ones, we need to have some criterium that would be used to decide which table should we put the data in. We can do it either by range (e.g. <code>created_at</code> between 01.01.2016 and 31.12.2016) or by value (<code>client_id</code> equal to 100). To ensure we have only the valid data which always satisfy out partitioning criterium, we should add proper <code>CHECK CONSTRAINTS</code> as guard statements. To make sure the orders in particular table were e.g. created at 2016, we could add the following constraint:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">CHECK</span> <span class="p">(</span><span class="n">created_at</span> <span class="o">&gt;=</span> <span class="nb">DATE</span> <span class="s1">&#39;2016-01-01&#39;</span> <span class="k">AND</span> <span class="n">created_at</span> <span class="o">&lt;=</span> <span class="nb">DATE</span> <span class="s1">&#39;2016-12-31&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If we were to create tables for orders for the upcoming few years (assuming that we want to cover entire year in each of them), we could do the following:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">orders_2016</span> <span class="p">(</span>
+</span><span class='line'>    <span class="k">CHECK</span> <span class="p">(</span><span class="n">created_at</span> <span class="o">&gt;=</span> <span class="nb">DATE</span> <span class="s1">&#39;2016-01-01&#39;</span> <span class="k">AND</span> <span class="n">created_at</span> <span class="o">&lt;=</span> <span class="nb">DATE</span> <span class="s1">&#39;2016-12-31&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="p">)</span> <span class="k">INHERITS</span> <span class="p">(</span><span class="n">orders</span><span class="p">);</span>
+</span><span class='line'><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">orders_2017</span> <span class="p">(</span>
+</span><span class='line'>    <span class="k">CHECK</span> <span class="p">(</span><span class="n">created_at</span> <span class="o">&gt;=</span> <span class="nb">DATE</span> <span class="s1">&#39;2017-01-01&#39;</span> <span class="k">AND</span> <span class="n">created_at</span> <span class="o">&lt;=</span> <span class="nb">DATE</span> <span class="s1">&#39;2017-12-31&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="p">)</span> <span class="k">INHERITS</span> <span class="p">(</span><span class="n">orders</span><span class="p">);</span>
+</span><span class='line'><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">orders_2018</span> <span class="p">(</span>
+</span><span class='line'>    <span class="k">CHECK</span> <span class="p">(</span><span class="n">created_at</span> <span class="o">&gt;=</span> <span class="nb">DATE</span> <span class="s1">&#39;2018-01-01&#39;</span> <span class="k">AND</span> <span class="n">created_at</span> <span class="o">&lt;=</span> <span class="nb">DATE</span> <span class="s1">&#39;2018-12-31&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="p">)</span> <span class="k">INHERITS</span> <span class="p">(</span><span class="n">orders</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>Beware of potential gotcha when defining <code>CHECK CONSTRAINTS</code>. Take a look at the following example:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">CHECK</span> <span class="p">(</span><span class="n">client_id</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="k">AND</span> <span class="n">client_id</span> <span class="o">&lt;=</span> <span class="mi">1000</span><span class="p">);</span>
+</span><span class='line'><span class="k">CHECK</span> <span class="p">(</span><span class="n">client_id</span> <span class="o">&gt;=</span> <span class="mi">1000</span> <span class="k">AND</span> <span class="n">client_id</span> <span class="o">&lt;=</span> <span class="mi">2000</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>In this case orders with <code>client_id</code> equal to 1000 could be inserted to any of these tables. Make sure the constraints are not inclusive on the same value when using ranges to avoid such problems.</p>
+
+
+
+
+<h2>Performance optimization</h2>
+
+
+
+
+<p>To provide decent performance it is also important to make <code>constraint_exclusion </code> in <code>postgresql.conf</code> enabled. You can set it either to <code>on</code> or <code>partition</code>:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="n">constraint_exclusion</span> <span class="o">=</span> <span class="k">on</span> <span class="o">#</span> <span class="k">on</span><span class="p">,</span> <span class="k">off</span><span class="p">,</span> <span class="k">or</span> <span class="n">partition</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>or</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="n">constraint_exclusion</span> <span class="o">=</span> <span class="n">partition</span>  <span class="o">#</span> <span class="k">on</span><span class="p">,</span> <span class="k">off</span><span class="p">,</span> <span class="k">or</span> <span class="n">partition</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>That way we can avoid scanning all children tables when the <code>CHECK CONSTRAINTS</code> exclude them based on query conditions. Compare the query plans between queries with <code>constraint_exclusion</code> disabled and enabled:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="o">#</span> <span class="k">SET</span> <span class="n">constraint_exclusion</span> <span class="o">=</span> <span class="k">off</span><span class="p">;</span>
+</span><span class='line'><span class="k">SET</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">#</span> <span class="k">EXPLAIN</span> <span class="p">(</span><span class="k">ANALYZE</span> <span class="k">ON</span><span class="p">,</span> <span class="n">BUFFERS</span> <span class="k">ON</span><span class="p">)</span> <span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">orders</span> <span class="k">WHERE</span> <span class="n">created_at</span> <span class="o">&gt;=</span> <span class="nb">DATE</span> <span class="s1">&#39;2018-01-01&#39;</span> <span class="k">AND</span> <span class="n">created_at</span> <span class="o">&lt;=</span> <span class="nb">DATE</span> <span class="s1">&#39;2018-12-31&#39;</span><span class="p">;</span>
+</span><span class='line'>                                                 <span class="n">QUERY</span> <span class="n">PLAN</span>
+</span><span class='line'><span class="c1">-------------------------------------------------------------------------------------------------------------</span>
+</span><span class='line'> <span class="n">Append</span>  <span class="p">(</span><span class="n">cost</span><span class="o">=</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span><span class="p">..</span><span class="mi">97</span><span class="p">.</span><span class="mi">95</span> <span class="k">rows</span><span class="o">=</span><span class="mi">25</span> <span class="n">width</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span> <span class="p">(</span><span class="n">actual</span> <span class="n">time</span><span class="o">=</span><span class="mi">0</span><span class="p">.</span><span class="mi">001</span><span class="p">..</span><span class="mi">0</span><span class="p">.</span><span class="mi">001</span> <span class="k">rows</span><span class="o">=</span><span class="mi">0</span> <span class="n">loops</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>   <span class="o">-&gt;</span>  <span class="n">Seq</span> <span class="n">Scan</span> <span class="k">on</span> <span class="n">orders</span>  <span class="p">(</span><span class="n">cost</span><span class="o">=</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span><span class="p">..</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="k">rows</span><span class="o">=</span><span class="mi">1</span> <span class="n">width</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span> <span class="p">(</span><span class="n">actual</span> <span class="n">time</span><span class="o">=</span><span class="mi">0</span><span class="p">.</span><span class="mi">001</span><span class="p">..</span><span class="mi">0</span><span class="p">.</span><span class="mi">001</span> <span class="k">rows</span><span class="o">=</span><span class="mi">0</span> <span class="n">loops</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>         <span class="n">Filter</span><span class="p">:</span> <span class="p">((</span><span class="n">created_at</span> <span class="o">&gt;=</span> <span class="s1">&#39;2018-01-01&#39;</span><span class="p">::</span><span class="nb">date</span><span class="p">)</span> <span class="k">AND</span> <span class="p">(</span><span class="n">created_at</span> <span class="o">&lt;=</span> <span class="s1">&#39;2018-12-31&#39;</span><span class="p">::</span><span class="nb">date</span><span class="p">))</span>
+</span><span class='line'>   <span class="o">-&gt;</span>  <span class="n">Seq</span> <span class="n">Scan</span> <span class="k">on</span> <span class="n">orders_2016</span>  <span class="p">(</span><span class="n">cost</span><span class="o">=</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span><span class="p">..</span><span class="mi">32</span><span class="p">.</span><span class="mi">65</span> <span class="k">rows</span><span class="o">=</span><span class="mi">8</span> <span class="n">width</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span> <span class="p">(</span><span class="n">actual</span> <span class="n">time</span><span class="o">=</span><span class="mi">0</span><span class="p">.</span><span class="mi">000</span><span class="p">..</span><span class="mi">0</span><span class="p">.</span><span class="mi">000</span> <span class="k">rows</span><span class="o">=</span><span class="mi">0</span> <span class="n">loops</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>         <span class="n">Filter</span><span class="p">:</span> <span class="p">((</span><span class="n">created_at</span> <span class="o">&gt;=</span> <span class="s1">&#39;2018-01-01&#39;</span><span class="p">::</span><span class="nb">date</span><span class="p">)</span> <span class="k">AND</span> <span class="p">(</span><span class="n">created_at</span> <span class="o">&lt;=</span> <span class="s1">&#39;2018-12-31&#39;</span><span class="p">::</span><span class="nb">date</span><span class="p">))</span>
+</span><span class='line'>   <span class="o">-&gt;</span>  <span class="n">Seq</span> <span class="n">Scan</span> <span class="k">on</span> <span class="n">orders_2017</span>  <span class="p">(</span><span class="n">cost</span><span class="o">=</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span><span class="p">..</span><span class="mi">32</span><span class="p">.</span><span class="mi">65</span> <span class="k">rows</span><span class="o">=</span><span class="mi">8</span> <span class="n">width</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span> <span class="p">(</span><span class="n">actual</span> <span class="n">time</span><span class="o">=</span><span class="mi">0</span><span class="p">.</span><span class="mi">000</span><span class="p">..</span><span class="mi">0</span><span class="p">.</span><span class="mi">000</span> <span class="k">rows</span><span class="o">=</span><span class="mi">0</span> <span class="n">loops</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>         <span class="n">Filter</span><span class="p">:</span> <span class="p">((</span><span class="n">created_at</span> <span class="o">&gt;=</span> <span class="s1">&#39;2018-01-01&#39;</span><span class="p">::</span><span class="nb">date</span><span class="p">)</span> <span class="k">AND</span> <span class="p">(</span><span class="n">created_at</span> <span class="o">&lt;=</span> <span class="s1">&#39;2018-12-31&#39;</span><span class="p">::</span><span class="nb">date</span><span class="p">))</span>
+</span><span class='line'>   <span class="o">-&gt;</span>  <span class="n">Seq</span> <span class="n">Scan</span> <span class="k">on</span> <span class="n">orders_2018</span>  <span class="p">(</span><span class="n">cost</span><span class="o">=</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span><span class="p">..</span><span class="mi">32</span><span class="p">.</span><span class="mi">65</span> <span class="k">rows</span><span class="o">=</span><span class="mi">8</span> <span class="n">width</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span> <span class="p">(</span><span class="n">actual</span> <span class="n">time</span><span class="o">=</span><span class="mi">0</span><span class="p">.</span><span class="mi">000</span><span class="p">..</span><span class="mi">0</span><span class="p">.</span><span class="mi">000</span> <span class="k">rows</span><span class="o">=</span><span class="mi">0</span> <span class="n">loops</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>         <span class="n">Filter</span><span class="p">:</span> <span class="p">((</span><span class="n">created_at</span> <span class="o">&gt;=</span> <span class="s1">&#39;2018-01-01&#39;</span><span class="p">::</span><span class="nb">date</span><span class="p">)</span> <span class="k">AND</span> <span class="p">(</span><span class="n">created_at</span> <span class="o">&lt;=</span> <span class="s1">&#39;2018-12-31&#39;</span><span class="p">::</span><span class="nb">date</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="o">#</span> <span class="k">SET</span> <span class="n">constraint_exclusion</span> <span class="o">=</span> <span class="n">partition</span><span class="p">;</span>
+</span><span class='line'><span class="k">SET</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">#</span> <span class="k">EXPLAIN</span> <span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">orders</span> <span class="k">WHERE</span> <span class="n">created_at</span> <span class="o">&gt;=</span> <span class="nb">DATE</span> <span class="s1">&#39;2018-01-01&#39;</span> <span class="k">AND</span> <span class="n">created_at</span> <span class="o">&lt;=</span> <span class="nb">DATE</span> <span class="s1">&#39;2018-12-31&#39;</span><span class="p">;</span>
+</span><span class='line'>                                         <span class="n">QUERY</span> <span class="n">PLAN</span>
+</span><span class='line'><span class="c1">---------------------------------------------------------------------------------------------</span>
+</span><span class='line'> <span class="n">Append</span>  <span class="p">(</span><span class="n">cost</span><span class="o">=</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span><span class="p">..</span><span class="mi">32</span><span class="p">.</span><span class="mi">65</span> <span class="k">rows</span><span class="o">=</span><span class="mi">9</span> <span class="n">width</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+</span><span class='line'>   <span class="o">-&gt;</span>  <span class="n">Seq</span> <span class="n">Scan</span> <span class="k">on</span> <span class="n">orders</span>  <span class="p">(</span><span class="n">cost</span><span class="o">=</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span><span class="p">..</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="k">rows</span><span class="o">=</span><span class="mi">1</span> <span class="n">width</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+</span><span class='line'>         <span class="n">Filter</span><span class="p">:</span> <span class="p">((</span><span class="n">created_at</span> <span class="o">&gt;=</span> <span class="s1">&#39;2018-01-01&#39;</span><span class="p">::</span><span class="nb">date</span><span class="p">)</span> <span class="k">AND</span> <span class="p">(</span><span class="n">created_at</span> <span class="o">&lt;=</span> <span class="s1">&#39;2018-12-31&#39;</span><span class="p">::</span><span class="nb">date</span><span class="p">))</span>
+</span><span class='line'>   <span class="o">-&gt;</span>  <span class="n">Seq</span> <span class="n">Scan</span> <span class="k">on</span> <span class="n">orders_2018</span>  <span class="p">(</span><span class="n">cost</span><span class="o">=</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span><span class="p">..</span><span class="mi">32</span><span class="p">.</span><span class="mi">65</span> <span class="k">rows</span><span class="o">=</span><span class="mi">8</span> <span class="n">width</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+</span><span class='line'>         <span class="n">Filter</span><span class="p">:</span> <span class="p">((</span><span class="n">created_at</span> <span class="o">&gt;=</span> <span class="s1">&#39;2018-01-01&#39;</span><span class="p">::</span><span class="nb">date</span><span class="p">)</span> <span class="k">AND</span> <span class="p">(</span><span class="n">created_at</span> <span class="o">&lt;=</span> <span class="s1">&#39;2018-12-31&#39;</span><span class="p">::</span><span class="nb">date</span><span class="p">))</span>
+</span><span class='line'><span class="p">(</span><span class="mi">5</span> <span class="k">rows</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>We wanted to select only the orders created on 2018, so there is no need to scan other children tables that don&#8217;t contain such data.</p>
+
+
+
+
+<p>The difference between <code>on</code> and <code>partition</code> setting is that the former checks constraints for all tables and the latter only for children tables inheriting from parent table (and also when using <code>UNION ALL</code> subqueries).</p>
+
+
+
+
+<h2>Create new records easily with triggers</h2>
+
+
+
+
+<p>Having multiple tables is certainly difficult to manage when creating new records. Always remembering that they should be inserted to a specific table can be cumbersome. Fortunately, there&#8217;s an excellent solution for this problem: PostgreSQL triggers! If you are not familiar with them, you can read my previous <a href="https://karolgalanciak.com/blog/2016/05/06/when-validation-is-not-enough-postgresql-triggers-for-data-integrity/" target="_blank">blog post</a> about database triggers.</p>
+
+
+
+
+<p>We can automate the insertion process by checking the value of <code>created_at</code> and decide which table it should be put in. Here&#8217;s an example how we could approach it:</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">CREATE</span> <span class="k">OR</span> <span class="k">REPLACE</span> <span class="k">FUNCTION</span> <span class="n">orders_create_function</span><span class="p">()</span>
+</span><span class='line'><span class="k">RETURNS</span> <span class="k">TRIGGER</span> <span class="k">AS</span> <span class="err">$$</span>
+</span><span class='line'><span class="k">BEGIN</span>
+</span><span class='line'>    <span class="n">IF</span> <span class="p">(</span><span class="k">NEW</span><span class="p">.</span><span class="n">created_at</span> <span class="o">&gt;=</span> <span class="nb">DATE</span> <span class="s1">&#39;2016-01-01&#39;</span> <span class="k">AND</span>
+</span><span class='line'>         <span class="k">NEW</span><span class="p">.</span><span class="n">created_at</span> <span class="o">&lt;=</span> <span class="nb">DATE</span> <span class="s1">&#39;2016-12-31&#39;</span><span class="p">)</span> <span class="k">THEN</span>
+</span><span class='line'>        <span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">orders_2016</span> <span class="k">VALUES</span> <span class="p">(</span><span class="k">NEW</span><span class="p">.</span><span class="o">*</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">ELSIF</span> <span class="p">(</span> <span class="k">NEW</span><span class="p">.</span><span class="n">created_at</span> <span class="o">&gt;=</span> <span class="nb">DATE</span> <span class="s1">&#39;2017-01-01&#39;</span> <span class="k">AND</span>
+</span><span class='line'>            <span class="k">NEW</span><span class="p">.</span><span class="n">created_at</span> <span class="o">&lt;=</span> <span class="nb">DATE</span> <span class="s1">&#39;2017-21-31&#39;</span> <span class="p">)</span> <span class="k">THEN</span>
+</span><span class='line'>        <span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">orders_2017</span> <span class="k">VALUES</span> <span class="p">(</span><span class="k">NEW</span><span class="p">.</span><span class="o">*</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">ELSIF</span> <span class="p">(</span><span class="k">NEW</span><span class="p">.</span><span class="n">created_at</span> <span class="o">&gt;=</span> <span class="n">created_at</span> <span class="s1">&#39;2018-01-01&#39;</span> <span class="k">AND</span>
+</span><span class='line'>            <span class="k">NEW</span><span class="p">.</span><span class="n">created_at</span> <span class="o">&lt;=</span> <span class="n">created_at</span> <span class="s1">&#39;2018-12-31&#39;</span><span class="p">)</span> <span class="k">THEN</span>
+</span><span class='line'>        <span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">orders_2018</span> <span class="k">VALUES</span> <span class="p">(</span><span class="k">NEW</span><span class="p">.</span><span class="o">*</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">ELSE</span>
+</span><span class='line'>        <span class="n">RAISE</span> <span class="n">EXCEPTION</span> <span class="s1">&#39;Date out of range, probably child table is missing&#39;</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">END</span> <span class="n">IF</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">RETURN</span> <span class="k">NULL</span><span class="p">;</span>
+</span><span class='line'><span class="k">END</span><span class="p">;</span>
+</span><span class='line'><span class="err">$$</span>
+</span><span class='line'><span class="k">LANGUAGE</span> <span class="n">plpgsql</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">CREATE</span> <span class="k">TRIGGER</span> <span class="n">orders_create_trigger</span>
+</span><span class='line'><span class="k">BEFORE</span> <span class="k">INSERT</span> <span class="k">ON</span> <span class="n">orders</span>
+</span><span class='line'><span class="k">FOR</span> <span class="k">EACH</span> <span class="k">ROW</span> <span class="k">EXECUTE</span> <span class="k">PROCEDURE</span> <span class="n">orders_create_function</span><span class="p">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>There&#8217;s a potential gotcha though: as we as we are dealing with multiple tables, the <code>id</code> of the orders might not necessarily be unique across all of them. When creating new records we can ensure that the next id will be based on &#8220;global&#8221; sequence for partitioned tables, but it still gives a possibility to have duplicated ids in some tables, e.g. by accidental update of the id. Probably the best way to make sure there are no duplicates in all partitioned tables would be using <strong>uuid</strong> which most likely will be unique.</p>
+
+
+
+
+<h2>Wrapping up</h2>
+
+
+
+
+<p>Table partitioning might be a great solution to improve performance of your application when the amount of data in tables is huge (especially when they don&#8217;t fit into memory any longer). In the first part, we learned some basics from raw SQL perspective about table partitioning. In the next one we will be applying this concept to real-world Rails application.</p>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Karol Galanciak</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-06-05T22:00:00+02:00" pubdate data-updated="true">Jun 5<span>th</span>, 2016</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/postgresql/'>PostgreSQL</a>, <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/ruby-on-rails/'>Ruby on Rails</a>, <a class='category' href='/blog/categories/architecture/'>architecture</a>, <a class='category' href='/blog/categories/databases/'>databases</a>, <a class='category' href='/blog/categories/performance/'>performance</a>, <a class='category' href='/blog/categories/scaling/'>scaling</a>
+  
+</span>
+
+
+    </p>
+    <div class="meta top-line">
+      <div class="post-subscription">
+  <div id="mc_embed_signup">
+    <div id="mc_embed_signup_scroll">
+      <label for="mce-EMAIL">Do you want to take your developer skills to the next level? Subscribe to my newsletter and never miss another blog post!</label>
+      <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+      <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_62804f1b69c60e0c7966cddd6_7c71fb81df" tabindex="-1" value=""></div>
+      <div class="clear">
+      <a href="http://eepurl.com/duztq5" target="_blank" id="mc-embedded-subscribe" class="button">Yes, I want to be a better developer!</a>
+    </div>
+  </div>
+</div>
+
+    </div>
+    <div class="top-line">
+      
+        <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://Azdaroth.github.io/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/" data-via="Azdaroth" data-counturl="http://Azdaroth.github.io/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+      
+    </div>
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/05/06/when-validation-is-not-enough-postgresql-triggers-for-data-integrity/" title="Previous Post: When validation is not enough: PostgreSQL triggers for data integrity">&laquo; When validation is not enough: PostgreSQL triggers for data integrity</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2016/06/12/scaling-up-rails-applications-with-postgresql-table-partitioning-part-2/" title="Next Post: Scaling Up Rails Applications With PostgreSQL Table Partitioning - Part 2">Scaling Up Rails Applications With PostgreSQL Table Partitioning - Part 2 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <img class="left" src="/images/me_formal.jpg" title="me:)" alt="Karol Galanciak - photo">
+  <p>Hi, my name is Karol Galanciak, I'm a technical polyglot and domain expert in vacation rental and fitness industries.</p>
+
+  <p>I specialize in building APIs, microservices architecture, working with legacy applications, building ambitious Single Page Applications and building payment processors for credit cards processing. Currently I'm working as CTO at <a href="https://www.bookingsync.com" target="_blank">BookingSync</a>.</p>
+
+  <p id="email-me"></p>
+</section>
+
+<script type="text/javascript">
+  (function(d, id, lhs, rhs) {
+    d.getElementById(id).innerHTML = "You can reach me at <a rel='nofollow' href='mailto:" + lhs + "@" + rhs + "'>" + lhs + "@" + rhs + "</a>";
+  })(window.document, 'email-me', 'karol.galanciak', 'gmail.com');
+</script>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization/">The Case for Before_validation Callback: Complex State Normalization</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/">Advanced Ember Data Customization - Different Model Types in Ember App and API for the Same Resource</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/">Exotic Ruby: Module.class_exec, Custom JSON and Liquid Drops in Action</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/">Rails Quick Tips: Temporarily Disabling Touching With ActiveRecord.no_touching</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function/">PostgreSQL Quick Tips: Working With Dates Using EXTRACT Function</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/Azdaroth">@Azdaroth</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'Azdaroth',
+            count: 6,
+            skip_forks: false,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+<section>
+   <h1>Twitter</h1>
+   <a class="twitter-timeline" href="https://twitter.com/Azdaroth" data-widget-id="357234540634329088">Tweets by @Azdaroth</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - Karol Galanciak -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'karolgalanciak';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://Azdaroth.github.io/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/';
+        var disqus_url = 'http://Azdaroth.github.io/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
