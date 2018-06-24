@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Rails And Conditional Validations In Models"
-date: 2018-06-30 20:00
+date: 2018-06-24 20:00
 comments: true
 categories: [Ruby, Rails, ActiveRecord, Design Patterns, Architecture]
 ---
@@ -10,7 +10,7 @@ Adding consents for accepting Terms of Service/Privacy Policies must have been a
 
 That makes a significant impact on how we approach this kind of features. However, in the past, such things were quite often not stored in a database at all - it just took some UI **acceptance validation** or maybe a **validation of the virtual attribute** on the backend to be on the safe side.
 
-Let's focus on the latter case and see what the possible solutions to that problems are. As **trivial** as this problem initially sounds, it will get **quite interesting** ;).
+Let's focus on the latter case where we don't need to store anything in DB and see what the possible solutions to that problems are. As **trivial** as this problem initially sounds, it will get **quite interesting** ;).
 
 ## Anatomy Of The Problem
 
@@ -48,7 +48,7 @@ Even if it solves the actual problem, there is a big issue about that - the vali
 
 ## Solution 3 - Add a virtual attribute to the model and validate it only for a specific context
 
-What is interesting in ActiveModel validations is that `on` option is not limited to `:create` or `:update` contexts - those are merely the ones that ActiveRecord sets by default depending on the persistence status of the model! We can provide a custom context for both `valid?` and `save` methods:
+What is interesting in ActiveModel validations is that `on` option is not limited to `:create` or `:update` contexts - those are merely the ones that ActiveRecord sets by default depending on the persistence status of the model. We can provide a custom context for both `valid?` and `save` methods:
 
 ``` rb
 user.valid?(:registration)
@@ -66,7 +66,7 @@ class User < ApplicationRecord
 end
 ```
 
-However, this is still not ideal - a global model which is used in multiple contexts has some logic that only applies to just one use case, and what is even worse, it's for a UI concern.
+However, this is still not ideal - a global model which is used in multiple contexts has some logic that only applies to just one use case, and what is even worse, it's for an UI concern.
 
 Let's try to find a solution that doesn't add any unnecessary mess to a model.
 
@@ -89,9 +89,9 @@ class User::RegistrationForm < Reform::Form
 end
 ```
 
-Besides handling other properties (most likely email, password and password confirmation), we are adding a virtual `terms_of_service_accepted` with explicit type and adding acceptance validation using ActiveModel validator.
+Besides handling other properties (most likely `email`, `password` and `password confirmation`), we are adding a virtual `terms_of_service_accepted` attribute with explicit type and adding acceptance validation using ActiveModel validator.
 
-Even though using form objects is the cleanest approach, it requires some extra overhead, especially with setup, and sometimes it might be painful to add that setup, especially when extending third party's logic, e.g. [devise_invitable](https://github.com/scambra/devise_invitable). In such case, we would need some heavy customization which could potentially break when updating a gem and we would also need extra test coverage for the custom solution. It might still be worth introducing a form object, but it would be a good idea to consider other potential solutions. What option do we have left?
+Even though using form objects is the cleanest approach, it requires some extra overhead, mostly with the setup, and sometimes it might be painful to add that setup, especially when extending third party's logic, e.g. [devise_invitable](https://github.com/scambra/devise_invitable). In such case, we would need some heavy customization which could potentially break when updating a gem and we would also need extra test coverage for the custom solution. It might still be worth introducing a form object, but it would be a good idea to consider other potential solutions. What option do we have left?
 
 ## Solution 5 - Extend user's instance with a custom logic
 
@@ -133,10 +133,8 @@ user.errors.messages[:terms_of_service_accepted]
 => ["must be accepted"]
 ```
 
-Perfect!
+Perfect, that's exactly what we needed!
 
 ## Wrapping Up
 
 There are multiple ways in Rails (or Ruby in general) to handle **conditional validation**, and thanks to the flexibility of the framework and the language, we can pick whatever seems best for our particular problem - from adding additional validations in a model with **extra ActiveModel context**, through using **form objects**, ending with arcane DCI-style object's extensions.
-
-
