@@ -12,6 +12,8 @@ That makes a significant impact on how we approach this kind of features. Howeve
 
 Let's focus on the latter case where we don't need to store anything in DB and see what the possible solutions to that problems are. As **trivial** as this problem initially sounds, it will get **quite interesting** ;).
 
+<!--more-->
+
 ## Anatomy Of The Problem
 
 We want to make sure a user accepts Terms of Service during the signup process and to be sure that it is indeed validated, even if JavaScript validation fails in UI, we want to validate that fact on the backend.
