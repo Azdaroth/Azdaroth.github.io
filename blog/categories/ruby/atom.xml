@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2018-06-12T17:32:38+02:00</updated>
+  <updated>2018-06-24T17:16:43+02:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -12,6 +12,159 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Rails And Conditional Validations In Models]]></title>
+    <link href="https://karolgalanciak.com/blog/2018/06/24/rails-and-conditional-validations-in-models/"/>
+    <updated>2018-06-24T20:00:00+02:00</updated>
+    <id>https://karolgalanciak.com/blog/2018/06/24/rails-and-conditional-validations-in-models</id>
+    <content type="html"><![CDATA[<p>Adding consents for accepting Terms of Service/Privacy Policies must have been a top popular feature in the majority of the applications due to enforcement of <strong>GDPR</strong> in May ;). From the technical aspects that GDPR requires, there is a proof of consent for processing the personal information. In that case, you need to have some actual attributes in the database that would confirm the fact that some user has indeed accepted Terms of Service/Privacy Policy.</p>
+
+<p>That makes a significant impact on how we approach this kind of features. However, in the past, such things were quite often not stored in a database at all &ndash; it just took some UI <strong>acceptance validation</strong> or maybe a <strong>validation of the virtual attribute</strong> on the backend to be on the safe side.</p>
+
+<p>Let&rsquo;s focus on the latter case where we don&rsquo;t need to store anything in DB and see what the possible solutions to that problems are. As <strong>trivial</strong> as this problem initially sounds, it will get <strong>quite interesting</strong> ;).</p>
+
+<h2>Anatomy Of The Problem</h2>
+
+<p>We want to make sure a user accepts Terms of Service during the signup process and to be sure that it is indeed validated, even if JavaScript validation fails in UI, we want to validate that fact on the backend.</p>
+
+<h2>Solution 1 &ndash; Just add a virtual attribute to the model and validate it</h2>
+
+<p>It is probably the most straightforward approach to that problem and most likely the least elegant. That&rsquo;s how we could implement it:</p>
+
+<p>``` rb</p>
+
+<h1>app/models/user.rb</h1>
+
+<p>class User &lt; ApplicationRecord
+  attr_accessor :terms_of_service_accepted</p>
+
+<p>  validates :terms_of_service_accepted, acceptance: true
+end
+```</p>
+
+<p>Well, it does work, no doubt about that. But currently, the validation will always be triggered, even during updates, which doesn&rsquo;t make much sense. We need to find a better solution.</p>
+
+<h2>Solution 2 &ndash; Add a virtual attribute to the model and validate it only during the creation of a user</h2>
+
+<p>A minor improvement over the previous version, we make sure that the validation is not triggered by updates, but only when creating a user:</p>
+
+<p>``` rb</p>
+
+<h1>app/models/user.rb</h1>
+
+<p>class User &lt; ApplicationRecord
+  attr_accessor :terms_of_service_accepted</p>
+
+<p>  validates :terms_of_service_accepted, acceptance: true, on: :create
+end
+```</p>
+
+<p>Even if it solves the actual problem, there is a big issue about that &ndash; the validation will always be triggered during a creation, even when creating users from factories! What other options do we have?</p>
+
+<h2>Solution 3 &ndash; Add a virtual attribute to the model and validate it only for a specific context</h2>
+
+<p>What is interesting in ActiveModel validations is that <code>on</code> option is not limited to <code>:create</code> or <code>:update</code> contexts &ndash; those are merely the ones that ActiveRecord sets by default depending on the persistence status of the model. We can provide a custom context for both <code>valid?</code> and <code>save</code> methods:</p>
+
+<p><code>rb
+user.valid?(:registration)
+user.save(context: :registration)
+</code></p>
+
+<p>In that case, we could replace <code>:create</code> context with <code>:registration</code> context for the acceptance validation:</p>
+
+<p>``` rb</p>
+
+<h1>app/models/user.rb</h1>
+
+<p>class User &lt; ApplicationRecord
+  attr_accessor :terms_of_service_accepted</p>
+
+<p>  validates :terms_of_service_accepted, acceptance: true, on: :registration
+end
+```</p>
+
+<p>However, this is still not ideal &ndash; a global model which is used in multiple contexts has some logic that only applies to just one use case, and what is even worse, it&rsquo;s for an UI concern.</p>
+
+<p>Let&rsquo;s try to find a solution that doesn&rsquo;t add any unnecessary mess to a model.</p>
+
+<h2>Solution 4 &ndash; Use form object</h2>
+
+<p>Using form object is probably the cleanest solution to our problem &ndash; we don&rsquo;t introduce any additional concerns to a model which should not be there, and we handle everything in a dedicated object. The are multiple ways how to implement a form object: we could create another ActiveModel model and take advantage of <a href="https://github.com/Azdaroth/active_model_attributes">ActiveModel Attributes</a> to make it smoother. We could use <a href="http://dry-rb.org/gems/dry-validation/basics/working-with-schemas/">dry-validation</a> gem for that. Or we could use my favorite tool for that purpose: <a href="https://github.com/trailblazer/reform">reform</a> gem from <a href="http://trailblazer.to">Trailblazer</a> stack.</p>
+
+<p>Explaining the entire API of <code>reform</code> gem is way beyond the scope of this article, but the following implementation should be quite self-explanatory:</p>
+
+<p>``` rb</p>
+
+<h1>app/forms/user/registration_form.rb</h1>
+
+<p>require &ldquo;reform/form/coercion&rdquo;</p>
+
+<p>class User::RegistrationForm &lt; Reform::Form
+  # other property declarations and validations</p>
+
+<p>  property :terms_of_service_accepted, virtual: :true, type: Types::Form::Boolean</p>
+
+<p>  validates :terms_of_service_accepted, acceptance: true
+end
+```</p>
+
+<p>Besides handling other properties (most likely <code>email</code>, <code>password</code> and <code>password confirmation</code>), we are adding a virtual <code>terms_of_service_accepted</code> attribute with explicit type and adding acceptance validation using ActiveModel validator.</p>
+
+<p>Even though using form objects is the cleanest approach, it requires some extra overhead, mostly with the setup, and sometimes it might be painful to add that setup, especially when extending third party&rsquo;s logic, e.g. <a href="https://github.com/scambra/devise_invitable">devise_invitable</a>. In such case, we would need some heavy customization which could potentially break when updating a gem and we would also need extra test coverage for the custom solution. It might still be worth introducing a form object, but it would be a good idea to consider other potential solutions. What option do we have left?</p>
+
+<h2>Solution 5 &ndash; Extend user&rsquo;s instance with a custom logic</h2>
+
+<p>Have you ever heard of DCI (Data Context Interaction) paradigm? If yes, you might have seen something like that:</p>
+
+<p><code>rb
+user = User.find(id)
+user.extend(User::RegistrationContext)
+</code></p>
+
+<p>What this code does is adding extra functionality from <code>User::RegistrationContext</code> module to user&rsquo;s singleton class. Effectively, it means that we are not adding any additional logic to all User class instances, but only to that particular instance. Sounds like exactly what we need! That way, we can solve our problem achieving all the other goals as well &ndash; ease of extending the logic without too much overhead and without making a mess in the model.</p>
+
+<p>Here is how our implementation of <code>User::RegistrationContext</code> context module could look like:</p>
+
+<p>``` rb</p>
+
+<h1>app/models/user/registration_context.rb</h1>
+
+<p>module User::RegistrationContext
+  def self.extended(model)</p>
+
+<pre><code>class &lt;&lt; model
+  validates :terms_of_service_accepted, acceptance: true
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  attr_accessor :terms_of_service_accepted
+end
+```</p>
+
+<p>The interesting thing about this implementation is that there is some singletons' inception going on there &ndash; first, we are using <code>extend</code> itself on the model, and then, in <code>extended</code> module hook we are opening singleton class of the model and declaring validation there. However, this is necessary since <code>validates</code> method is not defined in the context of that module, and we need to do that in the context of the model.</p>
+
+<p>Let&rsquo;s try our fancy solution in action:</p>
+
+<p><code>rb
+user = User.new
+user.extend(User::RegistrationContext)
+user.terms_of_service_accepted = "0"
+user.valid?
+=&gt; false
+user.errors.messages[:terms_of_service_accepted]
+=&gt; ["must be accepted"]
+</code></p>
+
+<p>Perfect, that&rsquo;s exactly what we needed!</p>
+
+<h2>Wrapping Up</h2>
+
+<p>There are multiple ways in Rails (or Ruby in general) to handle <strong>conditional validation</strong>, and thanks to the flexibility of the framework and the language, we can pick whatever seems best for our particular problem &ndash; from adding additional validations in a model with <strong>extra ActiveModel context</strong>, through using <strong>form objects</strong>, ending with arcane DCI-style object&rsquo;s extensions.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[The Case for before_validation callback: complex state normalization]]></title>
@@ -402,134 +555,6 @@ end
 <h2>Wrapping up</h2>
 
 <p>Naming is one of <a href="https://martinfowler.com/bliki/TwoHardThings.html" target="_blank">two hard problems in computer science</a> and it&rsquo;s a good idea to always make all the domain concepts properly named and explicit, even if it means adding more code &ndash; just because something is not explicit, doesn&rsquo;t mean it doesn&rsquo;t exist. When it comes to <strong>ActiveRecord</strong> models, an extra caution is more than recommended &ndash; such models mix both persistence and domain concepts and it&rsquo;s quite easy to hurt yourself in such case. Not overriding boolean methods generated by ActiveRecord and properly naming things sounds like a good rule of thumb to follow.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[The Case Against Exotic Usage of :before_validate Callbacks]]></title>
-    <link href="https://karolgalanciak.com/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks/"/>
-    <updated>2017-10-29T22:00:00+01:00</updated>
-    <id>https://karolgalanciak.com/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks</id>
-    <content type="html"><![CDATA[<p>It&rsquo;s nothing new that <strong>ActiveRecord callbacks</strong> are abused in many projects and used for the wrong reasons for many use cases where they can be <strong>easily avoided</strong> in favor of a much better alternative, like service objects. There is one callback though that is special and quite often used for pretty <strong>exotic reasons</strong> that have nothing to do with the process when it gets executed &ndash; it&rsquo;s the <code>before_validate</code> callback.</p>
-
-<!--more-->
-
-
-<h2>Data Formatting</h2>
-
-<p>Data formatting is something pretty common in the majority of the applications, especially stripping strings. Imagine that you need to strip some <code>URL</code> so that potential spaces won&rsquo;t cause any issues. How would you approach that?</p>
-
-<p>One way would be to use <code>before_validate</code> callback, especially if you have some format validations:</p>
-
-<p>``` ruby app/models/my_model.rb
-class MyModel
-  before_validate :strip_url</p>
-
-<p>  private</p>
-
-<p>  def strip_url</p>
-
-<pre><code>self.url = url.to_s.strip
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>It gets the job done. However, how would you test it? You would need to call <code>valid?</code> method on the model to check that&hellip; <code>URL</code> is stripped? Sounds quite funny and is even better when you look at the potential spec:</p>
-
-<p>``` ruby spec/models/my_model_spec.rb
-require &ldquo;rails_helper&rdquo;</p>
-
-<p>RSpec.describe MyModel, type: :model do
-  it &ldquo;strips URL before validation&rdquo; do</p>
-
-<pre><code>model = MyModel.new(url: "  http://rubyonrails.org")
-
-model.valid?
-
-expect(model.url).to eq "http://rubyonrails.org"
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>It&rsquo;s quite unlikely that this would be the result of <strong>TDD</strong> though ;). What&rsquo;s the alternative then?</p>
-
-<p>How about just using attribute writer for that? So something like this:</p>
-
-<p>``` ruby app/models/my_model.rb
-class MyModel
-  def url=(val)</p>
-
-<pre><code>super(val.to_s.strip)
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>And here is a potential spec for this feature:</p>
-
-<p>``` ruby spec/models/my_model_spec.rb
-require &ldquo;rails_helper&rdquo;</p>
-
-<p>RSpec.describe MyModel, type: :model do
-  it &ldquo;strips URL&rdquo; do</p>
-
-<pre><code>model = MyModel.new(url: "  http://rubyonrails.org")
-
-expect(model.url).to eq "http://rubyonrails.org"
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>Both the implementation and spec are much simpler and just more natural &ndash; data formatting has nothing to do with the validation, there is no need to use a callback related to validation to handle such use case.</p>
-
-<h2>Populating attributes and relationships</h2>
-
-<p>Another popular scenario is assigning attributes and relationships. Imagine you are creating a comment with a <code>content</code>, an author who will be <code>current_user</code> and also want to do some denormalization for performance reasons and directly assign <code>group</code> to this comment to which <code>current_user</code> belongs to. Here is how it is sometimes handled with <code>before_validate</code> callback:</p>
-
-<p><code>ruby
-Comment.create!(
-  content: content,
-  author: current_user,
-)
-</code></p>
-
-<p>``` ruby app/models/my_model.rb
-class MyModel
-  before_validate :assign_group</p>
-
-<p>  private</p>
-
-<p>  def assign_group</p>
-
-<pre><code>self.group = author.group if author
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>It&rsquo;s quite similar to the previous use case with data formatting &ndash; to write a test for this feature, we would need again to call <code>valid?</code> which doesn&rsquo;t make much sense, validation has nothing to do with populating attributes or relationships. There is much simpler and much more explicit way to handle it:</p>
-
-<p><code>ruby
-Comment.create!(
-  content: content,
-  author: current_user,
-  group: current_user.group,
-)
-</code></p>
-
-<p>There is no magic here &ndash; just a simple assignment, which is easy to test and understand.</p>
-
-<h2>Wrapping up</h2>
-
-<p>Maybe there are some scenarios where <code>before_validate</code> callback is the best possible choice (I&rsquo;m yet to find them though), but I&rsquo;m pretty sure data formatting or populating attributes/associations are not valid cases to use it for.</p>
 ]]></content>
   </entry>
   

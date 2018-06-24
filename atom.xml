@@ -4,7 +4,7 @@
   <title><![CDATA[Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2018-06-12T17:32:38+02:00</updated>
+  <updated>2018-06-24T17:16:43+02:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -12,6 +12,195 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Rails And Conditional Validations In Models]]></title>
+    <link href="https://karolgalanciak.com/blog/2018/06/24/rails-and-conditional-validations-in-models/"/>
+    <updated>2018-06-24T20:00:00+02:00</updated>
+    <id>https://karolgalanciak.com/blog/2018/06/24/rails-and-conditional-validations-in-models</id>
+    <content type="html"><![CDATA[<p>Adding consents for accepting Terms of Service/Privacy Policies must have been a top popular feature in the majority of the applications due to enforcement of <strong>GDPR</strong> in May ;). From the technical aspects that GDPR requires, there is a proof of consent for processing the personal information. In that case, you need to have some actual attributes in the database that would confirm the fact that some user has indeed accepted Terms of Service/Privacy Policy.</p>
+
+<p>That makes a significant impact on how we approach this kind of features. However, in the past, such things were quite often not stored in a database at all &ndash; it just took some UI <strong>acceptance validation</strong> or maybe a <strong>validation of the virtual attribute</strong> on the backend to be on the safe side.</p>
+
+<p>Let&rsquo;s focus on the latter case where we don&rsquo;t need to store anything in DB and see what the possible solutions to that problems are. As <strong>trivial</strong> as this problem initially sounds, it will get <strong>quite interesting</strong> ;).</p>
+
+<h2>Anatomy Of The Problem</h2>
+
+<p>We want to make sure a user accepts Terms of Service during the signup process and to be sure that it is indeed validated, even if JavaScript validation fails in UI, we want to validate that fact on the backend.</p>
+
+<h2>Solution 1 &ndash; Just add a virtual attribute to the model and validate it</h2>
+
+<p>It is probably the most straightforward approach to that problem and most likely the least elegant. That&rsquo;s how we could implement it:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="c1"># app/models/user.rb</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:terms_of_service_accepted</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:terms_of_service_accepted</span><span class="p">,</span> <span class="ss">acceptance</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Well, it does work, no doubt about that. But currently, the validation will always be triggered, even during updates, which doesn&rsquo;t make much sense. We need to find a better solution.</p>
+
+<h2>Solution 2 &ndash; Add a virtual attribute to the model and validate it only during the creation of a user</h2>
+
+<p>A minor improvement over the previous version, we make sure that the validation is not triggered by updates, but only when creating a user:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="c1"># app/models/user.rb</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:terms_of_service_accepted</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:terms_of_service_accepted</span><span class="p">,</span> <span class="ss">acceptance</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">on</span><span class="p">:</span> <span class="ss">:create</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Even if it solves the actual problem, there is a big issue about that &ndash; the validation will always be triggered during a creation, even when creating users from factories! What other options do we have?</p>
+
+<h2>Solution 3 &ndash; Add a virtual attribute to the model and validate it only for a specific context</h2>
+
+<p>What is interesting in ActiveModel validations is that <code>on</code> option is not limited to <code>:create</code> or <code>:update</code> contexts &ndash; those are merely the ones that ActiveRecord sets by default depending on the persistence status of the model. We can provide a custom context for both <code>valid?</code> and <code>save</code> methods:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">valid?</span><span class="p">(</span><span class="ss">:registration</span><span class="p">)</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="ss">context</span><span class="p">:</span> <span class="ss">:registration</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In that case, we could replace <code>:create</code> context with <code>:registration</code> context for the acceptance validation:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="c1"># app/models/user.rb</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:terms_of_service_accepted</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:terms_of_service_accepted</span><span class="p">,</span> <span class="ss">acceptance</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">on</span><span class="p">:</span> <span class="ss">:registration</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>However, this is still not ideal &ndash; a global model which is used in multiple contexts has some logic that only applies to just one use case, and what is even worse, it&rsquo;s for an UI concern.</p>
+
+<p>Let&rsquo;s try to find a solution that doesn&rsquo;t add any unnecessary mess to a model.</p>
+
+<h2>Solution 4 &ndash; Use form object</h2>
+
+<p>Using form object is probably the cleanest solution to our problem &ndash; we don&rsquo;t introduce any additional concerns to a model which should not be there, and we handle everything in a dedicated object. The are multiple ways how to implement a form object: we could create another ActiveModel model and take advantage of <a href="https://github.com/Azdaroth/active_model_attributes">ActiveModel Attributes</a> to make it smoother. We could use <a href="http://dry-rb.org/gems/dry-validation/basics/working-with-schemas/">dry-validation</a> gem for that. Or we could use my favorite tool for that purpose: <a href="https://github.com/trailblazer/reform">reform</a> gem from <a href="http://trailblazer.to">Trailblazer</a> stack.</p>
+
+<p>Explaining the entire API of <code>reform</code> gem is way beyond the scope of this article, but the following implementation should be quite self-explanatory:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="c1"># app/forms/user/registration_form.rb</span>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;reform/form/coercion&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">User</span><span class="o">::</span><span class="no">RegistrationForm</span> <span class="o">&lt;</span> <span class="ss">Reform</span><span class="p">:</span><span class="ss">:Form</span>
+</span><span class='line'>  <span class="c1"># other property declarations and validations</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">property</span> <span class="ss">:terms_of_service_accepted</span><span class="p">,</span> <span class="ss">virtual</span><span class="p">:</span> <span class="ss">:true</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="ss">Types</span><span class="p">:</span><span class="ss">:Form</span><span class="o">::</span><span class="no">Boolean</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:terms_of_service_accepted</span><span class="p">,</span> <span class="ss">acceptance</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Besides handling other properties (most likely <code>email</code>, <code>password</code> and <code>password confirmation</code>), we are adding a virtual <code>terms_of_service_accepted</code> attribute with explicit type and adding acceptance validation using ActiveModel validator.</p>
+
+<p>Even though using form objects is the cleanest approach, it requires some extra overhead, mostly with the setup, and sometimes it might be painful to add that setup, especially when extending third party&rsquo;s logic, e.g. <a href="https://github.com/scambra/devise_invitable">devise_invitable</a>. In such case, we would need some heavy customization which could potentially break when updating a gem and we would also need extra test coverage for the custom solution. It might still be worth introducing a form object, but it would be a good idea to consider other potential solutions. What option do we have left?</p>
+
+<h2>Solution 5 &ndash; Extend user&rsquo;s instance with a custom logic</h2>
+
+<p>Have you ever heard of DCI (Data Context Interaction) paradigm? If yes, you might have seen something like that:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="ss">User</span><span class="p">:</span><span class="ss">:RegistrationContext</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>What this code does is adding extra functionality from <code>User::RegistrationContext</code> module to user&rsquo;s singleton class. Effectively, it means that we are not adding any additional logic to all User class instances, but only to that particular instance. Sounds like exactly what we need! That way, we can solve our problem achieving all the other goals as well &ndash; ease of extending the logic without too much overhead and without making a mess in the model.</p>
+
+<p>Here is how our implementation of <code>User::RegistrationContext</code> context module could look like:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="c1"># app/models/user/registration_context.rb</span>
+</span><span class='line'><span class="k">module</span> <span class="nn">User::RegistrationContext</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">extended</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">class</span> <span class="o">&lt;&lt;</span> <span class="n">model</span>
+</span><span class='line'>      <span class="n">validates</span> <span class="ss">:terms_of_service_accepted</span><span class="p">,</span> <span class="ss">acceptance</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:terms_of_service_accepted</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The interesting thing about this implementation is that there is some singletons&#8217; inception going on there &ndash; first, we are using <code>extend</code> itself on the model, and then, in <code>extended</code> module hook we are opening singleton class of the model and declaring validation there. However, this is necessary since <code>validates</code> method is not defined in the context of that module, and we need to do that in the context of the model.</p>
+
+<p>Let&rsquo;s try our fancy solution in action:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="ss">User</span><span class="p">:</span><span class="ss">:RegistrationContext</span><span class="p">)</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">terms_of_service_accepted</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">valid?</span>
+</span><span class='line'><span class="o">=&gt;</span> <span class="kp">false</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">messages</span><span class="o">[</span><span class="ss">:terms_of_service_accepted</span><span class="o">]</span>
+</span><span class='line'><span class="o">=&gt;</span> <span class="o">[</span><span class="s2">&quot;must be accepted&quot;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Perfect, that&rsquo;s exactly what we needed!</p>
+
+<h2>Wrapping Up</h2>
+
+<p>There are multiple ways in Rails (or Ruby in general) to handle <strong>conditional validation</strong>, and thanks to the flexibility of the framework and the language, we can pick whatever seems best for our particular problem &ndash; from adding additional validations in a model with <strong>extra ActiveModel context</strong>, through using <strong>form objects</strong>, ending with arcane DCI-style object&rsquo;s extensions.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[The Case for before_validation callback: complex state normalization]]></title>
@@ -4731,1266 +4920,6 @@
 
 
 <p>Keeping data integrity in check is essential for most of the applications to not cause some serious problems, especially when implementing soft delete. Fortunately, simply by adding PostgreSQL conditional unique indexes we can protect ourselves from such issues.</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Decoding Rails Magic: How Does ActiveJob work?]]></title>
-    <link href="https://karolgalanciak.com/blog/2016/09/25/decoding-rails-magic-how-does-activejob-work/"/>
-    <updated>2016-09-25T23:45:00+02:00</updated>
-    <id>https://karolgalanciak.com/blog/2016/09/25/decoding-rails-magic-how-does-activejob-work</id>
-    <content type="html"><![CDATA[<p>Executing <strong>background jobs</strong> is quite a common feature in many of the web applications. Switching between different background processing frameworks used to be quite painful as most of them had different API for enqueuing jobs, enqueuing mailers and scheduling jobs. One of the great addition in <strong>Rails 4.2</strong> was a solution to this problem: <strong>ActiveJob</strong>, which provides extra layer on top of background jobs framework and unifies the API regardless of the queue adapter you use. But how exactly does it work? What are the requirements for adding new <strong>queue adapters</strong>? What kind of API does ActiveJob provide? Let’s dive deep into the codebase  and answer these and some other questions.</p>
-
-
-
-
-<!--more-->
-
-
-
-
-<h2>Anatomy of the job</h2>
-
-
-
-
-<p>Let’s start with some simple job class, let it be <code>MyAwesomeJob</code>:</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/jobs/my_awesome_job.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">MyAwesomeJob</span> <span class="o">&lt;</span> <span class="ss">ActiveJob</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-</span><span class='line'>    <span class="ss">User</span><span class="p">:</span><span class="ss">:DoSomethingAwesome</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>To enqueue a job we could simply write: <code>MyAwesomeJob.perform_later(some_user)</code> or if we wanted to schedule a job in some time in the future we could write: <code>MyAwesomeJob.set(wait: 12.hours).perform_later(some_user)</code> or <code>MyAwesomeJob.perform_now(some_user)</code> for executing the job immediately without enqueuing. But we never defined these methods, so what kind of extra work <strong>ActiveJob</strong> performs to make it happen?</p>
-
-
-
-
-<h2>Exploring internals of ActiveJob</h2>
-
-
-
-
-<p>To answer this question, let’s take a look at the <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/base.rb" target="_blank">ActiveJob::Base class</a>:</p>
-
-
-
-
-<figure class='code'><figcaption><span>active_job/base.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ActiveJob</span>
-</span><span class='line'>  <span class="k">class</span> <span class="nc">Base</span>
-</span><span class='line'>    <span class="kp">include</span> <span class="no">Core</span>
-</span><span class='line'>    <span class="kp">include</span> <span class="no">QueueAdapter</span>
-</span><span class='line'>    <span class="kp">include</span> <span class="no">QueueName</span>
-</span><span class='line'>    <span class="kp">include</span> <span class="no">QueuePriority</span>
-</span><span class='line'>    <span class="kp">include</span> <span class="no">Enqueuing</span>
-</span><span class='line'>    <span class="kp">include</span> <span class="no">Execution</span>
-</span><span class='line'>    <span class="kp">include</span> <span class="no">Callbacks</span>
-</span><span class='line'>    <span class="kp">include</span> <span class="no">Logging</span>
-</span><span class='line'>    <span class="kp">include</span> <span class="no">Translation</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="no">ActiveSupport</span><span class="o">.</span><span class="n">run_load_hooks</span><span class="p">(</span><span class="ss">:active_job</span><span class="p">,</span> <span class="nb">self</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>There are some interesting modules included in this class, which we will get to know in more details later, but let’s focus on the core API for now. Most likely this kind of logic would be defined in, well, <code>Core</code> module. Indeed, the <code>set</code> method is <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/core.rb#L59" target="_blank">there:</a></p>
-
-
-
-
-<figure class='code'><figcaption><span>active_job/core.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ActiveJob</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">Core</span>
-</span><span class='line'>    <span class="k">module</span> <span class="nn">ClassMethods</span>
-</span><span class='line'>      <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="p">{})</span>
-</span><span class='line'>        <span class="no">ConfiguredJob</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">self</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>It returns an instance of <code>ConfiguredJob</code> passing the job instance itself and arguments to the constructor. Let’s check what <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/configured_job.rb" target="_blank">ConfiguredJob</a> class is responsible for:</p>
-
-
-
-
-<figure class='code'><figcaption><span>active_job/configured_job.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ActiveJob</span>
-</span><span class='line'>  <span class="k">class</span> <span class="nc">ConfiguredJob</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">job_class</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">{})</span>
-</span><span class='line'>      <span class="vi">@options</span> <span class="o">=</span> <span class="n">options</span>
-</span><span class='line'>      <span class="vi">@job_class</span> <span class="o">=</span> <span class="n">job_class</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">perform_now</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
-</span><span class='line'>      <span class="vi">@job_class</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">perform_now</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">perform_later</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
-</span><span class='line'>      <span class="vi">@job_class</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">enqueue</span> <span class="vi">@options</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>We have 2 methods available here: <code>perform_now</code> and <code>perform_later</code>. Both of them create a new job instance with arguments passed to the method and they either call <code>perform_now</code> method on the job instance or call <code>enqueue</code> passing the options which are the arguments from the <code>set</code> method. </p>
-
-
-
-
-<p>Let’s go deeper and start with <code>perform_now</code> method: it’s defined inside <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/execution.rb#L15" target="_blank">Execution</a> module, which basically comes down to deserializing arguments if needed (there is <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/core.rb#L116" target="_blank">nothing</a> to deserialize when calling <code>perform_now</code> directly), and calling our <code>perform</code> method, which we defined in the job class. This logic is wrapped in <code>run_callbacks</code> block, which lets you define callbacks <code>before</code>, <code>around</code> and <code>after</code> the execution of <code>perform</code> method.</p>
-
-
-
-
-<figure class='code'><figcaption><span>active_job/execution.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ActiveJob</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">Execution</span>
-</span><span class='line'>    <span class="k">module</span> <span class="nn">ClassMethods</span>
-</span><span class='line'>      <span class="k">def</span> <span class="nf">perform_now</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
-</span><span class='line'>        <span class="n">job_or_instantiate</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">perform_now</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1"># rest of the code which was removed for brevity</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">perform_now</span>
-</span><span class='line'>      <span class="n">deserialize_arguments_if_needed</span>
-</span><span class='line'>      <span class="n">run_callbacks</span> <span class="ss">:perform</span> <span class="k">do</span>
-</span><span class='line'>        <span class="n">perform</span><span class="p">(</span><span class="o">*</span><span class="n">arguments</span><span class="p">)</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">rescue</span> <span class="o">=&gt;</span> <span class="n">exception</span>
-</span><span class='line'>      <span class="n">rescue_with_handler</span><span class="p">(</span><span class="n">exception</span><span class="p">)</span> <span class="o">||</span> <span class="k">raise</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>These callbacks are defined inside <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/callbacks.rb" target="_blank">Callbacks</a> module, but its only responsibility is defining callbacks for <code>perform</code> and <code>enqueue</code> method, which help extend the behaviour of the jobs in a pretty unobtrusive manner. For example, if we wanted to log when the job is finished, we could add the following <code>after_perform</code> callback:</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/jobs/my_awesome_job.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">MyAwesomeJob</span> <span class="o">&lt;</span> <span class="ss">ActiveJob</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">after_perform</span> <span class="k">do</span> <span class="o">|</span><span class="n">job</span><span class="o">|</span>
-</span><span class='line'>    <span class="no">Rails</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="no">Time</span><span class="o">.</span><span class="n">current</span><span class="si">}</span><span class="s2">: finished execution of the job: </span><span class="si">#{</span><span class="n">job</span><span class="o">.</span><span class="n">inspect</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-</span><span class='line'>    <span class="ss">User</span><span class="p">:</span><span class="ss">:DoSomethingAwesome</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Let’s get back to <code>perform_later</code> method from <code>ConfiguredJob</code>. We could expect <code>enqueue</code> method to be defined  in <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/enqueuing.rb">Enqueuing</a> module, which seems to be the case here as well:</p>
-
-
-
-
-<figure class='code'><figcaption><span>active_job/enqueuing.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ActiveJob</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">Enqueuing</span>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="p">{})</span>
-</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">scheduled_at</span> <span class="o">=</span> <span class="n">options</span><span class="o">[</span><span class="ss">:wait</span><span class="o">].</span><span class="n">seconds</span><span class="o">.</span><span class="n">from_now</span><span class="o">.</span><span class="n">to_f</span> <span class="k">if</span> <span class="n">options</span><span class="o">[</span><span class="ss">:wait</span><span class="o">]</span>
-</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">scheduled_at</span> <span class="o">=</span> <span class="n">options</span><span class="o">[</span><span class="ss">:wait_until</span><span class="o">].</span><span class="n">to_f</span> <span class="k">if</span> <span class="n">options</span><span class="o">[</span><span class="ss">:wait_until</span><span class="o">]</span>
-</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">queue_name</span>   <span class="o">=</span> <span class="nb">self</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">queue_name_from_part</span><span class="p">(</span><span class="n">options</span><span class="o">[</span><span class="ss">:queue</span><span class="o">]</span><span class="p">)</span> <span class="k">if</span> <span class="n">options</span><span class="o">[</span><span class="ss">:queue</span><span class="o">]</span>
-</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">priority</span>     <span class="o">=</span> <span class="n">options</span><span class="o">[</span><span class="ss">:priority</span><span class="o">].</span><span class="n">to_i</span> <span class="k">if</span> <span class="n">options</span><span class="o">[</span><span class="ss">:priority</span><span class="o">]</span>
-</span><span class='line'>      <span class="n">run_callbacks</span> <span class="ss">:enqueue</span> <span class="k">do</span>
-</span><span class='line'>        <span class="k">if</span> <span class="nb">self</span><span class="o">.</span><span class="n">scheduled_at</span>
-</span><span class='line'>          <span class="nb">self</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">queue_adapter</span><span class="o">.</span><span class="n">enqueue_at</span> <span class="nb">self</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="n">scheduled_at</span>
-</span><span class='line'>        <span class="k">else</span>
-</span><span class='line'>          <span class="nb">self</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">queue_adapter</span><span class="o">.</span><span class="n">enqueue</span> <span class="nb">self</span>
-</span><span class='line'>        <span class="k">end</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>      <span class="nb">self</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>We can pass several options here - <code>scheduled_at</code> attribute could be configured with <code>wait</code>  (which will schedule a job in specified amount of seconds from current time) and <code>wait_until</code> (which will schedule a job at exact specified time). We can also enforce <code>queue</code> used for the job execution and set the <code>priority</code>. At the end, the method call is delegated to <code>queue_adapter</code>. This logic is wrapped in <code>run_callbacks</code> block, which lets you define callbacks <code>before</code>, <code>around</code> and <code>after</code> the execution of this code. </p>
-
-
-
-
-<p>In <code>Enqueueing</code> module we can also find  <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/enqueuing.rb#L17" target="_blank">perform_later</a> method, which is the part of most basic API of <strong>ActiveJob</strong> and it basically comes down to calling <code>enqueue</code> method without any extra <code>options</code> arguments.</p>
-
-
-
-
-<figure class='code'><figcaption><span>active_job/enqueuing.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ActiveJob</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">Enqueuing</span>
-</span><span class='line'>    <span class="kp">extend</span> <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:Concern</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">module</span> <span class="nn">ClassMethods</span>
-</span><span class='line'>      <span class="k">def</span> <span class="nf">perform_later</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
-</span><span class='line'>        <span class="n">job_or_instantiate</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">enqueue</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="kp">protected</span>
-</span><span class='line'>        <span class="k">def</span> <span class="nf">job_or_instantiate</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
-</span><span class='line'>          <span class="n">args</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">is_a?</span><span class="p">(</span><span class="nb">self</span><span class="p">)</span> <span class="p">?</span> <span class="n">args</span><span class="o">.</span><span class="n">first</span> <span class="p">:</span> <span class="kp">new</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
-</span><span class='line'>        <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<h2>Queue Adapters</h2>
-
-
-
-
-<p>What is this <code>queue_adapter</code> to which we delegate the enqueueing? Let’s take a look at <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/queue_adapter.rb">QueueAdapter</a> module. Its responsibility is exposing reader and writer for <code>queue_adapter</code> accessor, which by default is <code>async</code> adapter. Assigning adapter is quite <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/queue_adapter.rb#L33" target="_blank">flexible</a> and we can pass here a string or a symbol (which will be used for the lookup of the proper adapter), instance of adapter itself or the class of the adapter (which is <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/queue_adapter.rb#L41" target="_blank">deprecated</a>).</p>
-
-
-
-
-<figure class='code'><figcaption><span>active_job/queue_adapter.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ActiveJob</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">QueueAdapter</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>    <span class="kp">extend</span> <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:Concern</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">included</span> <span class="k">do</span>
-</span><span class='line'>      <span class="n">class_attribute</span> <span class="ss">:_queue_adapter</span><span class="p">,</span> <span class="n">instance_accessor</span><span class="p">:</span> <span class="kp">false</span><span class="p">,</span> <span class="n">instance_predicate</span><span class="p">:</span> <span class="kp">false</span>
-</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">queue_adapter</span> <span class="o">=</span> <span class="ss">:async</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">module</span> <span class="nn">ClassMethods</span>
-</span><span class='line'>      <span class="k">def</span> <span class="nf">queue_adapter</span>
-</span><span class='line'>        <span class="n">_queue_adapter</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="k">def</span> <span class="nf">queue_adapter</span><span class="o">=</span><span class="p">(</span><span class="n">name_or_adapter_or_class</span><span class="p">)</span>
-</span><span class='line'>        <span class="nb">self</span><span class="o">.</span><span class="n">_queue_adapter</span> <span class="o">=</span> <span class="n">interpret_adapter</span><span class="p">(</span><span class="n">name_or_adapter_or_class</span><span class="p">)</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="kp">private</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="k">def</span> <span class="nf">interpret_adapter</span><span class="p">(</span><span class="n">name_or_adapter_or_class</span><span class="p">)</span>
-</span><span class='line'>        <span class="k">case</span> <span class="n">name_or_adapter_or_class</span>
-</span><span class='line'>        <span class="k">when</span> <span class="no">Symbol</span><span class="p">,</span> <span class="nb">String</span>
-</span><span class='line'>          <span class="ss">ActiveJob</span><span class="p">:</span><span class="ss">:QueueAdapters</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="n">name_or_adapter_or_class</span><span class="p">)</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'>        <span class="k">else</span>
-</span><span class='line'>          <span class="k">if</span> <span class="n">queue_adapter?</span><span class="p">(</span><span class="n">name_or_adapter_or_class</span><span class="p">)</span>
-</span><span class='line'>            <span class="n">name_or_adapter_or_class</span>
-</span><span class='line'>          <span class="k">elsif</span> <span class="n">queue_adapter_class?</span><span class="p">(</span><span class="n">name_or_adapter_or_class</span><span class="p">)</span>
-</span><span class='line'>            <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:Deprecation</span><span class="o">.</span><span class="n">warn</span> <span class="s2">&quot;Passing an adapter class is deprecated &quot;</span> <span class="p">\</span>
-</span><span class='line'>              <span class="s2">&quot;and will be removed in Rails 5.1. Please pass an adapter name &quot;</span> <span class="p">\</span>
-</span><span class='line'>              <span class="s2">&quot;(.queue_adapter = :</span><span class="si">#{</span><span class="n">name_or_adapter_or_class</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">demodulize</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;Adapter&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">underscore</span><span class="si">}</span><span class="s2">) &quot;</span> <span class="p">\</span>
-</span><span class='line'>              <span class="s2">&quot;or an instance (.queue_adapter = </span><span class="si">#{</span><span class="n">name_or_adapter_or_class</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.new) instead.&quot;</span>
-</span><span class='line'>              <span class="n">name_or_adapter_or_class</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'>          <span class="k">else</span>
-</span><span class='line'>            <span class="k">raise</span> <span class="no">ArgumentError</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>        <span class="k">end</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="no">QUEUE_ADAPTER_METHODS</span> <span class="o">=</span> <span class="o">[</span><span class="ss">:enqueue</span><span class="p">,</span> <span class="ss">:enqueue_at</span><span class="o">].</span><span class="n">freeze</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="k">def</span> <span class="nf">queue_adapter?</span><span class="p">(</span><span class="n">object</span><span class="p">)</span>
-</span><span class='line'>        <span class="no">QUEUE_ADAPTER_METHODS</span><span class="o">.</span><span class="n">all?</span> <span class="p">{</span> <span class="o">|</span><span class="n">meth</span><span class="o">|</span> <span class="n">object</span><span class="o">.</span><span class="n">respond_to?</span><span class="p">(</span><span class="n">meth</span><span class="p">)</span> <span class="p">}</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="k">def</span> <span class="nf">queue_adapter_class?</span><span class="p">(</span><span class="n">object</span><span class="p">)</span>
-</span><span class='line'>        <span class="n">object</span><span class="o">.</span><span class="n">is_a?</span><span class="p">(</span><span class="no">Class</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="no">QUEUE_ADAPTER_METHODS</span><span class="o">.</span><span class="n">all?</span> <span class="p">{</span> <span class="o">|</span><span class="n">meth</span><span class="o">|</span> <span class="n">object</span><span class="o">.</span><span class="n">public_method_defined?</span><span class="p">(</span><span class="n">meth</span><span class="p">)</span> <span class="p">}</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>All supported queue adapters are defined in <a href="https://github.com/rails/rails/tree/v5.0.0/activejob/lib/active_job/queue_adapters" target="_blank">queue_adapters</a> directory. There are quite a lot of adapters here, so let’s pick some of them.</p>
-
-
-
-
-<h3>Async Adapter</h3>
-
-
-
-
-<p>Let’s start with <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/queue_adapters/async_adapter.rb" target="_blank">AsyncAdapter</a> which is the default one. What is really interesting about this queue adapter is that it doesn’t use any extra services but runs jobs with an in-process thread pool. Under the hood it uses <a href="https://github.com/ruby-concurrency/concurrent-ruby" target="_blank">Concurrent Ruby</a>, which is a collection of modern tools for writing concurrent code, I highly recommend to check it further. We can pass <code>executor_options</code> to constructor, which are then used to create a new instance of <code>Scheduler</code>.</p>
-
-
-
-
-<figure class='code'><figcaption><span>active_job/queue_adapters/async_adapter.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ActiveJob</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">QueueAdapters</span>
-</span><span class='line'>    <span class="k">class</span> <span class="nc">AsyncAdapter</span>
-</span><span class='line'>      <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="o">**</span><span class="n">executor_options</span><span class="p">)</span>
-</span><span class='line'>        <span class="vi">@scheduler</span> <span class="o">=</span> <span class="no">Scheduler</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">**</span><span class="n">executor_options</span><span class="p">)</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="n">job</span><span class="p">)</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>        <span class="vi">@scheduler</span><span class="o">.</span><span class="n">enqueue</span> <span class="no">JobWrapper</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">job</span><span class="p">),</span> <span class="n">queue_name</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">queue_name</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="k">def</span> <span class="nf">enqueue_at</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>        <span class="vi">@scheduler</span><span class="o">.</span><span class="n">enqueue_at</span> <span class="no">JobWrapper</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">job</span><span class="p">),</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">queue_name</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="ss">wait</span><span class="p">:</span> <span class="kp">true</span><span class="p">)</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>        <span class="vi">@scheduler</span><span class="o">.</span><span class="n">shutdown</span> <span class="ss">wait</span><span class="p">:</span> <span class="n">wait</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="k">def</span> <span class="nf">immediate</span><span class="o">=</span><span class="p">(</span><span class="n">immediate</span><span class="p">)</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>        <span class="vi">@scheduler</span><span class="o">.</span><span class="n">immediate</span> <span class="o">=</span> <span class="n">immediate</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="k">class</span> <span class="nc">JobWrapper</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>        <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
-</span><span class='line'>          <span class="n">job</span><span class="o">.</span><span class="n">provider_job_id</span> <span class="o">=</span> <span class="no">SecureRandom</span><span class="o">.</span><span class="n">uuid</span>
-</span><span class='line'>          <span class="vi">@job_data</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">serialize</span>
-</span><span class='line'>        <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="k">def</span> <span class="nf">perform</span>
-</span><span class='line'>          <span class="no">Base</span><span class="o">.</span><span class="n">execute</span> <span class="vi">@job_data</span>
-</span><span class='line'>        <span class="k">end</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="k">class</span> <span class="nc">Scheduler</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>        <span class="c1"># code removed for brevity</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Remember how we could assign <code>queue adapter</code> for ActiveJob in multiple ways? That’s exactly the use case for assigning specific instance of the queue adapter, besides just passing a string / symbol (or class, but that way is deprecated). The <code>Scheduler</code> instance acts in fact like a queue backend and but specifics of how it works are beyond the scope of this article. Nevertheless, the thing to keep in mind is that it exposes two important methods: <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/queue_adapters/async_adapter.rb#L90">enqueue</a> and <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/queue_adapters/async_adapter.rb#L94" target="_blank">enqueue_at</a>:</p>
-
-
-
-
-<figure class='code'><figcaption><span>active_job/queue_adapters/async_adapter.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ActiveJob</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">QueueAdapters</span>
-</span><span class='line'>    <span class="k">class</span> <span class="nc">AsyncAdapter</span>
-</span><span class='line'>      <span class="k">class</span> <span class="nc">Scheduler</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>        <span class="no">DEFAULT_EXECUTOR_OPTIONS</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>          <span class="n">min_threads</span><span class="p">:</span>     <span class="mi">0</span><span class="p">,</span>
-</span><span class='line'>          <span class="n">max_threads</span><span class="p">:</span>     <span class="no">Concurrent</span><span class="o">.</span><span class="n">processor_count</span><span class="p">,</span>
-</span><span class='line'>          <span class="n">auto_terminate</span><span class="p">:</span>  <span class="kp">true</span><span class="p">,</span>
-</span><span class='line'>          <span class="ss">idletime</span><span class="p">:</span>        <span class="mi">60</span><span class="p">,</span> <span class="c1"># 1 minute</span>
-</span><span class='line'>          <span class="n">max_queue</span><span class="p">:</span>       <span class="mi">0</span><span class="p">,</span> <span class="c1"># unlimited</span>
-</span><span class='line'>          <span class="n">fallback_policy</span><span class="p">:</span> <span class="ss">:caller_runs</span> <span class="c1"># shouldn&#39;t matter -- 0 max queue</span>
-</span><span class='line'>        <span class="p">}</span><span class="o">.</span><span class="n">freeze</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="kp">attr_accessor</span> <span class="ss">:immediate</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="o">**</span><span class="n">options</span><span class="p">)</span>
-</span><span class='line'>          <span class="nb">self</span><span class="o">.</span><span class="n">immediate</span> <span class="o">=</span> <span class="kp">false</span>
-</span><span class='line'>          <span class="vi">@immediate_executor</span> <span class="o">=</span> <span class="ss">Concurrent</span><span class="p">:</span><span class="ss">:ImmediateExecutor</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'>          <span class="vi">@async_executor</span> <span class="o">=</span> <span class="ss">Concurrent</span><span class="p">:</span><span class="ss">:ThreadPoolExecutor</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">DEFAULT_EXECUTOR_OPTIONS</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">options</span><span class="p">))</span>
-</span><span class='line'>        <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">:)</span>
-</span><span class='line'>          <span class="n">executor</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="o">&amp;</span><span class="ss">:perform</span><span class="p">)</span>
-</span><span class='line'>        <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="k">def</span> <span class="nf">enqueue_at</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">:)</span>
-</span><span class='line'>          <span class="n">delay</span> <span class="o">=</span> <span class="n">timestamp</span> <span class="o">-</span> <span class="no">Time</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">to_f</span>
-</span><span class='line'>          <span class="k">if</span> <span class="n">delay</span> <span class="o">&gt;</span> <span class="mi">0</span>
-</span><span class='line'>            <span class="ss">Concurrent</span><span class="p">:</span><span class="ss">:ScheduledTask</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">delay</span><span class="p">,</span> <span class="ss">args</span><span class="p">:</span> <span class="o">[</span><span class="n">job</span><span class="o">]</span><span class="p">,</span> <span class="ss">executor</span><span class="p">:</span> <span class="n">executor</span><span class="p">,</span> <span class="o">&amp;</span><span class="ss">:perform</span><span class="p">)</span>
-</span><span class='line'>          <span class="k">else</span>
-</span><span class='line'>            <span class="n">enqueue</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">:</span> <span class="n">queue_name</span><span class="p">)</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>        <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="ss">wait</span><span class="p">:</span> <span class="kp">true</span><span class="p">)</span>
-</span><span class='line'>          <span class="vi">@async_executor</span><span class="o">.</span><span class="n">shutdown</span>
-</span><span class='line'>          <span class="vi">@async_executor</span><span class="o">.</span><span class="n">wait_for_termination</span> <span class="k">if</span> <span class="n">wait</span>
-</span><span class='line'>        <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="k">def</span> <span class="nf">executor</span>
-</span><span class='line'>          <span class="n">immediate</span> <span class="p">?</span> <span class="vi">@immediate_executor</span> <span class="p">:</span> <span class="vi">@async_executor</span>
-</span><span class='line'>        <span class="k">end</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>The main difference between these two methods is a timestamp (or lack of it) used for executing the job later. </p>
-
-
-
-
-<p>Let’s get back to top-level <code>AsyncAdapter</code> class. The primary interface that is required for all queue adapters to implement is two methods: <code>enqueue</code> and <code>enqueue_at</code>. For <code>Async</code> adapter, these methods simply pass instance of <code>JobWrapper</code> with <code>queue_name</code> and <code>timestamp</code> (only for <code>enqueue_at</code>):</p>
-
-
-
-
-<figure class='code'><figcaption><span>active_job/queue_adapters/async_adapter.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ActiveJob</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">QueueAdapters</span>
-</span><span class='line'>    <span class="k">class</span> <span class="nc">AsyncAdapter</span>
-</span><span class='line'>      <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="o">**</span><span class="n">executor_options</span><span class="p">)</span>
-</span><span class='line'>        <span class="vi">@scheduler</span> <span class="o">=</span> <span class="no">Scheduler</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">**</span><span class="n">executor_options</span><span class="p">)</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="n">job</span><span class="p">)</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>        <span class="vi">@scheduler</span><span class="o">.</span><span class="n">enqueue</span> <span class="no">JobWrapper</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">job</span><span class="p">),</span> <span class="n">queue_name</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">queue_name</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="k">def</span> <span class="nf">enqueue_at</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>        <span class="vi">@scheduler</span><span class="o">.</span><span class="n">enqueue_at</span> <span class="no">JobWrapper</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">job</span><span class="p">),</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">queue_name</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>And what is this <code>JobWrapper</code>? It’s a simple abstraction for passing something that can serialize jobs and knows how to execute them:</p>
-
-
-
-
-<figure class='code'><figcaption><span>active_job/queue_adapters/async_adapter.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ActiveJob</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">QueueAdapters</span>
-</span><span class='line'>    <span class="k">class</span> <span class="nc">AsyncAdapter</span>
-</span><span class='line'>      <span class="k">class</span> <span class="nc">JobWrapper</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>        <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
-</span><span class='line'>          <span class="n">job</span><span class="o">.</span><span class="n">provider_job_id</span> <span class="o">=</span> <span class="no">SecureRandom</span><span class="o">.</span><span class="n">uuid</span>
-</span><span class='line'>          <span class="vi">@job_data</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">serialize</span>
-</span><span class='line'>        <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="k">def</span> <span class="nf">perform</span>
-</span><span class='line'>          <span class="no">Base</span><span class="o">.</span><span class="n">execute</span> <span class="vi">@job_data</span>
-</span><span class='line'>        <span class="k">end</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<h2>Serialization and deserialization</h2>
-
-
-
-
-<p>Let’s take a closer look how it works: <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/execution.rb#L20" target="_blank">execute</a> method is defined in <code>Execution</code> module and it basically comes down to deserializing job data (which was serialized in <code>JobWrapper</code> so that it can be enqueued)  and calling <code>perform_now</code>. This logic is wrapped with <code>run_callbacks</code> block so we can extend this logic by performing some action <code>before</code>, <code>around</code> or <code>after</code> execution logic:</p>
-
-
-
-
-<figure class='code'><figcaption><span>active_job/execution.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ActiveJob</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">Execution</span>
-</span><span class='line'>    <span class="k">module</span> <span class="nn">ClassMethods</span>
-</span><span class='line'>      <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="n">job_data</span><span class="p">)</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>        <span class="ss">ActiveJob</span><span class="p">:</span><span class="ss">:Callbacks</span><span class="o">.</span><span class="n">run_callbacks</span><span class="p">(</span><span class="ss">:execute</span><span class="p">)</span> <span class="k">do</span>
-</span><span class='line'>          <span class="n">job</span> <span class="o">=</span> <span class="n">deserialize</span><span class="p">(</span><span class="n">job_data</span><span class="p">)</span>
-</span><span class='line'>          <span class="n">job</span><span class="o">.</span><span class="n">perform_now</span>
-</span><span class='line'>        <span class="k">end</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p><code>deserialize</code> class method is defined inside <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/core.rb#L35" target="_blank">Core</a> module and what it does is creating a new instance of the job, deserializing data and returning the job:</p>
-
-
-
-
-<figure class='code'><figcaption><span>active_job/core.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ActiveJob</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">Execution</span>
-</span><span class='line'>    <span class="k">module</span> <span class="nn">ClassMethods</span>
-</span><span class='line'>      <span class="c1"># Creates a new job instance from a hash created with +serialize+</span>
-</span><span class='line'>      <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="n">job_data</span><span class="p">)</span>
-</span><span class='line'>        <span class="n">job</span> <span class="o">=</span> <span class="n">job_data</span><span class="o">[</span><span class="s1">&#39;job_class&#39;</span><span class="o">].</span><span class="n">constantize</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'>        <span class="n">job</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">job_data</span><span class="p">)</span>
-</span><span class='line'>        <span class="n">job</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Before explaining what happens during the deserialization we should know how the serialized data look like -  it’s a hash containing name of the job class, job id, queue name, priority, locale and serialized arguments:</p>
-
-
-
-
-<figure class='code'><figcaption><span>active_job/core.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ActiveJob</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">Core</span>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">serialize</span>
-</span><span class='line'>      <span class="p">{</span>
-</span><span class='line'>        <span class="s1">&#39;job_class&#39;</span>  <span class="o">=&gt;</span> <span class="nb">self</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-</span><span class='line'>        <span class="s1">&#39;job_id&#39;</span>     <span class="o">=&gt;</span> <span class="n">job_id</span><span class="p">,</span>
-</span><span class='line'>        <span class="s1">&#39;queue_name&#39;</span> <span class="o">=&gt;</span> <span class="n">queue_name</span><span class="p">,</span>
-</span><span class='line'>        <span class="s1">&#39;priority&#39;</span>   <span class="o">=&gt;</span> <span class="n">priority</span><span class="p">,</span>
-</span><span class='line'>        <span class="s1">&#39;arguments&#39;</span>  <span class="o">=&gt;</span> <span class="n">serialize_arguments</span><span class="p">(</span><span class="n">arguments</span><span class="p">),</span>
-</span><span class='line'>        <span class="s1">&#39;locale&#39;</span>     <span class="o">=&gt;</span> <span class="no">I18n</span><span class="o">.</span><span class="n">locale</span><span class="o">.</span><span class="n">to_s</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p><code>serialize_arguments</code> method delegates the serialization process to <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/arguments.rb#L43" target="_blank">ActiveJob::Arguments.serialize</a> method, which is mainly responsible for mapping ActiveRecord models from arguments to global ids:</p>
-
-
-
-
-<figure class='code'><figcaption><span>active_job/core.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ActiveJob</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">Core</span>
-</span><span class='line'>    <span class="kp">private</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">serialize_arguments</span><span class="p">(</span><span class="n">serialized_args</span><span class="p">)</span>
-</span><span class='line'>      <span class="no">Arguments</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">serialized_args</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p> Here’s an example how serialized arguments may look like:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&gt;</span> <span class="ss">ActiveJob</span><span class="p">:</span><span class="ss">:Arguments</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="o">[</span><span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="o">[</span><span class="mi">123</span><span class="p">,</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">]</span><span class="p">,</span> <span class="p">{</span> <span class="s2">&quot;current_user&quot;</span> <span class="o">=&gt;</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">3</span><span class="p">)}</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'><span class="o">=&gt;</span> <span class="o">[</span><span class="s2">&quot;gid://app-name/User/1&quot;</span><span class="p">,</span> <span class="o">[</span><span class="mi">123</span><span class="p">,</span> <span class="s2">&quot;gid://app-name/User/2&quot;</span><span class="o">]</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="o">=&gt;</span><span class="s2">&quot;gid://app-name/User/3&quot;</span><span class="p">}</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>This format can easily be used for enqueuing jobs in different queues.</p>
-
-
-
-
-<p>Just before the execution of the job, the data needs to be deserialized. Like <code>serialize</code> method, <code>deserialize</code> is defined in <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/core.rb#L106" target="_blank">Core</a> module and it assigns job id, queue name, priority, locale and serialized arguments to the job using its accessors. But the arguments are not deserialized just yet, so how does the execution with <code>perform_now</code> work?</p>
-
-
-
-
-<p>Remember how I mentioned before that there is nothing to be deserialized when using <code>perform_now</code> directly? In this case it will be a bit different as we operate on serialized arguments. Deserialization happens just before executing <code>perform</code> method in <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/core.rb#L115" target="_blank">deserialize_arguments_if_needed</a>.</p>
-
-
-
-
-<figure class='code'><figcaption><span>activejob/lib/active_job/core.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ActiveJob</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">Core</span>
-</span><span class='line'>    <span class="kp">private</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">deserialize_arguments_if_needed</span>
-</span><span class='line'>      <span class="k">if</span> <span class="n">defined?</span><span class="p">(</span><span class="vi">@serialized_arguments</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="vi">@serialized_arguments</span><span class="o">.</span><span class="n">present?</span>
-</span><span class='line'>        <span class="vi">@arguments</span> <span class="o">=</span> <span class="n">deserialize_arguments</span><span class="p">(</span><span class="vi">@serialized_arguments</span><span class="p">)</span>
-</span><span class='line'>        <span class="vi">@serialized_arguments</span> <span class="o">=</span> <span class="kp">nil</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Again, the deserialization is delegated to <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/arguments.rb#L50" target="_blank">Arguments</a> module and its primary responsibility is turning global ids into real models, so <code>gid://app-name/User/3</code> would be in fact a User record with id equal to 3.</p>
-
-
-
-
-<h2>Exploring more queue adapters</h2>
-
-
-
-
-<h3>Inline Adapter</h3>
-
-
-
-
-<p>Let’s explore some more adapters. Most likely you were using <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/queue_adapters/inline_adapter.rb">InlineAdapter</a> in integration tests for testing the side effects of executing some job. Its logic is very limited: since it’s for the inline execution, it doesn’t support enqueueing jobs for the future execution and <code>enqueue</code> method for performing logic merely calls <code>execute</code> method with serialized arguments:</p>
-
-
-
-
-<figure class='code'><figcaption><span>activejob/queue_adapters/inline_adapter.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">InlineAdapter</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="n">job</span><span class="p">)</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>    <span class="no">Base</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">serialize</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">enqueue_at</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>    <span class="k">raise</span> <span class="no">NotImplementedError</span><span class="p">,</span> <span class="s2">&quot;Use a queueing backend to enqueue jobs in the future. Read more at http://guides.rubyonrails.org/active_job_basics.html&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<h3>Sidekiq Adapter</h3>
-
-
-
-
-<p>Let’s check a queue adapter for one of the most commonly used frameworks for background processing - <a href="https://github.com/mperham/sidekiq" target="_blank">Sidekiq</a>. Sidekiq requires defining a class implementing <code>perform</code> instance method executing the logic of the job and inclusion of <code>Sidekiq::Worker</code> module to be enqueued in its queue. Just like <code>AsyncAdapter</code>, <code>SidekiqAdapter</code> uses internal <code>JobWrapper</code> class, which includes <code>Sidekiq::Worker</code> and implements <code>perform</code> method taking <code>job_data</code> as an argument and its logic is limited to delegating execution of the logic to <code>ActiveJob::Base.execute</code> method:</p>
-
-
-
-
-<figure class='code'><figcaption><span>activejob/queue_adapters/sidekiq_adapter.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">SidekiqAdapter</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="n">job</span><span class="p">)</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>    <span class="c1">#Sidekiq::Client does not support symbols as keys</span>
-</span><span class='line'>    <span class="n">job</span><span class="o">.</span><span class="n">provider_job_id</span> <span class="o">=</span> <span class="ss">Sidekiq</span><span class="p">:</span><span class="ss">:Client</span><span class="o">.</span><span class="n">push</span> <span class="p">\</span>
-</span><span class='line'>      <span class="s1">&#39;class&#39;</span>   <span class="o">=&gt;</span> <span class="no">JobWrapper</span><span class="p">,</span>
-</span><span class='line'>      <span class="s1">&#39;wrapped&#39;</span> <span class="o">=&gt;</span> <span class="n">job</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">to_s</span><span class="p">,</span>
-</span><span class='line'>      <span class="s1">&#39;queue&#39;</span>   <span class="o">=&gt;</span> <span class="n">job</span><span class="o">.</span><span class="n">queue_name</span><span class="p">,</span>
-</span><span class='line'>      <span class="s1">&#39;args&#39;</span>    <span class="o">=&gt;</span> <span class="o">[</span> <span class="n">job</span><span class="o">.</span><span class="n">serialize</span> <span class="o">]</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">enqueue_at</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>    <span class="n">job</span><span class="o">.</span><span class="n">provider_job_id</span> <span class="o">=</span> <span class="ss">Sidekiq</span><span class="p">:</span><span class="ss">:Client</span><span class="o">.</span><span class="n">push</span> <span class="p">\</span>
-</span><span class='line'>      <span class="s1">&#39;class&#39;</span>   <span class="o">=&gt;</span> <span class="no">JobWrapper</span><span class="p">,</span>
-</span><span class='line'>      <span class="s1">&#39;wrapped&#39;</span> <span class="o">=&gt;</span> <span class="n">job</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">to_s</span><span class="p">,</span>
-</span><span class='line'>      <span class="s1">&#39;queue&#39;</span>   <span class="o">=&gt;</span> <span class="n">job</span><span class="o">.</span><span class="n">queue_name</span><span class="p">,</span>
-</span><span class='line'>      <span class="s1">&#39;args&#39;</span>    <span class="o">=&gt;</span> <span class="o">[</span> <span class="n">job</span><span class="o">.</span><span class="n">serialize</span> <span class="o">]</span><span class="p">,</span>
-</span><span class='line'>      <span class="s1">&#39;at&#39;</span>      <span class="o">=&gt;</span> <span class="n">timestamp</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">class</span> <span class="nc">JobWrapper</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>    <span class="kp">include</span> <span class="ss">Sidekiq</span><span class="p">:</span><span class="ss">:Worker</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="n">job_data</span><span class="p">)</span>
-</span><span class='line'>      <span class="no">Base</span><span class="o">.</span><span class="n">execute</span> <span class="n">job_data</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Again, like every other adapter, <code>SidekiqAdapter</code> implements <code>enqueue</code> and <code>enqueue_at</code> methods and both of them push jobs to Sidekiq’s queue by passing some meta info that is later used for identifying proper job class, executing in specific queue and of course the serialized arguments. As an extra argument, <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/queue_adapters/sidekiq_adapter.rb#L33" target="_blank">enqueue_at</a> passes timestamp for executing the job at specific time. Pushing a job to Sidekiq queue returns internal job id which is then assigned to <code>provider_job_id</code> attribute.</p>
-
-
-
-
-<h3>DelayedJob Adapter</h3>
-
-
-
-
-<p>Let’s take a look at adapter for arguably most common choice backed by application’s database - DelayedJob. The pattern is exactly the same as for Sidekiq Adapter: We have <code>enqueue</code> and <code>enqueue_at</code> methods and both of them push the job to the queue with extra info about queue name, priority and, for <code>enqueue_at</code> method, the time to run the job at. Just like <code>SidekiqAdapter</code>, it wraps serialized job with internal <code>JobWrapper</code> instance which delegates execution of the logic to <code>ActiveJob::Base.execute</code>. At the end, the internal job id from DelayedJob’s queue is assigned to <code>provider_job_id</code> attribute:</p>
-
-
-
-
-<figure class='code'><figcaption><span>activejob/queue_adatpers/delayed_job_adapter.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">DelayedJobAdapter</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="n">job</span><span class="p">)</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>    <span class="n">delayed_job</span> <span class="o">=</span> <span class="ss">Delayed</span><span class="p">:</span><span class="ss">:Job</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="no">JobWrapper</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">serialize</span><span class="p">),</span> <span class="ss">queue</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">queue_name</span><span class="p">,</span> <span class="ss">priority</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">priority</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">job</span><span class="o">.</span><span class="n">provider_job_id</span> <span class="o">=</span> <span class="n">delayed_job</span><span class="o">.</span><span class="n">id</span>
-</span><span class='line'>    <span class="n">delayed_job</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">enqueue_at</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>    <span class="n">delayed_job</span> <span class="o">=</span> <span class="ss">Delayed</span><span class="p">:</span><span class="ss">:Job</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="no">JobWrapper</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">serialize</span><span class="p">),</span> <span class="ss">queue</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">queue_name</span><span class="p">,</span> <span class="ss">priority</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span> <span class="n">run_at</span><span class="p">:</span> <span class="no">Time</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">timestamp</span><span class="p">))</span>
-</span><span class='line'>    <span class="n">job</span><span class="o">.</span><span class="n">provider_job_id</span> <span class="o">=</span> <span class="n">delayed_job</span><span class="o">.</span><span class="n">id</span>
-</span><span class='line'>    <span class="n">delayed_job</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">class</span> <span class="nc">JobWrapper</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>    <span class="kp">attr_accessor</span> <span class="ss">:job_data</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">job_data</span><span class="p">)</span>
-</span><span class='line'>      <span class="vi">@job_data</span> <span class="o">=</span> <span class="n">job_data</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">perform</span>
-</span><span class='line'>      <span class="no">Base</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">job_data</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<h3>TestAdapter</h3>
-
-
-
-
-<p>Have you ever needed to test which jobs were enqueued or performed when executing some specs? There’s a good change you were using test helpers provided by ActiveJob or <a href="https://github.com/gocardless/rspec-activejob" target="_blank">rspec-activejob</a> for that. All these assertions are quite easy to handle thanks to <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/queue_adapters/test_adapter.rb" target="_blank">TestAdapter</a> which exposes some extra API for keeping track of enqueued and performed jobs adding <code>enqueued_jobs</code> and <code>peformed_jobs</code> attributes, which are populated when calling <code>enqueue</code> and <code>enqueue_at</code> methods. You can also configure if the jobs should be actually executed by changing <code>perform_enqueued_jobs</code> and <code>perform_enqueued_at_jobs</code> flags.  You can also whitelist which jobs could be enqueued with <code>filter</code> attribute.</p>
-
-
-
-
-<figure class='code'><figcaption><span>activejob/queue_adapters/test_adapter.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">TestAdapter</span>
-</span><span class='line'>  <span class="kp">attr_accessor</span><span class="p">(</span><span class="ss">:perform_enqueued_jobs</span><span class="p">,</span> <span class="ss">:perform_enqueued_at_jobs</span><span class="p">,</span> <span class="ss">:filter</span><span class="p">)</span>
-</span><span class='line'>  <span class="kp">attr_writer</span><span class="p">(</span><span class="ss">:enqueued_jobs</span><span class="p">,</span> <span class="ss">:performed_jobs</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># Provides a store of all the enqueued jobs with the TestAdapter so you can check them.</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">enqueued_jobs</span>
-</span><span class='line'>    <span class="vi">@enqueued_jobs</span> <span class="o">||=</span> <span class="o">[]</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># Provides a store of all the performed jobs with the TestAdapter so you can check them.</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">performed_jobs</span>
-</span><span class='line'>    <span class="vi">@performed_jobs</span> <span class="o">||=</span> <span class="o">[]</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="n">job</span><span class="p">)</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>    <span class="k">return</span> <span class="k">if</span> <span class="n">filtered?</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">job_data</span> <span class="o">=</span> <span class="n">job_to_hash</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">enqueue_or_perform</span><span class="p">(</span><span class="n">perform_enqueued_jobs</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">job_data</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">enqueue_at</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span> <span class="c1">#:nodoc:</span>
-</span><span class='line'>    <span class="k">return</span> <span class="k">if</span> <span class="n">filtered?</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">job_data</span> <span class="o">=</span> <span class="n">job_to_hash</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="ss">at</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">enqueue_or_perform</span><span class="p">(</span><span class="n">perform_enqueued_at_jobs</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">job_data</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">job_to_hash</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">extras</span> <span class="o">=</span> <span class="p">{})</span>
-</span><span class='line'>    <span class="p">{</span> <span class="ss">job</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">class</span><span class="p">,</span> <span class="ss">args</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">serialize</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s1">&#39;arguments&#39;</span><span class="p">),</span> <span class="ss">queue</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">queue_name</span> <span class="p">}</span><span class="o">.</span><span class="n">merge!</span><span class="p">(</span><span class="n">extras</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">enqueue_or_perform</span><span class="p">(</span><span class="n">perform</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">job_data</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">if</span> <span class="n">perform</span>
-</span><span class='line'>      <span class="n">performed_jobs</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">job_data</span>
-</span><span class='line'>      <span class="no">Base</span><span class="o">.</span><span class="n">execute</span> <span class="n">job</span><span class="o">.</span><span class="n">serialize</span>
-</span><span class='line'>    <span class="k">else</span>
-</span><span class='line'>      <span class="n">enqueued_jobs</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">job_data</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">filtered?</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">filter</span> <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span> <span class="o">!</span><span class="nb">Array</span><span class="p">(</span><span class="n">filter</span><span class="p">)</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">class</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<h2>Wrapping up</h2>
-
-
-
-
-<p>We’ve learned quite a lot how <code>ActiveJob</code> works under the hood - what kind of public API is available and how to extend it with custom queue adapters.  Even though understanding the internals of Rails may require some effort and time, it’s worth going deeper and exploring the architecture of the framework we use for everyday development. Here are some key takeaways:</p>
-
-
-
-
-<ul>
-  <li>You can provide the exact instance of queue adapter for ActiveJob, not only a string or symbol, which lets you pass some extra configuration options</li>
-  <li>Adapter pattern is a great choice when we have several services with different interfaces but we want to have one unified interface for using all of them</li>
-  <li>Most of the ActiveJob&#8217;s logic is divided into modules (which seems to be a common pattern in other layers of Rails), but benefits of doing so are unclear: why Execution is a separate module from Core? What kind of benefits does splitting queue-related logic to QueuePriority, QueueName and QueueAdapter give? I don’t really see it as a way to decouple code as e.g. <code>Enqueuing</code> module depends on logic from QueueName, yet it’s not required explicitly, it just depends on existence of <code>queue_adapter</code> attribute. It would be more clear if Base or Core module acted like a facade and delegated responsibilities to some other classes. If anyone knows any reason behind this kind of design, please write it in a comment, I’m really curious about it.</li>
-  <li>To support another background jobs execution framework, you just need to add a queue adapter class implementing <code>enqueue</code> and <code>enequeue_at</code> methods which under the hood would push the job to the queue and delegate  execution of the logic to <code>ActiveJob::Base.execute</code> method passing the serialised job as an argument.</li>
-  <li>Rails internals are not that scary :)</li>
-</ul>
-
-
-
-
-<p>If there’s any particular part of Rails that seems &#8220;magical&#8221; and you would like to see it decoded, let me know in the comments, I want to make sure I cover the needs of my readers.</p>
 
 ]]></content>
   </entry>

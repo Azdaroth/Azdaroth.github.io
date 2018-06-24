@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2018-06-12T17:32:38+02:00</updated>
+  <updated>2018-06-24T17:16:43+02:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -12,6 +12,159 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Rails And Conditional Validations In Models]]></title>
+    <link href="https://karolgalanciak.com/blog/2018/06/24/rails-and-conditional-validations-in-models/"/>
+    <updated>2018-06-24T20:00:00+02:00</updated>
+    <id>https://karolgalanciak.com/blog/2018/06/24/rails-and-conditional-validations-in-models</id>
+    <content type="html"><![CDATA[<p>Adding consents for accepting Terms of Service/Privacy Policies must have been a top popular feature in the majority of the applications due to enforcement of <strong>GDPR</strong> in May ;). From the technical aspects that GDPR requires, there is a proof of consent for processing the personal information. In that case, you need to have some actual attributes in the database that would confirm the fact that some user has indeed accepted Terms of Service/Privacy Policy.</p>
+
+<p>That makes a significant impact on how we approach this kind of features. However, in the past, such things were quite often not stored in a database at all &ndash; it just took some UI <strong>acceptance validation</strong> or maybe a <strong>validation of the virtual attribute</strong> on the backend to be on the safe side.</p>
+
+<p>Let&rsquo;s focus on the latter case where we don&rsquo;t need to store anything in DB and see what the possible solutions to that problems are. As <strong>trivial</strong> as this problem initially sounds, it will get <strong>quite interesting</strong> ;).</p>
+
+<h2>Anatomy Of The Problem</h2>
+
+<p>We want to make sure a user accepts Terms of Service during the signup process and to be sure that it is indeed validated, even if JavaScript validation fails in UI, we want to validate that fact on the backend.</p>
+
+<h2>Solution 1 &ndash; Just add a virtual attribute to the model and validate it</h2>
+
+<p>It is probably the most straightforward approach to that problem and most likely the least elegant. That&rsquo;s how we could implement it:</p>
+
+<p>``` rb</p>
+
+<h1>app/models/user.rb</h1>
+
+<p>class User &lt; ApplicationRecord
+  attr_accessor :terms_of_service_accepted</p>
+
+<p>  validates :terms_of_service_accepted, acceptance: true
+end
+```</p>
+
+<p>Well, it does work, no doubt about that. But currently, the validation will always be triggered, even during updates, which doesn&rsquo;t make much sense. We need to find a better solution.</p>
+
+<h2>Solution 2 &ndash; Add a virtual attribute to the model and validate it only during the creation of a user</h2>
+
+<p>A minor improvement over the previous version, we make sure that the validation is not triggered by updates, but only when creating a user:</p>
+
+<p>``` rb</p>
+
+<h1>app/models/user.rb</h1>
+
+<p>class User &lt; ApplicationRecord
+  attr_accessor :terms_of_service_accepted</p>
+
+<p>  validates :terms_of_service_accepted, acceptance: true, on: :create
+end
+```</p>
+
+<p>Even if it solves the actual problem, there is a big issue about that &ndash; the validation will always be triggered during a creation, even when creating users from factories! What other options do we have?</p>
+
+<h2>Solution 3 &ndash; Add a virtual attribute to the model and validate it only for a specific context</h2>
+
+<p>What is interesting in ActiveModel validations is that <code>on</code> option is not limited to <code>:create</code> or <code>:update</code> contexts &ndash; those are merely the ones that ActiveRecord sets by default depending on the persistence status of the model. We can provide a custom context for both <code>valid?</code> and <code>save</code> methods:</p>
+
+<p><code>rb
+user.valid?(:registration)
+user.save(context: :registration)
+</code></p>
+
+<p>In that case, we could replace <code>:create</code> context with <code>:registration</code> context for the acceptance validation:</p>
+
+<p>``` rb</p>
+
+<h1>app/models/user.rb</h1>
+
+<p>class User &lt; ApplicationRecord
+  attr_accessor :terms_of_service_accepted</p>
+
+<p>  validates :terms_of_service_accepted, acceptance: true, on: :registration
+end
+```</p>
+
+<p>However, this is still not ideal &ndash; a global model which is used in multiple contexts has some logic that only applies to just one use case, and what is even worse, it&rsquo;s for an UI concern.</p>
+
+<p>Let&rsquo;s try to find a solution that doesn&rsquo;t add any unnecessary mess to a model.</p>
+
+<h2>Solution 4 &ndash; Use form object</h2>
+
+<p>Using form object is probably the cleanest solution to our problem &ndash; we don&rsquo;t introduce any additional concerns to a model which should not be there, and we handle everything in a dedicated object. The are multiple ways how to implement a form object: we could create another ActiveModel model and take advantage of <a href="https://github.com/Azdaroth/active_model_attributes">ActiveModel Attributes</a> to make it smoother. We could use <a href="http://dry-rb.org/gems/dry-validation/basics/working-with-schemas/">dry-validation</a> gem for that. Or we could use my favorite tool for that purpose: <a href="https://github.com/trailblazer/reform">reform</a> gem from <a href="http://trailblazer.to">Trailblazer</a> stack.</p>
+
+<p>Explaining the entire API of <code>reform</code> gem is way beyond the scope of this article, but the following implementation should be quite self-explanatory:</p>
+
+<p>``` rb</p>
+
+<h1>app/forms/user/registration_form.rb</h1>
+
+<p>require &ldquo;reform/form/coercion&rdquo;</p>
+
+<p>class User::RegistrationForm &lt; Reform::Form
+  # other property declarations and validations</p>
+
+<p>  property :terms_of_service_accepted, virtual: :true, type: Types::Form::Boolean</p>
+
+<p>  validates :terms_of_service_accepted, acceptance: true
+end
+```</p>
+
+<p>Besides handling other properties (most likely <code>email</code>, <code>password</code> and <code>password confirmation</code>), we are adding a virtual <code>terms_of_service_accepted</code> attribute with explicit type and adding acceptance validation using ActiveModel validator.</p>
+
+<p>Even though using form objects is the cleanest approach, it requires some extra overhead, mostly with the setup, and sometimes it might be painful to add that setup, especially when extending third party&rsquo;s logic, e.g. <a href="https://github.com/scambra/devise_invitable">devise_invitable</a>. In such case, we would need some heavy customization which could potentially break when updating a gem and we would also need extra test coverage for the custom solution. It might still be worth introducing a form object, but it would be a good idea to consider other potential solutions. What option do we have left?</p>
+
+<h2>Solution 5 &ndash; Extend user&rsquo;s instance with a custom logic</h2>
+
+<p>Have you ever heard of DCI (Data Context Interaction) paradigm? If yes, you might have seen something like that:</p>
+
+<p><code>rb
+user = User.find(id)
+user.extend(User::RegistrationContext)
+</code></p>
+
+<p>What this code does is adding extra functionality from <code>User::RegistrationContext</code> module to user&rsquo;s singleton class. Effectively, it means that we are not adding any additional logic to all User class instances, but only to that particular instance. Sounds like exactly what we need! That way, we can solve our problem achieving all the other goals as well &ndash; ease of extending the logic without too much overhead and without making a mess in the model.</p>
+
+<p>Here is how our implementation of <code>User::RegistrationContext</code> context module could look like:</p>
+
+<p>``` rb</p>
+
+<h1>app/models/user/registration_context.rb</h1>
+
+<p>module User::RegistrationContext
+  def self.extended(model)</p>
+
+<pre><code>class &lt;&lt; model
+  validates :terms_of_service_accepted, acceptance: true
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  attr_accessor :terms_of_service_accepted
+end
+```</p>
+
+<p>The interesting thing about this implementation is that there is some singletons' inception going on there &ndash; first, we are using <code>extend</code> itself on the model, and then, in <code>extended</code> module hook we are opening singleton class of the model and declaring validation there. However, this is necessary since <code>validates</code> method is not defined in the context of that module, and we need to do that in the context of the model.</p>
+
+<p>Let&rsquo;s try our fancy solution in action:</p>
+
+<p><code>rb
+user = User.new
+user.extend(User::RegistrationContext)
+user.terms_of_service_accepted = "0"
+user.valid?
+=&gt; false
+user.errors.messages[:terms_of_service_accepted]
+=&gt; ["must be accepted"]
+</code></p>
+
+<p>Perfect, that&rsquo;s exactly what we needed!</p>
+
+<h2>Wrapping Up</h2>
+
+<p>There are multiple ways in Rails (or Ruby in general) to handle <strong>conditional validation</strong>, and thanks to the flexibility of the framework and the language, we can pick whatever seems best for our particular problem &ndash; from adding additional validations in a model with <strong>extra ActiveModel context</strong>, through using <strong>form objects</strong>, ending with arcane DCI-style object&rsquo;s extensions.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[The Case for before_validation callback: complex state normalization]]></title>
@@ -434,460 +587,6 @@ Comment.create!(
 <h2>Wrapping up</h2>
 
 <p>Maybe there are some scenarios where <code>before_validate</code> callback is the best possible choice (I&rsquo;m yet to find them though), but I&rsquo;m pretty sure data formatting or populating attributes/associations are not valid cases to use it for.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Do. Or do not. There is no try - Object#try considered harmful]]></title>
-    <link href="https://karolgalanciak.com/blog/2017/09/24/do-or-do-not-there-is-no-try-object-number-try-considered-harmful/"/>
-    <updated>2017-09-24T22:00:00+02:00</updated>
-    <id>https://karolgalanciak.com/blog/2017/09/24/do-or-do-not-there-is-no-try-object-number-try-considered-harmful</id>
-    <content type="html"><![CDATA[<p><a href="https://apidock.com/rails/v4.2.7/Object/try" target="_blank"><code>Object#try</code></a> is quite a commonly used method in <strong>Rails applications</strong> to cover cases where there is a possibility of dealing with a <code>nil</code> value or to provide <strong>flexible interface</strong> for handling cases where some kind of object doesn&rsquo;t necessarily implement given method. Thanks to <code>try</code>, we may avoid getting <code>NoMethodError</code>. So it seems like it&rsquo;s perfect, right? No <code>NoMethodError</code> exception, no problem?</p>
-
-<p>Well, not really. There are some <strong>severe problems</strong> with using <code>Object#try</code>, and usually, it&rsquo;s quite easy to implement a solution that would be much better.</p>
-
-<!--more-->
-
-
-<h2>Object#try &ndash; how does it work?</h2>
-
-<p>The idea behind <code>Object#try</code> is simple: instead of raising <code>NoMethodError</code> exception when calling some method on <code>nil</code> or calling a method on non-<code>nil</code> object that is not implemented by this object, it just returns <code>nil</code>.</p>
-
-<p>Imagine that you want to grab the email of the first user. To make sure it won&rsquo;t blow up when there are no users, you could write it the following way:</p>
-
-<p><code>
-user.first.try(:email)
-</code></p>
-
-<p>What if you implemented some generic service where you can pass many types of objects and, e.g., after saving the object it attempts to send a notification if the object happens to implement a proper method for that? With <code>Object#try</code> it could be done like this:</p>
-
-<p>``` rb
-class MyService
-  def call(object)</p>
-
-<pre><code>object.save!
-object.try(:send_success_notification, "saved from MyService")
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>As you can see, it is also possible to provide <code>arguments</code> of the method.</p>
-
-<p>What if you need to do some chaining of the methods where you can get <code>nil</code> at each intermediate step? No problem, you can use <code>Object#try</code>:</p>
-
-<p><code>rb
-payment.client.try(:addresses).try(:first).try(:country).try(:name)
-</code></p>
-
-<h2>What is the problem then?</h2>
-
-<p>Apparently, <code>Object#try</code> is capable of handling multiple cases, so what is the problem with using it?</p>
-
-<p>Well, there are many. The biggest issue with <code>Object#try</code> is that in many cases it <code>solves</code> problems that should never happen in the first place and that problem is <code>nil</code>. The another one is that the intention of using it is not clear. What does the following code try to say?</p>
-
-<p><code>rb
-payment.client.try(:address)
-</code></p>
-
-<p>Is it a legit case that some payment might not have a client and indeed it could be <code>nil</code>? Or is added &ldquo;just in case&rdquo; if <code>client</code> happens to be <code>nil</code> to not blow up with <code>NoMethodError</code> exception? Or even worse, does <code>client</code> happen to be a polymorphic relationship where some models implement <code>addresses</code> method and the others don&rsquo;t? Or maybe there is a problem with data integrity, and for a few payments the client was deleted for some reason, and it&rsquo;s no longer there?</p>
-
-<p>Just by looking at this code it is impossible to tell what&rsquo;s the intention of <code>Object#try</code>, there are just too many possibilities.</p>
-
-<p>Fortunately, there are plenty of alternative solutions that you can apply to get rid of <code>Object#try</code> and make your code clear and expressive &ndash; thanks to that, it will be much more maintainable, more readable and less prone to bugs as the intention will no longer be ambiguous.</p>
-
-<h2>Alternative solutions</h2>
-
-<p>Here are few &ldquo;patterns&rdquo; you could apply depending on the context where <code>Object#try</code> is used.</p>
-
-<h3>Respecting Law of Demeter</h3>
-
-<p><a href="https://en.wikipedia.org/wiki/Law_of_Demeter" target="_blank">Law of Demeter</a> is a handy rule (I wouldn&rsquo;t go that far to call it a &ldquo;law&rdquo; though) which helps avoid structural coupling. What it states is that hypothetical object A should be only interested in its own immediate surrounding and should not be aware of the internal structure of its collaborators or associations. In many cases, it means having only one &ldquo;dot&rdquo; in method calls. However, <strong>Law of Demeter</strong> is not really about the amount of &ldquo;dots&rdquo; (method calls), it&rsquo;s only about the coupling between objects, so chained operations and transformations are perfectly fine, e.g., the following example doesn&rsquo;t violate the law:</p>
-
-<p><code>rb
-input.to_s.strip.split(" ").map(&amp;:capitalize).join(" ")
-</code></p>
-
-<p>but the following one does:</p>
-
-<p><code>rb
-payment.client.address
-</code></p>
-
-<p>Respecting <strong>Law of Demeter</strong> usually results in a clean and maintainable code, so unless you have a good reason to violate it, you should stick to the law and avoid tight coupling.</p>
-
-<p>Let&rsquo;s get back to the example with <code>payment</code>, <code>client</code> and <code>address</code>. How could we refactor the following code?</p>
-
-<p><code>rb
-payment.client.try(:address)
-</code></p>
-
-<p>The first thing would be to reduce structural coupling and implement <code>Payment#client_address</code> method:</p>
-
-<p>``` rb
-class Payment
-  def client_address</p>
-
-<pre><code>client.try(:address)
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>It&rsquo;s much better now &ndash; instead of referring to the address via <code>payment.client.try(:address)</code> we can simply do <code>payment.client_address</code>, which is already an improvement as <code>Object#try</code> happens only in one place. Let&rsquo;s refactor it further.</p>
-
-<p>We are left now with two options: either <code>client</code> being <code>nil</code> is a legit case or not. If it is, we can make the code look confident and explicitly return early, which clearly shows that having no <code>client</code> is a valid use case:</p>
-
-<p>``` rb
-class Payment
-  def client_address</p>
-
-<pre><code>return nil if client.nil?
-
-client.address
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>If it never happens to be <code>nil</code>, we can skip the guard statement:</p>
-
-<p>``` rb
-class Payment
-  def client_address</p>
-
-<pre><code>client.address
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>Such delegations are pretty generic; maybe Rails has some nice solution to this problem? The answer is &ldquo;yes&rdquo;! <code>ActiveSupport</code> offers a very nice solution to the exact issue: <a href="http://api.rubyonrails.org/classes/Module.html#method-i-delegate" target="_blank"><code>ActiveSupport#delegate</code></a> macro. Thanks to that macro, you can define delegations and even handle <code>nil</code> in the exact way we did it.</p>
-
-<p>The first example, where <code>nil</code> is a legit use case, could be rewritten the following way:</p>
-
-<p><code>rb
-class Payment
-  delegate :address, to: :client, prefix: true, allow_nil: true
-end
-</code></p>
-
-<p>and the second one, if <code>nil</code> is never to be expected:</p>
-
-<p><code>rb
-class Payment
-  delegate :address, to: :client, prefix: true
-end
-</code></p>
-
-<p>Much cleaner, less coupled and we&rsquo;ve managed to achieve the final result of not using <code>Object#try</code>, but just in a much more elegant way.</p>
-
-<p>However, it is still possible that we might not expect payment to have an empty client (e.g. payment for the transaction that is not completed yet) in some cases, e.g., when displaying data for the payments with completed transactions, but somehow we are getting dreaded <code>NoMethodEror</code> exception. It doesn&rsquo;t necessarily mean that we need to add <code>allow_nil: true</code> option in <code>delegate</code> macro and for sure it doesn&rsquo;t mean that we should use <code>Object#try</code>. The solution here would be:</p>
-
-<h3>Operating on the scoped data</h3>
-
-<p>If we want to deal payments with completed transactions, which are guaranteed to have <code>client</code>, why not simply make sure that we are dealing with the right set of data? In Rails apps that would probably mean applying some ActiveRecord <code>scope</code> to <code>Payment</code>s collection, like <code>with_completed_transactions</code>:</p>
-
-<p><code>rb
-Payment.with_completed_transactions.find_each do |payment|
-  do_something_with_address(payment.client_address)
-end
-</code></p>
-
-<p>Since we never plan to do anything with client&rsquo;s <code>address</code> for payments for not completed transactions, we don&rsquo;t need to explicitly handle <code>nil</code>s here.</p>
-
-<p>Nevertheless, even if <code>client</code> were always required for creating a payment, it would still be possible that such code might result in <code>NoMethodError</code>. One example where that might happen would be a deleted by mistake associated <code>client</code> record. In that case, we would need to fix:</p>
-
-<h3>Data integrity</h3>
-
-<p>Ensuring data integrity, especially with RDBMS like PostgreSQL, is quite simple &ndash; we just need to remember about adding the right constraints when creating new tables. Keep in mind that this needs to be handled on a database level, validations in models are never enough as they can easily be bypassed. To avoid the issue where <code>client</code> turns out to be <code>nil</code>, despite presence validation, we should add <code>NOT NULL</code> and <code>FOREIGN KEY</code> constraints when creating <code>payments</code> table, which will prevent us from not having a client assigned at all and also deleting the client record if it&rsquo;s still associated with some payment:</p>
-
-<p><code>rb
-create_table :payments do |t|
-  t.references :client, index: true, foreign_key: true, null: false
-end
-</code></p>
-
-<p>And that&rsquo;s it! By remembering about those constraints, you can avoid a lot of unexpected use cases with <code>nil</code>s.</p>
-
-<h3>Ensuring types via explicit conversion</h3>
-
-<p>I saw few times <code>Object#try</code> used in a quite exotic way which looked similar to this:</p>
-
-<p><code>rb
-params[:name].try(:upcase)
-</code></p>
-
-<p>Well, this code clearly shows that some string is expected to be found under <code>name</code> key in <code>params</code>, so why not just ensure it is a string by applying explicit conversion using <code>to_s</code> method?</p>
-
-<p><code>rb
-params[:name].to_s.upcase
-</code></p>
-
-<p>Much cleaner that way!</p>
-
-<p>However, those two codes are not equivalent. The former one returns a string if <code>params[:name]</code> is a string, but if it is <code>nil</code>, it will return <code>nil</code>. The latter always returns a string. It is not entirely clear if <code>nil</code> is expected in such case (which is the obvious problem with <code>Object#try</code>), so we are left with two options:</p>
-
-<ul>
-<li><code>nil</code> is the expected return value if <code>params[:name]</code> is <code>nil</code> &ndash; might not be the best idea as dealing with nils instead of strings might be quite inconvenient, however, in some cases, it might be necessary to have <code>nil</code>s. If that&rsquo;s the case, we can make it clear that we expect <code>params[:name]</code> to be <code>nil</code> by adding a guard statement:</li>
-</ul>
-
-
-<p>``` rb
-return if params[:name].nil?</p>
-
-<p>params[:name].to_s.upcase
-```</p>
-
-<ul>
-<li>a string is the expected return type &ndash; we don&rsquo;t need to bother with guard statements, and we can just keep the explicit conversion:</li>
-</ul>
-
-
-<p><code>rb
-params[:name].to_s.upcase
-</code></p>
-
-<p>In more complex scenarios, it might be a better idea to use form objects and/or have a more robust types management, e.g. by using <a href="https://github.com/dry-rb/dry-types" target="_blank">dry-types</a>, but the idea would still be the same as for explicit conversions, it would just be better as far as the design goes.</p>
-
-<h3>Using right methods</h3>
-
-<p>Dealing with nested hashes is quite a common use case, especially when building APIs and dealing with user-provided payload. Imagine you are dealing with JSONAPI-compliant API and want to grab client&rsquo;s name when updating. The expected payload might look like this:</p>
-
-<p>``` rb
-{
-  data: {</p>
-
-<pre><code>id: 1,
-type: "clients",
-attributes: {
-  name: "some name"
-}
-</code></pre>
-
-<p>  }
-}
-```</p>
-
-<p>However, since we never know if the API consumer provided a proper payload or not, it would make sense to assume that the structure won&rsquo;t be right.</p>
-
-<p>One terrible way to handle it would be using&hellip; guess what? Obviously <code>Object#try</code>:</p>
-
-<p><code>rb
-params[:data].try(:[], :attributes).try(:[], :name)
-</code></p>
-
-<p>It&rsquo;s certainly hard to say that this code looks pleasant. And the funny thing is that it is really easy to rewrite cleanly.</p>
-
-<p>One solution would be applying explicit conversions on each intermediate step:</p>
-
-<p><code>rb
-params[:data].to_h[:attributes].to_h[:name]
-</code></p>
-
-<p>That&rsquo;s better, but not really expressive. Ideally, we would use some dedicated method. One of those potentially dedicated methods is <a href="https://ruby-doc.org/core-2.2.0/Hash.html#method-i-fetch" target="_blank"><code>Hash#fetch</code></a> which allows you to provide a value that should be returned if the given key is not present in the hash:</p>
-
-<p><code>rb
-params.fetch(:data).fetch(:attributes, {}).fetch(:name)
-</code></p>
-
-<p>It looks even better but would be nice to have something even more dedicated for digging through nested hashes. Fortunately, since Ruby 2.3.0, we can take advantage of <a href="http://ruby-doc.org/core-2.3.0_preview1/Hash.html#method-i-dig" target="_blank"><code>Hash#dig</code></a>, which was implemented for exactly this purpose &ndash; digging through nested hashes and not raising exceptions if some intermediate key turns out to not be there:</p>
-
-<p><code>rb
-params.dig(:data, :attributes, :name)
-</code></p>
-
-<h3>Having Proper interfaces / Duck typing</h3>
-
-<p>Let&rsquo;s get back to the example that was mentioned in the beginning with sending a potential notification:</p>
-
-<p>``` rb
-class MyService
-  def call(object)</p>
-
-<pre><code>object.save!
-object.try(:send_success_notification, "saved from MyService")
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>There are two possible solutions here:</p>
-
-<ul>
-<li><strong>Implementing two set of services</strong> &ndash; one that sends notifications and one that doesn&rsquo;t:</li>
-</ul>
-
-
-<p>``` rb
-class MyServiceA
-  def call(object)</p>
-
-<pre><code>object.save!
-</code></pre>
-
-<p>  end
-end</p>
-
-<p>class MyServiceB
-  def call(object)</p>
-
-<pre><code>object.save!
-object.send_success_notification("saved from MyService")
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>Thanks to this refactoring, the code is much cleaner, and we easily got rid of <code>Object#try</code>. However, now we need to know that for one type of objects we need to use <code>MyServiceA</code> and for another type <code>MyServiceB</code>. It might make sense, but might also be a problem. In such case the 2nd option would be better:</p>
-
-<ul>
-<li><strong>Duck typing</strong>. Simply add <code>send_success_notification</code> method to all objects that are passed to <code>MyService</code> and if it&rsquo;s supposed to do nothing, just leave the method body empty:</li>
-</ul>
-
-
-<p>``` rb
-class MyService
-  def call(object)</p>
-
-<pre><code>object.save!
-object.send_success_notification("saved from MyService")
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>The extra benefit of this option is that it helps to identify some common behaviors of the objects and to make them explicit. As you can see, in case of <code>Object#try</code> a lot of domain concepts might stay implicit and unclear. It doesn&rsquo;t mean they are not there; they are just not clearly identified. This is yet another important thing to keep in mind &ndash; <code>Object#try</code> also hurts your domain.</p>
-
-<h3>Null Object Pattern</h3>
-
-<p>Let&rsquo;s reuse the example above with sending notifications after persisting some models and do a little modification &ndash; we will make <code>mailer</code> an argument of the method and call <code>send_success_notification</code> on it:</p>
-
-<p>``` rb
-class MyService
-  def call(object, mailer: SomeMailer)</p>
-
-<pre><code>object.save!
-mailer.send_success_notification(object, "saved from MyService")
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>That&rsquo;s going to work great if we always want to send a notification. What if we don&rsquo;t want to do it? One terrible way to handle it would be passing <code>nil</code> as a mailer and take advantage of <code>Object#try</code>:</p>
-
-<p>``` rb
-class MyService
-  def call(object, mailer: SomeMailer)</p>
-
-<pre><code>object.save!
-mailer.try(:send_success_notification, object, "saved from MyService")
-</code></pre>
-
-<p>  end
-end</p>
-
-<p>Service.new.call(object, mailer: nil)
-```</p>
-
-<p>But you&rsquo;ve probably already guessed this solution is a no-go. Fortunately, we can apply <a href="https://en.wikipedia.org/wiki/Null_Object_pattern" target="_blank">Null Object Pattern</a> and pass an instance of some <code>NullMailer</code> which implements <code>send_success_notification</code> method that simply does nothing:</p>
-
-<p>``` rb
-class NullMailer
-  def send_success_notification(*)
-  end
-end</p>
-
-<p>class MyService
-  def call(object, mailer: SomeMailer)</p>
-
-<pre><code>object.save!
-mailer.send_success_notification(object, "saved from MyService")
-</code></pre>
-
-<p>  end
-end</p>
-
-<p>MyService.new.call(object, mailer: NullMailer.new)
-```</p>
-
-<p>That&rsquo;s certainly better than using <code>Object#try</code>.</p>
-
-<h2>What about <code>&amp;.</code> a.k.a. lonely/safe navigation operator?</h2>
-
-<p><code>&amp;.</code>, lonely/safe navigation operator is a pretty new thing introduced in Ruby 2.3.0. It&rsquo;s quite similar to <code>Object#try</code>, but it&rsquo;s less ambiguous &ndash; if you call a method on the object different than <code>nil</code>, and this method is not implemented by that object, <code>NoMethodError</code> will still be raised which is not the case for <code>Object#try</code>. Check the following examples:</p>
-
-<p><code>`` rb
-User.first.try(:unknown_method) # assuming</code>user` is nil
-=> nil</p>
-
-<p>User.first&amp;.unknown_method
-=> nil</p>
-
-<p>User.first.try(:unknown_method!) # assuming <code>user</code> is not nil
-=> nil</p>
-
-<p>User.first&amp;.unknown_method
-=> NoMethodError: undefined method `unknown_method' for #&lt;User:0x007fb10c0fd498>
-```</p>
-
-<p>Does it mean safe navigation operator is fine and safe to use? Not really. It still comes with the same problems as <code>Object#try</code> does, it&rsquo;s merely one serious issue less.</p>
-
-<p>Nevertheless, I think there is a case where the lonely operator is not that bad. Check the following example:</p>
-
-<p><code>rb
-Comment.create!(
-  content: content,
-  author: current_user,
-  group_id: current_user&amp;.group_id,
-)
-</code></p>
-
-<p>What we want to do is create a comment belonging to some <code>current_user</code> who might be an author and also assign a <code>group_id</code> from <code>current_user</code>, who might be nil.</p>
-
-<p>The same code could be written as:</p>
-
-<p><code>rb
-Comment.create!(content: content, author: current_user) do |c|
-  c.group_id = current_user&amp;.group_id if current_user
-end
-</code></p>
-
-<p>or maybe as:</p>
-
-<p>``` rb
-comment_params = {
-  content: content,
-  author: current_user,
-}</p>
-
-<p>comment_params[:group_id] = current_user.group_id if current_user</p>
-
-<p>Comment.create!(comment_params)
-```</p>
-
-<p>But I think neither of those alternatives is more readable than the first example with <code>&amp;.</code> operator, so might be worth trading a bit of clarity for more readability.</p>
-
-<h2>Wrapping Up</h2>
-
-<p>I believe there is not a single valid use case for <code>Object#try</code> due to the <strong>ambiguity</strong> of its intentions, <strong>negative impact</strong> on the <strong>domain</strong> model and simply for the fact that there are <strong>many other ways</strong> to solve the problems that <code>Object#try</code> &ldquo;solves&rdquo; in a clumsy way &ndash; starting from respecting Law of Demeter and delegations, through operating on properly scoped data, applying right database constraints, ensuring types using explicit conversions, using proper methods, having right interfaces, taking advantage of duck typing, ending with Null Object Pattern  or even using the safe navigation operator (<code>&amp;.</code>) which is much safer to use and might be applied in limited cases.</p>
-
-<p><img src="/images/object_try/yoda.jpeg" title="&lsquo;yoda&rsquo; &lsquo;yoda&rsquo;" ></p>
-
-<p class="small-p center">
-  Source: https://www.pbnsg.org/weight-management/2015/7/27/do-or-do-not-there-is-no-try-yoda
-</p>
-
-
-
 ]]></content>
   </entry>
   

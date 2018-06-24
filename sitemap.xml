@@ -243,20 +243,26 @@
         <lastmod>2018-06-02T09:05:05+02:00</lastmod>
     </url>
     <url>
+        <loc>
+            https://karolgalanciak.com/blog/2018/06/24/rails-and-conditional-validations-in-models/
+        </loc>
+        <lastmod>2018-06-24T16:51:27+02:00</lastmod>
+    </url>
+    <url>
         <loc>https://karolgalanciak.com/</loc>
-        <lastmod>2018-06-02T09:05:05+02:00</lastmod>
+        <lastmod>2018-06-24T17:16:38+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/open-source/</loc>
-        <lastmod>2018-06-02T09:05:05+02:00</lastmod>
+        <lastmod>2018-06-24T16:51:27+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/privacy-policy/</loc>
-        <lastmod>2018-06-02T09:05:05+02:00</lastmod>
+        <lastmod>2018-06-24T16:51:27+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/publications/</loc>
-        <lastmod>2018-06-02T09:05:05+02:00</lastmod>
+        <lastmod>2018-06-24T16:51:27+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/test-driven-ember/</loc>
@@ -264,15 +270,15 @@
     </url>
     <url>
         <loc>https://karolgalanciak.com/blog/</loc>
-        <lastmod>2018-06-02T09:05:05+02:00</lastmod>
+        <lastmod>2018-06-24T16:51:27+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/blog/archives/</loc>
-        <lastmod>2018-06-02T09:05:05+02:00</lastmod>
+        <lastmod>2018-06-24T16:51:27+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/presentations/</loc>
-        <lastmod>2018-06-02T09:05:05+02:00</lastmod>
+        <lastmod>2018-06-24T16:51:27+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/robots.txt</loc>
