@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2018-06-24T17:16:43+02:00</updated>
+  <updated>2018-06-24T17:29:47+02:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -23,6 +23,9 @@
 <p>That makes a significant impact on how we approach this kind of features. However, in the past, such things were quite often not stored in a database at all &ndash; it just took some UI <strong>acceptance validation</strong> or maybe a <strong>validation of the virtual attribute</strong> on the backend to be on the safe side.</p>
 
 <p>Let&rsquo;s focus on the latter case where we don&rsquo;t need to store anything in DB and see what the possible solutions to that problems are. As <strong>trivial</strong> as this problem initially sounds, it will get <strong>quite interesting</strong> ;).</p>
+
+<!--more-->
+
 
 <h2>Anatomy Of The Problem</h2>
 
