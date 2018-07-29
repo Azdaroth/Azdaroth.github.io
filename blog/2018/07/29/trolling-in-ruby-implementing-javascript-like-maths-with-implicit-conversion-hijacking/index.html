@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>How To Handle Non-CRUD Logic In Your API - Karol Galanciak - Ruby on Rails and Ember.js consultant</title>
+  <title>Trolling In Ruby - Implementing JavaScript-like Maths With Implicit Conversion Hijacking - Karol Galanciak - Ruby on Rails and Ember.js consultant</title>
   <meta name="author" content="Karol Galanciak">
 
   
@@ -17,9 +17,9 @@
   
   
 
-  <meta property="og:title" value="How To Handle Non-CRUD Logic In Your API - Karol Galanciak - Ruby on Rails and Ember.js consultant" />
+  <meta property="og:title" value="Trolling In Ruby - Implementing JavaScript-like Maths With Implicit Conversion Hijacking - Karol Galanciak - Ruby on Rails and Ember.js consultant" />
   <meta property="og:description" value="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications." />
-  <meta property="og:url" value="https://karolgalanciak.com/blog/2016/01/24/how-to-handle-non-crud-logic-in-your-api/" />
+  <meta property="og:url" value="https://karolgalanciak.com/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking/" />
   <meta property="og:type" content="website" />
   
   <meta property="og:site_name" content="Karol Galanciak - Ruby on Rails and Ember.js consultant"/>
@@ -28,7 +28,7 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@Azdaroth">
   <meta name="twitter:creator" content="@Azdaroth">
-  <meta name="twitter:title" content="How To Handle Non-CRUD Logic In Your API - Karol Galanciak - Ruby on Rails and Ember.js consultant">
+  <meta name="twitter:title" content="Trolling In Ruby - Implementing JavaScript-like Maths With Implicit Conversion Hijacking - Karol Galanciak - Ruby on Rails and Ember.js consultant">
   <meta name="twitter:url" content="">
   <meta name="twitter:description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
 
@@ -38,7 +38,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="https://karolgalanciak.com/blog/2016/01/24/how-to-handle-non-crud-logic-in-your-api">
+  <link rel="canonical" href="https://karolgalanciak.com/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Karol Galanciak - Ruby on Rails and Ember.js consultant" type="application/atom+xml">
@@ -48,16 +48,16 @@
       "@type": "BlogPosting",
       "mainEntityOfPage": {
         "@type":"WebPage",
-        "@id": "https://karolgalanciak.com/blog/2016/01/24/how-to-handle-non-crud-logic-in-your-api"
+        "@id": "https://karolgalanciak.com/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking"
       },
-      "headline": "How To Handle Non-CRUD Logic In Your API - Karol Galanciak - Ruby on Rails and Ember.js consultant",
+      "headline": "Trolling In Ruby - Implementing JavaScript-like Maths With Implicit Conversion Hijacking - Karol Galanciak - Ruby on Rails and Ember.js consultant",
         "image": {
         "@type": "ImageObject",
         "url": "",
         "height": 640,
         "width": 1024
       },
-      "datePublished": "2016-01-24",
+      "datePublished": "2018-07-29",
       "dateModified": "2018-07-29",
       "author": {
         "@type": "Person",
@@ -138,7 +138,7 @@
   
   <header>
     
-      <h1 class="entry-title">How to Handle Non-CRUD Logic in Your API</h1>
+      <h1 class="entry-title">Trolling in Ruby - Implementing JavaScript-like Maths With Implicit Conversion Hijacking</h1>
     
     
       <p class="meta">
@@ -154,100 +154,90 @@
   
 
 
-<time datetime="2016-01-24T22:00:00+01:00" pubdate data-updated="true">Jan 24<span>th</span>, 2016</time>
+<time datetime="2018-07-29T20:00:00+02:00" pubdate data-updated="true">Jul 29<span>th</span>, 2018</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>If you happen to develop <strong>API</strong> for non-trivial app with complex business logic beyond <strong>CRUD</strong> directly mapped to the database tables (i.e. typical Active Record pattern) you were probably wondering many times how to handle these cases and what&#8217;s the best way to do it. There are quite a few solutions to this problem: you could add another endpoint for handling given use case, add <strong>non-RESTful</strong> action to already existing endpoint or you can add a magic param to the payload that would force non-standard scenario in the <strong>API</strong>. Let&#8217;s take a closer look at the these solutions and discuss some advantages and disadvantages of each of them.</p>
+<div class="entry-content"><p>If you&rsquo;ve ever worked with <strong>JavaScript</strong>, especially in <strong>pre-SPA/pre-frameworks</strong> era with just <strong>jQuery</strong>, you probably had a chance to see an &ldquo;exotic&rdquo; maths in action that looks similar to this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="s2">&quot;3&quot;</span> <span class="o">+</span> <span class="mi">4</span>
+</span><span class='line'><span class="c1">// =&gt; &quot;34&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
+<p>That kind of behavior usually comes as a <strong>big surprise</strong> and due to that fact, JavaScript has gotten some <strong>bad reputation</strong> (even though there is a <a href="https://karolgalanciak.com/blog/2017/01/22/javascript-the-surprising-parts/">rationale</a> behind it). If we tried that in <strong>Ruby</strong>, we would get an obvious <code>TypeError</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="s2">&quot;3&quot;</span> <span class="o">+</span> <span class="mi">4</span>
+</span><span class='line'><span class="c1"># =&gt; TypeError (no implicit conversion of Integer into String)</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
-<!--more-->
+<p>Would it be possible though to obtain the same result somehow in Ruby?</p>
+
+<h2>Explicit Conversion vs. Implicit Conversion</h2>
+
+<p>The answer is yes! But before we get to the actual implementation of that concept, let&rsquo;s make sure that we understand some essential concepts in Ruby that will lead us there: <strong>explicit conversion</strong> and <strong>implicit conversion</strong>.</p>
+
+<p>You&rsquo;ve probably used methods like <code>to_s</code>, <code>to_i</code>, <code>to_d</code>, <code>to_a</code> etc. for <em>explicit</em> typecasting. That way, we can get the closest representation of a given object in a different type.</p>
+
+<p>However, there is also a second type of conversion in Ruby, which is <strong>implicit conversion</strong>.  Those are the methods like <code>to_str</code>, <code>to_int</code>, <code>to_hash</code>, <code>to_ary</code>. In most cases, you should not use those methods unless you are implementing an object that kind of behaves like some type, so, e.g., all numeric objects could (and they actually do!) implement <code>to_int</code> method as they are kind of the same type. For the same reason, if we were implementing some type of collection, we could implement <code>to_ary</code> method that would just return the same result as <code>to_a</code>  which would be an instance of Array, but that we way put extra emphasis on the fact that this object behaves like an array.</p>
+
+<p>We could also take advantage of implicit conversion to put some extra boundaries on the collaborating objects.  Implicit conversion is widely used in Ruby for that purpose. When you are adding a string to a string like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="s2">&quot;3&quot;</span> <span class="o">+</span> <span class="s2">&quot;4&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
+<p>Ruby under the hood calls &ldquo;4&rdquo;.to_str to get the string representation of that object (which is already a string) to make <code>+</code> method more flexible, but at the same time, it makes sure that only string-like objects are permitted as arguments.</p>
+
+<h2>Hijacking Implicit Conversion</h2>
+
+<p>Let&rsquo;s get back to the original problem which was: how to get the following result in Ruby?</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="s2">&quot;3&quot;</span> <span class="o">+</span> <span class="mi">4</span>
+</span><span class='line'><span class="c1"># =&gt; &quot;34&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
-<h2>Our use case: creating drafts and articles</h2>
+<p>Based on what we&rsquo;ve just learned about implicit conversion, we just need to make sure that integers become somehow string-like objects. Let&rsquo;s monkey patch <code>Integer</code> class and add <code>to_str</code> method that would be an alias to <code>to_s</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Integer</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">to_str</span>
+</span><span class='line'>    <span class="nb">to_s</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
+<p>Let&rsquo;s try out crazy maths again:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="s2">&quot;3&quot;</span> <span class="o">+</span> <span class="mi">4</span>
+</span><span class='line'><span class="o">=&gt;</span> <span class="s2">&quot;34&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
-<p>Let&#8217;s start with some feature that will be simple enough for the blog post, but still interesting enough that we will have several ways to solve some the problem. Creating drafts and published articles (both referring to some <code>Article</code> model) sounds good enough: for <code>drafts</code> and <code>published</code> articles we are going to have different <strong>business validations</strong> and we will also need to have a possibility to transit from one state to another. Let&#8217;s assume that the drafts don&#8217;t have any required attributes at all and published articles require presence of: <code>title</code>, <code>content</code> and <code>author_id</code>. Besides creating both type of articles, we will also need to update both type of articles while maintaining current state and have a possibility to transit from drafts to published articles. To add some extra logic articles will also have <code>published_at</code> attribute, which is not directly settable via API, but will be automatically set server-side when making a transition from <code>draft</code> to <code>published</code> state or directly creating published article.</p>
-
-
-
-
-<h2>Magic param</h2>
-
-
-
-
-<p>Let&#8217;s start with the simplest strategy that I call <code>magic param</code> or <code>virtual param</code>. Basically, to force a different scenario we simply send some extra param, let&#8217;s name it <code>published</code>. In such case we will only have a single endpoint: <code>Articles</code> with <code>create</code> and <code>update</code> actions and depending on the value of <code>published</code> param we will either run a logic for creating / updating drafts or published articles.</p>
-
-
-
-
-<p>Making transition from <code>draft</code> to <code>published</code> state is going to be the same, we simply need to send <code>published</code> param with <code>true</code> value and make sure other requirements are met (title&#8217;s, content&#8217;s and author&#8217;s presence).</p>
-
-
-
-
-<p>Obviously, this approach looks pretty simple from the client perspective, everything is driven by sending a magic param and this solution is pretty easy to integrate with some client-side data layers like <strong>Ember Data</strong>. But personally I don&#8217;t find this solution really clean server-side. Having one interface (endpoint) for multiple purposes (where the logic is conditionally driven by a specific value of some param) adds some extra complexity on the design. Expecially in this case where the client knows exactly that we want to handle either drafts or published articles. For some features it may be good to hide some internal details server-side, but here it&#8217;s not the case. So the solution to this problem might be&#8230;</p>
-
-
-
-
-<h2>Adding extra endpoint</h2>
-
-
-
-
-<p>With extra endpoint we clearly separate interfaces between both types of articles. Clearly, the logic on server is now much less complex. If we want to create a draft, we just use <code>Drafts</code> endpoint. If we need to update a published article, we simply use (surprise, surprise) <code>Articles</code> endpoint.</p>
-
-
-
-
-<p>As a side-effect of such design decision we can actually do some cool things, e.g. in <code>index</code> actions we could return only one type of article, either drafts or published ones, depending on the endpoint.</p>
-
-
-
-
-<p>The disadvantage of this approach is that it may not be that easy to handle it client-side with frameworks&#8217; data layers, which in most cases are kind of equivalents of <strong>Active Record</strong> pattern, but in API world.</p>
-
-
-
-
-<p>Adding extra endpoint solved one of the issues: having the same interface for different kind of logic. But we still need to have a possibility to make a transition from <code>draft</code> to <code>published</code> article. One way would be to simply use <code>update</code> action from Published Articles endpoint, but this would mean using endpoint for actually different resource, which looks really weird and not proper, especially after separating Articles to two different endpoints. We could still handle it with magic <code>published</code> param, but this time only in Drafts endpoint. Or we could consider doing yet another thing, which is&#8230;</p>
-
-
-
-
-<h2>Adding extra action</h2>
-
-
-
-
-<p>This way doesn&#8217;t sound really RESTful, but I find it pretty elegant. To handle transition from <code>draft</code> to <code>published</code> we can simply add <code>publish</code> action to Drafts endpoint and let the API handle all the necessary logic.</p>
-
-
-
-
-<p>What I like about combining different endpoints with extra actions is that everything is explicitly defined: every part of API has its&#8217; own interface and there&#8217;s no magic and no implicit assumptions. It&#8217;s also more flexible and removes some complexity server-side. The disadvantage of this approach is that it actually moves complexity to the client - having extra actions, again, may not be that easy to handle neatly by data layers (if you happen to use Ember and Ember Data, you can play with <code>adapters</code> and <code>buildURL</code> function to make it smooth).</p>
-
-
-
+<p>Try the same for JavaScript and compare the results, it should be exactly the same.</p>
 
 <h2>Wrapping up</h2>
 
-
-
-
-<p>There are couple of different ways of handling complex logic in non typical CRUD scenarios in your API: using magic param, adding extra endpoints, adding extra method and each of them has its&#8217; own advantages and disadvatages on both server-side and client-side.</p>
-
+<p><strong>Ruby</strong> is an extremely <strong>flexible</strong> language which makes is it easy to do crazy things, just like it is the case with some operations in <strong>JavaScript</strong> ;).</p>
 </div>
 
 
@@ -270,12 +260,12 @@
   
 
 
-<time datetime="2016-01-24T22:00:00+01:00" pubdate data-updated="true">Jan 24<span>th</span>, 2016</time>
+<time datetime="2018-07-29T20:00:00+02:00" pubdate data-updated="true">Jul 29<span>th</span>, 2018</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/api/'>API</a>, <a class='category' href='/blog/categories/architecture/'>Architecture</a>, <a class='category' href='/blog/categories/rails/'>Rails</a>, <a class='category' href='/blog/categories/ruby/'>Ruby</a>
+    <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/trolling/'>Trolling</a>
   
 </span>
 
@@ -299,7 +289,7 @@
       
         <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="https://karolgalanciak.com/blog/2016/01/24/how-to-handle-non-crud-logic-in-your-api/" data-via="Azdaroth" data-counturl="https://karolgalanciak.com/blog/2016/01/24/how-to-handle-non-crud-logic-in-your-api/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="https://karolgalanciak.com/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking/" data-via="Azdaroth" data-counturl="https://karolgalanciak.com/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking/" >Tweet</a>
   
   
   <div class="g-plusone" data-size="medium"></div>
@@ -313,10 +303,8 @@
     </div>
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2016/01/06/refactoring-tips-trade-conditionals-for-type-delegation/" title="Previous Post: Refactoring Tips: Trade Conditionals For Type Delegation">&laquo; Refactoring Tips: Trade Conditionals For Type Delegation</a>
+        <a class="basic-alignment left" href="/blog/2018/06/24/rails-and-conditional-validations-in-models/" title="Previous Post: Rails And Conditional Validations In Models">&laquo; Rails And Conditional Validations In Models</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2016/02/07/implementing-non-restful-actions-with-ember-data/" title="Next Post: Implementing non-RESTful actions with Ember Data">Implementing non-RESTful actions with Ember Data &raquo;</a>
       
     </p>
   </footer>
@@ -431,8 +419,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'https://karolgalanciak.com/blog/2016/01/24/how-to-handle-non-crud-logic-in-your-api/';
-        var disqus_url = 'https://karolgalanciak.com/blog/2016/01/24/how-to-handle-non-crud-logic-in-your-api/';
+        var disqus_identifier = 'https://karolgalanciak.com/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking/';
+        var disqus_url = 'https://karolgalanciak.com/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking/';
         var disqus_script = 'embed.js';
       
     (function () {

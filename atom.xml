@@ -4,7 +4,7 @@
   <title><![CDATA[Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2018-06-24T17:29:47+02:00</updated>
+  <updated>2018-07-29T20:22:18+02:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -12,6 +12,91 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Trolling In Ruby - Implementing JavaScript-like Maths With Implicit Conversion Hijacking]]></title>
+    <link href="https://karolgalanciak.com/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking/"/>
+    <updated>2018-07-29T20:00:00+02:00</updated>
+    <id>https://karolgalanciak.com/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking</id>
+    <content type="html"><![CDATA[<p>If you&rsquo;ve ever worked with <strong>JavaScript</strong>, especially in <strong>pre-SPA/pre-frameworks</strong> era with just <strong>jQuery</strong>, you probably had a chance to see an &ldquo;exotic&rdquo; maths in action that looks similar to this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="s2">&quot;3&quot;</span> <span class="o">+</span> <span class="mi">4</span>
+</span><span class='line'><span class="c1">// =&gt; &quot;34&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That kind of behavior usually comes as a <strong>big surprise</strong> and due to that fact, JavaScript has gotten some <strong>bad reputation</strong> (even though there is a <a href="https://karolgalanciak.com/blog/2017/01/22/javascript-the-surprising-parts/">rationale</a> behind it). If we tried that in <strong>Ruby</strong>, we would get an obvious <code>TypeError</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="s2">&quot;3&quot;</span> <span class="o">+</span> <span class="mi">4</span>
+</span><span class='line'><span class="c1"># =&gt; TypeError (no implicit conversion of Integer into String)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Would it be possible though to obtain the same result somehow in Ruby?</p>
+
+<h2>Explicit Conversion vs. Implicit Conversion</h2>
+
+<p>The answer is yes! But before we get to the actual implementation of that concept, let&rsquo;s make sure that we understand some essential concepts in Ruby that will lead us there: <strong>explicit conversion</strong> and <strong>implicit conversion</strong>.</p>
+
+<p>You&rsquo;ve probably used methods like <code>to_s</code>, <code>to_i</code>, <code>to_d</code>, <code>to_a</code> etc. for <em>explicit</em> typecasting. That way, we can get the closest representation of a given object in a different type.</p>
+
+<p>However, there is also a second type of conversion in Ruby, which is <strong>implicit conversion</strong>.  Those are the methods like <code>to_str</code>, <code>to_int</code>, <code>to_hash</code>, <code>to_ary</code>. In most cases, you should not use those methods unless you are implementing an object that kind of behaves like some type, so, e.g., all numeric objects could (and they actually do!) implement <code>to_int</code> method as they are kind of the same type. For the same reason, if we were implementing some type of collection, we could implement <code>to_ary</code> method that would just return the same result as <code>to_a</code>  which would be an instance of Array, but that we way put extra emphasis on the fact that this object behaves like an array.</p>
+
+<p>We could also take advantage of implicit conversion to put some extra boundaries on the collaborating objects.  Implicit conversion is widely used in Ruby for that purpose. When you are adding a string to a string like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="s2">&quot;3&quot;</span> <span class="o">+</span> <span class="s2">&quot;4&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ruby under the hood calls &ldquo;4&rdquo;.to_str to get the string representation of that object (which is already a string) to make <code>+</code> method more flexible, but at the same time, it makes sure that only string-like objects are permitted as arguments.</p>
+
+<h2>Hijacking Implicit Conversion</h2>
+
+<p>Let&rsquo;s get back to the original problem which was: how to get the following result in Ruby?</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="s2">&quot;3&quot;</span> <span class="o">+</span> <span class="mi">4</span>
+</span><span class='line'><span class="c1"># =&gt; &quot;34&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Based on what we&rsquo;ve just learned about implicit conversion, we just need to make sure that integers become somehow string-like objects. Let&rsquo;s monkey patch <code>Integer</code> class and add <code>to_str</code> method that would be an alias to <code>to_s</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Integer</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">to_str</span>
+</span><span class='line'>    <span class="nb">to_s</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Let&rsquo;s try out crazy maths again:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="s2">&quot;3&quot;</span> <span class="o">+</span> <span class="mi">4</span>
+</span><span class='line'><span class="o">=&gt;</span> <span class="s2">&quot;34&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Try the same for JavaScript and compare the results, it should be exactly the same.</p>
+
+<h2>Wrapping up</h2>
+
+<p><strong>Ruby</strong> is an extremely <strong>flexible</strong> language which makes is it easy to do crazy things, just like it is the case with some operations in <strong>JavaScript</strong> ;).</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Rails And Conditional Validations In Models]]></title>
@@ -4718,211 +4803,6 @@
 
 
 <p><strong>ActiveRecord Attributes API</strong> is defintely a great feature introduced in <strong>Rails 5.0</strong>. Even though it is not yet supported in ActiveModel in Rails core, <a href="https://github.com/Azdaroth/active_model_attributes" target="_blank">ActiveModelAttributes</a> can be easily added to your Rails apps to provide almost the same functionality.</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Keeping Data Integrity In Check: Conditional Unique Indexes For Soft Delete]]></title>
-    <link href="https://karolgalanciak.com/blog/2016/11/01/keeping-data-integrity-in-check-conditional-unique-indexes-for-soft-delete/"/>
-    <updated>2016-11-01T00:30:00+01:00</updated>
-    <id>https://karolgalanciak.com/blog/2016/11/01/keeping-data-integrity-in-check-conditional-unique-indexes-for-soft-delete</id>
-    <content type="html"><![CDATA[<p><strong>Soft delete</strong> is a pretty common feature in most of the applications. It may increase complexity of the queries, nevertheless, not deleting anything might be a <strong>right default</strong> as the data might prove to be useful in the future: for restoring if a record was removed by mistake, to derive some conclusions based on statistics and plenty of other purposes. It may seem like it&#8217;s a pretty trivial thing: just adding a column like <code>deleted_at</code> and filtering out records that have this value present. But what happens when you need to do some proper <strong>uniqueness validation</strong> on both model layer and database level? Let&#8217;s take a look what kind of problem can easily be overlooked and how it can be solved with a <strong>conditional index</strong>.</p>
-
-
-
-
-<!--more-->
-
-
-
-
-<h2>Case study: daily prices for vacation rentals</h2>
-
-
-
-
-<p>Let&#8217;s imagine we are developing a <strong>vacation rental</strong> software. Most likely the pricing for each day will depend on some complex set of rules, but we may want to have some denormalized representation of base prices for each day to make things more obvious and have some possiblity of sharing this kind of data with other applications, which is quite common in this domain. We may start with adding a <code>DailyPrice</code> model having a reference to a <code>rental</code>, having <code>price</code> value and of course <code>date</code> for which the price is applicable.</p>
-
-
-
-
-<h2>Ensuring uniqueness</h2>
-
-
-
-
-<p>Obviously, we don&#8217;t want to have any duplicated <code>daily_prices</code> for any rental, so we need to add a uniqueness validation for <code>rental_id</code> and <code>date</code> attributes:</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/daily_price.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">validates</span> <span class="ss">:rental_id</span><span class="p">,</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">uniqueness</span><span class="p">:</span> <span class="p">{</span> <span class="ss">scope</span><span class="p">:</span> <span class="ss">:date</span> <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>To ensure <strong>integrity of the data</strong> and that we are protected against race conditions and potental validation bypassing, we need to add a <strong>unique index</strong> on the database level:</p>
-
-
-
-
-<figure class='code'><figcaption><span>db/migrate/20161030120000_add_unique_index_for_daily_prices.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="n">add_index</span> <span class="ss">:daily_prices</span><span class="p">,</span> <span class="o">[</span><span class="ss">:rental_id</span><span class="p">,</span> <span class="ss">:date</span><span class="o">]</span><span class="p">,</span> <span class="ss">unique</span><span class="p">:</span> <span class="kp">true</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<h2>Adding soft delete functionality</h2>
-
-
-
-
-<p>We have some nice setup already. But it turned out that for recalculating <code>daily_prices</code> if some rules or values influencing the price change it&#8217;s much more convenient to just remove them all and recalculate from scratch than checking if the price for given date needs to be recalculated. To be on the safe side, we may decide not to hard remove these rates, but do a soft delete instead.</p>
-
-
-
-
-<p>To implement this feature we could add <code>deleted_at</code> column, drop the previous index and a new one which will respect the new column. We should also update the validation in model in such case:</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/daily_price.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">validates</span> <span class="ss">:rental_id</span><span class="p">,</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">uniqueness</span><span class="p">:</span> <span class="p">{</span> <span class="ss">scope</span><span class="p">:</span> <span class="o">[</span><span class="ss">:date</span><span class="p">,</span> <span class="ss">:deleted_at</span><span class="o">]</span> <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>And the migration part:</p>
-
-
-
-
-<figure class='code'><figcaption><span>db/migrate/20161030120000_add_deleted_at_to_daily_prices.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="n">remove_index</span> <span class="ss">:daily_prices</span><span class="p">,</span> <span class="o">[</span><span class="ss">:rental_id</span><span class="p">,</span> <span class="ss">:date</span><span class="o">]</span><span class="p">,</span> <span class="ss">unique</span><span class="p">:</span> <span class="kp">true</span>
-</span><span class='line'>  <span class="n">add_column</span> <span class="ss">:daily_prices</span><span class="p">,</span> <span class="ss">:deleted_at</span><span class="p">,</span> <span class="ss">:datetime</span>
-</span><span class='line'>  <span class="n">add_index</span> <span class="ss">:daily_prices</span><span class="p">,</span> <span class="o">[</span><span class="ss">:rental_id</span><span class="p">,</span> <span class="ss">:date</span><span class="p">,</span> <span class="ss">:deleted_at</span><span class="o">]</span><span class="p">,</span> <span class="ss">unique</span><span class="p">:</span> <span class="kp">true</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Everything should be fine with that, right? What could possibly go wrong here?</p>
-
-
-
-
-<h2>Adding index the right way</h2>
-
-
-
-
-<p>Let&#8217;s play with Rails console and check it out:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&gt;</span> <span class="n">time_now</span> <span class="o">=</span> <span class="no">Time</span><span class="o">.</span><span class="n">current</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="no">Sun</span><span class="p">,</span> <span class="mi">23</span> <span class="no">Oct</span> <span class="mi">2016</span> <span class="mi">09</span><span class="p">:</span><span class="mi">44</span><span class="p">:</span><span class="mi">46</span> <span class="no">UTC</span> <span class="o">+</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span>
-</span><span class='line'><span class="o">&gt;</span> <span class="no">DailyPrice</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="ss">price</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="ss">date</span><span class="p">:</span> <span class="no">Date</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="n">rental_id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">deleted_at</span><span class="p">:</span> <span class="n">time_now</span><span class="p">)</span>
-</span><span class='line'>  <span class="no">COMMIT</span>
-</span><span class='line'><span class="o">&gt;</span> <span class="no">DailyPrice</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="ss">price</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="ss">date</span><span class="p">:</span> <span class="no">Date</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="n">rental_id</span><span class="p">:</span> <span class="mi">1</span><span class="p">)</span>
-</span><span class='line'>  <span class="no">COMMIT</span>
-</span><span class='line'><span class="o">&gt;</span> <span class="no">DailyPrice</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="ss">price</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="ss">date</span><span class="p">:</span> <span class="no">Date</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="n">rental_id</span><span class="p">:</span> <span class="mi">1</span><span class="p">)</span>
-</span><span class='line'>  <span class="no">ROLLBACK</span>
-</span><span class='line'><span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:RecordInvalid</span><span class="p">:</span> <span class="no">Validation</span> <span class="ss">failed</span><span class="p">:</span> <span class="no">Rental</span> <span class="n">has</span> <span class="n">already</span> <span class="n">been</span> <span class="n">taken</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Nah, there can&#8217;t be any problem, looks like we have the expected behaviour - we couldn&#8217;t create a non-soft-deleted <strong>daily_price</strong> for given date and rental. But let&#8217;s check one more thing:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&gt;</span> <span class="n">price</span> <span class="o">=</span> <span class="no">DailyPrice</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">price</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="ss">date</span><span class="p">:</span> <span class="no">Date</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="n">rental_id</span><span class="p">:</span> <span class="mi">1</span><span class="p">)</span>
-</span><span class='line'><span class="o">&gt;</span> <span class="n">price</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="ss">validate</span><span class="p">:</span> <span class="kp">false</span><span class="p">)</span>
-</span><span class='line'>  <span class="no">COMMIT</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Whoops! Something looks very wrong here. But how is it possible? The index looks exactly like the validation in our model, yet it didn&#8217;t work like that when we bypassed the validation.</p>
-
-
-
-
-<p>Let&#8217;s consult <strong>PostgreSQL</strong> <a href="https://www.postgresql.org/docs/9.0/static/indexes-unique.html" target="_blank">docs</a>. There is something mentioned about null values: </p>
-
-
-
-
-<blockquote><p>Null values are not considered equal</p></blockquote>
-
-
-
-
-<p>That is our problem: ActiveRecord considered it as a unique value, but it doesn&#8217;t work quite like that in <strong>PostgreSQL</strong>.</p>
-
-
-
-
-<p>Our index should be in fact <strong>conditional</strong> and look the following way:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">add_index</span> <span class="ss">:nightly_rates</span><span class="p">,</span> <span class="o">[</span><span class="ss">:rental_id</span><span class="p">,</span> <span class="ss">:date</span><span class="o">]</span><span class="p">,</span> <span class="ss">unique</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">where</span><span class="p">:</span> <span class="s2">&quot;deleted_at IS NULL&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>We could optionally improve the validation in our model to make it look much closer to what we have in database and use <code>conditions</code> option:</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/daily_price.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">validates</span> <span class="ss">:rental_id</span><span class="p">,</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">uniqueness</span><span class="p">:</span> <span class="p">{</span> <span class="ss">scope</span><span class="p">:</span> <span class="ss">:date</span><span class="p">,</span> <span class="ss">conditions</span><span class="p">:</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">where</span><span class="p">(</span><span class="n">deleted_at</span><span class="p">:</span> <span class="kp">nil</span><span class="p">)</span> <span class="p">}</span> <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>And that&#8217;s it! There&#8217;s no way we could compromise <strong>data integrity</strong> now!</p>
-
-
-
-
-<h2>Wrapping Up</h2>
-
-
-
-
-<p>Keeping data integrity in check is essential for most of the applications to not cause some serious problems, especially when implementing soft delete. Fortunately, simply by adding PostgreSQL conditional unique indexes we can protect ourselves from such issues.</p>
 
 ]]></content>
   </entry>

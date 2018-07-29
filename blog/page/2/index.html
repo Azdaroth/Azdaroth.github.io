@@ -58,7 +58,7 @@
         "width": 1024
       },
       "datePublished": "",
-      "dateModified": "2018-06-24",
+      "dateModified": "2018-07-29",
       "author": {
         "@type": "Person",
         "name": "Karol Galanciak"
@@ -135,6 +135,49 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2017/09/24/do-or-do-not-there-is-no-try-object-number-try-considered-harmful/">Do. Or Do Not. There Is No Try - Object#try Considered Harmful</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-09-24T22:00:00+02:00" pubdate data-updated="true">Sep 24<span>th</span>, 2017</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="https://apidock.com/rails/v4.2.7/Object/try" target="_blank"><code>Object#try</code></a> is quite a commonly used method in <strong>Rails applications</strong> to cover cases where there is a possibility of dealing with a <code>nil</code> value or to provide <strong>flexible interface</strong> for handling cases where some kind of object doesn&rsquo;t necessarily implement given method. Thanks to <code>try</code>, we may avoid getting <code>NoMethodError</code>. So it seems like it&rsquo;s perfect, right? No <code>NoMethodError</code> exception, no problem?</p>
+
+<p>Well, not really. There are some <strong>severe problems</strong> with using <code>Object#try</code>, and usually, it&rsquo;s quite easy to implement a solution that would be much better.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2017/09/24/do-or-do-not-there-is-no-try-object-number-try-considered-harmful/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -516,50 +559,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/11/01/keeping-data-integrity-in-check-conditional-unique-indexes-for-soft-delete/">Keeping Data Integrity in Check: Conditional Unique Indexes for Soft Delete</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-11-01T00:30:00+01:00" pubdate data-updated="true">Nov 1<span>st</span>, 2016</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><strong>Soft delete</strong> is a pretty common feature in most of the applications. It may increase complexity of the queries, nevertheless, not deleting anything might be a <strong>right default</strong> as the data might prove to be useful in the future: for restoring if a record was removed by mistake, to derive some conclusions based on statistics and plenty of other purposes. It may seem like it&#8217;s a pretty trivial thing: just adding a column like <code>deleted_at</code> and filtering out records that have this value present. But what happens when you need to do some proper <strong>uniqueness validation</strong> on both model layer and database level? Let&#8217;s take a look what kind of problem can easily be overlooked and how it can be solved with a <strong>conditional index</strong>.</p>
-
-
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/11/01/keeping-data-integrity-in-check-conditional-unique-indexes-for-soft-delete/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -592,6 +591,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking/">Trolling in Ruby - Implementing JavaScript-like Maths With Implicit Conversion Hijacking</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/06/24/rails-and-conditional-validations-in-models/">Rails and Conditional Validations in Models</a>
       </li>
     
@@ -605,10 +608,6 @@
     
       <li class="post">
         <a href="/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/">Exotic Ruby: Module.class_exec, Custom JSON and Liquid Drops in Action</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/">Rails Quick Tips: Temporarily Disabling Touching With ActiveRecord.no_touching</a>
       </li>
     
   </ul>

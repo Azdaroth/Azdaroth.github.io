@@ -58,7 +58,7 @@
         "width": 1024
       },
       "datePublished": "2014-07-10",
-      "dateModified": "2018-06-24",
+      "dateModified": "2018-07-29",
       "author": {
         "@type": "Person",
         "name": "Karol Galanciak"
@@ -334,7 +334,7 @@
 <p><p>Now we have our node, let&rsquo;s prepare it for running Chef (the command below must be run within main Chef project directory):</p></p>
 
 <p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>knife solo prepare <a href="&#109;&#97;&#x69;&#x6c;&#116;&#x6f;&#58;&#x76;&#97;&#103;&#x72;&#x61;&#x6e;&#x74;&#x40;&#49;&#x32;&#x37;&#46;&#48;&#x2e;&#48;&#x2e;&#x31;">&#118;&#97;&#x67;&#114;&#97;&#110;&#116;&#64;&#49;&#x32;&#x37;&#46;&#48;&#46;&#x30;&#x2e;&#49;</a> -p 2222 -i ~/.vagrant.d/insecure_private_key
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>knife solo prepare <a href="&#109;&#97;&#105;&#x6c;&#x74;&#x6f;&#x3a;&#118;&#97;&#103;&#x72;&#97;&#110;&#116;&#64;&#49;&#x32;&#x37;&#46;&#x30;&#x2e;&#48;&#x2e;&#49;">&#118;&#x61;&#103;&#x72;&#x61;&#110;&#x74;&#x40;&#49;&#50;&#55;&#x2e;&#x30;&#46;&#48;&#x2e;&#49;</a> -p 2222 -i ~/.vagrant.d/insecure_private_key
 </span></code></pre></td></tr></table></div></figure></p>
 
 <p><p>Remember to use real system user name.</p></p>
@@ -740,7 +740,7 @@
 <p><p>So here is the final step &ndash; applying recipes on our node:</p></p>
 
 <p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>knife solo cook <a href="&#x6d;&#97;&#x69;&#108;&#x74;&#x6f;&#x3a;&#118;&#x61;&#103;&#114;&#x61;&#x6e;&#x74;&#64;&#x31;&#50;&#55;&#x2e;&#48;&#46;&#48;&#x2e;&#x31;">&#x76;&#x61;&#103;&#x72;&#x61;&#x6e;&#x74;&#64;&#x31;&#x32;&#55;&#46;&#48;&#46;&#48;&#46;&#49;</a> -p 2222 -i /Users/system_user_name/.vagrant.d/insecure_private_key
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>knife solo cook <a href="&#x6d;&#97;&#105;&#108;&#116;&#x6f;&#x3a;&#x76;&#x61;&#103;&#114;&#x61;&#x6e;&#x74;&#64;&#49;&#x32;&#x37;&#46;&#x30;&#x2e;&#x30;&#x2e;&#x31;">&#118;&#x61;&#103;&#114;&#x61;&#x6e;&#116;&#64;&#x31;&#50;&#55;&#46;&#x30;&#x2e;&#x30;&#x2e;&#49;</a> -p 2222 -i /Users/system_user_name/.vagrant.d/insecure_private_key
 </span></code></pre></td></tr></table></div></figure></p>
 
 <p><p>The great thing about Chef is that you can change the values of attributes, apply them on the node and the chef-client will pick that change up. Just change <code>worker_processes</code> to 3 and watch what happens &ndash; Chef client will change the value of the attribute and restart Nginx.</p></p>
@@ -922,6 +922,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking/">Trolling in Ruby - Implementing JavaScript-like Maths With Implicit Conversion Hijacking</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/06/24/rails-and-conditional-validations-in-models/">Rails and Conditional Validations in Models</a>
       </li>
     
@@ -935,10 +939,6 @@
     
       <li class="post">
         <a href="/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/">Exotic Ruby: Module.class_exec, Custom JSON and Liquid Drops in Action</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/">Rails Quick Tips: Temporarily Disabling Touching With ActiveRecord.no_touching</a>
       </li>
     
   </ul>

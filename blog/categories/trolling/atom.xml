@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Trolling | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
+  <link href="https://karolgalanciak.com/blog/categories/trolling/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-07-29T20:22:18+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
+  <author>
+    <name><![CDATA[Karol Galanciak]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Trolling In Ruby - Implementing JavaScript-like Maths With Implicit Conversion Hijacking]]></title>
+    <link href="https://karolgalanciak.com/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking/"/>
+    <updated>2018-07-29T20:00:00+02:00</updated>
+    <id>https://karolgalanciak.com/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking</id>
+    <content type="html"><![CDATA[<p>If you&rsquo;ve ever worked with <strong>JavaScript</strong>, especially in <strong>pre-SPA/pre-frameworks</strong> era with just <strong>jQuery</strong>, you probably had a chance to see an &ldquo;exotic&rdquo; maths in action that looks similar to this:</p>
+
+<p><code>javascript
+"3" + 4
+// =&gt; "34"
+</code></p>
+
+<p>That kind of behavior usually comes as a <strong>big surprise</strong> and due to that fact, JavaScript has gotten some <strong>bad reputation</strong> (even though there is a <a href="https://karolgalanciak.com/blog/2017/01/22/javascript-the-surprising-parts/">rationale</a> behind it). If we tried that in <strong>Ruby</strong>, we would get an obvious <code>TypeError</code>:</p>
+
+<p>``` ruby
+&ldquo;3&rdquo; + 4</p>
+
+<h1>=> TypeError (no implicit conversion of Integer into String)</h1>
+
+<p>```</p>
+
+<p>Would it be possible though to obtain the same result somehow in Ruby?</p>
+
+<h2>Explicit Conversion vs. Implicit Conversion</h2>
+
+<p>The answer is yes! But before we get to the actual implementation of that concept, let&rsquo;s make sure that we understand some essential concepts in Ruby that will lead us there: <strong>explicit conversion</strong> and <strong>implicit conversion</strong>.</p>
+
+<p>You&rsquo;ve probably used methods like <code>to_s</code>, <code>to_i</code>, <code>to_d</code>, <code>to_a</code> etc. for <em>explicit</em> typecasting. That way, we can get the closest representation of a given object in a different type.</p>
+
+<p>However, there is also a second type of conversion in Ruby, which is <strong>implicit conversion</strong>.  Those are the methods like <code>to_str</code>, <code>to_int</code>, <code>to_hash</code>, <code>to_ary</code>. In most cases, you should not use those methods unless you are implementing an object that kind of behaves like some type, so, e.g., all numeric objects could (and they actually do!) implement <code>to_int</code> method as they are kind of the same type. For the same reason, if we were implementing some type of collection, we could implement <code>to_ary</code> method that would just return the same result as <code>to_a</code>  which would be an instance of Array, but that we way put extra emphasis on the fact that this object behaves like an array.</p>
+
+<p>We could also take advantage of implicit conversion to put some extra boundaries on the collaborating objects.  Implicit conversion is widely used in Ruby for that purpose. When you are adding a string to a string like this:</p>
+
+<p><code>rb
+"3" + "4"
+</code></p>
+
+<p>Ruby under the hood calls &ldquo;4&rdquo;.to_str to get the string representation of that object (which is already a string) to make <code>+</code> method more flexible, but at the same time, it makes sure that only string-like objects are permitted as arguments.</p>
+
+<h2>Hijacking Implicit Conversion</h2>
+
+<p>Let&rsquo;s get back to the original problem which was: how to get the following result in Ruby?</p>
+
+<p>``` ruby
+&ldquo;3&rdquo; + 4</p>
+
+<h1>=> &ldquo;34&rdquo;</h1>
+
+<p><code>``
+Based on what we've just learned about implicit conversion, we just need to make sure that integers become somehow string-like objects. Let's monkey patch</code>Integer<code>class and add</code>to_str<code>method that would be an alias to</code>to_s`:</p>
+
+<p>```
+class Integer
+  def to_str</p>
+
+<pre><code>to_s
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Let&rsquo;s try out crazy maths again:</p>
+
+<p><code>ruby
+"3" + 4
+=&gt; "34"
+</code></p>
+
+<p>Try the same for JavaScript and compare the results, it should be exactly the same.</p>
+
+<h2>Wrapping up</h2>
+
+<p><strong>Ruby</strong> is an extremely <strong>flexible</strong> language which makes is it easy to do crazy things, just like it is the case with some operations in <strong>JavaScript</strong> ;).</p>
+]]></content>
+  </entry>
+  
+</feed>

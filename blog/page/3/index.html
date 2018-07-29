@@ -58,7 +58,7 @@
         "width": 1024
       },
       "datePublished": "",
-      "dateModified": "2018-06-24",
+      "dateModified": "2018-07-29",
       "author": {
         "@type": "Person",
         "name": "Karol Galanciak"
@@ -135,6 +135,50 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/11/01/keeping-data-integrity-in-check-conditional-unique-indexes-for-soft-delete/">Keeping Data Integrity in Check: Conditional Unique Indexes for Soft Delete</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-11-01T00:30:00+01:00" pubdate data-updated="true">Nov 1<span>st</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>Soft delete</strong> is a pretty common feature in most of the applications. It may increase complexity of the queries, nevertheless, not deleting anything might be a <strong>right default</strong> as the data might prove to be useful in the future: for restoring if a record was removed by mistake, to derive some conclusions based on statistics and plenty of other purposes. It may seem like it&#8217;s a pretty trivial thing: just adding a column like <code>deleted_at</code> and filtering out records that have this value present. But what happens when you need to do some proper <strong>uniqueness validation</strong> on both model layer and database level? Let&#8217;s take a look what kind of problem can easily be overlooked and how it can be solved with a <strong>conditional index</strong>.</p>
+
+
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/11/01/keeping-data-integrity-in-check-conditional-unique-indexes-for-soft-delete/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -533,50 +577,6 @@ A classic example would be a unique <code>email</code> per user. To make sure th
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/02/07/implementing-non-restful-actions-with-ember-data/">Implementing non-RESTful Actions With Ember Data</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-02-07T10:45:00+01:00" pubdate data-updated="true">Feb 7<span>th</span>, 2016</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>In my <a target="_blank" href="http://karolgalanciak.com/blog/2016/01/24/how-to-handle-non-crud-logic-in-your-api/">recent post</a> I mentioned some strategies of handling non-strictly <strong>CRUD</strong> / <strong>RESTful</strong> actions in <strong>API</strong>. One of them was adding extra actions beyond creating, updating and deleting resources. As it&#8217;s not a standard solution and some data layers on client side (like <strong>Ember Data</strong>) don&#8217;t handle it out-of-box, I was asked by some developers what&#8217;s the best way to handle such actions. So let&#8217;s see how can we hack into <strong>Ember Data</strong> and make it smooth.</p>
-
-
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/02/07/implementing-non-restful-actions-with-ember-data/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/4/">&larr; Older</a>
@@ -609,6 +609,10 @@ A classic example would be a unique <code>email</code> per user. To make sure th
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking/">Trolling in Ruby - Implementing JavaScript-like Maths With Implicit Conversion Hijacking</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/06/24/rails-and-conditional-validations-in-models/">Rails and Conditional Validations in Models</a>
       </li>
     
@@ -622,10 +626,6 @@ A classic example would be a unique <code>email</code> per user. To make sure th
     
       <li class="post">
         <a href="/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/">Exotic Ruby: Module.class_exec, Custom JSON and Liquid Drops in Action</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/">Rails Quick Tips: Temporarily Disabling Touching With ActiveRecord.no_touching</a>
       </li>
     
   </ul>

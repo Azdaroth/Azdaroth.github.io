@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2018-06-24T17:29:47+02:00</updated>
+  <updated>2018-07-29T20:22:18+02:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -12,6 +12,83 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Trolling In Ruby - Implementing JavaScript-like Maths With Implicit Conversion Hijacking]]></title>
+    <link href="https://karolgalanciak.com/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking/"/>
+    <updated>2018-07-29T20:00:00+02:00</updated>
+    <id>https://karolgalanciak.com/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking</id>
+    <content type="html"><![CDATA[<p>If you&rsquo;ve ever worked with <strong>JavaScript</strong>, especially in <strong>pre-SPA/pre-frameworks</strong> era with just <strong>jQuery</strong>, you probably had a chance to see an &ldquo;exotic&rdquo; maths in action that looks similar to this:</p>
+
+<p><code>javascript
+"3" + 4
+// =&gt; "34"
+</code></p>
+
+<p>That kind of behavior usually comes as a <strong>big surprise</strong> and due to that fact, JavaScript has gotten some <strong>bad reputation</strong> (even though there is a <a href="https://karolgalanciak.com/blog/2017/01/22/javascript-the-surprising-parts/">rationale</a> behind it). If we tried that in <strong>Ruby</strong>, we would get an obvious <code>TypeError</code>:</p>
+
+<p>``` ruby
+&ldquo;3&rdquo; + 4</p>
+
+<h1>=> TypeError (no implicit conversion of Integer into String)</h1>
+
+<p>```</p>
+
+<p>Would it be possible though to obtain the same result somehow in Ruby?</p>
+
+<h2>Explicit Conversion vs. Implicit Conversion</h2>
+
+<p>The answer is yes! But before we get to the actual implementation of that concept, let&rsquo;s make sure that we understand some essential concepts in Ruby that will lead us there: <strong>explicit conversion</strong> and <strong>implicit conversion</strong>.</p>
+
+<p>You&rsquo;ve probably used methods like <code>to_s</code>, <code>to_i</code>, <code>to_d</code>, <code>to_a</code> etc. for <em>explicit</em> typecasting. That way, we can get the closest representation of a given object in a different type.</p>
+
+<p>However, there is also a second type of conversion in Ruby, which is <strong>implicit conversion</strong>.  Those are the methods like <code>to_str</code>, <code>to_int</code>, <code>to_hash</code>, <code>to_ary</code>. In most cases, you should not use those methods unless you are implementing an object that kind of behaves like some type, so, e.g., all numeric objects could (and they actually do!) implement <code>to_int</code> method as they are kind of the same type. For the same reason, if we were implementing some type of collection, we could implement <code>to_ary</code> method that would just return the same result as <code>to_a</code>  which would be an instance of Array, but that we way put extra emphasis on the fact that this object behaves like an array.</p>
+
+<p>We could also take advantage of implicit conversion to put some extra boundaries on the collaborating objects.  Implicit conversion is widely used in Ruby for that purpose. When you are adding a string to a string like this:</p>
+
+<p><code>rb
+"3" + "4"
+</code></p>
+
+<p>Ruby under the hood calls &ldquo;4&rdquo;.to_str to get the string representation of that object (which is already a string) to make <code>+</code> method more flexible, but at the same time, it makes sure that only string-like objects are permitted as arguments.</p>
+
+<h2>Hijacking Implicit Conversion</h2>
+
+<p>Let&rsquo;s get back to the original problem which was: how to get the following result in Ruby?</p>
+
+<p>``` ruby
+&ldquo;3&rdquo; + 4</p>
+
+<h1>=> &ldquo;34&rdquo;</h1>
+
+<p><code>``
+Based on what we've just learned about implicit conversion, we just need to make sure that integers become somehow string-like objects. Let's monkey patch</code>Integer<code>class and add</code>to_str<code>method that would be an alias to</code>to_s`:</p>
+
+<p>```
+class Integer
+  def to_str</p>
+
+<pre><code>to_s
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Let&rsquo;s try out crazy maths again:</p>
+
+<p><code>ruby
+"3" + 4
+=&gt; "34"
+</code></p>
+
+<p>Try the same for JavaScript and compare the results, it should be exactly the same.</p>
+
+<h2>Wrapping up</h2>
+
+<p><strong>Ruby</strong> is an extremely <strong>flexible</strong> language which makes is it easy to do crazy things, just like it is the case with some operations in <strong>JavaScript</strong> ;).</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Rails And Conditional Validations In Models]]></title>
@@ -430,134 +507,6 @@ collection.group_by(&amp;:itself).transform_values(&amp;:count)
 <h2>Wrapping up</h2>
 
 <p>Ruby code is known for being particularly pleasant to read and I&rsquo;m still happy that after several years I still feel immense joy when I discover interesting little things like <a href="https://ruby-doc.org/core-2.2.0/Object.html#method-i-itself" target="_blank"><code>Kernel#itself</code></a> which add up to the overall aesthetics of the language.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Traps on Rails - Overriding boolean methods in models]]></title>
-    <link href="https://karolgalanciak.com/blog/2017/11/26/traps-on-rails-overriding-boolean-methods-in-models/"/>
-    <updated>2017-11-26T16:00:00+01:00</updated>
-    <id>https://karolgalanciak.com/blog/2017/11/26/traps-on-rails-overriding-boolean-methods-in-models</id>
-    <content type="html"><![CDATA[<p>One very <strong>useful</strong> feature of <strong>ActiveRecord</strong> is automatically defining attribute readers and writers for all the columns for given tables. For the ones with <strong>boolean</strong> type, however, there is one more addition &ndash; defining an <strong>alias</strong> of the method with a question mark. Sometimes it might be useful to override this method and add some extra requirements for a given condition. However, this might not be such a good idea.</p>
-
-<!--more-->
-
-
-<h2>Anatomy of the problem</h2>
-
-<p>Imagine that you are developing some application, where users can be activated and deactivated from an admin panel. However, the application is not free, and every user that wants to access the application needs to buy a subscription. In that case, to check if the user is, in fact, active, you could override <code>User#active?</code> method and add some extra requirements regarding the subscription:</p>
-
-<p>``` rb</p>
-
-<h1>app/models/users.rb</h1>
-
-<p>class User &lt; ApplicationRecord
-  def active?</p>
-
-<pre><code>super &amp;&amp; valid_subscription?
-</code></pre>
-
-<p>  end</p>
-
-<p>  def valid_subscription?</p>
-
-<pre><code># somehow check if the subscription is valid
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>We are taking advantage of the fact that ActiveRecord defines the aliases for boolean columns which are the original column names' ending with a question mark, so for <code>active</code> boolean column we can expect that <code>active?</code> method will be defined, and it will work the same as <code>active</code> method.</p>
-
-<p>Ok, cool, we have our feature working and to check if a user is fully active, we call <code>User#active?</code> here and there. Our next requirement is exposing users in the API. Nothing too hard, we can add <a href="https://github.com/fotinakis/jsonapi-serializers"><code>jsonapi-serializers</code></a> gem and implement fully JSONAPI-compliant serializers. It turns out that we need to expose info if a user is active and not. Here is how our serializer could look like:</p>
-
-<p>``` rb</p>
-
-<h1>app/serializers/user.rb</h1>
-
-<p>class UserSerializer
-  include JSONAPI::Serializer</p>
-
-<p>  attribute :active
-  # other attributes
-end
-```</p>
-
-<p>It sounds like we are done here. But the truth is there is a nasty bug here! The serializer returns the value returned by <code>User#active</code>, not by <code>User#active?</code>!</p>
-
-<h2>What exactly went wrong here?</h2>
-
-<p>The primary thing that went wrongs here was being lazy about the naming and not introducing proper domain concepts. Somehow ActiveRecord made it even easier &ndash; there was already a method called <code>active?</code> defined based on the <code>active</code> column name, so the only thing that was necessary in that case to make our first feature work was overriding it and adding some extra condition because the idea of being &ldquo;active&rdquo; is kind of similar. But overriding boolean methods is never a good idea &ndash; it always implies that some concept is missing or is made implicit in the code.</p>
-
-<h2>A solution to the problem</h2>
-
-<p>A solution would be simply making this domain concept explicit. <code>User#active?</code> method doesn&rsquo;t check if the user is active is not, it rather checks if a user can access the application, so the better name for that method would be <code>User#can_access_application?</code></p>
-
-<p>It is quite possible that we might later need to add some extra features that are related to this feature, like checking if the user is active but cannot access the app or just simply checking the <code>active</code> flag itself. Our final model could look like this in the end:</p>
-
-<p>``` rb</p>
-
-<h1>app/models/users.rb</h1>
-
-<p>class User &lt; ApplicationRecord
-  def can_access_application?</p>
-
-<pre><code>active? &amp;&amp; valid_subscription?
-</code></pre>
-
-<p>  end</p>
-
-<p>  def cannot_access_application?</p>
-
-<pre><code>!can_access_application?
-</code></pre>
-
-<p>  end</p>
-
-<p>  # other methods
-end
-```</p>
-
-<p>We should also update the serializer:</p>
-
-<p>``` rb</p>
-
-<h1>app/serializers/user.rb</h1>
-
-<p>class UserSerializer
-  include JSONAPI::Serializer</p>
-
-<p>  attribute :active do</p>
-
-<pre><code>object.active
-</code></pre>
-
-<p>  end</p>
-
-<p>  attribute :can_access_application do</p>
-
-<pre><code>object.can_access_application?
-</code></pre>
-
-<p>  end</p>
-
-<p>  attribute :cannot_access_application do</p>
-
-<pre><code>object.cannot_access_application?
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>One could argue that this fix was not necessary and it was a developer&rsquo;s fault, and he or she should have checked the model if this method has not been overridden and adjust the serializer. That is somehow true, but if such code is deployed to production, it probably means that the reviewer of the code was not aware that there is a potential issue in the code and such things are really hard to spot &ndash; ActiveRecord adds those aliases for every boolean column so it might sound like a fair assumption that <code>User#active</code> and <code>User#active?</code> will return the same result.</p>
-
-<p>However, the truth is that not only did we minimize the risk of having the name collisions by those changes but we gained some extra flexibility, and it was quite straight-forward to differentiate between <code>User#active?</code>and <code>User#can_access_application?</code>. In a previous implementation, it was simply not possible with the question-mark methods.</p>
-
-<h2>Wrapping up</h2>
-
-<p>Naming is one of <a href="https://martinfowler.com/bliki/TwoHardThings.html" target="_blank">two hard problems in computer science</a> and it&rsquo;s a good idea to always make all the domain concepts properly named and explicit, even if it means adding more code &ndash; just because something is not explicit, doesn&rsquo;t mean it doesn&rsquo;t exist. When it comes to <strong>ActiveRecord</strong> models, an extra caution is more than recommended &ndash; such models mix both persistence and domain concepts and it&rsquo;s quite easy to hurt yourself in such case. Not overriding boolean methods generated by ActiveRecord and properly naming things sounds like a good rule of thumb to follow.</p>
 ]]></content>
   </entry>
   
