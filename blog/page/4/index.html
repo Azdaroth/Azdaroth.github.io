@@ -58,7 +58,7 @@
         "width": 1024
       },
       "datePublished": "",
-      "dateModified": "2018-07-29",
+      "dateModified": "2018-08-19",
       "author": {
         "@type": "Person",
         "name": "Karol Galanciak"
@@ -135,6 +135,50 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/02/20/postgresql-in-action-sorting-with-nullif-expression/">PostgreSQL in Action: Sorting With NULLIF Expression</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-02-20T21:20:00+01:00" pubdate data-updated="true">Feb 20<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Ordering with <strong>ActiveRecord</strong> and <strong>PostgreSQL</strong> may seem like an obvious and simple thing: in most cases you just specify one or several criteria with direction of ordering like <code>order(name: :asc)</code> and that&#8217;s all, maybe in more <b>complex scenarios</b> you would need to use <code>CASE</code> statement to provide some more customized conditions. But how could we approach sorting with forcing <b>blank values</b> to be the last ones, regardless of the direction of the sort? You might be thinking now about <code>NULLS LAST</code> statement for this purpose, but that&#8217;s not going to handle empty string. For this case you need something special: time to meet <code>NULLIF</code> conditional expression.</p>
+
+
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/02/20/postgresql-in-action-sorting-with-nullif-expression/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -532,50 +576,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/27/you-dont-necessarily-need-gem-for-that-feature/">You Don&#8217;t (Necessarily) Need Gem for That Feature</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-27T17:02:00+02:00" pubdate data-updated="true">Apr 27<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>You are working currently on that awesome app and just started thinking about implementing new feature, let&#8217;s call it feature X. What&#8217;s the first thing you do? Rolling your own solution or&#8230; maybe checking if there&#8217;s a magical gem that can help you solve that problem? Ok, it turns out there&#8217;s already a gem Y that does what you expect. Also, it does tons of other things and is really complex. After some time your app breaks, something is definitively not working and it seems that gem Y is responsible for that. So you read all the issues on Github, pull requests and even read the source code and finally find a little bug. You managed to do some monkeypatching first and then send pull request for a small fix and solved a problem, which took you a few hours. Looks like a problem is solved. And then, you try to update Rails to2 the current version. Seems like there&#8217;s a dependency problem - gem Y depends on previous version of Rails&#8230;</p>
-
-
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/04/27/you-dont-necessarily-need-gem-for-that-feature/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/5/">&larr; Older</a>
@@ -608,6 +608,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/08/19/indexes-on-rails-how-to-make-the-most-of-your-postgres-database/">Indexes on Rails: How to Make the Most of Your Postgres Database</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking/">Trolling in Ruby - Implementing JavaScript-like Maths With Implicit Conversion Hijacking</a>
       </li>
     
@@ -621,10 +625,6 @@
     
       <li class="post">
         <a href="/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/">Advanced Ember Data Customization - Different Model Types in Ember App and API for the Same Resource</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/">Exotic Ruby: Module.class_exec, Custom JSON and Liquid Drops in Action</a>
       </li>
     
   </ul>

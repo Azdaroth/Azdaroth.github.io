@@ -255,20 +255,26 @@
         <lastmod>2018-07-29T20:20:48+02:00</lastmod>
     </url>
     <url>
+        <loc>
+            https://karolgalanciak.com/blog/2018/08/19/indexes-on-rails-how-to-make-the-most-of-your-postgres-database/
+        </loc>
+        <lastmod>2018-08-19T20:55:12+02:00</lastmod>
+    </url>
+    <url>
         <loc>https://karolgalanciak.com/</loc>
-        <lastmod>2018-07-29T20:20:48+02:00</lastmod>
+        <lastmod>2018-08-19T20:55:12+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/open-source/</loc>
-        <lastmod>2018-07-29T20:20:48+02:00</lastmod>
+        <lastmod>2018-08-19T20:55:12+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/privacy-policy/</loc>
-        <lastmod>2018-07-29T20:20:48+02:00</lastmod>
+        <lastmod>2018-08-19T20:55:12+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/publications/</loc>
-        <lastmod>2018-07-29T20:20:48+02:00</lastmod>
+        <lastmod>2018-08-19T20:55:12+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/test-driven-ember/</loc>
@@ -276,15 +282,15 @@
     </url>
     <url>
         <loc>https://karolgalanciak.com/blog/</loc>
-        <lastmod>2018-07-29T20:20:48+02:00</lastmod>
+        <lastmod>2018-08-19T20:55:12+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/blog/archives/</loc>
-        <lastmod>2018-07-29T20:20:48+02:00</lastmod>
+        <lastmod>2018-08-19T20:55:12+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/presentations/</loc>
-        <lastmod>2018-07-29T20:20:48+02:00</lastmod>
+        <lastmod>2018-08-19T20:55:12+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/robots.txt</loc>

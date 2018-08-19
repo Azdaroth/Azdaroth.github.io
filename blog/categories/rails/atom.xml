@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2018-07-29T20:22:18+02:00</updated>
+  <updated>2018-08-19T20:55:17+02:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -12,6 +12,219 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Indexes on Rails: How to make the most of your Postgres database]]></title>
+    <link href="https://karolgalanciak.com/blog/2018/08/19/indexes-on-rails-how-to-make-the-most-of-your-postgres-database/"/>
+    <updated>2018-08-19T20:00:00+02:00</updated>
+    <id>https://karolgalanciak.com/blog/2018/08/19/indexes-on-rails-how-to-make-the-most-of-your-postgres-database</id>
+    <content type="html"><![CDATA[<p>Optimizing <strong>database queries</strong> is arguably one of the fastest ways to improve the <strong>performance</strong> of the Rails applications. There are multiple ways how you can approach it, depending on the kind of a problem. <strong>N+1 queries</strong> seem to be a pretty common issue, which is, fortunately, <strong>easy to address</strong>. However, sometimes you have some relatively <strong>simple-looking queries</strong> that seem to take way longer than they should be, indicating that they might require some optimization. The best way to improve such queries is adding a <strong>proper index</strong>.</p>
+
+<p>But what does &ldquo;proper index&rdquo; mean? How to figure out what kind of index is exactly needed for a given query? Here are some essential facts and tips that should cover a majority of the queries you may encounter and make your database no longer a bottleneck.</p>
+
+<!--more-->
+
+
+<h2>Why index at all?</h2>
+
+<p>Simple &ndash; to have faster queries. But why are indexes faster? The alternative to index is a sequential scanning of the entire table. That might not sound like a bad idea, but imagine you are performing a search over a huge table. What would be the fastest way to retrieve all records you are looking for &ndash; by scanning the entire table, or maybe having a way to store a subset of the records, based on some specific criteria, and then retrieve them from that place? Obviously, it&rsquo;s the second option. And that&rsquo;s roughly how indexes work.</p>
+
+<p>As trivial as it sounds, there is a valuable lesson to learn from it: to achieve a good performance, the index must be selective enough. And the more specific you will be about those criteria, the better.</p>
+
+<h2>Index Types</h2>
+
+<p>Although Postgres by defaults creates <code>B-Tree</code> index when using <code>CREATE INDEX</code> command, there are a couple of more indexes that will be certainly useful in many use cases. Let&rsquo;s check them all out:</p>
+
+<h3>B-Tree Index</h3>
+
+<p><code>B-Tree</code> is a self-balancing tree data structure which keeps data ordered and easy to search. This index is appropriate for equality and range queries (using operators like <code>&gt;=</code>,  <code>&lt;</code> etc.) and will work great with text, timestamp and number fields.</p>
+
+<p>B-Tree indexes are a reasonable default for most of the queries, but not for all of them. The limitation comes from the underlying structure. Discussing the details of the B-Tree data structure itself is beyond the scope of this article; nevertheless, it&rsquo;s worth keeping in mind that it&rsquo;s a similar data structure to a binary search tree, which has meaningful consequences on what can be indexed with it and how. We will get back to a couple of examples later.</p>
+
+<h3>Hash Index</h3>
+
+<p>Before Postgres 10, the usage of hash indexes was discouraged since they used to be not WAL-logged. Fortunately, it&rsquo;s changed in Postgres 10, and we can use them safely without worrying about rebuilding the index if something goes wrong with our database that would cause a crash. The use cases where hash indexes are useful are very limited, as they work only for equality, but they are a bit more efficient for this kind of queries comparing to b-tree indexes. If you store tokens for example and perform lookups by the token value, hash indexes would be a good way to optimize such queries.</p>
+
+<h3>BRIN Index (Block Range Index)</h3>
+
+<p>BRIN indexes were introduced in Postgres 9.5 which make them a pretty new addition. They tend to work very well for the large sets of ordered data, e.g., statistical data collected with timestamps which are later filtered by the time range. They will perform better than b-tree indexes in such case, although the difference won&rsquo;t be drastic. However, the different of the size of the index will be huge &ndash; BRIN index can be smaller by literally few orders of magnitude comparing to b-tree index.</p>
+
+<h3>GIN Index (Generalized Inverted Index)</h3>
+
+<p>GIN Indexes are the perfect choice for &ldquo;composite values&rdquo; where you perform a query which looks for an element within such &ldquo;composite&rdquo;. That is the index you will most likely want to use for <code>jsonb</code>, <code>array</code> or <code>hstore</code> data structures. They are also an excellent choice for full-text search.</p>
+
+<h3>GiST Index (Generalized Inverted Seach Tree Index)</h3>
+
+<p>GiST Indexes will be a good choice when the records overlap values under the same column. They are commonly used for geometry types and full-text search as well. The difference between GIN and GiST Index when it comes to full-text search is that GiST Index will be less taxing on writes comparing to GIN (as it is faster to build). But since it&rsquo;s a lossy index, there might be some extra overhead involved for reads, which makes GIN index a better choice when you mostly care about reads optimization.</p>
+
+<h2>Optimizing Queries</h2>
+
+<p>Here are some tips that should help you with the majority of the queries:</p>
+
+<h3>Start with EXPLAIN</h3>
+
+<p>With enough experience and knowledge of your app, you will develop an intuition about indexes and where they might be useful, long before having performance problems with queries. Until that happens, it&rsquo;s essential to understand how Postgres is going to execute these queries. The best tool for that purpose is using <code>EXPLAIN</code> command, which will show the execution plan generated by the query planner. <code>ActiveRecord</code> provides a convenient method &ndash; <code>explain</code> &ndash; that you can use on collections to get the query plan:</p>
+
+<p>```</p>
+
+<blockquote><p>Order.where(customer_id: 1).explain
+  Order Load (13.8ms)  SELECT &ldquo;orders&rdquo;.<em> FROM &ldquo;orders&rdquo; WHERE &ldquo;orders&rdquo;.&ldquo;customer_id&rdquo; = $1  [[&ldquo;customer_id&rdquo;, 1]]
+=> EXPLAIN for: SELECT &ldquo;orders&rdquo;.</em> FROM &ldquo;orders&rdquo; WHERE &ldquo;orders&rdquo;.&ldquo;customer_id&rdquo; = $1 [[&ldquo;customer_id&rdquo;, 1]]</p>
+
+<pre><code>                                       QUERY PLAN
+</code></pre>
+
+<hr />
+
+<p> Index Scan using index_orders_on_customer_id on orders  (cost=0.15..19.62 rows=50 width=1417)
+   Index Cond: (customer_id = 1)
+(2 rows)
+```</p></blockquote>
+
+<h3>How to tell a good query plan from a bad one?</h3>
+
+<p>This is not that simple as it sounds, as the sequential scan can be sometimes more efficient than using an index, especially if not kept in memory, but stored entirely on disk, and even worse, an HDD one. Usually, a preferable query plan is the one that looks simpler and utilizes the least possible number of indexes, which means that it&rsquo;s better to use one index instead of two of them, like in the following example:</p>
+
+<p>```</p>
+
+<blockquote><p>Product.where(warehouse_id: 1).where(category_id: 1).explain
+  Product Load (0.5ms)  SELECT &ldquo;products&rdquo;.<em> FROM &ldquo;products&rdquo; WHERE &ldquo;products&rdquo;.&ldquo;warehouse_id&rdquo; = $1 AND &ldquo;products&rdquo;.&ldquo;category_id&rdquo; = $2  [[&ldquo;warehouse_id&rdquo;, 1], [&ldquo;category_id&rdquo;, 1]]
+=> EXPLAIN for: SELECT &ldquo;products&rdquo;.</em> FROM &ldquo;products&rdquo; WHERE &ldquo;products&rdquo;.&ldquo;warehouse_id&rdquo; = $1 AND &ldquo;products&rdquo;.&ldquo;category_id&rdquo; = $2 [[&ldquo;warehouse_id&rdquo;, 1], [&ldquo;category_id&rdquo;, 1]]</p>
+
+<pre><code>                                                   QUERY PLAN
+</code></pre>
+
+<hr />
+
+<p> Bitmap Heap Scan on products  (cost=9.08..13.10 rows=1 width=1417)
+   Recheck Cond: ((warehouse_id = 1) AND (category_id = 1))
+   &ndash;>  BitmapAnd  (cost=9.08..9.08 rows=1 width=0)</p>
+
+<pre><code>     -&gt;  Bitmap Index Scan on index_products_on_warehouse_id_and_name_and_something_else  (cost=0.00..4.31 rows=5 width=0)
+           Index Cond: (warehouse_id = 1)
+     -&gt;  Bitmap Index Scan on index_products_on_category_id  (cost=0.00..4.52 rows=50 width=0)
+           Index Cond: (category_id = 1)
+</code></pre>
+
+<p>(7 rows)
+```</p></blockquote>
+
+<p>It doesn&rsquo;t necessarily mean that this query plan is a bad one &ndash; it could be totally the case that such query is fast enough. However, if read speed is more important for us than the index size and extra overhead on writes which will make them slower, the best way to deal with such query would be adding a compound index on both <code>warehouse_id</code> and <code>category_id</code>.</p>
+
+<p>One statement that is especially worth keeping an eye on (besides <code>Seq Scan</code> which stands for a sequential scan) is <code>Filter</code> statement which indicates that the records required extra filtering and the index was not enough. Here is one example:</p>
+
+<p><code>
+ Index Scan using index_products_on_category_id on products
+   Index Cond: (category = 1)
+   Filter: (created_at = '2018-08-11'::date)
+</code></p>
+
+<p>Ideally, <code>created_at</code> part would appear in <code>Index Cond</code> and be fully covered by the index. Usually, adding a compound index on multiple columns solves the issue which in this example would mean having an index on both <code>category_id</code> and <code>created_at</code>, not only on <code>category_id</code>.</p>
+
+<h3>Sequence of the columns in B-Tree index does matter</h3>
+
+<p>The sequence of the columns in a multi-column index is critical. Imagine that you created a following index: <code>create_index :tag_items, [:taggable_type, :taggable_id]</code> and want to perform a couple of queries. For sure this index is going to be efficient for searching by both <code>taggable_type</code> and <code>taggable_id</code>. It will also work great for search by <code>taggable_type</code>. It won&rsquo;t, however, be efficient when performing a search just by <code>taggable_id</code>. The reason why it is like that is quite simple though &ndash; try to imagine how the data would be stored in a hypothetical B-Tree. First, the nodes will be organized based on the leftmost column and then, by another one. Traversing such tree when you do a search based on <code>taggable_type</code> or both <code>taggable_type</code> and <code>taggable_id</code> will be simple. However, you can&rsquo;t do the same with just <code>taggable_id</code>. Postgres might use this index anyway as it might turn out to be still more efficient than a sequential scan, but this is going to be suboptimal. If it happens that you need to perform queries by <code>taggable_id</code> only, it would be a good idea to add a separate index on that field.</p>
+
+<h3>Unique Indexes</h3>
+
+<p>The biggest need behind unique indexes is ensuring data integrity (since most uniqueness validations, including ActiveRecord one, don&rsquo;t enforce anything and are more useful for having a nice error message and not raising an exception than for data integrity). However, a nice side effect of a unique index is also a better performance comparing to a non-unique one.</p>
+
+<h3>Partial Indexes</h3>
+
+<p>Imagine that you have some Articles in your application and you want to add <code>published_at</code> datetime field indicating whether and when the article was published, and then, filter published articles by a given author. We can most likely expect a need for an index on <code>author_id</code> column in such case. What about our second condition? We could for sure add a compound index on both <code>author_id</code> and <code>published_at</code>. However, there is a better choice. We could add a partial index for <code>author_id</code> which covers only published articles, i.e., covers <code>WHERE published_at IS NOT NULL</code>!</p>
+
+<p>Fortunately, this is supported by Rails (although writing a SQL command wouldn&rsquo;t be that difficult), we just need to use <code>where</code> option for that:</p>
+
+<p><code>rb
+add_column :articles, :author_id, where: "published_at IS NOT NULL"
+</code></p>
+
+<h3>Expression Indexes</h3>
+
+<p>Imagine that you need to search users by their first name which comes from some input provided by a user. However, to avoid issues with figuring out whether the name provided by a user starts with a capital letter or not or how the names were stored in the database in the first place, you perform a query like this:</p>
+
+<p><code>rb
+User.where("lower(first_name) = ?", name.downcase)
+</code></p>
+
+<p>This query will obviously work, however, if you have a lot of users, a query plan will indicate that it is suboptimal and instead of seeing something like <code>Index Scan using index_users_on_first_name on users</code>, you will see <code>Seq Scan on users</code>.</p>
+
+<p>There is no need to worry though. Postgres allows creating expression indexes where you can apply some functions, which in our case is <code>lower</code>. A proper index for this scenario would need to be created that way:</p>
+
+<p><code>rb
+add_index :users, "lower(first_name)", name: "index_users_on_lower_first_name"
+</code></p>
+
+<h3>Optimizing LIKE queries</h3>
+
+<p>Optimizing queries with <code>LIKE</code> clause is simple; you just need to remember about two things:</p>
+
+<ol>
+<li>Forget about B-Tree Index for this case.</li>
+<li>Take advantage of trigram matching provided by <a href="https://www.postgresql.org/docs/10/static/pgtrgm.html">pg_trgm</a> extension.</li>
+</ol>
+
+
+<p>To avoid sequential scans and utilize index that will drastically improve the performance of this kind of queries, enable the extension and create a GIN or GiST index:</p>
+
+<p><code>
+execute "CREATE EXTENSION pg_trgm;"
+execute "CREATE INDEX CONCURRENTLY index_products_on_description_trigram ON clients USING gin(description gin_trgm_ops);"
+</code></p>
+
+<p>Thanks to this index, this is a query plan you might expect when filtering <code>Products</code> by <code>descriptions</code> containing some text, with wildcards on both the beginning and the end:</p>
+
+<p>```
+EXPLAIN for: SELECT &ldquo;products&rdquo;.* FROM &ldquo;products&rdquo; WHERE (products.description ILIKE &lsquo;%some text with wildacards%&rsquo;)</p>
+
+<pre><code>                                            QUERY PLAN
+</code></pre>
+
+<hr />
+
+<p> Bitmap Heap Scan on products
+   Recheck Cond: (description ~~* &lsquo;%some text with wildacards%&rsquo;::text)
+   &ndash;>  Bitmap Index Scan on index_products_on_description_trigram</p>
+
+<pre><code>     Index Cond: (description ~~* '%some text with wildacards%'::text)
+</code></pre>
+
+<p>```</p>
+
+<h3>Ordering</h3>
+
+<p>B-tree indexes are sorted in an ascending order which we can use to our advantage to avoid performing sorting in memory. However, we also need to keep in mind the limitation of the data structure itself. A rule of thumb for efficient ordering would be: order by the same columns you perform filtering by. It is going to be the case by default when you don&rsquo;t explicitly add any <code>ORDER</code> clause since the indexes are ordered. But if it happens that you need to apply different ordering criteria, you can take advantage of <code>order</code> option and explicitly specify the order:</p>
+
+<p><code>
+add_index :products, :created_at, order: { created_at: :desc }
+</code></p>
+
+<h3>Adding indexes concurrently</h3>
+
+<p>The way how the indexes are added doesn&rsquo;t impact the performance once they are created; however, it&rsquo;s good to keep in mind that just simple <code>CREATE INDEX</code> will block concurrent writes (inserts, updates, and deletes) until it&rsquo;s finished. It can lead to some issues, including deadlocks, especially when the index is getting created for a huge table under massive write operations.</p>
+
+<p>To prevent such a problem, it&rsquo;s worth creating indexes <a href="https://www.postgresql.org/docs/10/static/sql-createindex.html#SQL-CREATEINDEX-CONCURRENTLY">concurrently</a> instead. You can do that in Rails using <code>algorithm: :concurrently</code> option and by making sure that the index creation will run outside of a transaction by calling <code>disable_ddl_transaction!</code>.</p>
+
+<p>``` rb
+class AddIndexToAsksActive &lt; ActiveRecord::Migration[5.0]
+  disable_ddl_transaction!</p>
+
+<p>  def change</p>
+
+<pre><code>add_index :users, :active, algorithm: :concurrently
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>There is one caveat here though. If you attempt to create a unique index concurrently, there is a possibility that something will go wrong, e.g., when a non-unique record is created during the index creation. Since the command is run outside the transaction, it won&rsquo;t be rolled back, and you will end up with an invalid index. Nevertheless, that is not a big problem &ndash; should it ever happen, just drop the invalid index and try creating it concurrently one more time.</p>
+
+<h2>Wrapping up</h2>
+
+<p>Optimizing <strong>PostgreSQL queries</strong> might not look a trivial task, but if you keep these rules in mind, you will have much easier time with your database, and you will enjoy fast queries for a long time.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Rails And Conditional Validations In Models]]></title>
@@ -462,134 +675,6 @@ end
 <h2>Wrapping up</h2>
 
 <p>Naming is one of <a href="https://martinfowler.com/bliki/TwoHardThings.html" target="_blank">two hard problems in computer science</a> and it&rsquo;s a good idea to always make all the domain concepts properly named and explicit, even if it means adding more code &ndash; just because something is not explicit, doesn&rsquo;t mean it doesn&rsquo;t exist. When it comes to <strong>ActiveRecord</strong> models, an extra caution is more than recommended &ndash; such models mix both persistence and domain concepts and it&rsquo;s quite easy to hurt yourself in such case. Not overriding boolean methods generated by ActiveRecord and properly naming things sounds like a good rule of thumb to follow.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[The Case Against Exotic Usage of :before_validate Callbacks]]></title>
-    <link href="https://karolgalanciak.com/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks/"/>
-    <updated>2017-10-29T22:00:00+01:00</updated>
-    <id>https://karolgalanciak.com/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks</id>
-    <content type="html"><![CDATA[<p>It&rsquo;s nothing new that <strong>ActiveRecord callbacks</strong> are abused in many projects and used for the wrong reasons for many use cases where they can be <strong>easily avoided</strong> in favor of a much better alternative, like service objects. There is one callback though that is special and quite often used for pretty <strong>exotic reasons</strong> that have nothing to do with the process when it gets executed &ndash; it&rsquo;s the <code>before_validate</code> callback.</p>
-
-<!--more-->
-
-
-<h2>Data Formatting</h2>
-
-<p>Data formatting is something pretty common in the majority of the applications, especially stripping strings. Imagine that you need to strip some <code>URL</code> so that potential spaces won&rsquo;t cause any issues. How would you approach that?</p>
-
-<p>One way would be to use <code>before_validate</code> callback, especially if you have some format validations:</p>
-
-<p>``` ruby app/models/my_model.rb
-class MyModel
-  before_validate :strip_url</p>
-
-<p>  private</p>
-
-<p>  def strip_url</p>
-
-<pre><code>self.url = url.to_s.strip
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>It gets the job done. However, how would you test it? You would need to call <code>valid?</code> method on the model to check that&hellip; <code>URL</code> is stripped? Sounds quite funny and is even better when you look at the potential spec:</p>
-
-<p>``` ruby spec/models/my_model_spec.rb
-require &ldquo;rails_helper&rdquo;</p>
-
-<p>RSpec.describe MyModel, type: :model do
-  it &ldquo;strips URL before validation&rdquo; do</p>
-
-<pre><code>model = MyModel.new(url: "  http://rubyonrails.org")
-
-model.valid?
-
-expect(model.url).to eq "http://rubyonrails.org"
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>It&rsquo;s quite unlikely that this would be the result of <strong>TDD</strong> though ;). What&rsquo;s the alternative then?</p>
-
-<p>How about just using attribute writer for that? So something like this:</p>
-
-<p>``` ruby app/models/my_model.rb
-class MyModel
-  def url=(val)</p>
-
-<pre><code>super(val.to_s.strip)
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>And here is a potential spec for this feature:</p>
-
-<p>``` ruby spec/models/my_model_spec.rb
-require &ldquo;rails_helper&rdquo;</p>
-
-<p>RSpec.describe MyModel, type: :model do
-  it &ldquo;strips URL&rdquo; do</p>
-
-<pre><code>model = MyModel.new(url: "  http://rubyonrails.org")
-
-expect(model.url).to eq "http://rubyonrails.org"
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>Both the implementation and spec are much simpler and just more natural &ndash; data formatting has nothing to do with the validation, there is no need to use a callback related to validation to handle such use case.</p>
-
-<h2>Populating attributes and relationships</h2>
-
-<p>Another popular scenario is assigning attributes and relationships. Imagine you are creating a comment with a <code>content</code>, an author who will be <code>current_user</code> and also want to do some denormalization for performance reasons and directly assign <code>group</code> to this comment to which <code>current_user</code> belongs to. Here is how it is sometimes handled with <code>before_validate</code> callback:</p>
-
-<p><code>ruby
-Comment.create!(
-  content: content,
-  author: current_user,
-)
-</code></p>
-
-<p>``` ruby app/models/my_model.rb
-class MyModel
-  before_validate :assign_group</p>
-
-<p>  private</p>
-
-<p>  def assign_group</p>
-
-<pre><code>self.group = author.group if author
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>It&rsquo;s quite similar to the previous use case with data formatting &ndash; to write a test for this feature, we would need again to call <code>valid?</code> which doesn&rsquo;t make much sense, validation has nothing to do with populating attributes or relationships. There is much simpler and much more explicit way to handle it:</p>
-
-<p><code>ruby
-Comment.create!(
-  content: content,
-  author: current_user,
-  group: current_user.group,
-)
-</code></p>
-
-<p>There is no magic here &ndash; just a simple assignment, which is easy to test and understand.</p>
-
-<h2>Wrapping up</h2>
-
-<p>Maybe there are some scenarios where <code>before_validate</code> callback is the best possible choice (I&rsquo;m yet to find them though), but I&rsquo;m pretty sure data formatting or populating attributes/associations are not valid cases to use it for.</p>
 ]]></content>
   </entry>
   

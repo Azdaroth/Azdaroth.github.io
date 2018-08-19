@@ -58,7 +58,7 @@
         "width": 1024
       },
       "datePublished": "",
-      "dateModified": "2018-07-29",
+      "dateModified": "2018-08-19",
       "author": {
         "@type": "Person",
         "name": "Karol Galanciak"
@@ -135,6 +135,49 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2018/08/19/indexes-on-rails-how-to-make-the-most-of-your-postgres-database/">Indexes on Rails: How to Make the Most of Your Postgres Database</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-08-19T20:00:00+02:00" pubdate data-updated="true">Aug 19<span>th</span>, 2018</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Optimizing <strong>database queries</strong> is arguably one of the fastest ways to improve the <strong>performance</strong> of the Rails applications. There are multiple ways how you can approach it, depending on the kind of a problem. <strong>N+1 queries</strong> seem to be a pretty common issue, which is, fortunately, <strong>easy to address</strong>. However, sometimes you have some relatively <strong>simple-looking queries</strong> that seem to take way longer than they should be, indicating that they might require some optimization. The best way to improve such queries is adding a <strong>proper index</strong>.</p>
+
+<p>But what does &ldquo;proper index&rdquo; mean? How to figure out what kind of index is exactly needed for a given query? Here are some essential facts and tips that should cover a majority of the queries you may encounter and make your database no longer a bottleneck.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2018/08/19/indexes-on-rails-how-to-make-the-most-of-your-postgres-database/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -635,47 +678,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks/">The Case Against Exotic Usage of :before_validate Callbacks</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2017-10-29T22:00:00+01:00" pubdate data-updated="true">Oct 29<span>th</span>, 2017</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>It&rsquo;s nothing new that <strong>ActiveRecord callbacks</strong> are abused in many projects and used for the wrong reasons for many use cases where they can be <strong>easily avoided</strong> in favor of a much better alternative, like service objects. There is one callback though that is special and quite often used for pretty <strong>exotic reasons</strong> that have nothing to do with the process when it gets executed &ndash; it&rsquo;s the <code>before_validate</code> callback.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -706,6 +708,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/08/19/indexes-on-rails-how-to-make-the-most-of-your-postgres-database/">Indexes on Rails: How to Make the Most of Your Postgres Database</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking/">Trolling in Ruby - Implementing JavaScript-like Maths With Implicit Conversion Hijacking</a>
       </li>
     
@@ -719,10 +725,6 @@
     
       <li class="post">
         <a href="/blog/2018/04/28/advanced-ember-data-customization-different-model-types-in-ember-app-and-api-for-the-same-resource/">Advanced Ember Data Customization - Different Model Types in Ember App and API for the Same Resource</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/03/27/exotic-ruby-module-dot-class-exec-and-liquid-drops-in-action/">Exotic Ruby: Module.class_exec, Custom JSON and Liquid Drops in Action</a>
       </li>
     
   </ul>

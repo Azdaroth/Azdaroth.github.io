@@ -4,7 +4,7 @@
   <title><![CDATA[Category: PostgreSQL | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/blog/categories/postgresql/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2018-07-29T20:22:18+02:00</updated>
+  <updated>2018-08-19T20:55:17+02:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -12,6 +12,219 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Indexes on Rails: How to make the most of your Postgres database]]></title>
+    <link href="https://karolgalanciak.com/blog/2018/08/19/indexes-on-rails-how-to-make-the-most-of-your-postgres-database/"/>
+    <updated>2018-08-19T20:00:00+02:00</updated>
+    <id>https://karolgalanciak.com/blog/2018/08/19/indexes-on-rails-how-to-make-the-most-of-your-postgres-database</id>
+    <content type="html"><![CDATA[<p>Optimizing <strong>database queries</strong> is arguably one of the fastest ways to improve the <strong>performance</strong> of the Rails applications. There are multiple ways how you can approach it, depending on the kind of a problem. <strong>N+1 queries</strong> seem to be a pretty common issue, which is, fortunately, <strong>easy to address</strong>. However, sometimes you have some relatively <strong>simple-looking queries</strong> that seem to take way longer than they should be, indicating that they might require some optimization. The best way to improve such queries is adding a <strong>proper index</strong>.</p>
+
+<p>But what does &ldquo;proper index&rdquo; mean? How to figure out what kind of index is exactly needed for a given query? Here are some essential facts and tips that should cover a majority of the queries you may encounter and make your database no longer a bottleneck.</p>
+
+<!--more-->
+
+
+<h2>Why index at all?</h2>
+
+<p>Simple &ndash; to have faster queries. But why are indexes faster? The alternative to index is a sequential scanning of the entire table. That might not sound like a bad idea, but imagine you are performing a search over a huge table. What would be the fastest way to retrieve all records you are looking for &ndash; by scanning the entire table, or maybe having a way to store a subset of the records, based on some specific criteria, and then retrieve them from that place? Obviously, it&rsquo;s the second option. And that&rsquo;s roughly how indexes work.</p>
+
+<p>As trivial as it sounds, there is a valuable lesson to learn from it: to achieve a good performance, the index must be selective enough. And the more specific you will be about those criteria, the better.</p>
+
+<h2>Index Types</h2>
+
+<p>Although Postgres by defaults creates <code>B-Tree</code> index when using <code>CREATE INDEX</code> command, there are a couple of more indexes that will be certainly useful in many use cases. Let&rsquo;s check them all out:</p>
+
+<h3>B-Tree Index</h3>
+
+<p><code>B-Tree</code> is a self-balancing tree data structure which keeps data ordered and easy to search. This index is appropriate for equality and range queries (using operators like <code>&gt;=</code>,  <code>&lt;</code> etc.) and will work great with text, timestamp and number fields.</p>
+
+<p>B-Tree indexes are a reasonable default for most of the queries, but not for all of them. The limitation comes from the underlying structure. Discussing the details of the B-Tree data structure itself is beyond the scope of this article; nevertheless, it&rsquo;s worth keeping in mind that it&rsquo;s a similar data structure to a binary search tree, which has meaningful consequences on what can be indexed with it and how. We will get back to a couple of examples later.</p>
+
+<h3>Hash Index</h3>
+
+<p>Before Postgres 10, the usage of hash indexes was discouraged since they used to be not WAL-logged. Fortunately, it&rsquo;s changed in Postgres 10, and we can use them safely without worrying about rebuilding the index if something goes wrong with our database that would cause a crash. The use cases where hash indexes are useful are very limited, as they work only for equality, but they are a bit more efficient for this kind of queries comparing to b-tree indexes. If you store tokens for example and perform lookups by the token value, hash indexes would be a good way to optimize such queries.</p>
+
+<h3>BRIN Index (Block Range Index)</h3>
+
+<p>BRIN indexes were introduced in Postgres 9.5 which make them a pretty new addition. They tend to work very well for the large sets of ordered data, e.g., statistical data collected with timestamps which are later filtered by the time range. They will perform better than b-tree indexes in such case, although the difference won&rsquo;t be drastic. However, the different of the size of the index will be huge &ndash; BRIN index can be smaller by literally few orders of magnitude comparing to b-tree index.</p>
+
+<h3>GIN Index (Generalized Inverted Index)</h3>
+
+<p>GIN Indexes are the perfect choice for &ldquo;composite values&rdquo; where you perform a query which looks for an element within such &ldquo;composite&rdquo;. That is the index you will most likely want to use for <code>jsonb</code>, <code>array</code> or <code>hstore</code> data structures. They are also an excellent choice for full-text search.</p>
+
+<h3>GiST Index (Generalized Inverted Seach Tree Index)</h3>
+
+<p>GiST Indexes will be a good choice when the records overlap values under the same column. They are commonly used for geometry types and full-text search as well. The difference between GIN and GiST Index when it comes to full-text search is that GiST Index will be less taxing on writes comparing to GIN (as it is faster to build). But since it&rsquo;s a lossy index, there might be some extra overhead involved for reads, which makes GIN index a better choice when you mostly care about reads optimization.</p>
+
+<h2>Optimizing Queries</h2>
+
+<p>Here are some tips that should help you with the majority of the queries:</p>
+
+<h3>Start with EXPLAIN</h3>
+
+<p>With enough experience and knowledge of your app, you will develop an intuition about indexes and where they might be useful, long before having performance problems with queries. Until that happens, it&rsquo;s essential to understand how Postgres is going to execute these queries. The best tool for that purpose is using <code>EXPLAIN</code> command, which will show the execution plan generated by the query planner. <code>ActiveRecord</code> provides a convenient method &ndash; <code>explain</code> &ndash; that you can use on collections to get the query plan:</p>
+
+<p>```</p>
+
+<blockquote><p>Order.where(customer_id: 1).explain
+  Order Load (13.8ms)  SELECT &ldquo;orders&rdquo;.<em> FROM &ldquo;orders&rdquo; WHERE &ldquo;orders&rdquo;.&ldquo;customer_id&rdquo; = $1  [[&ldquo;customer_id&rdquo;, 1]]
+=> EXPLAIN for: SELECT &ldquo;orders&rdquo;.</em> FROM &ldquo;orders&rdquo; WHERE &ldquo;orders&rdquo;.&ldquo;customer_id&rdquo; = $1 [[&ldquo;customer_id&rdquo;, 1]]</p>
+
+<pre><code>                                       QUERY PLAN
+</code></pre>
+
+<hr />
+
+<p> Index Scan using index_orders_on_customer_id on orders  (cost=0.15..19.62 rows=50 width=1417)
+   Index Cond: (customer_id = 1)
+(2 rows)
+```</p></blockquote>
+
+<h3>How to tell a good query plan from a bad one?</h3>
+
+<p>This is not that simple as it sounds, as the sequential scan can be sometimes more efficient than using an index, especially if not kept in memory, but stored entirely on disk, and even worse, an HDD one. Usually, a preferable query plan is the one that looks simpler and utilizes the least possible number of indexes, which means that it&rsquo;s better to use one index instead of two of them, like in the following example:</p>
+
+<p>```</p>
+
+<blockquote><p>Product.where(warehouse_id: 1).where(category_id: 1).explain
+  Product Load (0.5ms)  SELECT &ldquo;products&rdquo;.<em> FROM &ldquo;products&rdquo; WHERE &ldquo;products&rdquo;.&ldquo;warehouse_id&rdquo; = $1 AND &ldquo;products&rdquo;.&ldquo;category_id&rdquo; = $2  [[&ldquo;warehouse_id&rdquo;, 1], [&ldquo;category_id&rdquo;, 1]]
+=> EXPLAIN for: SELECT &ldquo;products&rdquo;.</em> FROM &ldquo;products&rdquo; WHERE &ldquo;products&rdquo;.&ldquo;warehouse_id&rdquo; = $1 AND &ldquo;products&rdquo;.&ldquo;category_id&rdquo; = $2 [[&ldquo;warehouse_id&rdquo;, 1], [&ldquo;category_id&rdquo;, 1]]</p>
+
+<pre><code>                                                   QUERY PLAN
+</code></pre>
+
+<hr />
+
+<p> Bitmap Heap Scan on products  (cost=9.08..13.10 rows=1 width=1417)
+   Recheck Cond: ((warehouse_id = 1) AND (category_id = 1))
+   &ndash;>  BitmapAnd  (cost=9.08..9.08 rows=1 width=0)</p>
+
+<pre><code>     -&gt;  Bitmap Index Scan on index_products_on_warehouse_id_and_name_and_something_else  (cost=0.00..4.31 rows=5 width=0)
+           Index Cond: (warehouse_id = 1)
+     -&gt;  Bitmap Index Scan on index_products_on_category_id  (cost=0.00..4.52 rows=50 width=0)
+           Index Cond: (category_id = 1)
+</code></pre>
+
+<p>(7 rows)
+```</p></blockquote>
+
+<p>It doesn&rsquo;t necessarily mean that this query plan is a bad one &ndash; it could be totally the case that such query is fast enough. However, if read speed is more important for us than the index size and extra overhead on writes which will make them slower, the best way to deal with such query would be adding a compound index on both <code>warehouse_id</code> and <code>category_id</code>.</p>
+
+<p>One statement that is especially worth keeping an eye on (besides <code>Seq Scan</code> which stands for a sequential scan) is <code>Filter</code> statement which indicates that the records required extra filtering and the index was not enough. Here is one example:</p>
+
+<p><code>
+ Index Scan using index_products_on_category_id on products
+   Index Cond: (category = 1)
+   Filter: (created_at = '2018-08-11'::date)
+</code></p>
+
+<p>Ideally, <code>created_at</code> part would appear in <code>Index Cond</code> and be fully covered by the index. Usually, adding a compound index on multiple columns solves the issue which in this example would mean having an index on both <code>category_id</code> and <code>created_at</code>, not only on <code>category_id</code>.</p>
+
+<h3>Sequence of the columns in B-Tree index does matter</h3>
+
+<p>The sequence of the columns in a multi-column index is critical. Imagine that you created a following index: <code>create_index :tag_items, [:taggable_type, :taggable_id]</code> and want to perform a couple of queries. For sure this index is going to be efficient for searching by both <code>taggable_type</code> and <code>taggable_id</code>. It will also work great for search by <code>taggable_type</code>. It won&rsquo;t, however, be efficient when performing a search just by <code>taggable_id</code>. The reason why it is like that is quite simple though &ndash; try to imagine how the data would be stored in a hypothetical B-Tree. First, the nodes will be organized based on the leftmost column and then, by another one. Traversing such tree when you do a search based on <code>taggable_type</code> or both <code>taggable_type</code> and <code>taggable_id</code> will be simple. However, you can&rsquo;t do the same with just <code>taggable_id</code>. Postgres might use this index anyway as it might turn out to be still more efficient than a sequential scan, but this is going to be suboptimal. If it happens that you need to perform queries by <code>taggable_id</code> only, it would be a good idea to add a separate index on that field.</p>
+
+<h3>Unique Indexes</h3>
+
+<p>The biggest need behind unique indexes is ensuring data integrity (since most uniqueness validations, including ActiveRecord one, don&rsquo;t enforce anything and are more useful for having a nice error message and not raising an exception than for data integrity). However, a nice side effect of a unique index is also a better performance comparing to a non-unique one.</p>
+
+<h3>Partial Indexes</h3>
+
+<p>Imagine that you have some Articles in your application and you want to add <code>published_at</code> datetime field indicating whether and when the article was published, and then, filter published articles by a given author. We can most likely expect a need for an index on <code>author_id</code> column in such case. What about our second condition? We could for sure add a compound index on both <code>author_id</code> and <code>published_at</code>. However, there is a better choice. We could add a partial index for <code>author_id</code> which covers only published articles, i.e., covers <code>WHERE published_at IS NOT NULL</code>!</p>
+
+<p>Fortunately, this is supported by Rails (although writing a SQL command wouldn&rsquo;t be that difficult), we just need to use <code>where</code> option for that:</p>
+
+<p><code>rb
+add_column :articles, :author_id, where: "published_at IS NOT NULL"
+</code></p>
+
+<h3>Expression Indexes</h3>
+
+<p>Imagine that you need to search users by their first name which comes from some input provided by a user. However, to avoid issues with figuring out whether the name provided by a user starts with a capital letter or not or how the names were stored in the database in the first place, you perform a query like this:</p>
+
+<p><code>rb
+User.where("lower(first_name) = ?", name.downcase)
+</code></p>
+
+<p>This query will obviously work, however, if you have a lot of users, a query plan will indicate that it is suboptimal and instead of seeing something like <code>Index Scan using index_users_on_first_name on users</code>, you will see <code>Seq Scan on users</code>.</p>
+
+<p>There is no need to worry though. Postgres allows creating expression indexes where you can apply some functions, which in our case is <code>lower</code>. A proper index for this scenario would need to be created that way:</p>
+
+<p><code>rb
+add_index :users, "lower(first_name)", name: "index_users_on_lower_first_name"
+</code></p>
+
+<h3>Optimizing LIKE queries</h3>
+
+<p>Optimizing queries with <code>LIKE</code> clause is simple; you just need to remember about two things:</p>
+
+<ol>
+<li>Forget about B-Tree Index for this case.</li>
+<li>Take advantage of trigram matching provided by <a href="https://www.postgresql.org/docs/10/static/pgtrgm.html">pg_trgm</a> extension.</li>
+</ol>
+
+
+<p>To avoid sequential scans and utilize index that will drastically improve the performance of this kind of queries, enable the extension and create a GIN or GiST index:</p>
+
+<p><code>
+execute "CREATE EXTENSION pg_trgm;"
+execute "CREATE INDEX CONCURRENTLY index_products_on_description_trigram ON clients USING gin(description gin_trgm_ops);"
+</code></p>
+
+<p>Thanks to this index, this is a query plan you might expect when filtering <code>Products</code> by <code>descriptions</code> containing some text, with wildcards on both the beginning and the end:</p>
+
+<p>```
+EXPLAIN for: SELECT &ldquo;products&rdquo;.* FROM &ldquo;products&rdquo; WHERE (products.description ILIKE &lsquo;%some text with wildacards%&rsquo;)</p>
+
+<pre><code>                                            QUERY PLAN
+</code></pre>
+
+<hr />
+
+<p> Bitmap Heap Scan on products
+   Recheck Cond: (description ~~* &lsquo;%some text with wildacards%&rsquo;::text)
+   &ndash;>  Bitmap Index Scan on index_products_on_description_trigram</p>
+
+<pre><code>     Index Cond: (description ~~* '%some text with wildacards%'::text)
+</code></pre>
+
+<p>```</p>
+
+<h3>Ordering</h3>
+
+<p>B-tree indexes are sorted in an ascending order which we can use to our advantage to avoid performing sorting in memory. However, we also need to keep in mind the limitation of the data structure itself. A rule of thumb for efficient ordering would be: order by the same columns you perform filtering by. It is going to be the case by default when you don&rsquo;t explicitly add any <code>ORDER</code> clause since the indexes are ordered. But if it happens that you need to apply different ordering criteria, you can take advantage of <code>order</code> option and explicitly specify the order:</p>
+
+<p><code>
+add_index :products, :created_at, order: { created_at: :desc }
+</code></p>
+
+<h3>Adding indexes concurrently</h3>
+
+<p>The way how the indexes are added doesn&rsquo;t impact the performance once they are created; however, it&rsquo;s good to keep in mind that just simple <code>CREATE INDEX</code> will block concurrent writes (inserts, updates, and deletes) until it&rsquo;s finished. It can lead to some issues, including deadlocks, especially when the index is getting created for a huge table under massive write operations.</p>
+
+<p>To prevent such a problem, it&rsquo;s worth creating indexes <a href="https://www.postgresql.org/docs/10/static/sql-createindex.html#SQL-CREATEINDEX-CONCURRENTLY">concurrently</a> instead. You can do that in Rails using <code>algorithm: :concurrently</code> option and by making sure that the index creation will run outside of a transaction by calling <code>disable_ddl_transaction!</code>.</p>
+
+<p>``` rb
+class AddIndexToAsksActive &lt; ActiveRecord::Migration[5.0]
+  disable_ddl_transaction!</p>
+
+<p>  def change</p>
+
+<pre><code>add_index :users, :active, algorithm: :concurrently
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>There is one caveat here though. If you attempt to create a unique index concurrently, there is a possibility that something will go wrong, e.g., when a non-unique record is created during the index creation. Since the command is run outside the transaction, it won&rsquo;t be rolled back, and you will end up with an invalid index. Nevertheless, that is not a big problem &ndash; should it ever happen, just drop the invalid index and try creating it concurrently one more time.</p>
+
+<h2>Wrapping up</h2>
+
+<p>Optimizing <strong>PostgreSQL queries</strong> might not look a trivial task, but if you keep these rules in mind, you will have much easier time with your database, and you will enjoy fast queries for a long time.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[PostgreSQL Quick Tips: Working With Dates Using EXTRACT function]]></title>
@@ -1425,244 +1638,6 @@ Order.all.count
 
 
 <p>Table partitioning might a great solution to solve database performance issues. Even though it's not supported out-of-the-box by Rails, you can easily integrate it with your app thanks to <a href="https://github.com/fiksu/partitioned" target="_blank">partitioned</a> gem.</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Scaling Up Rails Applications With PostgreSQL Table Partitioning - Part 1]]></title>
-    <link href="https://karolgalanciak.com/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/"/>
-    <updated>2016-06-05T22:00:00+02:00</updated>
-    <id>https://karolgalanciak.com/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1</id>
-    <content type="html"><![CDATA[<p>You've probably heard many times that the database is the bottleneck of many web applications. This isn't necessarily true. Often it happens that some heavy queries can be substiantially optimized, making them really efficient and fast. As the time passes by, however, the data can remarkably grow in size, especially in several years time which can indeed make the database a bottleneck - the tables are huge and don't fit into memory any longer, the indexes are even bigger making queries much slower and you can't really optimize further any query. In many cases deleting old records that are no longer used is not an option - they still can have some value, e.g. for data analysis or statystical purposes. Fortunately, it's not a dead end. You can make your database performance great again with a new secret weapon: table partitioning.</p>
-
-
-
-
-<!--more-->
-
-
-
-
-<h2>Table partitioning and inheritance 101</h2>
-
-
-
-
-<p>To put it in simple words, table partitioning is about splitting one big table into several smaller units. In <strong>PostgreSQL</strong> it can be done by creating <strong>master table</strong> serving as a template for other <strong>children tables</strong> that will inherit from it. <strong>Master table</strong> contains no data and you shouldn't add any indexes and unique constraints to it. However, if you need some <code>CHECK CONSTRAINTS</code> in all <strong>children tables</strong>, it is a good idea to add them to <strong>master table</strong> as they will be inherited. Due to inheritance mechanism, there is no point in adding any columns to <strong>children tables</strong> either. Creating tables inheriting from other tables is pretty straight-forward - you just need to use <code>INHERITS</code> clause:</p>
-
-
-<p>``` sql
-CREATE TABLE orders(
-  id serial NOT NULL,
-  client_id integer NOT NULL,
-  created_at timestamp without time zone NOT NULL,
-  updated_at timestamp without time zone NOT NULL
-);</p>
-
-<p>CREATE TABLE other_orders() INHERITS (orders);
-```</p>
-
-<p>and that's it - all columns and extra constraints will be defined on <code>other_orders</code> thanks to inheritance from <code>orders</code> table.</p>
-
-
-
-
-<h2>Defining constraints for partitioning criteria</h2>
-
-
-
-
-<p>As we are going to split one big table into the smaller ones, we need to have some criterium that would be used to decide which table should we put the data in. We can do it either by range (e.g. <code>created_at</code> between 01.01.2016 and 31.12.2016) or by value (<code>client_id</code> equal to 100). To ensure we have only the valid data which always satisfy out partitioning criterium, we should add proper <code>CHECK CONSTRAINTS</code> as guard statements. To make sure the orders in particular table were e.g. created at 2016, we could add the following constraint:</p>
-
-
-<p><code>sql
-CHECK (created_at &gt;= DATE '2016-01-01' AND created_at &lt;= DATE '2016-12-31')
-</code></p>
-
-<p>If we were to create tables for orders for the upcoming few years (assuming that we want to cover entire year in each of them), we could do the following:</p>
-
-<p>```sql
-CREATE TABLE orders_2016 (</p>
-
-<pre><code>CHECK (created_at &gt;= DATE '2016-01-01' AND created_at &lt;= DATE '2016-12-31')
-</code></pre>
-
-<p>) INHERITS (orders);
-CREATE TABLE orders_2017 (</p>
-
-<pre><code>CHECK (created_at &gt;= DATE '2017-01-01' AND created_at &lt;= DATE '2017-12-31')
-</code></pre>
-
-<p>) INHERITS (orders);
-CREATE TABLE orders_2018 (</p>
-
-<pre><code>CHECK (created_at &gt;= DATE '2018-01-01' AND created_at &lt;= DATE '2018-12-31')
-</code></pre>
-
-<p>) INHERITS (orders);
-```</p>
-
-<p>Beware of potential gotcha when defining <code>CHECK CONSTRAINTS</code>. Take a look at the following example:</p>
-
-
-<p><code>sql
-CHECK (client_id &gt;= 1 AND client_id &lt;= 1000);
-CHECK (client_id &gt;= 1000 AND client_id &lt;= 2000);
-</code></p>
-
-<p>In this case orders with <code>client_id</code> equal to 1000 could be inserted to any of these tables. Make sure the constraints are not inclusive on the same value when using ranges to avoid such problems.</p>
-
-
-
-
-<h2>Performance optimization</h2>
-
-
-
-
-<p>To provide decent performance it is also important to make <code>constraint_exclusion </code> in <code>postgresql.conf</code> enabled. You can set it either to <code>on</code> or <code>partition</code>:</p>
-
-
-<p><code>
-constraint_exclusion = on # on, off, or partition
-</code></p>
-
-<p>or</p>
-
-<p><code>
-constraint_exclusion = partition  # on, off, or partition
-</code></p>
-
-<p>That way we can avoid scanning all children tables when the <code>CHECK CONSTRAINTS</code> exclude them based on query conditions. Compare the query plans between queries with <code>constraint_exclusion</code> disabled and enabled:</p>
-
-
-<p>``` sql</p>
-
-<h1>SET constraint_exclusion = off;</h1>
-
-<p>SET</p>
-
-<h1>EXPLAIN (ANALYZE ON, BUFFERS ON) SELECT * FROM orders WHERE created_at >= DATE &lsquo;2018-01-01&rsquo; AND created_at &lt;= DATE &lsquo;2018-12-31&rsquo;;</h1>
-
-<pre><code>                                             QUERY PLAN
-</code></pre>
-
-<hr />
-
-<p> Append  (cost=0.00..97.95 rows=25 width=24) (actual time=0.001..0.001 rows=0 loops=1)
-   &ndash;>  Seq Scan on orders  (cost=0.00..0.00 rows=1 width=24) (actual time=0.001..0.001 rows=0 loops=1)</p>
-
-<pre><code>     Filter: ((created_at &gt;= '2018-01-01'::date) AND (created_at &lt;= '2018-12-31'::date))
-</code></pre>
-
-<p>   &ndash;>  Seq Scan on orders_2016  (cost=0.00..32.65 rows=8 width=24) (actual time=0.000..0.000 rows=0 loops=1)</p>
-
-<pre><code>     Filter: ((created_at &gt;= '2018-01-01'::date) AND (created_at &lt;= '2018-12-31'::date))
-</code></pre>
-
-<p>   &ndash;>  Seq Scan on orders_2017  (cost=0.00..32.65 rows=8 width=24) (actual time=0.000..0.000 rows=0 loops=1)</p>
-
-<pre><code>     Filter: ((created_at &gt;= '2018-01-01'::date) AND (created_at &lt;= '2018-12-31'::date))
-</code></pre>
-
-<p>   &ndash;>  Seq Scan on orders_2018  (cost=0.00..32.65 rows=8 width=24) (actual time=0.000..0.000 rows=0 loops=1)</p>
-
-<pre><code>     Filter: ((created_at &gt;= '2018-01-01'::date) AND (created_at &lt;= '2018-12-31'::date))
-</code></pre>
-
-<p>```</p>
-
-<p>``` sql</p>
-
-<h1>SET constraint_exclusion = partition;</h1>
-
-<p>SET</p>
-
-<h1>EXPLAIN SELECT * FROM orders WHERE created_at >= DATE &lsquo;2018-01-01&rsquo; AND created_at &lt;= DATE &lsquo;2018-12-31&rsquo;;</h1>
-
-<pre><code>                                     QUERY PLAN
-</code></pre>
-
-<hr />
-
-<p> Append  (cost=0.00..32.65 rows=9 width=24)
-   &ndash;>  Seq Scan on orders  (cost=0.00..0.00 rows=1 width=24)</p>
-
-<pre><code>     Filter: ((created_at &gt;= '2018-01-01'::date) AND (created_at &lt;= '2018-12-31'::date))
-</code></pre>
-
-<p>   &ndash;>  Seq Scan on orders_2018  (cost=0.00..32.65 rows=8 width=24)</p>
-
-<pre><code>     Filter: ((created_at &gt;= '2018-01-01'::date) AND (created_at &lt;= '2018-12-31'::date))
-</code></pre>
-
-<p>(5 rows)
-```</p>
-
-<p>We wanted to select only the orders created on 2018, so there is no need to scan other children tables that don't contain such data.</p>
-
-
-
-
-<p>The difference between <code>on</code> and <code>partition</code> setting is that the former checks constraints for all tables and the latter only for children tables inheriting from parent table (and also when using <code>UNION ALL</code> subqueries).</p>
-
-
-
-
-<h2>Create new records easily with triggers</h2>
-
-
-
-
-<p>Having multiple tables is certainly difficult to manage when creating new records. Always remembering that they should be inserted to a specific table can be cumbersome. Fortunately, there's an excellent solution for this problem: PostgreSQL triggers! If you are not familiar with them, you can read my previous <a href="https://karolgalanciak.com/blog/2016/05/06/when-validation-is-not-enough-postgresql-triggers-for-data-integrity/" target="_blank">blog post</a> about database triggers.</p>
-
-
-
-
-<p>We can automate the insertion process by checking the value of <code>created_at</code> and decide which table it should be put in. Here's an example how we could approach it:</p>
-
-
-<p>``` sql
-CREATE OR REPLACE FUNCTION orders_create_function()
-RETURNS TRIGGER AS $$
-BEGIN</p>
-
-<pre><code>IF (NEW.created_at &gt;= DATE '2016-01-01' AND
-     NEW.created_at &lt;= DATE '2016-12-31') THEN
-    INSERT INTO orders_2016 VALUES (NEW.*);
-ELSIF ( NEW.created_at &gt;= DATE '2017-01-01' AND
-        NEW.created_at &lt;= DATE '2017-21-31' ) THEN
-    INSERT INTO orders_2017 VALUES (NEW.*);
-ELSIF (NEW.created_at &gt;= created_at '2018-01-01' AND
-        NEW.created_at &lt;= created_at '2018-12-31') THEN
-    INSERT INTO orders_2018 VALUES (NEW.*);
-ELSE
-    RAISE EXCEPTION 'Date out of range, probably child table is missing';
-END IF;
-RETURN NULL;
-</code></pre>
-
-<p>END;
-$$
-LANGUAGE plpgsql;</p>
-
-<p>CREATE TRIGGER orders_create_trigger
-BEFORE INSERT ON orders
-FOR EACH ROW EXECUTE PROCEDURE orders_create_function();
-```</p>
-
-<p>There's a potential gotcha though: as we as we are dealing with multiple tables, the <code>id</code> of the orders might not necessarily be unique across all of them. When creating new records we can ensure that the next id will be based on "global" sequence for partitioned tables, but it still gives a possibility to have duplicated ids in some tables, e.g. by accidental update of the id. Probably the best way to make sure there are no duplicates in all partitioned tables would be using <strong>uuid</strong> which most likely will be unique.</p>
-
-
-
-
-<h2>Wrapping up</h2>
-
-
-
-
-<p>Table partitioning might be a great solution to improve performance of your application when the amount of data in tables is huge (especially when they don't fit into memory any longer). In the first part, we learned some basics from raw SQL perspective about table partitioning. In the next one we will be applying this concept to real-world Rails application.</p>
 
 ]]></content>
   </entry>

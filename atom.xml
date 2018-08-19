@@ -4,7 +4,7 @@
   <title><![CDATA[Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2018-07-29T20:22:18+02:00</updated>
+  <updated>2018-08-19T20:55:17+02:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -12,6 +12,237 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Indexes on Rails: How to make the most of your Postgres database]]></title>
+    <link href="https://karolgalanciak.com/blog/2018/08/19/indexes-on-rails-how-to-make-the-most-of-your-postgres-database/"/>
+    <updated>2018-08-19T20:00:00+02:00</updated>
+    <id>https://karolgalanciak.com/blog/2018/08/19/indexes-on-rails-how-to-make-the-most-of-your-postgres-database</id>
+    <content type="html"><![CDATA[<p>Optimizing <strong>database queries</strong> is arguably one of the fastest ways to improve the <strong>performance</strong> of the Rails applications. There are multiple ways how you can approach it, depending on the kind of a problem. <strong>N+1 queries</strong> seem to be a pretty common issue, which is, fortunately, <strong>easy to address</strong>. However, sometimes you have some relatively <strong>simple-looking queries</strong> that seem to take way longer than they should be, indicating that they might require some optimization. The best way to improve such queries is adding a <strong>proper index</strong>.</p>
+
+<p>But what does &ldquo;proper index&rdquo; mean? How to figure out what kind of index is exactly needed for a given query? Here are some essential facts and tips that should cover a majority of the queries you may encounter and make your database no longer a bottleneck.</p>
+
+<!--more-->
+
+
+<h2>Why index at all?</h2>
+
+<p>Simple &ndash; to have faster queries. But why are indexes faster? The alternative to index is a sequential scanning of the entire table. That might not sound like a bad idea, but imagine you are performing a search over a huge table. What would be the fastest way to retrieve all records you are looking for &ndash; by scanning the entire table, or maybe having a way to store a subset of the records, based on some specific criteria, and then retrieve them from that place? Obviously, it&rsquo;s the second option. And that&rsquo;s roughly how indexes work.</p>
+
+<p>As trivial as it sounds, there is a valuable lesson to learn from it: to achieve a good performance, the index must be selective enough. And the more specific you will be about those criteria, the better.</p>
+
+<h2>Index Types</h2>
+
+<p>Although Postgres by defaults creates <code>B-Tree</code> index when using <code>CREATE INDEX</code> command, there are a couple of more indexes that will be certainly useful in many use cases. Let&rsquo;s check them all out:</p>
+
+<h3>B-Tree Index</h3>
+
+<p><code>B-Tree</code> is a self-balancing tree data structure which keeps data ordered and easy to search. This index is appropriate for equality and range queries (using operators like <code>&gt;=</code>,  <code>&lt;</code> etc.) and will work great with text, timestamp and number fields.</p>
+
+<p>B-Tree indexes are a reasonable default for most of the queries, but not for all of them. The limitation comes from the underlying structure. Discussing the details of the B-Tree data structure itself is beyond the scope of this article; nevertheless, it&rsquo;s worth keeping in mind that it&rsquo;s a similar data structure to a binary search tree, which has meaningful consequences on what can be indexed with it and how. We will get back to a couple of examples later.</p>
+
+<h3>Hash Index</h3>
+
+<p>Before Postgres 10, the usage of hash indexes was discouraged since they used to be not WAL-logged. Fortunately, it&rsquo;s changed in Postgres 10, and we can use them safely without worrying about rebuilding the index if something goes wrong with our database that would cause a crash. The use cases where hash indexes are useful are very limited, as they work only for equality, but they are a bit more efficient for this kind of queries comparing to b-tree indexes. If you store tokens for example and perform lookups by the token value, hash indexes would be a good way to optimize such queries.</p>
+
+<h3>BRIN Index (Block Range Index)</h3>
+
+<p>BRIN indexes were introduced in Postgres 9.5 which make them a pretty new addition. They tend to work very well for the large sets of ordered data, e.g., statistical data collected with timestamps which are later filtered by the time range. They will perform better than b-tree indexes in such case, although the difference won&rsquo;t be drastic. However, the different of the size of the index will be huge &ndash; BRIN index can be smaller by literally few orders of magnitude comparing to b-tree index.</p>
+
+<h3>GIN Index (Generalized Inverted Index)</h3>
+
+<p>GIN Indexes are the perfect choice for &ldquo;composite values&rdquo; where you perform a query which looks for an element within such &ldquo;composite&rdquo;. That is the index you will most likely want to use for <code>jsonb</code>, <code>array</code> or <code>hstore</code> data structures. They are also an excellent choice for full-text search.</p>
+
+<h3>GiST Index (Generalized Inverted Seach Tree Index)</h3>
+
+<p>GiST Indexes will be a good choice when the records overlap values under the same column. They are commonly used for geometry types and full-text search as well. The difference between GIN and GiST Index when it comes to full-text search is that GiST Index will be less taxing on writes comparing to GIN (as it is faster to build). But since it&rsquo;s a lossy index, there might be some extra overhead involved for reads, which makes GIN index a better choice when you mostly care about reads optimization.</p>
+
+<h2>Optimizing Queries</h2>
+
+<p>Here are some tips that should help you with the majority of the queries:</p>
+
+<h3>Start with EXPLAIN</h3>
+
+<p>With enough experience and knowledge of your app, you will develop an intuition about indexes and where they might be useful, long before having performance problems with queries. Until that happens, it&rsquo;s essential to understand how Postgres is going to execute these queries. The best tool for that purpose is using <code>EXPLAIN</code> command, which will show the execution plan generated by the query planner. <code>ActiveRecord</code> provides a convenient method &ndash; <code>explain</code> &ndash; that you can use on collections to get the query plan:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&gt; Order.where(customer_id: 1).explain
+</span><span class='line'>  Order Load (13.8ms)  SELECT "orders".* FROM "orders" WHERE "orders"."customer_id" = $1  [["customer_id", 1]]
+</span><span class='line'>=&gt; EXPLAIN for: SELECT "orders".* FROM "orders" WHERE "orders"."customer_id" = $1 [["customer_id", 1]]
+</span><span class='line'>                                           QUERY PLAN
+</span><span class='line'>-------------------------------------------------------------------------------------------------
+</span><span class='line'> Index Scan using index_orders_on_customer_id on orders  (cost=0.15..19.62 rows=50 width=1417)
+</span><span class='line'>   Index Cond: (customer_id = 1)
+</span><span class='line'>(2 rows)</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>How to tell a good query plan from a bad one?</h3>
+
+<p>This is not that simple as it sounds, as the sequential scan can be sometimes more efficient than using an index, especially if not kept in memory, but stored entirely on disk, and even worse, an HDD one. Usually, a preferable query plan is the one that looks simpler and utilizes the least possible number of indexes, which means that it&rsquo;s better to use one index instead of two of them, like in the following example:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&gt; Product.where(warehouse_id: 1).where(category_id: 1).explain
+</span><span class='line'>  Product Load (0.5ms)  SELECT "products".* FROM "products" WHERE "products"."warehouse_id" = $1 AND "products"."category_id" = $2  [["warehouse_id", 1], ["category_id", 1]]
+</span><span class='line'>=&gt; EXPLAIN for: SELECT "products".* FROM "products" WHERE "products"."warehouse_id" = $1 AND "products"."category_id" = $2 [["warehouse_id", 1], ["category_id", 1]]
+</span><span class='line'>                                                       QUERY PLAN
+</span><span class='line'>------------------------------------------------------------------------------------------------------------------------
+</span><span class='line'> Bitmap Heap Scan on products  (cost=9.08..13.10 rows=1 width=1417)
+</span><span class='line'>   Recheck Cond: ((warehouse_id = 1) AND (category_id = 1))
+</span><span class='line'>   -&gt;  BitmapAnd  (cost=9.08..9.08 rows=1 width=0)
+</span><span class='line'>         -&gt;  Bitmap Index Scan on index_products_on_warehouse_id_and_name_and_something_else  (cost=0.00..4.31 rows=5 width=0)
+</span><span class='line'>               Index Cond: (warehouse_id = 1)
+</span><span class='line'>         -&gt;  Bitmap Index Scan on index_products_on_category_id  (cost=0.00..4.52 rows=50 width=0)
+</span><span class='line'>               Index Cond: (category_id = 1)
+</span><span class='line'>(7 rows)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It doesn&rsquo;t necessarily mean that this query plan is a bad one &ndash; it could be totally the case that such query is fast enough. However, if read speed is more important for us than the index size and extra overhead on writes which will make them slower, the best way to deal with such query would be adding a compound index on both <code>warehouse_id</code> and <code>category_id</code>.</p>
+
+<p>One statement that is especially worth keeping an eye on (besides <code>Seq Scan</code> which stands for a sequential scan) is <code>Filter</code> statement which indicates that the records required extra filtering and the index was not enough. Here is one example:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'> Index Scan using index_products_on_category_id on products
+</span><span class='line'>   Index Cond: (category = 1)
+</span><span class='line'>   Filter: (created_at = '2018-08-11'::date)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ideally, <code>created_at</code> part would appear in <code>Index Cond</code> and be fully covered by the index. Usually, adding a compound index on multiple columns solves the issue which in this example would mean having an index on both <code>category_id</code> and <code>created_at</code>, not only on <code>category_id</code>.</p>
+
+<h3>Sequence of the columns in B-Tree index does matter</h3>
+
+<p>The sequence of the columns in a multi-column index is critical. Imagine that you created a following index: <code>create_index :tag_items, [:taggable_type, :taggable_id]</code> and want to perform a couple of queries. For sure this index is going to be efficient for searching by both <code>taggable_type</code> and <code>taggable_id</code>. It will also work great for search by <code>taggable_type</code>. It won&rsquo;t, however, be efficient when performing a search just by <code>taggable_id</code>. The reason why it is like that is quite simple though &ndash; try to imagine how the data would be stored in a hypothetical B-Tree. First, the nodes will be organized based on the leftmost column and then, by another one. Traversing such tree when you do a search based on <code>taggable_type</code> or both <code>taggable_type</code> and <code>taggable_id</code> will be simple. However, you can&rsquo;t do the same with just <code>taggable_id</code>. Postgres might use this index anyway as it might turn out to be still more efficient than a sequential scan, but this is going to be suboptimal. If it happens that you need to perform queries by <code>taggable_id</code> only, it would be a good idea to add a separate index on that field.</p>
+
+<h3>Unique Indexes</h3>
+
+<p>The biggest need behind unique indexes is ensuring data integrity (since most uniqueness validations, including ActiveRecord one, don&rsquo;t enforce anything and are more useful for having a nice error message and not raising an exception than for data integrity). However, a nice side effect of a unique index is also a better performance comparing to a non-unique one.</p>
+
+<h3>Partial Indexes</h3>
+
+<p>Imagine that you have some Articles in your application and you want to add <code>published_at</code> datetime field indicating whether and when the article was published, and then, filter published articles by a given author. We can most likely expect a need for an index on <code>author_id</code> column in such case. What about our second condition? We could for sure add a compound index on both <code>author_id</code> and <code>published_at</code>. However, there is a better choice. We could add a partial index for <code>author_id</code> which covers only published articles, i.e., covers <code>WHERE published_at IS NOT NULL</code>!</p>
+
+<p>Fortunately, this is supported by Rails (although writing a SQL command wouldn&rsquo;t be that difficult), we just need to use <code>where</code> option for that:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="n">add_column</span> <span class="ss">:articles</span><span class="p">,</span> <span class="ss">:author_id</span><span class="p">,</span> <span class="ss">where</span><span class="p">:</span> <span class="s2">&quot;published_at IS NOT NULL&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Expression Indexes</h3>
+
+<p>Imagine that you need to search users by their first name which comes from some input provided by a user. However, to avoid issues with figuring out whether the name provided by a user starts with a capital letter or not or how the names were stored in the database in the first place, you perform a query like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s2">&quot;lower(first_name) = ?&quot;</span><span class="p">,</span> <span class="nb">name</span><span class="o">.</span><span class="n">downcase</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This query will obviously work, however, if you have a lot of users, a query plan will indicate that it is suboptimal and instead of seeing something like <code>Index Scan using index_users_on_first_name on users</code>, you will see <code>Seq Scan on users</code>.</p>
+
+<p>There is no need to worry though. Postgres allows creating expression indexes where you can apply some functions, which in our case is <code>lower</code>. A proper index for this scenario would need to be created that way:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="n">add_index</span> <span class="ss">:users</span><span class="p">,</span> <span class="s2">&quot;lower(first_name)&quot;</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;index_users_on_lower_first_name&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Optimizing LIKE queries</h3>
+
+<p>Optimizing queries with <code>LIKE</code> clause is simple; you just need to remember about two things:</p>
+
+<ol>
+<li>Forget about B-Tree Index for this case.</li>
+<li>Take advantage of trigram matching provided by <a href="https://www.postgresql.org/docs/10/static/pgtrgm.html">pg_trgm</a> extension.</li>
+</ol>
+
+
+<p>To avoid sequential scans and utilize index that will drastically improve the performance of this kind of queries, enable the extension and create a GIN or GiST index:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="n">execute</span> <span class="s2">&quot;CREATE EXTENSION pg_trgm;&quot;</span>
+</span><span class='line'><span class="n">execute</span> <span class="s2">&quot;CREATE INDEX CONCURRENTLY index_products_on_description_trigram ON clients USING gin(description gin_trgm_ops);&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Thanks to this index, this is a query plan you might expect when filtering <code>Products</code> by <code>descriptions</code> containing some text, with wildcards on both the beginning and the end:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="no">EXPLAIN</span> <span class="k">for</span><span class="p">:</span> <span class="no">SELECT</span> <span class="s2">&quot;products&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;products&quot;</span> <span class="no">WHERE</span> <span class="p">(</span><span class="n">products</span><span class="o">.</span><span class="n">description</span> <span class="no">ILIKE</span> <span class="s1">&#39;%some text with wildacards%&#39;</span><span class="p">)</span>
+</span><span class='line'>                                                <span class="no">QUERY</span> <span class="no">PLAN</span>
+</span><span class='line'><span class="o">-----------------------------------------------------------------------------------------------------------</span>
+</span><span class='line'> <span class="no">Bitmap</span> <span class="no">Heap</span> <span class="no">Scan</span> <span class="n">on</span> <span class="n">products</span>
+</span><span class='line'>   <span class="no">Recheck</span> <span class="ss">Cond</span><span class="p">:</span> <span class="p">(</span><span class="n">description</span> <span class="o">~~*</span> <span class="s1">&#39;%some text with wildacards%&#39;</span><span class="o">::</span><span class="n">text</span><span class="p">)</span>
+</span><span class='line'>   <span class="o">-&gt;</span>  <span class="no">Bitmap</span> <span class="no">Index</span> <span class="no">Scan</span> <span class="n">on</span> <span class="n">index_products_on_description_trigram</span>
+</span><span class='line'>         <span class="no">Index</span> <span class="ss">Cond</span><span class="p">:</span> <span class="p">(</span><span class="n">description</span> <span class="o">~~*</span> <span class="s1">&#39;%some text with wildacards%&#39;</span><span class="o">::</span><span class="n">text</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Ordering</h3>
+
+<p>B-tree indexes are sorted in an ascending order which we can use to our advantage to avoid performing sorting in memory. However, we also need to keep in mind the limitation of the data structure itself. A rule of thumb for efficient ordering would be: order by the same columns you perform filtering by. It is going to be the case by default when you don&rsquo;t explicitly add any <code>ORDER</code> clause since the indexes are ordered. But if it happens that you need to apply different ordering criteria, you can take advantage of <code>order</code> option and explicitly specify the order:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="n">add_index</span> <span class="ss">:products</span><span class="p">,</span> <span class="ss">:created_at</span><span class="p">,</span> <span class="ss">order</span><span class="p">:</span> <span class="p">{</span> <span class="n">created_at</span><span class="p">:</span> <span class="ss">:desc</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Adding indexes concurrently</h3>
+
+<p>The way how the indexes are added doesn&rsquo;t impact the performance once they are created; however, it&rsquo;s good to keep in mind that just simple <code>CREATE INDEX</code> will block concurrent writes (inserts, updates, and deletes) until it&rsquo;s finished. It can lead to some issues, including deadlocks, especially when the index is getting created for a huge table under massive write operations.</p>
+
+<p>To prevent such a problem, it&rsquo;s worth creating indexes <a href="https://www.postgresql.org/docs/10/static/sql-createindex.html#SQL-CREATEINDEX-CONCURRENTLY">concurrently</a> instead. You can do that in Rails using <code>algorithm: :concurrently</code> option and by making sure that the index creation will run outside of a transaction by calling <code>disable_ddl_transaction!</code>.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">AddIndexToAsksActive</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span><span class="o">[</span><span class="mi">5</span><span class="o">.</span><span class="mi">0</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">disable_ddl_transaction!</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">change</span>
+</span><span class='line'>    <span class="n">add_index</span> <span class="ss">:users</span><span class="p">,</span> <span class="ss">:active</span><span class="p">,</span> <span class="ss">algorithm</span><span class="p">:</span> <span class="ss">:concurrently</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>There is one caveat here though. If you attempt to create a unique index concurrently, there is a possibility that something will go wrong, e.g., when a non-unique record is created during the index creation. Since the command is run outside the transaction, it won&rsquo;t be rolled back, and you will end up with an invalid index. Nevertheless, that is not a big problem &ndash; should it ever happen, just drop the invalid index and try creating it concurrently one more time.</p>
+
+<h2>Wrapping up</h2>
+
+<p>Optimizing <strong>PostgreSQL queries</strong> might not look a trivial task, but if you keep these rules in mind, you will have much easier time with your database, and you will enjoy fast queries for a long time.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Trolling In Ruby - Implementing JavaScript-like Maths With Implicit Conversion Hijacking]]></title>
@@ -4350,459 +4581,6 @@
 
 
 <p>Even though <strong>arrow function expressions</strong> are very convenient to use, they can&#8217;t be used interchangeably with <strong>function expressions</strong>. Sometimes you may not want <code>this</code> inside a function to preserve outer context, which is exactly the case with <strong>Ember computed properties</strong>.</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Introduction to ActiveRecord and ActiveModel Attributes API]]></title>
-    <link href="https://karolgalanciak.com/blog/2016/12/04/introduction-to-activerecord-and-activemodel-attributes-api/"/>
-    <updated>2016-12-04T22:00:00+01:00</updated>
-    <id>https://karolgalanciak.com/blog/2016/12/04/introduction-to-activerecord-and-activemodel-attributes-api</id>
-    <content type="html"><![CDATA[<p><strong>Rails 5.0</strong> is without a doubt a great release with plenty of useful changes and additions. The most notable change was probably <strong>ActionCable</strong> - the layer responsible for integrating your app with websockets. However, there were also other additions that could bring some <strong>substantial improvements</strong> to your Rails apps, but were a bit outshined by bigger changes. One of such features is <strong>Attributes API</strong>.</p>
-
-
-
-
-<!--more-->
-
-
-
-
-<h2>ActiveRecord Attributes And Defaults - The Old Way</h2>
-
-
-
-
-<p>Imagine that you are in a vacation rental industry and you are adding a new model for handling reservations for rentals, let&#8217;s call it <code>Reservation</code>. To keep it simple for the purpose of this example, let&#8217;s assume that we need <code>start_date</code> and <code>end_date</code> date fields for handling the duration of the reservations and <code>price</code> field, which is pretty useful unless you are developing an app for a charity organization ;). Let&#8217;s say we want to provide some defaults for the <code>start_date</code> and <code>end_date</code> attributes to be 1 day from now and 8 days from know accordingly when initializing a new instance of <code>Reservation</code> and the price should be converted to integer, so in fact it is going to be <code>price in cents</code>, and the expected format of the input is going to look like <code>"$1000.12"</code>. How could we handle it inside ActiveRecord models?</p>
-
-
-
-
-<p>For default values, one option would be to add <code>after_initialize</code> callbacks which would assign the given defaults unless the values were already set in the initializer. For <code>price</code> we can simply override the attribute writer which is <code>Reservation#price=</code> method. We would most likely end up with something looking like this:</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/reservation.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">Reservation</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
-</span><span class='line'>  <span class="n">after_initialize</span> <span class="ss">:set_default_start_date</span>
-</span><span class='line'>  <span class="n">after_initialize</span> <span class="ss">:set_default_end_date</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">price</span><span class="o">=</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">return</span> <span class="k">super</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="o">!</span><span class="n">value</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="s1">&#39;$&#39;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">price_in_dollars</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/\$/</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_d</span>
-</span><span class='line'>    <span class="k">super</span><span class="p">(</span><span class="n">price_in_dollars</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">set_default_start_date</span>
-</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">start_date</span> <span class="o">=</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="o">.</span><span class="n">from_now</span> <span class="k">if</span> <span class="n">start_date</span><span class="o">.</span><span class="n">blank?</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">set_default_end_date</span>
-</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">end_date</span> <span class="o">=</span> <span class="mi">8</span><span class="o">.</span><span class="n">days</span><span class="o">.</span><span class="n">from_now</span> <span class="k">if</span> <span class="n">end_date</span><span class="o">.</span><span class="n">blank?</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Well, the above code works, but it can get repetitive across many models and doesn&#8217;t read that well, would be much better to handle it with more of a declarative approach. But is there any built-in solution for that problem in <code>ActiveRecord</code>?</p>
-
-
-
-
-<p>Then answer is yes! Time to meet your new friend in Rails world: <code>ActiveRecord Attributes API</code>.</p>
-
-
-
-
-<h2>ActiveRecord Attributes And Defaults - The New Way - Attributes API</h2>
-
-
-
-
-<p>Since Rails 5.0 we can use awesome Attributes API in our models. Just declare the name of the attribute with <code>attribute</code> class method, its <code>type</code> and provide optional default (either a raw value or a lambda). The great thing is that you are not limited only to attributes <strong>backed by database</strong>, you can use it for virtual attributes as well!</p>
-
-
-
-
-<p>For our <code>Reservation</code> model, we could apply the following refactoring with <strong>Attributes API</strong>:</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/reservation.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">Reservation</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
-</span><span class='line'>  <span class="n">attribute</span> <span class="ss">:start_date</span><span class="p">,</span> <span class="ss">:date</span><span class="p">,</span> <span class="ss">default</span><span class="p">:</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="o">.</span><span class="n">from_now</span> <span class="p">}</span>
-</span><span class='line'>  <span class="n">attribute</span> <span class="ss">:end_date</span><span class="p">,</span> <span class="ss">:date</span><span class="p">,</span> <span class="ss">default</span><span class="p">:</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="mi">8</span><span class="o">.</span><span class="n">days</span><span class="o">.</span><span class="n">from_now</span> <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">price</span><span class="o">=</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">return</span> <span class="k">super</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="o">!</span><span class="n">value</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="s1">&#39;$&#39;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">price_in_dollars</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/\$/</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_d</span>
-</span><span class='line'>    <span class="k">super</span><span class="p">(</span><span class="n">price_in_dollars</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Looks much cleaner now! Let&#8217;s see how it works:</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/reservation.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span> <span class="p">:</span><span class="mo">001</span> <span class="o">&gt;</span> <span class="n">reservation</span> <span class="o">=</span> <span class="no">Reservation</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="c1">#&lt;Reservation id: nil, start_date: &quot;2016-12-03&quot;, end_date: &quot;2016-12-10&quot;, price: nil, created_at: nil, updated_at: nil&gt;</span>
-</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span> <span class="p">:</span><span class="mo">002</span> <span class="o">&gt;</span> <span class="n">reservation</span><span class="o">.</span><span class="n">start_date</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="no">Sat</span><span class="p">,</span> <span class="mo">03</span> <span class="no">Dec</span> <span class="mi">2016</span>
-</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span> <span class="p">:</span><span class="mo">003</span> <span class="o">&gt;</span> <span class="n">reservation</span><span class="o">.</span><span class="n">end_date</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="no">Sat</span><span class="p">,</span> <span class="mi">10</span> <span class="no">Dec</span> <span class="mi">2016</span>
-</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span> <span class="p">:</span><span class="mo">004</span> <span class="o">&gt;</span> <span class="n">reservation</span> <span class="o">=</span> <span class="no">Reservation</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">start_date</span><span class="p">:</span> <span class="mi">3</span><span class="o">.</span><span class="n">days</span><span class="o">.</span><span class="n">from_now</span><span class="p">)</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="c1">#&lt;Reservation id: nil, start_date: &quot;2016-12-05&quot;, end_date: &quot;2016-12-10&quot;, price: nil, created_at: nil, updated_at: nil&gt;</span>
-</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span> <span class="p">:</span><span class="mo">005</span> <span class="o">&gt;</span> <span class="n">reservation</span><span class="o">.</span><span class="n">start_date</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="no">Mon</span><span class="p">,</span> <span class="mo">05</span> <span class="no">Dec</span> <span class="mi">2016</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>That&#8217;s exactly what we needed. What about our conversion for <code>price</code>? As we can specify the type for given attribute, we may expect that it would be possible to define our own types. Turns out it is possible and quite simple actually. Just create a class inheriting from <code>ActiveRecord::Type::Value</code> or already existing type, e.g. <code>ActiveRecord::Type::Integer</code>, define <code>cast</code> method and register the new type. In our use case let&#8217;s register a new <code>price</code> type:</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/types/price_type.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">PriceType</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Type</span><span class="o">::</span><span class="nb">Integer</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">cast</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">return</span> <span class="k">super</span> <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">kind_of?</span><span class="p">(</span><span class="no">Numeric</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">return</span> <span class="k">super</span> <span class="k">if</span> <span class="o">!</span><span class="n">value</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="s1">&#39;$&#39;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">price_in_dollars</span> <span class="o">=</span> <span class="no">BigDecimal</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/\$/</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
-</span><span class='line'>    <span class="k">super</span><span class="p">(</span><span class="n">price_in_dollars</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>config/initializers/types.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Type</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="ss">:price</span><span class="p">,</span> <span class="no">PriceType</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Let&#8217;s use Attributes API for <code>price</code> attribute:</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/reservation.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Reservation</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
-</span><span class='line'>  <span class="n">attribute</span> <span class="ss">:start_date</span><span class="p">,</span> <span class="ss">:date</span><span class="p">,</span> <span class="ss">default</span><span class="p">:</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="o">.</span><span class="n">from_now</span> <span class="p">}</span>
-</span><span class='line'>  <span class="n">attribute</span> <span class="ss">:end_date</span><span class="p">,</span> <span class="ss">:date</span><span class="p">,</span> <span class="ss">default</span><span class="p">:</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="mi">8</span><span class="o">.</span><span class="n">days</span><span class="o">.</span><span class="n">from_now</span> <span class="p">}</span>
-</span><span class='line'>  <span class="n">attribute</span> <span class="ss">:price</span><span class="p">,</span> <span class="ss">:price</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>And let&#8217;s test if it indeed works as expected:</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/reservation.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span> <span class="p">:</span><span class="mo">001</span> <span class="o">&gt;</span> <span class="n">reservation</span> <span class="o">=</span> <span class="no">Reservation</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="c1">#&lt;Reservation id: nil, start_date: &quot;2016-12-03&quot;, end_date: &quot;2016-12-10&quot;, price: nil, created_at: nil, updated_at: nil&gt;</span>
-</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span> <span class="p">:</span><span class="mo">002</span> <span class="o">&gt;</span> <span class="n">reservation</span><span class="o">.</span><span class="n">price</span> <span class="o">=</span> <span class="s2">&quot;$100.12&quot;</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="s2">&quot;$100.12&quot;</span>
-</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span> <span class="p">:</span><span class="mo">003</span> <span class="o">&gt;</span> <span class="n">reservation</span><span class="o">.</span><span class="n">price</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="mi">10012</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Nice! Much cleaner and easy to reuse.</p>
-
-
-
-
-<p>Attributes API comes also with some other features, you could e.g. provide <code>array</code> or range <code>option</code> and work with arrays and ranges for given type:</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/reservation.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">Reservation</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
-</span><span class='line'>  <span class="n">attribute</span> <span class="ss">:start_date</span><span class="p">,</span> <span class="ss">:date</span><span class="p">,</span> <span class="ss">default</span><span class="p">:</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="o">.</span><span class="n">from_now</span> <span class="p">}</span>
-</span><span class='line'>  <span class="n">attribute</span> <span class="ss">:end_date</span><span class="p">,</span> <span class="ss">:date</span><span class="p">,</span> <span class="ss">default</span><span class="p">:</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="mi">8</span><span class="o">.</span><span class="n">days</span><span class="o">.</span><span class="n">from_now</span> <span class="p">}</span>
-</span><span class='line'>  <span class="n">attribute</span> <span class="ss">:price</span><span class="p">,</span> <span class="ss">:money</span>
-</span><span class='line'>  <span class="n">attribute</span> <span class="ss">:virtual_array</span><span class="p">,</span> <span class="ss">:integer</span><span class="p">,</span> <span class="ss">array</span><span class="p">:</span> <span class="kp">true</span>
-</span><span class='line'>  <span class="n">attribute</span> <span class="ss">:virtual_range</span><span class="p">,</span> <span class="ss">:date</span><span class="p">,</span> <span class="ss">range</span><span class="p">:</span> <span class="kp">true</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/reservation.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span> <span class="p">:</span><span class="mo">001</span> <span class="o">&gt;</span> <span class="n">reservation</span> <span class="o">=</span> <span class="no">Reservation</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">virtual_array</span><span class="p">:</span> <span class="o">[</span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="o">]</span><span class="p">,</span> <span class="n">virtual_range</span><span class="p">:</span> <span class="s2">&quot;[2016-01-01,2017-01-1]&quot;</span><span class="p">)</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="c1">#&lt;Reservation id: nil, start_date: &quot;2016-12-03&quot;, end_date: &quot;2016-12-10&quot;, price: nil, created_at: nil, updated_at: nil&gt;</span>
-</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span> <span class="p">:</span><span class="mo">002</span> <span class="o">&gt;</span> <span class="n">reservation</span><span class="o">.</span><span class="n">virtual_array</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">]</span>
-</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span> <span class="p">:</span><span class="mo">003</span> <span class="o">&gt;</span> <span class="n">reservation</span><span class="o">.</span><span class="n">virtual_range</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="no">Fri</span><span class="p">,</span> <span class="mo">01</span> <span class="no">Jan</span> <span class="mi">2016</span><span class="o">.</span><span class="n">.</span><span class="no">Sun</span><span class="p">,</span> <span class="mo">01</span> <span class="no">Jan</span> <span class="mi">2017</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Attributes API is already looking great, but it&#8217;s not the end of the story. You can use your custom types for querying a database, you just need to define <code>serialize</code> method for your own types:</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/types/price_type.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">PriceType</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Type</span><span class="o">::</span><span class="nb">Integer</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">cast</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">return</span> <span class="k">super</span> <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">kind_of?</span><span class="p">(</span><span class="no">Numeric</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">return</span> <span class="k">super</span> <span class="k">if</span> <span class="o">!</span><span class="n">value</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="s1">&#39;$&#39;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">price_in_dollars</span> <span class="o">=</span> <span class="no">BigDecimal</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/\$/</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
-</span><span class='line'>    <span class="k">super</span><span class="p">(</span><span class="n">price_in_dollars</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">cast</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>That way we could simply give prices in original format as arguments and they are going to be converted to price in cents before performing a query.</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="no">Reservation</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">price</span><span class="p">:</span> <span class="s2">&quot;$100.12&quot;</span><span class="p">)</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="no">Reservation</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">3</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;reservations&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;reservations&quot;</span> <span class="no">WHERE</span> <span class="s2">&quot;reservations&quot;</span><span class="o">.</span><span class="s2">&quot;price&quot;</span> <span class="o">=</span> <span class="vg">$1</span>  <span class="o">[[</span><span class="s2">&quot;price&quot;</span><span class="p">,</span> <span class="mi">10012</span><span class="o">]]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>As expected, the price used for query was the one after serialization.</p>
-
-
-
-
-<p>If you want to check the list of built-in types or learn more, check the official <a href="http://edgeapi.rubyonrails.org/classes/ActiveRecord/Attributes/ClassMethods.html" target="_blank">docs</a>.</p>
-
-
-
-
-<h2>What About ActiveModel?</h2>
-
-
-
-
-<p>So far I&#8217;ve discussed only the <strong>ActiveRecord Attributes API</strong>, but the title clearly mentions <code>ActiveModel</code> part, so what about it? There is a bad news and good news.</p>
-
-
-
-
-<p>The bad news is that it is not <a href="https://github.com/rails/rails/pull/26728" target="_blank">yet</a> supported in Rails core, but most likely it is going to be the part of <strong>ActiveModel</strong> eventually.</p>
-
-
-
-
-<p>The good news is that you can use it today, even though it&#8217;s not a part of Rails! I&#8217;ve released <a href="https://github.com/Azdaroth/active_model_attributes" target="_blank">ActiveModelAttributes</a> gem which provides Attributes API for ActiveModel and it works in a very similar way to <strong>ActiveRecord Attributes</strong>.</p>
-
-
-
-
-<p>Just define your <strong>ActiveModel model</strong>, include <code>ActiveModel::Model</code> and ActiveModelAttributes</code> modules and define attributes and their types using <code>attribute</code> class method:</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/my_awesome_model.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">MyAwesomeModel</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="ss">ActiveModel</span><span class="p">:</span><span class="ss">:Model</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="no">ActiveModelAttributes</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">attribute</span> <span class="ss">:description</span><span class="p">,</span> <span class="ss">:string</span><span class="p">,</span> <span class="ss">default</span><span class="p">:</span> <span class="s2">&quot;default description&quot;</span>
-</span><span class='line'>  <span class="n">attribute</span> <span class="ss">:start_date</span><span class="p">,</span> <span class="ss">:date</span><span class="p">,</span> <span class="ss">default</span><span class="p">:</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="no">Date</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">2016</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="p">}</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>You can also add your custom types. Just create a class inheriting from <code>ActiveModel::Type::Value</code> or already existing type, e.g. <code>ActiveModel::Type::Integer</code>, define <code>cast</code> method and register the new type:</p>
-
-
-
-
-<figure class='code'><figcaption><span>app/types/money_type.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">MoneyType</span> <span class="o">&lt;</span> <span class="ss">ActiveModel</span><span class="p">:</span><span class="ss">:Type</span><span class="o">::</span><span class="nb">Integer</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">cast</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">return</span> <span class="k">super</span> <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">kind_of?</span><span class="p">(</span><span class="no">Numeric</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">return</span> <span class="k">super</span> <span class="k">if</span> <span class="o">!</span><span class="n">value</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="s1">&#39;$&#39;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">price_in_dollars</span> <span class="o">=</span> <span class="no">BigDecimal</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/\$/</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
-</span><span class='line'>    <span class="k">super</span><span class="p">(</span><span class="n">price_in_dollars</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>config/initializers/types.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="ss">ActiveModel</span><span class="p">:</span><span class="ss">:Type</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="ss">:money</span><span class="p">,</span> <span class="no">MoneyType</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>app/models/my_awesome_model.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">MyAwesomeModel</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="ss">ActiveModel</span><span class="p">:</span><span class="ss">:Model</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="no">ActiveModelAttributes</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">attribute</span> <span class="ss">:price</span><span class="p">,</span> <span class="ss">:money</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>And that&#8217;s it! Check the <a href="https://github.com/Azdaroth/active_model_attributes" target="_blank">docs</a>, start using it today and enjoy ;)</p>
-
-
-
-
-<h2>Wrapping up</h2>
-
-
-
-
-<p><strong>ActiveRecord Attributes API</strong> is defintely a great feature introduced in <strong>Rails 5.0</strong>. Even though it is not yet supported in ActiveModel in Rails core, <a href="https://github.com/Azdaroth/active_model_attributes" target="_blank">ActiveModelAttributes</a> can be easily added to your Rails apps to provide almost the same functionality.</p>
 
 ]]></content>
   </entry>
