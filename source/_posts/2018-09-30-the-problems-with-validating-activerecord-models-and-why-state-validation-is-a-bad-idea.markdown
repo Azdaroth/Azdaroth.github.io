@@ -14,6 +14,8 @@ There are multiple ways to bypass this problem: use `validate: false` flag with 
 
 However, this is the expected behavior of ActiveRecord (or in general, ActiveModel-style) validations, which is **a validation of the state** of the model. And judging from this example, it's evident that it leads to **problematic scenarios**. What kind of design then would be the most appropriate to **prevent such issues**?
 
+<!--more-->
+
 ## Forget State Validation
 
 Based on the previous example, it's clear that the real problem is the idea of a model's state validation. And the more complex state of the models can be (especially if there are some cross-validations between several models, which is not uncommon in complex applications), the more problems you will get.
