@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Architeture | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
+  <link href="https://karolgalanciak.com/blog/categories/architeture/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2018-09-29T15:41:00+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
+  <author>
+    <name><![CDATA[Karol Galanciak]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[The Problems With Validating ActiveRecord Models And Why State Validation Is a Bad Idea]]></title>
+    <link href="https://karolgalanciak.com/blog/2018/09/30/the-problems-with-validating-activerecord-models-and-why-state-validation-is-a-bad-idea/"/>
+    <updated>2018-09-30T20:00:00+02:00</updated>
+    <id>https://karolgalanciak.com/blog/2018/09/30/the-problems-with-validating-activerecord-models-and-why-state-validation-is-a-bad-idea</id>
+    <content type="html"><![CDATA[<p>In the typical <strong>Rails application</strong>, you can find the most of the validations in the <strong>ActiveRecord models</strong>, which is nothing surprising &ndash; ActiveRecord models are used for multiple things. Whether it is a good thing, or a bad thing (in most cases it&rsquo;s the latter) deserves a separate book or at least blog post-series as it&rsquo;s not a simple problem, there is one specific thing that can cause <strong>a lot of issues</strong> that are <strong>difficult to solve</strong> and go beyond <strong>design decisions</strong> and ease of maintenance of the application, something that impacts the behavior of the model &ndash; <strong>the validations</strong>.</p>
+
+<p>Just to give you a real-world example of what validation in ActiveRecord model looks like (as impossible as it seems, it really did happen) &ndash; when updating the check-in time of the reservation, which is a simple attribute on Reservation model, the record turned out to be invalid because&hellip; the format of guest&rsquo;s phone didn&rsquo;t match some regexp.</p>
+
+<p>There are multiple ways to bypass this problem: use <code>validate: false</code> flag with <code>save</code> method: <code>save(validate: false)</code> or use <code>update_columns</code> method, but this is definitely not something that can be applied in a &ldquo;normal&rdquo; use case. In a typical scenario, this will be the error message displayed in the UI/returned to API consumer, and it will be confusing.</p>
+
+<p>However, this is the expected behavior of ActiveRecord (or in general, ActiveModel-style) validations, which is <strong>a validation of the state</strong> of the model. And judging from this example, it&rsquo;s evident that it leads to <strong>problematic scenarios</strong>. What kind of design then would be the most appropriate to <strong>prevent such issues</strong>?</p>
+
+<!--more-->
+
+
+<h2>Forget State Validation</h2>
+
+<p>Based on the previous example, it&rsquo;s clear that the real problem is the idea of a model&rsquo;s state validation. And the more complex state of the models can be (especially if there are some cross-validations between several models, which is not uncommon in complex applications), the more problems you will get.</p>
+
+<p>Just wanted to update some <code>notes</code> attribute to add some quick info about something? Forget it &ndash; you will get three different validation errors that will tell you that someone&rsquo;s email has an invalid format, description is too short, a discount amount of something is invalid.</p>
+
+<p>Sadly, this is the typical Rails Way of handling validations. In the initial phase of the application, this is certainly convenient &ndash; adding new validations is super easy, there is no need to discuss the design of potential alternatives and how it fits the bigger picture, and there is very little overhead. Unless you are ok with such problems, at some point, you will probably need to migrate validations to some other solution. What would be the potential alternative for validations?</p>
+
+<h2>Validate The Actual Use Case</h2>
+
+<p>The answer to that question is straight-forward (although it doesn&rsquo;t mean that achieving it will be simple) &ndash; just validate the thing you are doing, the actual use case. If you want to update <code>description</code>, you should only be concerned with the description &ndash; if it&rsquo;s present or not, it&rsquo;s length, etc., whether <code>headline</code> is too short or not (this can happen when you change the validation rules and don&rsquo;t somehow migrate the data) is not the subject of that use case.</p>
+
+<p>There are a lot of implications of such approach &ndash; indeed, it will result in different sets of validators per creation and per update, since for creation we usually need way more data, and for an update, we may merely want to update a single attribute. Effectively, it will result in different validation pipelines for create and update actions. For creating, we may always need to apply specific validators (e.g., presence validators for some attributes), but for updating it will make more sense to apply only the validators for what we are trying to do &ndash; when we want to update email, we apply the presence and format validation for an email, if we want to update a description, we apply presence and length validators for a description.</p>
+
+<h2>Potential Implementation</h2>
+
+<p>What would be the way to implement it? The specific design is out of the scope of this article as it might require building mini-framework for validations and consider some design implications on the entire application (especially if we are escaping the traditional Rails Way). However, one thing is sure here &ndash; there will be dedicated validator objects, probably different for create and update action, and the validations will need to be removed from ActiveRecord models.</p>
+
+<p>A potential way of interacting with such objects could look like this:</p>
+
+<p><code>rb
+validation_result = Reservation::CreateValidator.call(params)
+if validation_result.success?
+  # handle happy path here
+else
+  puts validation_result.errors.messages # for convenience and familiarity, `errors` object could have a similar interface to ActiveModel::Errors
+end
+</code></p>
+
+<p>What if we need the model itself in the validator due to some complex business rules, like cross-model validation? We could either reuse <code>id</code> from <code>params</code> or just provide <code>model</code> as an argument:</p>
+
+<p><code>rb
+validation_result = Reservation::CreateValidator.call(record, params)
+</code></p>
+
+<h2>Side-Effects Of Such Design</h2>
+
+<p>The implications of such design go far deeper than just moving things from one place to another to prevent some edge cases (and naturally increasing the complexity of the design, but it seems to be a fair price to pay for what we get as a result). Since it would make the most sense to have validations per use case, then&hellip; maybe we can have use case as objects that would expose their constraints, and the validators would take the rules from those objects and apply some specific logic on top of it to achieve the desired result? Maybe we could even create value objects composed of a single or multiple attributes, e.g. <code>Client::Email</code> object that would enforce its constraints and also, move some logic specific to the email itself in the context of a hypothetical <code>Client</code> model? And if we can identify the use cases themselves, aren&rsquo;t they domain events? And how hard would it be to build event-based architecture, or even apply Event Sourcing?</p>
+
+<p>These are not trivial questions, however, doing one change in the design opens
+the door to a holistic architectural approach where all parts of the domain fit together and the interaction between them is way more intentional comparing to ad hoc duct-tape-like solutions.</p>
+
+<h2>Wrapping Up</h2>
+
+<p>Putting <strong>too much logic</strong> in <strong>ActiveRecord models</strong> has a lot of disadvantages, most of them being problematic on the <strong>design level</strong>. However, things like validations can result in some nasty issues that go beyond the maintenance and cause actual business problems. Fortunately, by keeping that in mind and putting the <strong>validation logic</strong> in a <strong>separate object(s)</strong>, we can easily avoid such issues and as a nice side-effect, have a design that is way more flexible, extendible and eventually simpler to maintain.</p>
+]]></content>
+  </entry>
+  
+</feed>

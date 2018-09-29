@@ -252,7 +252,7 @@
         <loc>
             https://karolgalanciak.com/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking/
         </loc>
-        <lastmod>2018-07-29T20:20:48+02:00</lastmod>
+        <lastmod>2018-09-29T15:40:43+02:00</lastmod>
     </url>
     <url>
         <loc>
@@ -261,20 +261,26 @@
         <lastmod>2018-08-19T20:55:12+02:00</lastmod>
     </url>
     <url>
+        <loc>
+            https://karolgalanciak.com/blog/2018/09/30/the-problems-with-validating-activerecord-models-and-why-state-validation-is-a-bad-idea/
+        </loc>
+        <lastmod>2018-09-29T15:35:36+02:00</lastmod>
+    </url>
+    <url>
         <loc>https://karolgalanciak.com/</loc>
-        <lastmod>2018-08-19T20:55:12+02:00</lastmod>
+        <lastmod>2018-09-29T15:40:43+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/open-source/</loc>
-        <lastmod>2018-08-19T20:55:12+02:00</lastmod>
+        <lastmod>2018-09-29T15:40:43+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/privacy-policy/</loc>
-        <lastmod>2018-08-19T20:55:12+02:00</lastmod>
+        <lastmod>2018-09-29T15:40:43+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/publications/</loc>
-        <lastmod>2018-08-19T20:55:12+02:00</lastmod>
+        <lastmod>2018-09-29T15:40:43+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/test-driven-ember/</loc>
@@ -282,15 +288,15 @@
     </url>
     <url>
         <loc>https://karolgalanciak.com/blog/</loc>
-        <lastmod>2018-08-19T20:55:12+02:00</lastmod>
+        <lastmod>2018-09-29T15:40:43+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/blog/archives/</loc>
-        <lastmod>2018-08-19T20:55:12+02:00</lastmod>
+        <lastmod>2018-09-29T15:40:43+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/presentations/</loc>
-        <lastmod>2018-08-19T20:55:12+02:00</lastmod>
+        <lastmod>2018-09-29T15:40:43+02:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/robots.txt</loc>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Trolling | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/blog/categories/trolling/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2018-08-19T20:55:17+02:00</updated>
+  <updated>2018-09-29T15:41:00+02:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -35,6 +35,9 @@
 <p>```</p>
 
 <p>Would it be possible though to obtain the same result somehow in Ruby?</p>
+
+<!--more-->
+
 
 <h2>Explicit Conversion vs. Implicit Conversion</h2>
 
