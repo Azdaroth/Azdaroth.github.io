@@ -22,6 +22,8 @@ That kind of behavior usually comes as a **big surprise** and due to that fact, 
 
 Would it be possible though to obtain the same result somehow in Ruby?
 
+<!--more-->
+
 ## Explicit Conversion vs. Implicit Conversion
 
 The answer is yes! But before we get to the actual implementation of that concept, let's make sure that we understand some essential concepts in Ruby that will lead us there: **explicit conversion** and **implicit conversion**.
