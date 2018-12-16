@@ -4,7 +4,7 @@
   <title><![CDATA[Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2018-09-29T15:41:00+02:00</updated>
+  <updated>2018-12-09T19:46:51+01:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -12,6 +12,213 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Inheritance and define_method - how to make them work together]]></title>
+    <link href="https://karolgalanciak.com/blog/2018/12/16/inheritance-and-define-method-how-to-make-them-work-together/"/>
+    <updated>2018-12-16T20:00:00+01:00</updated>
+    <id>https://karolgalanciak.com/blog/2018/12/16/inheritance-and-define-method-how-to-make-them-work-together</id>
+    <content type="html"><![CDATA[<p>Imagine that you are implementing some form object because you are fed up with treating ActiveRecord models as such, and you need some extra flexibility. You start with a straightforward implementation for a base class of a form object where you can just whitelist attributes. That could look like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">FormObject</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">attributes_registry</span>
+</span><span class='line'>    <span class="vi">@attributes_registry</span> <span class="o">||=</span> <span class="o">[]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">attribute</span><span class="p">(</span><span class="n">attribute_name</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">attributes_registry</span> <span class="o">&lt;&lt;</span> <span class="n">attribute_name</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">define_method</span><span class="p">(</span><span class="n">attribute_name</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>      <span class="nb">instance_variable_get</span><span class="p">(</span><span class="s2">&quot;@</span><span class="si">#{</span><span class="n">attribute_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">define_method</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">attribute_name</span><span class="si">}</span><span class="s2">=&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">value</span><span class="o">|</span>
+</span><span class='line'>      <span class="nb">instance_variable_set</span><span class="p">(</span><span class="s2">&quot;@</span><span class="si">#{</span><span class="n">attribute_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Since the base class is ready, you can create a first form object that would inherit from this class:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">MyForm</span> <span class="o">&lt;</span> <span class="no">FormObject</span>
+</span><span class='line'>  <span class="n">attribute</span> <span class="ss">:some_attribute</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Initially, it does the job, but then it turns out that you might need a default value if <code>some_attribute</code> turns out to be nil. So you try something like that:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">MyFormWithDefaultValue</span> <span class="o">&lt;</span> <span class="no">FormObject</span>
+</span><span class='line'>  <span class="n">attribute</span> <span class="ss">:some_attribute</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">some_attribute</span>
+</span><span class='line'>    <span class="k">super</span> <span class="o">||</span> <span class="s2">&quot;Default&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>After checking if the default value works, this is what you get:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="o">&gt;</span> <span class="no">MyFormWithDefaultValue</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">some_attribute</span>
+</span><span class='line'><span class="o">=&gt;</span> <span class="ss">NoMethodError</span><span class="p">:</span> <span class="k">super</span><span class="p">:</span> <span class="n">no</span> <span class="n">superclass</span> <span class="nb">method</span> <span class="sb">`some_attribute&#39; for #&lt;MyFormWithDefaultValue:0x007f84a50ae8e0&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Whoops! How did it happen? The method was defined in the superclass so it should be inheritable, right?</p>
+
+<p>Well, this is not really true. However, the problem is easy to fix.</p>
+
+<h2>Anatomy Of The Problem</h2>
+
+<p>The primary question we should answer in the first place is: where are all those new methods defined using <code>define_method</code> in that particular way? Is it a superclass?</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'> <span class="no">FormObject</span><span class="o">.</span><span class="n">instance_methods</span> <span class="o">-</span> <span class="no">Object</span><span class="o">.</span><span class="n">methods</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="o">[]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It&rsquo;s definitely not a superclass &ndash; there are no any instance methods defined there, there are only the ones inherited from <code>Object</code>. What about <code>MyFormWithDefaultValue</code>?</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="o">&gt;</span> <span class="no">MyFormWithDefaultValue</span><span class="o">.</span><span class="n">instance_methods</span> <span class="o">-</span> <span class="no">Object</span><span class="o">.</span><span class="n">methods</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="o">[</span><span class="ss">:some_attribute</span><span class="p">,</span> <span class="ss">:some_attribute</span><span class="o">=]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now the error that we initially got makes way more sense. The entire issue is caused by the fact that the declaration of the attribute happens in <code>MyFormWithDefaultValue</code>, if it were defined in a base class, there would be no any issue. We can verify it with a simple example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">MyForm</span> <span class="o">&lt;</span> <span class="no">FormObject</span>
+</span><span class='line'>  <span class="n">attribute</span> <span class="ss">:some_attribute</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">MyFormWithDefaultValue</span> <span class="o">&lt;</span> <span class="no">MyForm</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">some_attribute</span>
+</span><span class='line'>    <span class="k">super</span> <span class="o">||</span> <span class="s2">&quot;Default&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="o">&gt;</span> <span class="no">MyFormWithDefaultValueA</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">some_attribute</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="s2">&quot;Default&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Solution</h2>
+
+<p>Now that we fully understand the problem let&rsquo;s think about the solution. Ideally, about the one, that doesn&rsquo;t require defining explicitly an intermediate class that we can inherit from.</p>
+
+<p>How about defining a module instead? Modules are also included in the inheritance chain, and for using <code>super</code>, it doesn&rsquo;t matter if the method is defined in the class or a module.</p>
+
+<p>The exact solution to the problem would be wrapping the definition of new methods that happens in <code>FormObject</code> inside some module, it could be even an anonymous one, and including it right away:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">FormObject</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">attributes_registry</span>
+</span><span class='line'>    <span class="vi">@attributes_registry</span> <span class="o">||=</span> <span class="o">[]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">attribute</span><span class="p">(</span><span class="n">attribute_name</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">attributes_registry</span> <span class="o">&lt;&lt;</span> <span class="n">attribute_name</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">wrapper</span> <span class="o">=</span> <span class="no">Module</span><span class="o">.</span><span class="n">new</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">define_method</span><span class="p">(</span><span class="n">attribute_name</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>        <span class="nb">instance_variable_get</span><span class="p">(</span><span class="s2">&quot;@</span><span class="si">#{</span><span class="n">attribute_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">define_method</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">attribute_name</span><span class="si">}</span><span class="s2">=&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">value</span><span class="o">|</span>
+</span><span class='line'>        <span class="nb">instance_variable_set</span><span class="p">(</span><span class="s2">&quot;@</span><span class="si">#{</span><span class="n">attribute_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="kp">include</span> <span class="n">wrapper</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Let&rsquo;s verify if the new solution works:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="o">&gt;</span> <span class="no">MyFormWithDefaultValue</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">some_attribute</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="s2">&quot;Default&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Yay! It does exactly what we wanted to achieve.</p>
+
+<h2>Wrapping Up</h2>
+
+<p>Metaprogramming in Ruby is a powerful tool, however; it can lead to some issues that might not be obvious why they happen. Fortunately, with enough knowledge of the language, those problems can be solved elegantly.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[The Problems With Validating ActiveRecord Models And Why State Validation Is a Bad Idea]]></title>
@@ -3669,604 +3876,6 @@ the door to a holistic architectural approach where all parts of the domain fit 
 <h2>Wrapping Up</h2>
 
 <p>Maybe <strong>JavaScript</strong> has some odd parts, nevertheless, it&rsquo;s a quite powerful language. Changing the value of read-only properties is probably not a something do you will do often, but if you really need to do it, <code>Object.defineProperty</code> will be your friend.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[JavaScript: The Surprising Parts]]></title>
-    <link href="https://karolgalanciak.com/blog/2017/01/22/javascript-the-surprising-parts/"/>
-    <updated>2017-01-22T22:45:00+01:00</updated>
-    <id>https://karolgalanciak.com/blog/2017/01/22/javascript-the-surprising-parts</id>
-    <content type="html"><![CDATA[<p>Do you think you know all the surprising parts of <strong>JavaScript</strong>? Some of these &#8220;features&#8221; may look as if the language was broken, but it&#8217;s not necessarily the case. Things like <strong>variables hoisting</strong>, <strong>variables scope</strong>, behaviour of <code>this</code> are quite intentional and besides just being different from most of other programming languages, there is nothing particularly wrong with them. However, there are still some things that are quite surprising about <strong>JavaScript</strong>. Let&#8217;s take a look at some of them.</p>
-
-
-
-
-<!--more-->
-
-
-
-
-<h2>Surprise #1 - <code>parseInt</code> function</h2>
-
-
-
-
-<p>Imagine you have some numbers as strings and you want to convert them to integers. You could probably use <code>Number()</code> function to do that, but let&#8217;s assume you are used to <code>parseInt()</code> function. Let&#8217;s do some conversions then:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">].</span><span class="nx">map</span><span class="p">(</span><span class="nb">parseInt</span><span class="p">);</span>
-</span><span class='line'><span class="c1">// [1]</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">].</span><span class="nx">map</span><span class="p">(</span><span class="nb">parseInt</span><span class="p">);</span>
-</span><span class='line'><span class="c1">// =&gt; [1, NaN, NaN, NaN] // WUT ?!</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">].</span><span class="nx">map</span><span class="p">(</span><span class="nb">parseFloat</span><span class="p">);</span>
-</span><span class='line'><span class="c1">// =&gt; [1, 2, 3, 4] // WUT...</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Something is definitely wrong here. How could possibly <code>parseFloat()</code> work fine here and <code>parseInt()</code> not? Obviously <strong>JavaScript</strong> is broken, right?</p>
-
-
-
-
-<p>Not really. This is actually the expected behaviour. The difference between <code>parseFloat</code> and <code>parseInt()</code> is that <code>parseFloat()</code> takes only one argument (<code>string</code>), but <code>parseInt()</code>takes two arguments - <code>string</code> and&#8230; <code>radix</code>. To verify it, let&#8217;s rewrite the mapping using an anonymous function:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">].</span><span class="nx">map</span><span class="p">((</span><span class="nx">number</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">number</span><span class="p">));</span>
-</span><span class='line'><span class="c1">// =&gt; [1, 2, 3, 4]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>When you pass simply <code>parseInt()</code> function as an argument to <code>map()</code>, the second argument (which is a current index) is going to be passed as <code>radix</code> to <code>parseInt</code>, which explains why it returns <code>NaN</code>. The equivalent of just passing <code>parseInt</code> looks like this:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">].</span><span class="nx">map</span><span class="p">((</span><span class="nx">number</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">array</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">number</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">array</span><span class="p">));</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>As &#8220;odd&#8221; as it may look like, this is a perfectly valid behaviour and there is nothing wrong with <code>JavaScript</code> ;).</p>
-
-
-
-
-<h2>Surprise #2 - sorting</h2>
-
-
-
-
-<p>Now that we&#8217;ve learned how to parse integers in <strong>JavaScript</strong> like a boss, let&#8217;s do some sorting:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">].</span><span class="nx">sort</span><span class="p">();</span>
-</span><span class='line'><span class="c1">// =&gt; [1, 100, 2, 20] // WUT again...</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Again, something odd is going on here. However, this is the intended behavior - after consulting with <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Array/sort" target="_blank">docs</a>, we can learn that <code>sort()</code> converts all elements into strings and compares them in Unicode code point order. I think this might be a big surprise for a majority of developers performing sorting and seeing the result, but this behaviour is clearly documented. Due to the necessity of maintaing backwards compatibility, I wouldn&#8217;t expect this behavior to change, so it&#8217;s worth keeping it in mind.</p>
-
-
-
-
-<p>To perform sorting on integers you need to provide a <strong>compare function</strong>:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">].</span><span class="nx">sort</span><span class="p">((</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">a</span> <span class="o">-</span> <span class="nx">b</span><span class="p">);</span>
-</span><span class='line'><span class="c1">// =&gt; [1, 2, 20, 100]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<h2>Surprise #3 - <code>==</code> vs. <code>===</code></h2>
-
-
-
-
-<p>You&#8217;ve probably heard that you should never use <strong>double equals</strong> (loose equality) and just stick to <strong>triple equals</strong> (strict equaility). But following some rules without understanding the reasons behind them is never a good solution to a problem. Let&#8217;s try to understand how these operators work.</p>
-
-
-
-
-<p><strong>Loose equality</strong> (<strong>==</strong>) compares two values after converting them to <strong>common type</strong>. After conversions (both of the values can be converted) the comparison is performed by strict equality (<strong>===</strong>). So what is a <strong>common type</strong> in this case?</p>
-
-
-
-
-<p>The easiest way to get the idea what happens when using <code>==</code> would be checking the table for conversion rules <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Equality_comparisons_and_sameness#Loose_equality_using" target="_blank">here</a> as it&#8217;s not really something obvious (the details of how conversion works are described later in this article).</p>
-
-
-
-
-<p>So basically this table says that the following expressions will be truthy:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="mi">1</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span><span class="p">;</span>
-</span><span class='line'><span class="s2">&quot;1&quot;</span> <span class="o">==</span> <span class="mi">1</span><span class="p">;</span>
-</span><span class='line'><span class="k">new</span> <span class="nb">String</span><span class="p">(</span><span class="s2">&quot;string&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;string&quot;</span><span class="p">;</span>
-</span><span class='line'><span class="mi">1</span> <span class="o">==</span> <span class="p">{</span> <span class="nx">valueOf</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span> <span class="p">}</span> <span class="p">};</span> <span class="c1">// lulz, it&#39;s not a joke ;)</span>
-</span><span class='line'><span class="mi">1</span> <span class="o">==</span> <span class="kc">true</span><span class="p">;</span>
-</span><span class='line'><span class="kc">false</span> <span class="o">==</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="s2">&quot;Fri Jan 01 2016 00:00:00 GMT+0100 (CET)&quot;</span> <span class="o">==</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">(</span><span class="mi">2016</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-</span><span class='line'><span class="s2">&quot;1,2&quot;</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="c1">// because why not?</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Seems quite &#8220;exotic&#8221;, right? But is <strong>loose equality</strong> actually useful?</p>
-
-
-
-
-<p>Yes, it is. I can imagine 3 scenarios where it comes in handy.</p>
-
-
-
-
-<p>The first scenario would be comparing integers from the forms when you don&#8217;t really care about strict equality and types:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="k">if</span> <span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.my-awesome-input&#39;</span><span class="p">).</span><span class="nx">val</span><span class="p">()</span> <span class="o">==</span> <span class="mi">100</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="c1">// do something here</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>In such case it may turn out that we don&#8217;t really care if we compare strings or integers, either <code>"100"</code> and <code>100</code> are fine and we don&#8217;t need to perform any explicit conversions.</p>
-
-
-
-
-<p>The second use case would be treating both <code>undefined</code> and <code>null</code> as the same thing meaning lack of some value. With strict equality we would need to check for both values:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">x</span> <span class="o">=</span> <span class="nx">getSomeValue</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="nx">x</span> <span class="o">!==</span> <span class="kc">undefined</span> <span class="o">&amp;&amp;</span> <span class="nx">x</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="c1">// some logic</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Doesn&#8217;t look that nice. We could clean it up with loose equality and simply check if something is not <code>null</code>-ish:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">x</span> <span class="o">=</span> <span class="nx">getSomeValue</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="nx">x</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="c1">// some logic</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>The last use case would be comparing <strong>primitives</strong> and <strong>objects</strong>. It&#8217;s especially useful when dealing with both primitive strings (<code>"simple string"</code>) and strings as objects (<code>new String("string as object")</code>:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">x</span> <span class="o">=</span> <span class="nx">getSomeValue</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="nx">x</span> <span class="o">!=</span> <span class="s2">&quot;some special value&quot;</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="c1">// some logic</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>With strict equality we would probably need to explicitly convert objects to strings using <code>toString()</code>, which is not that bad, but loose equality looks arguably cleaner.</p>
-
-
-
-
-<h2>Surprise #4 - equality gotcha #1: <code>NaN</code></h2>
-
-
-
-
-<p>Do you know how to identify <strong>NaN</strong> in <strong>JavaScript</strong>. Sounds like a silly question, right? Well, not really, both of the following expressions are falsey:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kc">NaN</span> <span class="o">==</span> <span class="kc">NaN</span><span class="p">;</span> <span class="c1">// =&gt; false</span>
-</span><span class='line'><span class="kc">NaN</span> <span class="o">===</span> <span class="kc">NaN</span><span class="p">;</span> <span class="c1">// =&gt; false</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Fortunately, there is still a way to check for <code>NaN</code>: it is the only value in JS that is not equal to itself:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kc">NaN</span> <span class="o">!=</span> <span class="kc">NaN</span><span class="p">;</span> <span class="c1">// =&gt; true</span>
-</span><span class='line'><span class="kc">NaN</span> <span class="o">!==</span> <span class="kc">NaN</span><span class="p">;</span> <span class="c1">// =&gt; true</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>You could either take advantage of this behaviour or use <code>isNaN</code> function:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nb">isNaN</span><span class="p">(</span><span class="kc">NaN</span><span class="p">);</span> <span class="c1">// =&gt; true</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>There is one more possibility to test for <code>NaN</code>: <code>Object.is</code> function, which is very similar to <strong>strict equality</strong>, but with few exceptions. One of those is comparing <code>NaN</code> values:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kc">NaN</span> <span class="o">===</span> <span class="kc">NaN</span> <span class="c1">// =&gt; false</span>
-</span><span class='line'><span class="nb">Object</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="kc">NaN</span><span class="p">,</span> <span class="kc">NaN</span><span class="p">);</span> <span class="c1">// =&gt; true</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<h2>Surprise #5 - equality gotcha #2: comparing objects</h2>
-
-
-
-
-<p>There is one more gotcha besides <code>NaN</code> when it comes to testing for equality: <strong>comparing objects</strong>. If you think you can easily compare arrays with the same elements or objects with the same keys and values, you might be quite surprised:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">];</span> <span class="c1">// false</span>
-</span><span class='line'><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">===</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">];</span> <span class="c1">// false</span>
-</span><span class='line'><span class="p">{</span> <span class="nx">comparing</span><span class="o">:</span> <span class="s2">&quot;objects&quot;</span> <span class="p">}</span> <span class="o">==</span> <span class="p">{</span> <span class="nx">comparing</span><span class="o">:</span> <span class="s2">&quot;objects&quot;</span> <span class="p">};</span> <span class="c1">// false</span>
-</span><span class='line'><span class="p">{</span> <span class="nx">comparing</span><span class="o">:</span> <span class="s2">&quot;objects&quot;</span> <span class="p">}</span> <span class="o">===</span> <span class="p">{</span> <span class="nx">comparing</span><span class="o">:</span> <span class="s2">&quot;objects&quot;</span> <span class="p">};</span> <span class="c1">// false</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>The reason behind it is quite simple though: <strong>strict equality</strong> doesn&#8217;t compare the values, but identities instead. And two different objects are, well, different, unless they are referring to the exactly same thing.</p>
-
-
-
-
-<p>How about <strong>loose equality</strong>? As already discussed, if the types are the same, the values are compared using <strong>strict equality</strong>. It doesn&#8217;t work with <code>Object.is</code> either. The only option for objects is to compare each key and associated value with the ones from the other object.</p>
-
-
-
-
-<h2>Surprise #6 - <code>instanceof</code> and <code>typeof</code></h2>
-
-
-
-
-<p>There seems to be a lot of confusion regarding those two and how use them in different contexts. Basically, <code>typeof</code> should be used for getting the basic <strong>JavaScript</strong> type of given <strong>expression</strong> (i.e. undefined, object, boolean, string, number, string, function or symbol) and <strong>instanceof</strong> should be used for checking if a prototype of a given constructor is present in expression&#8217;s prototype chain. Even if they may seem to be similar at times, they should be used in very different use cases, check the following examples:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="k">typeof</span> <span class="s2">&quot;basic string&quot;</span>  <span class="c1">// =&gt; &quot;string&quot;, it&#39;s a primitive so looks good so far</span>
-</span><span class='line'><span class="k">typeof</span> <span class="k">new</span> <span class="nb">String</span><span class="p">(</span><span class="s2">&quot;basic string&quot;</span> <span class="p">)</span> <span class="c1">// =&gt; &quot;object&quot;, because it&#39;s no longer a primitive!</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&quot;basic string&quot;</span> <span class="k">instanceof</span> <span class="nb">String</span> <span class="c1">// =&gt; false, because &quot;basic string&quot; is a primitive</span>
-</span><span class='line'><span class="mi">1</span> <span class="k">instanceof</span> <span class="nb">Number</span> <span class="c1">// =&gt; false, same reason, 1 is a primitive</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">[]</span> <span class="k">instanceof</span> <span class="nb">Array</span> <span class="c1">// =&gt; true</span>
-</span><span class='line'><span class="p">[]</span> <span class="k">instanceof</span> <span class="nb">Object</span> <span class="c1">// =&gt; true, array is not a primitive</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">typeof</span> <span class="p">[]</span> <span class="c1">// =&gt; &quot;object&quot;, there is no array primitive, it&#39;s still an object</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Unforunately, it&#8217;s not that easy in all cases. There are 2 exceptions regarding usage of <code>typeof</code> that are quite surprising.</p>
-
-
-
-
-<p>There is <strong>undefined</strong> type which would be returned for <code>undefined</code> expression, but what about <code>null</code>? Turns out that its type is <strong>object</strong>! There were some attempts to remove this confusion - like this proposal for introducing <a href="http://wiki.ecmascript.org/doku.php?id=harmony:typeof_null" target="_blank">null type</a> - but they were eventually rejected.</p>
-
-
-
-
-<p>And another suprise: <strong>NaN</strong>. What is the type of something that is not a number? Well, it&#8217;s <strong>number</strong> of course ;). As funny as it sounds, it is in accordance with <a href="https://en.wikipedia.org/wiki/IEEE_floating_point" target="_blank">IEEE Standard for Floating-Point Arithmetic</a> and the concept of <code>NaN</code> is kind of number-ish, so this behaviour is somehow justified.</p>
-
-
-
-
-<h2>Surprise #7 - <code>Number.toFixed()</code> returning strings</h2>
-
-
-
-
-<p>Imagine you want to round some number in <strong>JavaScript</strong> and do some math with it. Apparently <code>Math.round()</code> is capable only of rounding to the nearest integer, so we need to find some better solution. There is <code>Number.toFixed()</code> function which seems to do the job. Let&#8217;s try it out:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="mf">123.789</span><span class="p">.</span><span class="nx">toFixed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="c1">// =&gt; 123.82, huh?</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>Is math broken in JS? Not really. It&#8217;s just the fact that <code>Number.toFixed()</code> returns a string, not a numeric type! And its intention is not really to perform rounding for math operations, it&#8217;s only for formatting! Too bad there is no built-in function to do such simple operation, but if you expect a numeric type, you can just handle it with <code>+</code> <strong>unary prefix operator</strong>, which won&#8217;t be used as an <strong>addition operator</strong>, but will perform <strong>conversion to number</strong> in such case:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kr">const</span> <span class="nx">number</span> <span class="o">=</span> <span class="o">+</span><span class="mf">123.789</span><span class="p">.</span><span class="nx">toFixed</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
-</span><span class='line'><span class="nx">number</span> <span class="c1">// =&gt; 123.8</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<h2>Surprise #8 - Plus (<code>+</code>) operator and results of addition</h2>
-
-
-
-
-<blockquote>&#8220;Adding stuff in JavaScript is simple, obvious and not surprising&#8221; - No one ever</blockquote>
-
-
-
-
-<p>Have you ever watched <a href="https://www.destroyallsoftware.com/talks/wat" target="_blank">Wat</a> by Gary Bernhardt? If not, I highly encourage you to do it now, it&#8217;s absolutely hillarious and concerns a lot of &#8220;odd&#8221; parts of <strong>JavaScript</strong>.</p>
-
-
-
-
-<p>Let&#8217;s try to explain most of those odd results when using <code>+</code> operator. Beware: once you finishing reading it, you will actually not find most of these results that surprising, it will be just &#8220;different&#8221;. I&#8217;m not sure yet if it&#8217;s a good or a bad thing :).</p>
-
-
-
-
-<p>Take a look at the following examples:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="p">[]</span> <span class="o">+</span> <span class="p">[]</span> <span class="c1">// =&gt; &quot;&quot;</span>
-</span><span class='line'><span class="p">[]</span> <span class="o">+</span> <span class="p">{}</span> <span class="c1">// =&gt; &quot;[object Object]&quot;</span>
-</span><span class='line'><span class="p">{}</span> <span class="o">+</span> <span class="p">[]</span> <span class="c1">// =&gt; 0 // wut...</span>
-</span><span class='line'><span class="p">{}</span> <span class="o">+</span> <span class="p">{}</span> <span class="c1">// =&gt; &quot;[object Object][object Object]&quot;</span>
-</span><span class='line'><span class="p">[]</span> <span class="o">+</span> <span class="mi">1</span> <span class="c1">// =&gt; &quot;1&quot; // it&#39;s a string!</span>
-</span><span class='line'><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">=&gt;</span> <span class="c1">// =&gt; &quot;12&quot;</span>
-</span><span class='line'><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span> <span class="c1">// =&gt; &quot;1,22&quot;</span>
-</span><span class='line'><span class="mi">3</span> <span class="o">+</span> <span class="kc">true</span> <span class="c1">// =&gt; 4</span>
-</span><span class='line'><span class="k">new</span> <span class="nb">Date</span><span class="p">(</span><span class="mi">2016</span><span class="p">,</span> <span class="mi">0</span> <span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">123</span> <span class="c1">// =&gt; &quot;Fri Jan 01 2016 00:00:00 GMT+0100 (CET)123&quot;</span>
-</span><span class='line'><span class="p">({</span> <span class="nx">toString</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="s2">&quot;trolololo&quot;</span><span class="p">;</span> <span class="p">}</span> <span class="p">})</span> <span class="o">+</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">(</span><span class="mi">2016</span><span class="p">,</span> <span class="mi">0</span> <span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c1">// =&gt; &quot;trolololoFri Jan 01 2016 00:00:00 GMT+0100 (CET)&quot;</span>
-</span><span class='line'><span class="mi">1</span> <span class="o">+</span> <span class="p">{</span> <span class="nx">valueOf</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">10</span><span class="p">;</span> <span class="p">},</span> <span class="nx">toString</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">5</span><span class="p">;</span> <span class="p">}</span> <span class="p">}</span> <span class="c1">// =&gt; 11</span>
-</span><span class='line'><span class="mi">1</span> <span class="o">+</span> <span class="p">{</span> <span class="nx">toString</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">10</span><span class="p">;</span> <span class="p">}</span> <span class="p">}</span> <span class="c1">// =&gt; 11</span>
-</span><span class='line'><span class="mi">1</span> <span class="o">+</span> <span class="kc">undefined</span> <span class="c1">// =&gt; NaN</span>
-</span><span class='line'><span class="mi">1</span> <span class="o">+</span> <span class="kc">null</span> <span class="c1">// =&gt; 1</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<div class="img-center-wrapper">
-  <img src="https://karolgalanciak.com/images/js_results_not_so_wut.jpg" title="js_results_not_so_wut" alt="js_results_not_so_wut">
-</div>
-
-
-
-
-<p>All of these results may seem to be somehow exotic, but only one of them, maybe two at most, are exceptional. The basic thing before figuring out the result of those expressions is understanding what is happening under the hood. In <strong>JavaScript</strong> you can only add numbers and strings, all other types must be converted to one of thos before. The <code>+</code> operator basically converts each value to primitive (which are: undefined, null, booleans, numbers and strings). This convertion is handled by the internal operation called <code>ToPrimitive</code> which has the following signature: <code>ToPrimitive(input, PreferredType)</code>. The <code>PreferredType</code> can be either <strong>number</strong> or <strong>string</strong>. The algorithm of this operation is quite simple, here are the steps if <strong>string</strong> is the preferred type:</p>
-
-
-
-
-<ul>
-  <li>return <code>input</code> if it&#8217;s already a primitive</li>
-  <li>If it&#8217;s not a primitive, call <code>toString()</code> method on <code>input</code> and return the result if it&#8217;s a primitive value</li>
-  <li>If it&#8217;s not a primitive, call <code>valueOf()</code> method on <code>input</code> and return the result if it&#8217;s a primitive value</li>
-  <li>If it&#8217;s not a primitive, throw <code>TypeError</code></li>
-</ul>
-
-
-
-
-<p>For <code>number</code> as preferred type the only difference is the sequence of steps 2 and 3: <code>valueOf</code> method will be called first and if it doesn&#8217;t return a primitive then <code>toString</code> method wil be called. In most cases <code>number</code> will be the preferred type, <code>string</code> will be used only when dealing with the instances of <code>Date</code>.</p>
-
-
-
-
-<p>Now that we know what is going on under the hood let&#8217;s explain the results from the examples above.</p>
-
-
-
-
-<p>The result of calling <code>valueOf</code> method on <strong>objects</strong> (<code>{}</code>) and <strong>arrays</strong> (which technically are also objects) is simply the object itself, so it&#8217;s not a primitive. However, for objects <code>toString()</code> method will return <code>"[object Object]"</code> and for arrays it will return empty string - <code>""</code>. Now we have primitives that can be added. From this point we can predict the results of operation like <code>{} + {}</code>, <code>[] + {}</code> or even:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="mi">1</span> <span class="o">+</span> <span class="p">{</span> <span class="nx">valueOf</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">10</span><span class="p">;</span> <span class="p">},</span> <span class="nx">toString</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">5</span><span class="p">;</span> <span class="p">}</span> <span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>and: </p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="mi">1</span> <span class="o">+</span> <span class="p">{</span> <span class="nx">toString</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">10</span><span class="p">;</span> <span class="p">}</span> <span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>If you remember that <string>string</string> is the preferred type for operations involving dates, the result of <code>({ toString: function() { return "surprise!"; } }) + new Date(2016, 0 , 1)</code> is not really surprising anymore. But how is it possible that <code>{} + []</code> returns <code>0</code>, not <code>"[object Object]"</code>?</p>
-
-
-
-
-<p>Most likely <code>{}</code> in the beginning is interpreted as an empty block and it&#8217;s ignored. You can verify it by putting the empty object inside parentheses (<code>({}) + []</code>), the result will be <code>"[object Object]"</code>. So in fact that expression is interpreted as <code>+[]</code> which is very different from the addition! As I&#8217;ve already mentioned before, it&#8217;s the <strong>unary prefix operator</strong> which performs conversion to number. For arrays the result of such conversion is simply 0.</p>
-
-
-
-
-<p>And why does <code>1 + undefined</code> return <code>NaN</code>? We can add only numbers and strings, <code>undefined</code> is neither of them, so it must be converted to a number in this case. The result of such operation is simply <code>NaN</code> and <code>1 + NaN</code> is still <code>NaN</code>.</p>
-
-
-
-
-<h2>Surprise #9 - No integers and floats - just numbers</h2>
-
-
-
-
-<p>In most programming languages there are different type of numbers, like integers and floats. What is again surprising about <strong>JavaScript</strong> is that all numbers are simply double precision floating point numbers! This has a huge impact of anything related to math, even for such things like precision. Take a look at the following example:</p>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="mi">9999999999999999</span> <span class="o">===</span> <span class="mi">10000000000000000</span> <span class="c1">// =&gt; true</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<p>This is definitely not something that would be expected here. If you are planning to do any serious math in <strong>JavaScript</strong>, make sure you won&#8217;t run into any issues caused by the implementation of the numbers.</p>
-
-
-
-
-<h2>Wrapping up</h2>
-
-
-
-
-<p><strong>JavaScript</strong> may sometimes seem like it&#8217;s &#8220;broken&#8221; somehow, especially comparing to other programming languages. However, many of these features are quite <strong>intentional</strong> and others are consequences of some decisions. There are still few things that seem to be really odd, but after digging deeper they start to make sense (or at least don&#8217;t look like some voodoo magic), so to avoid unfortunate surprises it&#8217;s definitely worth learning about those odd parts of <strong>JavaScript</strong>.</p>
-
-
-
 ]]></content>
   </entry>
   

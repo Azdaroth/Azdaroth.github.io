@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Quick Tips | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
+  <title><![CDATA[Category: quick tips | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/blog/categories/quick-tips/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2018-09-29T15:41:00+02:00</updated>
+  <updated>2018-12-09T19:46:51+01:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -14,401 +14,164 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Rails Quick Tips: Temporarily Disabling Touching with ActiveRecord.no_touching]]></title>
-    <link href="https://karolgalanciak.com/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/"/>
-    <updated>2018-02-25T20:00:00+01:00</updated>
-    <id>https://karolgalanciak.com/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching</id>
-    <content type="html"><![CDATA[<p><strong>Touching</strong> <strong>ActiveRecord models</strong> is quite a common thing in most of the <strong>Rails applications</strong>, especially useful for cache invalidation. By default, it updates <code>updated_at</code> timestamp with the current time, Here&rsquo;s a typical example of using <a href="https://apidock.com/rails/ActiveRecord/Persistence/touch">touch</a> in a model:</p>
+    <title type="html"><![CDATA[Inheritance and define_method - how to make them work together]]></title>
+    <link href="https://karolgalanciak.com/blog/2018/12/16/inheritance-and-define-method-how-to-make-them-work-together/"/>
+    <updated>2018-12-16T20:00:00+01:00</updated>
+    <id>https://karolgalanciak.com/blog/2018/12/16/inheritance-and-define-method-how-to-make-them-work-together</id>
+    <content type="html"><![CDATA[<p>Imagine that you are implementing some form object because you are fed up with treating ActiveRecord models as such, and you need some extra flexibility. You start with a straightforward implementation for a base class of a form object where you can just whitelist attributes. That could look like this:</p>
 
-<p>``` ruby</p>
+<p>``` rb
+class FormObject
+  def self.attributes_registry</p>
 
-<h1>app/models/photo.rb</h1>
+<pre><code>@attributes_registry ||= []
+</code></pre>
 
-<p>class Photo &lt; ApplicationRecord
-  belongs_to :user, touch: true
+<p>  end</p>
+
+<p>  def self.attribute(attribute_name)</p>
+
+<pre><code>attributes_registry &lt;&lt; attribute_name
+
+define_method(attribute_name) do
+  instance_variable_get("@#{attribute_name}")
+end
+
+define_method("#{attribute_name}=") do |value|
+  instance_variable_set("@#{attribute_name}", value)
+end
+</code></pre>
+
+<p>  end
 end
 ```</p>
 
-<p>Whenever a new photo is created, or the existing one is updated/destroyed, the <code>updated_at</code> attribute of the associated user will be updated with the current time. In the majority of the cases, this is the desired behavior (it&rsquo;s one of those rare ActiveRecord callbacks that is not that bad ;)). However, it might happen that you may not want <code>touch</code> to be executed for some reason. Is there any built-in solution that could solve that problem?</p>
+<p>Since the base class is ready, you can create a first form object that would inherit from this class:</p>
 
-<!--more-->
+<p><code>rb
+class MyForm &lt; FormObject
+  attribute :some_attribute
+end
+</code></p>
 
+<p>Initially, it does the job, but then it turns out that you might need a default value if <code>some_attribute</code> turns out to be nil. So you try something like that:</p>
+
+<p>``` rb
+class MyFormWithDefaultValue &lt; FormObject
+  attribute :some_attribute</p>
+
+<p>  def some_attribute</p>
+
+<pre><code>super || "Default"
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>After checking if the default value works, this is what you get:</p>
+
+<p>```</p>
+
+<blockquote><p>MyFormWithDefaultValue.new.some_attribute
+=> NoMethodError: super: no superclass method `some_attribute' for #&lt;MyFormWithDefaultValue:0x007f84a50ae8e0>
+```</p></blockquote>
+
+<p>Whoops! How did it happen? The method was defined in the superclass so it should be inheritable, right?</p>
+
+<p>Well, this is not really true. However, the problem is easy to fix.</p>
 
 <h2>Anatomy Of The Problem</h2>
 
-<p>Temporarily disabling <code>touch</code>ing can useful either for performance reasons (when updating a large number of records) or simply to prevent <code>after_touch</code> or <code>after_commit</code> from being executed multiple times. The latter might indicate that there is a deeper problem in the design as putting any important logic causing side-effects beyond the record&rsquo;s internal state in those <strong>ActiveRecord callbacks</strong> can easily go south (especially if you trigger email notifications), but the reality is that a lot of Rails applications use those callbacks in such cases.</p>
+<p>The primary question we should answer in the first place is: where are all those new methods defined using <code>define_method</code> in that particular way? Is it a superclass?</p>
 
-<h2>The Solution</h2>
-
-<p>Fortunately, a heavy refactoring or a rewrite is not necessary. Instead, we can take advantage of <a href="http://api.rubyonrails.org/classes/ActiveRecord/NoTouching/ClassMethods.html">ActiveRecord.no_touching</a> which temporarily disables touching inside the block.</p>
-
-<p>Imagine that you need to update all photos belonging to some user and <code>touch</code> this user only after all photos are updated. Here&rsquo;s how it could be handled:</p>
-
-<p>``` ruby
-user = User.find(user_id)</p>
-
-<p>ActiveRecord::Base.transaction do
-  User.no_touching do</p>
-
-<pre><code>user.photos.find_each do |photo|
-  # user won't be `touch`ed
-  photo.update!(some_attributes)
-end
-</code></pre>
-
-<p>  end</p>
-
-<p>  user.touch
-end
-```</p>
-
-<p>If for some reason disabling touching is necessary for all models, you could just call it on <code>ActiveRecord::Base</code>:</p>
-
-<p>``` ruby
-user = User.find(user_id)</p>
-
-<p>ActiveRecord::Base.transaction do
-  ActiveRecord::Base.no_touching do</p>
-
-<pre><code>user.photos.find_each do |photo|
-  # no model will be `touch`ed
-  photo.update!(some_attributes)
-end
-</code></pre>
-
-<p>  end</p>
-
-<p>  user.touch
-end
-```</p>
-
-<p>And that&rsquo;s it!</p>
-
-<h2>Summary</h2>
-
-<p><a href="http://api.rubyonrails.org/classes/ActiveRecord/NoTouching/ClassMethods.html"><code>ActiveRecord.no_touching</code></a> is certainly a quick solution to a potentially tricky issue. However, it is also a dirty hack that indicates a potential problem with the design of the application that should be addressed sooner than later.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[PostgreSQL Quick Tips: Working With Dates Using EXTRACT function]]></title>
-    <link href="https://karolgalanciak.com/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function/"/>
-    <updated>2018-01-30T04:30:00+01:00</updated>
-    <id>https://karolgalanciak.com/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function</id>
-    <content type="html"><![CDATA[<p>Imagine that you are implementing an e-commerce platform and want to grab all orders from the <strong>current year</strong>. What would be the simplest way of doing it in Rails? Probably writing a query looking like this:</p>
-
-<p><code>ruby
-Order.where("created_at &gt;= ? AND created_at &lt; ?", Date.today.beginning_of_year, Date.today.beginning_of_year.next_year)
+<p><code>
+ FormObject.instance_methods - Object.methods
+ =&gt; []
 </code></p>
 
-<p>It gets the job done but requires unnatural filtering by a range for a use case generic enough that it should be handled just using some native functions. Is it possible?</p>
+<p>It&rsquo;s definitely not a superclass &ndash; there are no any instance methods defined there, there are only the ones inherited from <code>Object</code>. What about <code>MyFormWithDefaultValue</code>?</p>
 
-<p>Apparently, it is! We can use <a href="https://www.postgresql.org/docs/10/static/functions-datetime.html#FUNCTIONS-DATETIME-EXTRACT" target="_blank"><code>EXTRACT</code></a>  and <a href="https://www.postgresql.org/docs/10/static/functions-datetime.html#FUNCTIONS-DATETIME-CURRENT" target="_blank"><code>now()</code></a> functions &ndash; the former could be used for extracting the current <strong>year</strong> from a timestamp and the latter could be used for getting the current time.</p>
+<p>```</p>
 
-<p>With those two functions, the query could look like the following one:</p>
+<blockquote><p>MyFormWithDefaultValue.instance_methods &ndash; Object.methods
+ => [:some_attribute, :some_attribute=]
+```</p></blockquote>
 
-<p><code>ruby
-Order.where("EXTRACT(year FROM created_at) = EXTRACT(year FROM now())")
-</code></p>
+<p>Now the error that we initially got makes way more sense. The entire issue is caused by the fact that the declaration of the attribute happens in <code>MyFormWithDefaultValue</code>, if it were defined in a base class, there would be no any issue. We can verify it with a simple example:</p>
 
-<p>Much cleaner! And the great thing is that you can also create a functional index for <code>EXTRACT(year FROM created_at)</code> to avoid sequential scanning and get much better performance.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[The aesthetics of Ruby - Kernel#itself method]]></title>
-    <link href="https://karolgalanciak.com/blog/2017/12/26/the-aesthetics-of-ruby-kernel-number-itself-method/"/>
-    <updated>2017-12-26T20:30:00+01:00</updated>
-    <id>https://karolgalanciak.com/blog/2017/12/26/the-aesthetics-of-ruby-kernel-number-itself-method</id>
-    <content type="html"><![CDATA[<p>Recently, I&rsquo;ve had quite a popular problem to solve: count the occurences of the given item in a collection. There are few ways to solve this problem &ndash; starting from using <code>Enumerable#inject</code> or <code>Enumerable#each_with_object</code> with an empty hash as an accumulator value and writing a code looking like this:</p>
+<p>``` rb
+class MyForm &lt; FormObject
+  attribute :some_attribute
+end</p>
 
-<p><code>rb
-collection.each_with_object({}) { |item, accum| accum[item] = accum[item].to_i + 1 }
-</code></p>
+<p>class MyFormWithDefaultValue &lt; MyForm
+  def some_attribute</p>
 
-<p>through a bit smarter way and taking advantage of the default hash value:</p>
-
-<p><code>rb
-collection.each_with_object(Hash.new(0)) { |item, accum| accum[item] = accum[item] + 1 }
-</code></p>
-
-<p>All these solutions look quite nice; however, there is one that looks particularly beautiful.</p>
-
-<!--more-->
-
-
-<h2>The Aesthetics of Ruby</h2>
-
-<p>An interesting way of solving this problem is by using <code>Enumerable#group_by</code> &ndash; we can simply group elements by themselves and count the occurences of each item. Here is one way to implement it:</p>
-
-<p><code>rb
-collection.group_by { |item| item }.map { |key, value| [key, value.count] }.to_h
-</code></p>
-
-<p>However, it doesn&rsquo;t look that great, especially for Ruby standard. We could do better. Ruby 2.4 adapted a very useful core extension from ActiveSupport: <a href="https://ruby-doc.org/core-2.4.0/Hash.html#method-i-transform_values" target="_blank"><code>Hash#transform_values</code></a>. Thanks to this addition, we could rewrite that to the following code:</p>
-
-<p><code>rb
-collection.group_by { |item| item }.transform_values(&amp;:count)
-</code></p>
-
-<p>Looks much better, but <code>group_by { |item| item }</code> could still be improved. Is there anything in Ruby that could help us in such case?</p>
-
-<p>It turns out there is! One of the additions in Ruby 2.2 was <a href="https://ruby-doc.org/core-2.2.0/Object.html#method-i-itself" target="_blank"><code>Kernel#itself</code></a>, which simply returns self. It might sound like an odd idea to introduce such method, but this is exactly something that we need:</p>
-
-<p><code>rb
-collection.group_by(&amp;:itself).transform_values(&amp;:count)
-</code></p>
-
-<p>This code looks just beautiful.</p>
-
-<h2>Wrapping up</h2>
-
-<p>Ruby code is known for being particularly pleasant to read and I&rsquo;m still happy that after several years I still feel immense joy when I discover interesting little things like <a href="https://ruby-doc.org/core-2.2.0/Object.html#method-i-itself" target="_blank"><code>Kernel#itself</code></a> which add up to the overall aesthetics of the language.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Traps on Rails - Overriding boolean methods in models]]></title>
-    <link href="https://karolgalanciak.com/blog/2017/11/26/traps-on-rails-overriding-boolean-methods-in-models/"/>
-    <updated>2017-11-26T16:00:00+01:00</updated>
-    <id>https://karolgalanciak.com/blog/2017/11/26/traps-on-rails-overriding-boolean-methods-in-models</id>
-    <content type="html"><![CDATA[<p>One very <strong>useful</strong> feature of <strong>ActiveRecord</strong> is automatically defining attribute readers and writers for all the columns for given tables. For the ones with <strong>boolean</strong> type, however, there is one more addition &ndash; defining an <strong>alias</strong> of the method with a question mark. Sometimes it might be useful to override this method and add some extra requirements for a given condition. However, this might not be such a good idea.</p>
-
-<!--more-->
-
-
-<h2>Anatomy of the problem</h2>
-
-<p>Imagine that you are developing some application, where users can be activated and deactivated from an admin panel. However, the application is not free, and every user that wants to access the application needs to buy a subscription. In that case, to check if the user is, in fact, active, you could override <code>User#active?</code> method and add some extra requirements regarding the subscription:</p>
-
-<p>``` rb</p>
-
-<h1>app/models/users.rb</h1>
-
-<p>class User &lt; ApplicationRecord
-  def active?</p>
-
-<pre><code>super &amp;&amp; valid_subscription?
-</code></pre>
-
-<p>  end</p>
-
-<p>  def valid_subscription?</p>
-
-<pre><code># somehow check if the subscription is valid
+<pre><code>super || "Default"
 </code></pre>
 
 <p>  end
 end
 ```</p>
 
-<p>We are taking advantage of the fact that ActiveRecord defines the aliases for boolean columns which are the original column names' ending with a question mark, so for <code>active</code> boolean column we can expect that <code>active?</code> method will be defined, and it will work the same as <code>active</code> method.</p>
+<p>```</p>
 
-<p>Ok, cool, we have our feature working and to check if a user is fully active, we call <code>User#active?</code> here and there. Our next requirement is exposing users in the API. Nothing too hard, we can add <a href="https://github.com/fotinakis/jsonapi-serializers"><code>jsonapi-serializers</code></a> gem and implement fully JSONAPI-compliant serializers. It turns out that we need to expose info if a user is active and not. Here is how our serializer could look like:</p>
+<blockquote><p>MyFormWithDefaultValueA.new.some_attribute
+ => &ldquo;Default&rdquo;
+```</p></blockquote>
 
-<p>``` rb</p>
+<h2>Solution</h2>
 
-<h1>app/serializers/user.rb</h1>
+<p>Now that we fully understand the problem let&rsquo;s think about the solution. Ideally, about the one, that doesn&rsquo;t require defining explicitly an intermediate class that we can inherit from.</p>
 
-<p>class UserSerializer
-  include JSONAPI::Serializer</p>
+<p>How about defining a module instead? Modules are also included in the inheritance chain, and for using <code>super</code>, it doesn&rsquo;t matter if the method is defined in the class or a module.</p>
 
-<p>  attribute :active
-  # other attributes
+<p>The exact solution to the problem would be wrapping the definition of new methods that happens in <code>FormObject</code> inside some module, it could be even an anonymous one, and including it right away:</p>
+
+<p>```
+class FormObject
+  def self.attributes_registry</p>
+
+<pre><code>@attributes_registry ||= []
+</code></pre>
+
+<p>  end</p>
+
+<p>  def self.attribute(attribute_name)</p>
+
+<pre><code>attributes_registry &lt;&lt; attribute_name
+
+wrapper = Module.new do
+  define_method(attribute_name) do
+    instance_variable_get("@#{attribute_name}")
+  end
+
+  define_method("#{attribute_name}=") do |value|
+    instance_variable_set("@#{attribute_name}", value)
+  end
 end
-```</p>
-
-<p>It sounds like we are done here. But the truth is there is a nasty bug here! The serializer returns the value returned by <code>User#active</code>, not by <code>User#active?</code>!</p>
-
-<h2>What exactly went wrong here?</h2>
-
-<p>The primary thing that went wrongs here was being lazy about the naming and not introducing proper domain concepts. Somehow ActiveRecord made it even easier &ndash; there was already a method called <code>active?</code> defined based on the <code>active</code> column name, so the only thing that was necessary in that case to make our first feature work was overriding it and adding some extra condition because the idea of being &ldquo;active&rdquo; is kind of similar. But overriding boolean methods is never a good idea &ndash; it always implies that some concept is missing or is made implicit in the code.</p>
-
-<h2>A solution to the problem</h2>
-
-<p>A solution would be simply making this domain concept explicit. <code>User#active?</code> method doesn&rsquo;t check if the user is active is not, it rather checks if a user can access the application, so the better name for that method would be <code>User#can_access_application?</code></p>
-
-<p>It is quite possible that we might later need to add some extra features that are related to this feature, like checking if the user is active but cannot access the app or just simply checking the <code>active</code> flag itself. Our final model could look like this in the end:</p>
-
-<p>``` rb</p>
-
-<h1>app/models/users.rb</h1>
-
-<p>class User &lt; ApplicationRecord
-  def can_access_application?</p>
-
-<pre><code>active? &amp;&amp; valid_subscription?
-</code></pre>
-
-<p>  end</p>
-
-<p>  def cannot_access_application?</p>
-
-<pre><code>!can_access_application?
-</code></pre>
-
-<p>  end</p>
-
-<p>  # other methods
-end
-```</p>
-
-<p>We should also update the serializer:</p>
-
-<p>``` rb</p>
-
-<h1>app/serializers/user.rb</h1>
-
-<p>class UserSerializer
-  include JSONAPI::Serializer</p>
-
-<p>  attribute :active do</p>
-
-<pre><code>object.active
-</code></pre>
-
-<p>  end</p>
-
-<p>  attribute :can_access_application do</p>
-
-<pre><code>object.can_access_application?
-</code></pre>
-
-<p>  end</p>
-
-<p>  attribute :cannot_access_application do</p>
-
-<pre><code>object.cannot_access_application?
+include wrapper
 </code></pre>
 
 <p>  end
 end
 ```</p>
 
-<p>One could argue that this fix was not necessary and it was a developer&rsquo;s fault, and he or she should have checked the model if this method has not been overridden and adjust the serializer. That is somehow true, but if such code is deployed to production, it probably means that the reviewer of the code was not aware that there is a potential issue in the code and such things are really hard to spot &ndash; ActiveRecord adds those aliases for every boolean column so it might sound like a fair assumption that <code>User#active</code> and <code>User#active?</code> will return the same result.</p>
+<p>Let&rsquo;s verify if the new solution works:</p>
 
-<p>However, the truth is that not only did we minimize the risk of having the name collisions by those changes but we gained some extra flexibility, and it was quite straight-forward to differentiate between <code>User#active?</code>and <code>User#can_access_application?</code>. In a previous implementation, it was simply not possible with the question-mark methods.</p>
+<p>```</p>
 
-<h2>Wrapping up</h2>
+<blockquote><p>MyFormWithDefaultValue.new.some_attribute
+ => &ldquo;Default&rdquo;</p></blockquote>
 
-<p>Naming is one of <a href="https://martinfowler.com/bliki/TwoHardThings.html" target="_blank">two hard problems in computer science</a> and it&rsquo;s a good idea to always make all the domain concepts properly named and explicit, even if it means adding more code &ndash; just because something is not explicit, doesn&rsquo;t mean it doesn&rsquo;t exist. When it comes to <strong>ActiveRecord</strong> models, an extra caution is more than recommended &ndash; such models mix both persistence and domain concepts and it&rsquo;s quite easy to hurt yourself in such case. Not overriding boolean methods generated by ActiveRecord and properly naming things sounds like a good rule of thumb to follow.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ember Tips: Testing Outgoing HTTP Requests]]></title>
-    <link href="https://karolgalanciak.com/blog/2017/06/25/ember-tips-testing-outgoing-http-requests/"/>
-    <updated>2017-06-25T22:00:00+02:00</updated>
-    <id>https://karolgalanciak.com/blog/2017/06/25/ember-tips-testing-outgoing-http-requests</id>
-    <content type="html"><![CDATA[<p><strong>Ember.js</strong> is a web frontend framework and it&rsquo;s no surprise that majority of the applications deal with a lot of <strong>HTTP requests</strong>. But such fact has a lot of implications on the process of development of the Ember apps, especially when it comes to <strong>testing</strong>. For basic <code>GET</code> requests which don&rsquo;t include any query params or don&rsquo;t deal with pagination it&rsquo;s quite straight-forward &ndash; for those we just want to fetch some data, so we can check if proper objects are present as a side-effect of these requests. What about <code>POST</code>, <code>PATCH</code> or <code>DELETE</code> requests, where we can&rsquo;t easily test the side effects?</p>
+<p>```</p>
 
-<p>Fortunately, thanks to the awesome tools such as <a href="https://github.com/pretenderjs/pretender" target="_blank">pretender</a> and <a href="https://github.com/samselikoff/ember-cli-mirage" target="_blank">ember-cli-mirage</a>, it&rsquo;s not a big problem.</p>
-
-<!--more-->
-
-
-<h2>Scenario #1: Testing if the request body sent in the outgoing request is right</h2>
-
-<p>Imagine that you are writing a classic sign-up for users. It would be quite useful to ensure that the right params are indeed sent to the <code>/api/users</code> endpoint (if that&rsquo;s the case).</p>
-
-<p>For dealing with HTTP requests and/or implementing a backend mock, <a href="https://github.com/samselikoff/ember-cli-mirage" target="_blank">ember-cli-mirage</a> addon is a great choice. The setup is beyond the scope of this article, but if you happen to not be familiar with <code>ember-cli-mirage</code>, I highly recommend reading the <a href="http://www.ember-cli-mirage.com" target="_blank">docs</a> which are very clear about the setup and its features.</p>
-
-<p>Let&rsquo;s assume that we have a proper route generated for the signup, let it be a <code>signup</code> route, a corresponding <code>signup</code> controller already handling a logic for the registration in one of its actions and that we have a <code>User</code> model with <code>email</code> and <code>password</code> attributes. Our scenario will be pretty simple: we want to make sure that after filling in <code>email</code> and <code>password</code> fields and clicking the <code>submit</code> button the request will be performed to <code>/api/users</code> with the right params. Here&rsquo;s our test for the signup feature:</p>
-
-<p>``` javascript my-awesome-app/tests/acceptance/sign-up.js
-/<em> global server </em>/
-import { test } from &lsquo;qunit&rsquo;;
-import moduleForAcceptance from &lsquo;book-me/tests/helpers/module-for-acceptance&rsquo;;</p>
-
-<p>moduleForAcceptance(&lsquo;Acceptance | sign up&rsquo;);
-test(&lsquo;user can successfully sign up&rsquo;, function(assert) {
-  assert.expect(1);</p>
-
-<p>  server.post(&lsquo;/api/users&rsquo;, function(schema)  {</p>
-
-<pre><code>const attributes = this.normalizedRequestAttrs();
-const expectedAttributes = {
-  email: 'example@email.com',
-  password: 'secretpassword'
-};
-
-assert.deepEqual(attributes, expectedAttributes, "attributes don't match the expected ones");
-
-return schema.users.create(attributes);
-</code></pre>
-
-<p>  });</p>
-
-<p>  visit(&lsquo;/signup&rsquo;);</p>
-
-<p>  andThen(() => {</p>
-
-<pre><code>fillIn('[data-test=signup-email]', "example@email.com");
-fillIn('[data-test=signup-password]', 'secretPassword');
-
-click('[data-test=submit-signup]');
-</code></pre>
-
-<p>  });
-});
-```</p>
-
-<p>In this acceptance test we visit the <code>signup</code> page, provide the email and password combo and we click on the submit button. There is only one simple assertion here: comparing the expected attributes against the normalized attributes from the requests to <code>/api/users</code> endpoint &ndash; we use normalized attributes to avoid dealing with JSONAPI format. To achieve that we provide a custom action handler which is very close to the default implementation for <code>POST</code> actions from <code>ember-cli-mirage</code>. The only extra step here is comparing the attributes.</p>
-
-<p>What if we want to just make sure that the request was performed to the given endpoint, but we don&rsquo;t care about the request body?</p>
-
-<h2>Scenario #2 Testing if the request was performed to the given endpoint</h2>
-
-<p>For this scenario imagine that we want to have a feature of deleting some tasks from the to-do list. The simplest way to make sure that the task will be removed would be checking if the <code>DELETE</code> request was performed to <code>/api/tasks/:id</code> endpoint. Again, let&rsquo;s assume that we already have a right implementation for this feature (too bad we didn&rsquo;t practice strict TDD to develop it properly).</p>
-
-<p>For this use case we will do something a bit different than the last time. First, let&rsquo;s add the right config for the <code>ember-cli-mirage</code> to handle CRUD actions for <code>tasks</code> using <code>resource</code> helper:</p>
-
-<p>``` javascript my-awesome-app/mirage/config.js
-export default function() {
-  this.namespace = &lsquo;api&rsquo;;</p>
-
-<p>  this.resource(&lsquo;users&rsquo;);
-}
-```</p>
-
-<p>And that&rsquo;s how our test could look like:</p>
-
-<p>``` javascript my-awesome-app/tests/acceptance/delete-task.js
-/<em> global server </em>/
-import { test } from &lsquo;qunit&rsquo;;
-import moduleForAcceptance from &lsquo;book-me/tests/helpers/module-for-acceptance&rsquo;;</p>
-
-<p>moduleForAcceptance(&lsquo;Acceptance | delete task&rsquo;);
-test(&lsquo;user can delete tasks&rsquo;, function(assert) {
-  assert.expect(1);</p>
-
-<p>  const task = server.create(&lsquo;task&rsquo;);</p>
-
-<p>  visit(&lsquo;/tasks&rsquo;);</p>
-
-<p>  click(&lsquo;[data-test=delete-task]&rsquo;);</p>
-
-<p>  andThen(() => {</p>
-
-<pre><code>const taskUrl = `/api/tasks/${task.id}`;
-const deleteTaskRequest = server.pretender.handledRequests.find((request) =&gt; {
-  return request.url === taskUrl &amp;&amp; request.method === 'DELETE';
-});
-
-assert.ok(deleteTaskRequest, 'delete task request should be performed');
-</code></pre>
-
-<p>  });
-});
-```</p>
-
-<p>Again, our test has a very simple structure: we visit the <code>tasks</code> route where all the tasks are displayed and delete the one we created in the test&rsquo;s setup. To make sure that the request was performed to the right endpoint we take advantage of the fact that <code>ember-cli-mirage</code> uses <code>pretender</code> under the hood which keeps track of all handled requests in <code>handledRequests</code> property. Thanks to this feature, we can identify our request based on the <strong>URL</strong> and the <strong>request method</strong>.</p>
+<p>Yay! It does exactly what we wanted to achieve.</p>
 
 <h2>Wrapping Up</h2>
 
-<p>Testing <strong>outgoing requests</strong> in Ember might not be the most obvious thing to do. Fortunately, thanks to <a href="https://github.com/pretenderjs/pretender" target="_blank">pretender</a> and <a href="https://github.com/samselikoff/ember-cli-mirage" target="_blank">ember-cli-mirage</a>, we can easily verify both the <strong>URLs</strong> of the endpoints where the requests were performed to and the <strong>request body</strong> that was sent with the request.</p>
-
-<p>P.S. I&rsquo;ve just started <strong>writing a book</strong> about <strong>test-driving Ember</strong> applications. If you found this article useful, you are going to love it :). <strong>Subscribe</strong> to my newsletter to get updates and promotion code once it&rsquo;s released.</p>
+<p>Metaprogramming in Ruby is a powerful tool, however; it can lead to some issues that might not be obvious why they happen. Fortunately, with enough knowledge of the language, those problems can be solved elegantly.</p>
 ]]></content>
   </entry>
   

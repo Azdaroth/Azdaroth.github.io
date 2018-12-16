@@ -58,7 +58,7 @@
         "width": 1024
       },
       "datePublished": "",
-      "dateModified": "2018-09-29",
+      "dateModified": "2018-12-09",
       "author": {
         "@type": "Person",
         "name": "Karol Galanciak"
@@ -135,6 +135,50 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2017/01/22/javascript-the-surprising-parts/">JavaScript: The Surprising Parts</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-01-22T22:45:00+01:00" pubdate data-updated="true">Jan 22<span>nd</span>, 2017</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Do you think you know all the surprising parts of <strong>JavaScript</strong>? Some of these &#8220;features&#8221; may look as if the language was broken, but it&#8217;s not necessarily the case. Things like <strong>variables hoisting</strong>, <strong>variables scope</strong>, behaviour of <code>this</code> are quite intentional and besides just being different from most of other programming languages, there is nothing particularly wrong with them. However, there are still some things that are quite surprising about <strong>JavaScript</strong>. Let&#8217;s take a look at some of them.</p>
+
+
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2017/01/22/javascript-the-surprising-parts/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -532,51 +576,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/05/06/when-validation-is-not-enough-postgresql-triggers-for-data-integrity/">When Validation Is Not Enough: PostgreSQL Triggers for Data Integrity</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-05-06T19:45:00+02:00" pubdate data-updated="true">May 6<span>th</span>, 2016</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Is <strong>validation</strong> in your models or form objects enough to ensure <strong>integrity of the data</strong>? Well, seems like you can&#8217;t really persist a record when the data is <strong>not valid</strong> unless you intentionally try to bypass validation using <code>save: false</code> option when calling <code>save</code> or using <code>update_column</code>. What about <strong>uniqueness validation</strong>?
-A classic example would be a unique <code>email</code> per user. To make sure the email is truly unique we could add a unique index in database - not only would it prevent saving non-unique users when <strong>bypassing validation</strong>, but also it would raise extra error when 2 <strong>concurrent requests</strong> would attempt to save user with the same email. However, some validations are more complex that ensuring  a value is unique and index won&#8217;t really help much. Fortunately, PostgreSQL is powerful enough to provide a perfect solution to such problem. Time to meet your new friend: <strong>PostgreSQL triggers</strong>.</p>
-
-
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/05/06/when-validation-is-not-enough-postgresql-triggers-for-data-integrity/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/4/">&larr; Older</a>
@@ -609,6 +608,10 @@ A classic example would be a unique <code>email</code> per user. To make sure th
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/12/16/inheritance-and-define-method-how-to-make-them-work-together/">Inheritance and Define_method - How to Make Them Work Together</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/09/30/the-problems-with-validating-activerecord-models-and-why-state-validation-is-a-bad-idea/">The Problems With Validating ActiveRecord Models and Why State Validation Is a Bad Idea</a>
       </li>
     
@@ -622,10 +625,6 @@ A classic example would be a unique <code>email</code> per user. To make sure th
     
       <li class="post">
         <a href="/blog/2018/06/24/rails-and-conditional-validations-in-models/">Rails and Conditional Validations in Models</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization/">The Case for Before_validation Callback: Complex State Normalization</a>
       </li>
     
   </ul>
