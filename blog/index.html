@@ -58,7 +58,7 @@
         "width": 1024
       },
       "datePublished": "",
-      "dateModified": "2018-12-16",
+      "dateModified": "2019-01-27",
       "author": {
         "@type": "Person",
         "name": "Karol Galanciak"
@@ -135,6 +135,77 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2019/01/27/how-to-tell-the-difference-between-a-default-and-provided-value-for-optional-arguments-in-ruby/">How to Tell the Difference Between a Default and a Provided Value for Optional Arguments in Ruby?</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2019-01-27T20:00:00+01:00" pubdate data-updated="true">Jan 27<span>th</span>, 2019</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>It is sometimes required for the methods with optional arguments to be able to differentiate between its default value and the value passed from the caller. Passing <code>nil</code> might initially sound like a good idea since it represents &ldquo;nothingness&rdquo;. However, it might turn out that <code>nil</code> is a legit value and there might be cases where it is desirable for the caller to pass <code>nil</code>. In such a case, we cannot use it as a default value if we want to implement a special logic for the case of not providing that value.</p>
+
+<p>Fortunately, there is an easy way to deal with it &ndash; use a special constant:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">SomeClass</span>
+</span><span class='line'>  <span class="no">NO_VALUE_PROVIDED</span> <span class="o">=</span> <span class="no">Object</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>  <span class="n">private_constant</span> <span class="ss">:NO_VALUE_PROVIDED</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="ss">argument</span><span class="p">:</span> <span class="no">NO_VALUE_PROVIDED</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">argument</span> <span class="o">==</span> <span class="no">NO_VALUE_PROVIDED</span>
+</span><span class='line'>      <span class="n">handle_scenario_for_no_value_provided</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="n">do_something_with_argument</span><span class="p">(</span><span class="n">argument</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In <code>call</code> method, we allow to pass an optional argument with a default of <code>NO_VALUE_PROVIDED</code>, which is a private constant defined in that class that is an instance of <code>Object</code>.</p>
+
+<p>By depending on the instance of <code>Object</code> that is initialized inside that class, we can avoid cases where the equality check returns <code>true</code> even if this is not an expected outcome, which could happen if we used strings or symbols. We could use some symbol that would be very unlikely to be passed from the caller, like <code>:__no_value_provided__,</code> but it arguably looks more like a workaround than a dedicated solution for the problem.</p>
+
+<p>Also, a private constant ensures it is not used anywhere outside the class, which minimizes the chances that the passed argument would the same as our placeholder for no-value-provided scenario even more.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -756,60 +827,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function/">PostgreSQL Quick Tips: Working With Dates Using EXTRACT Function</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2018-01-30T04:30:00+01:00" pubdate data-updated="true">Jan 30<span>th</span>, 2018</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Imagine that you are implementing an e-commerce platform and want to grab all orders from the <strong>current year</strong>. What would be the simplest way of doing it in Rails? Probably writing a query looking like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Order</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s2">&quot;created_at &gt;= ? AND created_at &lt; ?&quot;</span><span class="p">,</span> <span class="no">Date</span><span class="o">.</span><span class="n">today</span><span class="o">.</span><span class="n">beginning_of_year</span><span class="p">,</span> <span class="no">Date</span><span class="o">.</span><span class="n">today</span><span class="o">.</span><span class="n">beginning_of_year</span><span class="o">.</span><span class="n">next_year</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>It gets the job done but requires unnatural filtering by a range for a use case generic enough that it should be handled just using some native functions. Is it possible?</p>
-
-<p>Apparently, it is! We can use <a href="https://www.postgresql.org/docs/10/static/functions-datetime.html#FUNCTIONS-DATETIME-EXTRACT" target="_blank"><code>EXTRACT</code></a>  and <a href="https://www.postgresql.org/docs/10/static/functions-datetime.html#FUNCTIONS-DATETIME-CURRENT" target="_blank"><code>now()</code></a> functions &ndash; the former could be used for extracting the current <strong>year</strong> from a timestamp and the latter could be used for getting the current time.</p>
-
-<p>With those two functions, the query could look like the following one:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Order</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s2">&quot;EXTRACT(year FROM created_at) = EXTRACT(year FROM now())&quot;</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Much cleaner! And the great thing is that you can also create a functional index for <code>EXTRACT(year FROM created_at)</code> to avoid sequential scanning and get much better performance.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -840,6 +857,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/01/27/how-to-tell-the-difference-between-a-default-and-provided-value-for-optional-arguments-in-ruby/">How to Tell the Difference Between a Default and a Provided Value for Optional Arguments in Ruby?</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/12/16/inheritance-and-define-method-how-to-make-them-work-together/">Inheritance and Define_method - How to Make Them Work Together</a>
       </li>
     
@@ -853,10 +874,6 @@
     
       <li class="post">
         <a href="/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking/">Trolling in Ruby - Implementing JavaScript-like Maths With Implicit Conversion Hijacking</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/06/24/rails-and-conditional-validations-in-models/">Rails and Conditional Validations in Models</a>
       </li>
     
   </ul>
@@ -906,7 +923,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2018 - Karol Galanciak -
+  Copyright &copy; 2019 - Karol Galanciak -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

@@ -4,7 +4,7 @@
   <title><![CDATA[Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2018-12-16T18:25:51+01:00</updated>
+  <updated>2019-01-27T18:30:24+01:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -12,6 +12,50 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[How to tell the difference between a default and a provided value for optional arguments in Ruby?]]></title>
+    <link href="https://karolgalanciak.com/blog/2019/01/27/how-to-tell-the-difference-between-a-default-and-provided-value-for-optional-arguments-in-ruby/"/>
+    <updated>2019-01-27T20:00:00+01:00</updated>
+    <id>https://karolgalanciak.com/blog/2019/01/27/how-to-tell-the-difference-between-a-default-and-provided-value-for-optional-arguments-in-ruby</id>
+    <content type="html"><![CDATA[<p>It is sometimes required for the methods with optional arguments to be able to differentiate between its default value and the value passed from the caller. Passing <code>nil</code> might initially sound like a good idea since it represents &ldquo;nothingness&rdquo;. However, it might turn out that <code>nil</code> is a legit value and there might be cases where it is desirable for the caller to pass <code>nil</code>. In such a case, we cannot use it as a default value if we want to implement a special logic for the case of not providing that value.</p>
+
+<p>Fortunately, there is an easy way to deal with it &ndash; use a special constant:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">SomeClass</span>
+</span><span class='line'>  <span class="no">NO_VALUE_PROVIDED</span> <span class="o">=</span> <span class="no">Object</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>  <span class="n">private_constant</span> <span class="ss">:NO_VALUE_PROVIDED</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="ss">argument</span><span class="p">:</span> <span class="no">NO_VALUE_PROVIDED</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">argument</span> <span class="o">==</span> <span class="no">NO_VALUE_PROVIDED</span>
+</span><span class='line'>      <span class="n">handle_scenario_for_no_value_provided</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="n">do_something_with_argument</span><span class="p">(</span><span class="n">argument</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In <code>call</code> method, we allow to pass an optional argument with a default of <code>NO_VALUE_PROVIDED</code>, which is a private constant defined in that class that is an instance of <code>Object</code>.</p>
+
+<p>By depending on the instance of <code>Object</code> that is initialized inside that class, we can avoid cases where the equality check returns <code>true</code> even if this is not an expected outcome, which could happen if we used strings or symbols. We could use some symbol that would be very unlikely to be passed from the caller, like <code>:__no_value_provided__,</code> but it arguably looks more like a workaround than a dedicated solution for the problem.</p>
+
+<p>Also, a private constant ensures it is not used anywhere outside the class, which minimizes the chances that the passed argument would the same as our placeholder for no-value-provided scenario even more.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Inheritance and define_method - how to make them work together]]></title>
@@ -3686,196 +3730,6 @@ the door to a holistic architectural approach where all parts of the domain fit 
 <p>Testing holding a button for particular period of time doesn&rsquo;t sound like an obvious thing to do. Fortunately, with proper design and understanding the interaction from the <strong>browser&rsquo;s perspective</strong>, it isn&rsquo;t that hard to do and doesn&rsquo;t necessarily make your tests slower.</p>
 
 <p>P.S. I&rsquo;ve just started <strong>writing a book</strong> about <strong>test-driving Ember</strong> applications. If you found this article useful, you are going to love it :). <strong>Subscribe</strong> to my newsletter to get updates and promotion code once it&rsquo;s released.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[JavaScript Tips: Redefining userAgent property]]></title>
-    <link href="https://karolgalanciak.com/blog/2017/02/26/javascript-tips-redefining-useragent-property/"/>
-    <updated>2017-02-26T23:00:00+01:00</updated>
-    <id>https://karolgalanciak.com/blog/2017/02/26/javascript-tips-redefining-useragent-property</id>
-    <content type="html"><![CDATA[<p>Imagine a use case where you are trying to check if a user accessed your app from a <strong>mobile</strong> device or not. Most likely you will need to use <a href="https://developer.mozilla.org/en-US/docs/Web/API/NavigatorID/userAgent" target="_blank">navigator.userAgent</a>  property and craft some smart regular expression to test for the presence of particular expression, like <code>(/Mobi/.test(navigator.userAgent)</code> which seems to be the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent" target="_blank">recommended way</a> to do it. Ok, so we&rsquo;re almost done with our feature, we just need to add some tests to make sure it works as expected. But there&rsquo;s a problem &ndash; you can&rsquo;t redefine <code>userAgent</code> property with just using a setter! Fortunately, there is a way to solve this problem.</p>
-
-<!--more-->
-
-
-<h2>Anatomy of the problem</h2>
-
-<div class="img-center-wrapper">
-  <img src="https://karolgalanciak.com/images/useragent/one_does_not_simply_override_useragent.jpg" title="'one does not simply override user agent'" >
-</div>
-
-
-<p>Let&rsquo;s check what happens when we try to override <code>navigator.userAgent</code> property with a setter in a browser.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&gt;</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span>
-</span><span class='line'><span class="o">&lt;</span> <span class="s2">&quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_2) AppleWebKit/602.3.12 (KHTML, like Gecko) Version/10.0.2 Safari/602.3.12&quot;</span>
-</span><span class='line'><span class="o">&gt;</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span> <span class="o">=</span> <span class="s2">&quot;Mobile&quot;</span>
-</span><span class='line'><span class="o">&lt;</span> <span class="s2">&quot;Mobile&quot;</span>
-</span><span class='line'><span class="o">&gt;</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span>
-</span><span class='line'><span class="o">&lt;</span> <span class="s2">&quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_2) AppleWebKit/602.3.12 (KHTML, like Gecko) Version/10.0.2 Safari/602.3.12&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Well, that&rsquo;s not exactly what we wanted to be returned. But we need to override this value somehow to test both behaviours &ndash; when the device is a mobile one and not a mobile one. Fortunately, <strong>JavaScript</strong> is quite powerful at this point and it&rsquo;s possibly to redefine such property using <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty" target="_blank"><code>Object.defineProperty</code></a>.</p>
-
-<h2>Object.defineProperty to the Rescue</h2>
-
-<p><code>Object.defineProperty</code> allows to define a new property or redefine an existing one on a  given object. The syntax is following:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nb">Object</span><span class="p">.</span><span class="nx">defineProperty</span><span class="p">(</span><span class="nx">obj</span><span class="p">,</span> <span class="nx">prop</span><span class="p">,</span> <span class="nx">descriptor</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>descriptor</code> argument is a particularly interesting one &ndash; it allows to define a <code>value</code> of the property, a getter, a setter, whether the property should be <code>enumerable</code> (if it&rsquo;s going to be included when iterating over the properties), if it&rsquo;s <code>writable</code> (if the value can be changed with an assignment operator) and <code>configurable</code> (if the property can be changed and deleted from the object&rsquo;s properties).</p>
-
-<p>Looks like <code>value</code> is exactly what we need. Let&rsquo;s try it then:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&gt;</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">defineProperty</span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">navigator</span><span class="p">,</span> <span class="s1">&#39;userAgent&#39;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">value</span><span class="o">:</span> <span class="s1">&#39;Mobile&#39;</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&gt;</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">;</span>
-</span><span class='line'><span class="o">&lt;</span> <span class="s2">&quot;Mobile&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Looks good so far. What if we wanted to override this property again?</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&gt;</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span> <span class="o">=</span> <span class="s1">&#39;Desktop&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&gt;</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">;</span>
-</span><span class='line'><span class="o">&lt;</span> <span class="s2">&quot;Mobile&quot;</span><span class="p">;</span> <span class="c1">// whooops</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Hmm, doesn&rsquo;t work, maybe let&rsquo;s try to redefine this propert again then?</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&gt;</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">defineProperty</span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">navigator</span><span class="p">,</span> <span class="s1">&#39;userAgent&#39;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">value</span><span class="o">:</span> <span class="s1">&#39;Mobile&#39;</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span> <span class="nx">TypeError</span><span class="o">:</span> <span class="nx">Attempting</span> <span class="nx">to</span> <span class="nx">change</span> <span class="nx">value</span> <span class="nx">of</span> <span class="nx">a</span> <span class="nx">readonly</span> <span class="nx">property</span><span class="p">.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Apparently it&rsquo;s not that great as we thought it would be. However, that&rsquo;s not a problem! We just need to make this property either <code>configurable</code> or <code>writable</code>! Let&rsquo;s check both scenarios:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&gt;</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">defineProperty</span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">navigator</span><span class="p">,</span> <span class="s1">&#39;userAgent&#39;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">value</span><span class="o">:</span> <span class="s1">&#39;Mobile&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">configurable</span><span class="o">:</span> <span class="kc">true</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&gt;</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">;</span>
-</span><span class='line'><span class="o">&lt;</span> <span class="s2">&quot;Mobile&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&gt;</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">defineProperty</span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">navigator</span><span class="p">,</span> <span class="s1">&#39;userAgent&#39;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">value</span><span class="o">:</span> <span class="s1">&#39;Desktop&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">configurable</span><span class="o">:</span> <span class="kc">true</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&gt;</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">;</span>
-</span><span class='line'><span class="o">&lt;</span> <span class="s2">&quot;Desktop&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&gt;</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span> <span class="o">=</span> <span class="s2">&quot;Mobile&quot;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&gt;</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">;</span>
-</span><span class='line'><span class="o">&lt;</span> <span class="s2">&quot;Desktop&quot;</span> <span class="c1">// setter won&#39;t work here!</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&gt;</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">defineProperty</span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">navigator</span><span class="p">,</span> <span class="s1">&#39;userAgent&#39;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">value</span><span class="o">:</span> <span class="s1">&#39;Mobile&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">writable</span><span class="o">:</span> <span class="kc">true</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&gt;</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">;</span>
-</span><span class='line'><span class="o">&lt;</span> <span class="s2">&quot;Mobile&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&gt;</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span> <span class="o">=</span> <span class="s1">&#39;Desktop&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&gt;</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">;</span>
-</span><span class='line'><span class="o">&lt;</span> <span class="s2">&quot;Desktop&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&gt;</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">defineProperty</span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">navigator</span><span class="p">,</span> <span class="s1">&#39;userAgent&#39;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">value</span><span class="o">:</span> <span class="s1">&#39;Mobile&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">writable</span><span class="o">:</span> <span class="kc">true</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&gt;</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">;</span>
-</span><span class='line'><span class="o">&lt;</span> <span class="s2">&quot;Mobile&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Both of the ways work just fine, however, <code>writable</code> is a bit more flexible as it allows to change the <code>value</code> returned by a given property by redefining this property or using a simple setter. In case of <code>configurable</code> you can only redefine a property.</p>
-
-<h2>Wrapping Up</h2>
-
-<p>Maybe <strong>JavaScript</strong> has some odd parts, nevertheless, it&rsquo;s a quite powerful language. Changing the value of read-only properties is probably not a something do you will do often, but if you really need to do it, <code>Object.defineProperty</code> will be your friend.</p>
 ]]></content>
   </entry>
   

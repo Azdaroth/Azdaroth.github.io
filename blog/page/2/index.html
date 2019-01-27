@@ -58,7 +58,7 @@
         "width": 1024
       },
       "datePublished": "",
-      "dateModified": "2018-12-16",
+      "dateModified": "2019-01-27",
       "author": {
         "@type": "Person",
         "name": "Karol Galanciak"
@@ -135,6 +135,60 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2018/01/30/postgresql-quick-tips-working-with-dates-using-extract-function/">PostgreSQL Quick Tips: Working With Dates Using EXTRACT Function</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-01-30T04:30:00+01:00" pubdate data-updated="true">Jan 30<span>th</span>, 2018</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Imagine that you are implementing an e-commerce platform and want to grab all orders from the <strong>current year</strong>. What would be the simplest way of doing it in Rails? Probably writing a query looking like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Order</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s2">&quot;created_at &gt;= ? AND created_at &lt; ?&quot;</span><span class="p">,</span> <span class="no">Date</span><span class="o">.</span><span class="n">today</span><span class="o">.</span><span class="n">beginning_of_year</span><span class="p">,</span> <span class="no">Date</span><span class="o">.</span><span class="n">today</span><span class="o">.</span><span class="n">beginning_of_year</span><span class="o">.</span><span class="n">next_year</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It gets the job done but requires unnatural filtering by a range for a use case generic enough that it should be handled just using some native functions. Is it possible?</p>
+
+<p>Apparently, it is! We can use <a href="https://www.postgresql.org/docs/10/static/functions-datetime.html#FUNCTIONS-DATETIME-EXTRACT" target="_blank"><code>EXTRACT</code></a>  and <a href="https://www.postgresql.org/docs/10/static/functions-datetime.html#FUNCTIONS-DATETIME-CURRENT" target="_blank"><code>now()</code></a> functions &ndash; the former could be used for extracting the current <strong>year</strong> from a timestamp and the latter could be used for getting the current time.</p>
+
+<p>With those two functions, the query could look like the following one:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Order</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s2">&quot;EXTRACT(year FROM created_at) = EXTRACT(year FROM now())&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Much cleaner! And the great thing is that you can also create a functional index for <code>EXTRACT(year FROM created_at)</code> to avoid sequential scanning and get much better performance.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -523,47 +577,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2017/02/26/javascript-tips-redefining-useragent-property/">JavaScript Tips: Redefining userAgent Property</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2017-02-26T23:00:00+01:00" pubdate data-updated="true">Feb 26<span>th</span>, 2017</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Imagine a use case where you are trying to check if a user accessed your app from a <strong>mobile</strong> device or not. Most likely you will need to use <a href="https://developer.mozilla.org/en-US/docs/Web/API/NavigatorID/userAgent" target="_blank">navigator.userAgent</a>  property and craft some smart regular expression to test for the presence of particular expression, like <code>(/Mobi/.test(navigator.userAgent)</code> which seems to be the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent" target="_blank">recommended way</a> to do it. Ok, so we&rsquo;re almost done with our feature, we just need to add some tests to make sure it works as expected. But there&rsquo;s a problem &ndash; you can&rsquo;t redefine <code>userAgent</code> property with just using a setter! Fortunately, there is a way to solve this problem.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2017/02/26/javascript-tips-redefining-useragent-property/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -596,6 +609,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/01/27/how-to-tell-the-difference-between-a-default-and-provided-value-for-optional-arguments-in-ruby/">How to Tell the Difference Between a Default and a Provided Value for Optional Arguments in Ruby?</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/12/16/inheritance-and-define-method-how-to-make-them-work-together/">Inheritance and Define_method - How to Make Them Work Together</a>
       </li>
     
@@ -609,10 +626,6 @@
     
       <li class="post">
         <a href="/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking/">Trolling in Ruby - Implementing JavaScript-like Maths With Implicit Conversion Hijacking</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/06/24/rails-and-conditional-validations-in-models/">Rails and Conditional Validations in Models</a>
       </li>
     
   </ul>
@@ -662,7 +675,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2018 - Karol Galanciak -
+  Copyright &copy; 2019 - Karol Galanciak -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

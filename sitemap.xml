@@ -273,20 +273,26 @@
         <lastmod>2018-12-16T18:21:34+01:00</lastmod>
     </url>
     <url>
+        <loc>
+            https://karolgalanciak.com/blog/2019/01/27/how-to-tell-the-difference-between-a-default-and-provided-value-for-optional-arguments-in-ruby/
+        </loc>
+        <lastmod>2019-01-27T18:30:09+01:00</lastmod>
+    </url>
+    <url>
         <loc>https://karolgalanciak.com/</loc>
-        <lastmod>2018-12-16T18:21:34+01:00</lastmod>
+        <lastmod>2019-01-27T18:30:09+01:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/open-source/</loc>
-        <lastmod>2018-12-16T18:21:34+01:00</lastmod>
+        <lastmod>2019-01-27T18:30:09+01:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/privacy-policy/</loc>
-        <lastmod>2018-12-16T18:21:34+01:00</lastmod>
+        <lastmod>2019-01-27T18:30:09+01:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/publications/</loc>
-        <lastmod>2018-12-16T18:21:34+01:00</lastmod>
+        <lastmod>2019-01-27T18:30:09+01:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/test-driven-ember/</loc>
@@ -294,15 +300,15 @@
     </url>
     <url>
         <loc>https://karolgalanciak.com/blog/</loc>
-        <lastmod>2018-12-16T18:21:34+01:00</lastmod>
+        <lastmod>2019-01-27T18:30:09+01:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/blog/archives/</loc>
-        <lastmod>2018-12-16T18:21:34+01:00</lastmod>
+        <lastmod>2019-01-27T18:30:09+01:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/presentations/</loc>
-        <lastmod>2018-12-16T18:21:34+01:00</lastmod>
+        <lastmod>2019-01-27T18:30:09+01:00</lastmod>
     </url>
     <url>
         <loc>https://karolgalanciak.com/robots.txt</loc>

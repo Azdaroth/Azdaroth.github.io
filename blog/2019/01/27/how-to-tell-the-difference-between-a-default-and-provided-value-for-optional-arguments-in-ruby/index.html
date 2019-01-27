@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Ruby Memoization: ||= vs. defined? syntax - Karol Galanciak - Ruby on Rails and Ember.js consultant</title>
+  <title>How to tell the difference between a default and a provided value for optional arguments in Ruby? - Karol Galanciak - Ruby on Rails and Ember.js consultant</title>
   <meta name="author" content="Karol Galanciak">
 
   
@@ -17,9 +17,9 @@
   
   
 
-  <meta property="og:title" value="Ruby Memoization: ||= vs. defined? syntax - Karol Galanciak - Ruby on Rails and Ember.js consultant" />
+  <meta property="og:title" value="How to tell the difference between a default and a provided value for optional arguments in Ruby? - Karol Galanciak - Ruby on Rails and Ember.js consultant" />
   <meta property="og:description" value="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications." />
-  <meta property="og:url" value="https://karolgalanciak.com/blog/2017/05/28/ruby-memoization-%7C%7C-equals-vs-defined-syntax/" />
+  <meta property="og:url" value="https://karolgalanciak.com/blog/2019/01/27/how-to-tell-the-difference-between-a-default-and-provided-value-for-optional-arguments-in-ruby/" />
   <meta property="og:type" content="website" />
   
   <meta property="og:site_name" content="Karol Galanciak - Ruby on Rails and Ember.js consultant"/>
@@ -28,7 +28,7 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@Azdaroth">
   <meta name="twitter:creator" content="@Azdaroth">
-  <meta name="twitter:title" content="Ruby Memoization: ||= vs. defined? syntax - Karol Galanciak - Ruby on Rails and Ember.js consultant">
+  <meta name="twitter:title" content="How to tell the difference between a default and a provided value for optional arguments in Ruby? - Karol Galanciak - Ruby on Rails and Ember.js consultant">
   <meta name="twitter:url" content="">
   <meta name="twitter:description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
 
@@ -38,7 +38,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="https://karolgalanciak.com/blog/2017/05/28/ruby-memoization-%7C%7C-equals-vs-defined-syntax">
+  <link rel="canonical" href="https://karolgalanciak.com/blog/2019/01/27/how-to-tell-the-difference-between-a-default-and-provided-value-for-optional-arguments-in-ruby">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Karol Galanciak - Ruby on Rails and Ember.js consultant" type="application/atom+xml">
@@ -48,16 +48,16 @@
       "@type": "BlogPosting",
       "mainEntityOfPage": {
         "@type":"WebPage",
-        "@id": "https://karolgalanciak.com/blog/2017/05/28/ruby-memoization-%7C%7C-equals-vs-defined-syntax"
+        "@id": "https://karolgalanciak.com/blog/2019/01/27/how-to-tell-the-difference-between-a-default-and-provided-value-for-optional-arguments-in-ruby"
       },
-      "headline": "Ruby Memoization: ||= vs. defined? syntax - Karol Galanciak - Ruby on Rails and Ember.js consultant",
+      "headline": "How to tell the difference between a default and a provided value for optional arguments in Ruby? - Karol Galanciak - Ruby on Rails and Ember.js consultant",
         "image": {
         "@type": "ImageObject",
         "url": "",
         "height": 640,
         "width": 1024
       },
-      "datePublished": "2017-05-28",
+      "datePublished": "2019-01-27",
       "dateModified": "2019-01-27",
       "author": {
         "@type": "Person",
@@ -138,7 +138,7 @@
   
   <header>
     
-      <h1 class="entry-title">Ruby Memoization: ||= vs. Defined? Syntax</h1>
+      <h1 class="entry-title">How to Tell the Difference Between a Default and a Provided Value for Optional Arguments in Ruby?</h1>
     
     
       <p class="meta">
@@ -154,72 +154,49 @@
   
 
 
-<time datetime="2017-05-28T22:00:00+02:00" pubdate data-updated="true">May 28<span>th</span>, 2017</time>
+<time datetime="2019-01-27T20:00:00+01:00" pubdate data-updated="true">Jan 27<span>th</span>, 2019</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>In the majority of the <strong>Rails applications</strong> or even <strong>Ruby gems</strong> you can find a lot of use cases where you need to <strong>memoize</strong> a result of some computation for performance benefits and to not compute it again if this result has already been computed. Seems like doing the assignment to some instance variable with <code>||=</code> operator is the most commonly used solution for this purpose, e.g. <code>@result ||= do_some_heavy_computation</code>. However, there are some cases where it might not produce the expected outome and you should actually use <code>defined?</code> operator instead.</p>
+<div class="entry-content"><p>It is sometimes required for the methods with optional arguments to be able to differentiate between its default value and the value passed from the caller. Passing <code>nil</code> might initially sound like a good idea since it represents &ldquo;nothingness&rdquo;. However, it might turn out that <code>nil</code> is a legit value and there might be cases where it is desirable for the caller to pass <code>nil</code>. In such a case, we cannot use it as a default value if we want to implement a special logic for the case of not providing that value.</p>
 
-<!--more-->
-
-
-<h2>What Is <code>||=</code> operator?</h2>
-
-<p>Let&rsquo;s get back to the example from the introduction: <code>@result ||= do_some_heavy_computation</code>. What is this <code>||=</code> operator and how does it work? <del>It&rsquo;s nothing more than a <strong>syntactic shortcut</strong> and it&rsquo;s an equivalent of @result || @result = do_some_heavy_computation</del> Edit: It&rsquo;s very close to <code>@result || @result = do_some_heavy_computation</code>, but <a href="http://www.rubyinside.com/what-rubys-double-pipe-or-equals-really-does-5488.html" target="_blank">not exactly the same</a> which translates to: &ldquo;return the value of <code>@result</code> if the value is truthy or assign the result of <code>do_some_heavy_computation</code> to <code>@result</code>&rdquo;. Clearly, the shortcut version looks more appealing. Keep in mind though that it&rsquo;s not really about already assigning some value to the instance variable, but rather if the value of it is truthy or not. How do we check then if the instance variable has already been set knowing that referring to undefined instance variable will simply result in <code>nil</code> without any exceptions?</p>
-
-<h2>What Is <code>defined?</code> operator?</h2>
-
-<p>We can do that by using <code>defined?</code> opeator, which returns <code>nil</code> if its argument is not defined or, if it is defined, the description of that argument. Thanks to that behaviour, we can easily check if some instance variable has already been set or not:</p>
+<p>Fortunately, there is an easy way to deal with it &ndash; use a special constant:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">defined?</span><span class="p">(</span><span class="vi">@result</span><span class="p">)</span> <span class="sr">//</span> <span class="o">=&gt;</span> <span class="kp">nil</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">SomeClass</span>
+</span><span class='line'>  <span class="no">NO_VALUE_PROVIDED</span> <span class="o">=</span> <span class="no">Object</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>  <span class="n">private_constant</span> <span class="ss">:NO_VALUE_PROVIDED</span>
 </span><span class='line'>
-</span><span class='line'><span class="vi">@result</span> <span class="o">=</span> <span class="kp">nil</span>
-</span><span class='line'><span class="n">defined?</span><span class="p">(</span><span class="vi">@result</span><span class="p">)</span> <span class="sr">//</span> <span class="o">=&gt;</span> <span class="s2">&quot;instance-variable&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Memoization gotcha</h2>
-
-<p>Ok, we now understand the difference between <code>||=</code> and <code>defined?</code> operators, why should we bother in the context of memoization?</p>
-
-<p>Imagine that you have a following method in some object:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">heavy_computation_result</span>
-</span><span class='line'>  <span class="vi">@result</span> <span class="o">||=</span> <span class="n">do_some_heavy_computation</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="ss">argument</span><span class="p">:</span> <span class="no">NO_VALUE_PROVIDED</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">argument</span> <span class="o">==</span> <span class="no">NO_VALUE_PROVIDED</span>
+</span><span class='line'>      <span class="n">handle_scenario_for_no_value_provided</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="n">do_something_with_argument</span><span class="p">(</span><span class="n">argument</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>and you are calling <code>heavy_computation_result</code> method multiple times to reuse the result of the computation. Certainly, this computation is heavy (as the name suggests) and ideally it should be computed only once for the performance reasons. What if this computation returns <code>nil</code> or <code>false</code>?</p>
+<p>In <code>call</code> method, we allow to pass an optional argument with a default of <code>NO_VALUE_PROVIDED</code>, which is a private constant defined in that class that is an instance of <code>Object</code>.</p>
 
-<p><del>As @result ||= do_some_heavy_computation is nothing more than a shortcut of @result || @result = do_some_heavy_computation expression</del> Edit: As <code>@result ||= do_some_heavy_computation</code> works in a <a href="http://www.rubyinside.com/what-rubys-double-pipe-or-equals-really-does-5488.html" target="_blank">pretty similar way</a> to  <code>@result || @result = do_some_heavy_computation</code> expression, the left side will be falsey in such case and the computation will be performed every time you call <code>heavy_computation_result</code> method making this syntax useless here!</p>
+<p>By depending on the instance of <code>Object</code> that is initialized inside that class, we can avoid cases where the equality check returns <code>true</code> even if this is not an expected outcome, which could happen if we used strings or symbols. We could use some symbol that would be very unlikely to be passed from the caller, like <code>:__no_value_provided__,</code> but it arguably looks more like a workaround than a dedicated solution for the problem.</p>
 
-<p>For the <strong>proper memoization</strong>, this method should be rewritten using <code>defined?</code> operator:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">heavy_computation_result</span>
-</span><span class='line'>  <span class="k">return</span> <span class="vi">@result</span> <span class="k">if</span> <span class="n">defined?</span><span class="p">(</span><span class="vi">@result</span><span class="p">)</span>
-</span><span class='line'>  <span class="vi">@result</span> <span class="o">=</span> <span class="n">do_some_heavy_computation</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Wrapping Up</h2>
-
-<p>Even though <code>||=</code> operator is commonly used for memoization, it isn&rsquo;t necessarily the best solution to this problem. It is certainly quite convenient to use, nevertheless, when there is a possiblity of having <strong>falsey values</strong> such as <code>false</code> and <code>nil</code>, it is much safer to use <code>defined?</code> operator instead.</p>
+<p>Also, a private constant ensures it is not used anywhere outside the class, which minimizes the chances that the passed argument would the same as our placeholder for no-value-provided scenario even more.</p>
 </div>
 
 
@@ -242,7 +219,7 @@
   
 
 
-<time datetime="2017-05-28T22:00:00+02:00" pubdate data-updated="true">May 28<span>th</span>, 2017</time>
+<time datetime="2019-01-27T20:00:00+01:00" pubdate data-updated="true">Jan 27<span>th</span>, 2019</time>
       
 
 <span class="categories">
@@ -271,7 +248,7 @@
       
         <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="https://karolgalanciak.com/blog/2017/05/28/ruby-memoization-%7C%7C-equals-vs-defined-syntax/" data-via="Azdaroth" data-counturl="https://karolgalanciak.com/blog/2017/05/28/ruby-memoization-%7C%7C-equals-vs-defined-syntax/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="https://karolgalanciak.com/blog/2019/01/27/how-to-tell-the-difference-between-a-default-and-provided-value-for-optional-arguments-in-ruby/" data-via="Azdaroth" data-counturl="https://karolgalanciak.com/blog/2019/01/27/how-to-tell-the-difference-between-a-default-and-provided-value-for-optional-arguments-in-ruby/" >Tweet</a>
   
   
   <div class="g-plusone" data-size="medium"></div>
@@ -285,10 +262,8 @@
     </div>
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2017/04/30/ember-quick-tips-managing-timeouts-and-delays/" title="Previous Post: Ember Tips: Managing Timeouts And Delays">&laquo; Ember Tips: Managing Timeouts And Delays</a>
+        <a class="basic-alignment left" href="/blog/2018/12/16/inheritance-and-define-method-how-to-make-them-work-together/" title="Previous Post: Inheritance and define_method - how to make them work together">&laquo; Inheritance and define_method - how to make them work together</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2017/06/25/ember-tips-testing-outgoing-http-requests/" title="Next Post: Ember Tips: Testing Outgoing HTTP Requests">Ember Tips: Testing Outgoing HTTP Requests &raquo;</a>
       
     </p>
   </footer>
@@ -403,8 +378,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'https://karolgalanciak.com/blog/2017/05/28/ruby-memoization-%7C%7C-equals-vs-defined-syntax/';
-        var disqus_url = 'https://karolgalanciak.com/blog/2017/05/28/ruby-memoization-%7C%7C-equals-vs-defined-syntax/';
+        var disqus_identifier = 'https://karolgalanciak.com/blog/2019/01/27/how-to-tell-the-difference-between-a-default-and-provided-value-for-optional-arguments-in-ruby/';
+        var disqus_url = 'https://karolgalanciak.com/blog/2019/01/27/how-to-tell-the-difference-between-a-default-and-provided-value-for-optional-arguments-in-ruby/';
         var disqus_script = 'embed.js';
       
     (function () {

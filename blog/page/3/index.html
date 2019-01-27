@@ -58,7 +58,7 @@
         "width": 1024
       },
       "datePublished": "",
-      "dateModified": "2018-12-16",
+      "dateModified": "2019-01-27",
       "author": {
         "@type": "Person",
         "name": "Karol Galanciak"
@@ -135,6 +135,47 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2017/02/26/javascript-tips-redefining-useragent-property/">JavaScript Tips: Redefining userAgent Property</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-02-26T23:00:00+01:00" pubdate data-updated="true">Feb 26<span>th</span>, 2017</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Imagine a use case where you are trying to check if a user accessed your app from a <strong>mobile</strong> device or not. Most likely you will need to use <a href="https://developer.mozilla.org/en-US/docs/Web/API/NavigatorID/userAgent" target="_blank">navigator.userAgent</a>  property and craft some smart regular expression to test for the presence of particular expression, like <code>(/Mobi/.test(navigator.userAgent)</code> which seems to be the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent" target="_blank">recommended way</a> to do it. Ok, so we&rsquo;re almost done with our feature, we just need to add some tests to make sure it works as expected. But there&rsquo;s a problem &ndash; you can&rsquo;t redefine <code>userAgent</code> property with just using a setter! Fortunately, there is a way to solve this problem.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2017/02/26/javascript-tips-redefining-useragent-property/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -532,50 +573,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/">Scaling Up Rails Applications With PostgreSQL Table Partitioning - Part 1</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-06-05T22:00:00+02:00" pubdate data-updated="true">Jun 5<span>th</span>, 2016</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>You&#8217;ve probably heard many times that the database is the bottleneck of many web applications. This isn&#8217;t necessarily true. Often it happens that some heavy queries can be substiantially optimized, making them really efficient and fast. As the time passes by, however, the data can remarkably grow in size, especially in several years time which can indeed make the database a bottleneck - the tables are huge and don&#8217;t fit into memory any longer, the indexes are even bigger making queries much slower and you can&#8217;t really optimize further any query. In many cases deleting old records that are no longer used is not an option - they still can have some value, e.g. for data analysis or statystical purposes. Fortunately, it&#8217;s not a dead end. You can make your database performance great again with a new secret weapon: table partitioning.</p>
-
-
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/4/">&larr; Older</a>
@@ -608,6 +605,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/01/27/how-to-tell-the-difference-between-a-default-and-provided-value-for-optional-arguments-in-ruby/">How to Tell the Difference Between a Default and a Provided Value for Optional Arguments in Ruby?</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/12/16/inheritance-and-define-method-how-to-make-them-work-together/">Inheritance and Define_method - How to Make Them Work Together</a>
       </li>
     
@@ -621,10 +622,6 @@
     
       <li class="post">
         <a href="/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking/">Trolling in Ruby - Implementing JavaScript-like Maths With Implicit Conversion Hijacking</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/06/24/rails-and-conditional-validations-in-models/">Rails and Conditional Validations in Models</a>
       </li>
     
   </ul>
@@ -674,7 +671,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2018 - Karol Galanciak -
+  Copyright &copy; 2019 - Karol Galanciak -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

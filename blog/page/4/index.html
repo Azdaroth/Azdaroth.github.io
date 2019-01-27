@@ -58,7 +58,7 @@
         "width": 1024
       },
       "datePublished": "",
-      "dateModified": "2018-12-16",
+      "dateModified": "2019-01-27",
       "author": {
         "@type": "Person",
         "name": "Karol Galanciak"
@@ -135,6 +135,50 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/">Scaling Up Rails Applications With PostgreSQL Table Partitioning - Part 1</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-06-05T22:00:00+02:00" pubdate data-updated="true">Jun 5<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>You&#8217;ve probably heard many times that the database is the bottleneck of many web applications. This isn&#8217;t necessarily true. Often it happens that some heavy queries can be substiantially optimized, making them really efficient and fast. As the time passes by, however, the data can remarkably grow in size, especially in several years time which can indeed make the database a bottleneck - the tables are huge and don&#8217;t fit into memory any longer, the indexes are even bigger making queries much slower and you can&#8217;t really optimize further any query. In many cases deleting old records that are no longer used is not an option - they still can have some value, e.g. for data analysis or statystical purposes. Fortunately, it&#8217;s not a dead end. You can make your database performance great again with a new secret weapon: table partitioning.</p>
+
+
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -533,50 +577,6 @@ A classic example would be a unique <code>email</code> per user. To make sure th
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/26/model-your-domain-with-composed-models/">Model Your Domain With Composed Models</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-26T09:10:00+01:00" pubdate data-updated="true">Feb 26<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>In many Rails applications the modeling is limited only to creating classes inheritng from <code>ActiveRecord::Base</code> which are 1:1 mapped to database tables. Having AR models like <code>User</code> and <code>Project</code> doesn&#8217;t tell much about the domain of your application. Well, you can add some domain logic to the models but that way you will easily end up having giant classes with thousands lines of code, so let&#8217;s just use models for database-related stuff only. Other option would be to create service objects for every usecase. That&#8217;s a good and clean way, but it&#8217;s merely the interaction layer between different parts of your application. You may end up easily with all logic encapsulated within service objects that will start looking more like procedural programming rather than proper OOP and not real domain API at all. The good news is that you can easily counteract it: time to use composed models.</p>
-
-
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2015/02/26/model-your-domain-with-composed-models/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/5/">&larr; Older</a>
@@ -609,6 +609,10 @@ A classic example would be a unique <code>email</code> per user. To make sure th
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/01/27/how-to-tell-the-difference-between-a-default-and-provided-value-for-optional-arguments-in-ruby/">How to Tell the Difference Between a Default and a Provided Value for Optional Arguments in Ruby?</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/12/16/inheritance-and-define-method-how-to-make-them-work-together/">Inheritance and Define_method - How to Make Them Work Together</a>
       </li>
     
@@ -622,10 +626,6 @@ A classic example would be a unique <code>email</code> per user. To make sure th
     
       <li class="post">
         <a href="/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking/">Trolling in Ruby - Implementing JavaScript-like Maths With Implicit Conversion Hijacking</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/06/24/rails-and-conditional-validations-in-models/">Rails and Conditional Validations in Models</a>
       </li>
     
   </ul>
@@ -675,7 +675,7 @@ A classic example would be a unique <code>email</code> per user. To make sure th
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2018 - Karol Galanciak -
+  Copyright &copy; 2019 - Karol Galanciak -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

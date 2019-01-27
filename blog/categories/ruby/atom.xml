@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2018-12-16T18:25:51+01:00</updated>
+  <updated>2019-01-27T18:30:24+01:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -12,6 +12,41 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[How to tell the difference between a default and a provided value for optional arguments in Ruby?]]></title>
+    <link href="https://karolgalanciak.com/blog/2019/01/27/how-to-tell-the-difference-between-a-default-and-provided-value-for-optional-arguments-in-ruby/"/>
+    <updated>2019-01-27T20:00:00+01:00</updated>
+    <id>https://karolgalanciak.com/blog/2019/01/27/how-to-tell-the-difference-between-a-default-and-provided-value-for-optional-arguments-in-ruby</id>
+    <content type="html"><![CDATA[<p>It is sometimes required for the methods with optional arguments to be able to differentiate between its default value and the value passed from the caller. Passing <code>nil</code> might initially sound like a good idea since it represents &ldquo;nothingness&rdquo;. However, it might turn out that <code>nil</code> is a legit value and there might be cases where it is desirable for the caller to pass <code>nil</code>. In such a case, we cannot use it as a default value if we want to implement a special logic for the case of not providing that value.</p>
+
+<p>Fortunately, there is an easy way to deal with it &ndash; use a special constant:</p>
+
+<p>``` rb
+class SomeClass
+  NO_VALUE_PROVIDED = Object.new
+  private_constant :NO_VALUE_PROVIDED</p>
+
+<p>  def call(argument: NO_VALUE_PROVIDED)</p>
+
+<pre><code>if argument == NO_VALUE_PROVIDED
+  handle_scenario_for_no_value_provided
+else
+  do_something_with_argument(argument)
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>In <code>call</code> method, we allow to pass an optional argument with a default of <code>NO_VALUE_PROVIDED</code>, which is a private constant defined in that class that is an instance of <code>Object</code>.</p>
+
+<p>By depending on the instance of <code>Object</code> that is initialized inside that class, we can avoid cases where the equality check returns <code>true</code> even if this is not an expected outcome, which could happen if we used strings or symbols. We could use some symbol that would be very unlikely to be passed from the caller, like <code>:__no_value_provided__,</code> but it arguably looks more like a workaround than a dedicated solution for the problem.</p>
+
+<p>Also, a private constant ensures it is not used anywhere outside the class, which minimizes the chances that the passed argument would the same as our placeholder for no-value-provided scenario even more.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Inheritance and define_method - how to make them work together]]></title>
@@ -472,97 +507,6 @@ user.errors.messages[:terms_of_service_accepted]
 <h2>Wrapping Up</h2>
 
 <p>There are multiple ways in Rails (or Ruby in general) to handle <strong>conditional validation</strong>, and thanks to the flexibility of the framework and the language, we can pick whatever seems best for our particular problem &ndash; from adding additional validations in a model with <strong>extra ActiveModel context</strong>, through using <strong>form objects</strong>, ending with arcane DCI-style object&rsquo;s extensions.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[The Case for before_validation callback: complex state normalization]]></title>
-    <link href="https://karolgalanciak.com/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization/"/>
-    <updated>2018-05-27T20:00:00+02:00</updated>
-    <id>https://karolgalanciak.com/blog/2018/05/27/the-case-for-before-validation-callback-complex-state-normalization</id>
-    <content type="html"><![CDATA[<p>Few months ago I wrote a <a href="https://karolgalanciak.com/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks/">blog post</a> about <strong>ActiveRecord</strong> <code>before_validation</code> callback and how it is used for  <strong>wrong reasons</strong> and concluded that in most cases this is not something we should be using routinely. However, I missed one <strong>appropriate use case</strong> for it which might be quite common in Rails apps, so this might be an excellent opportunity to get back to  <strong>before_validation callback</strong> and show its other side.</p>
-
-<!--more-->
-
-
-<h2>Anatomy Of The Problem</h2>
-
-<p>Imagine that we have a <code>Payment</code> model where we need to store <code>amount</code> and <code>currency</code>. However, for statistical purposes, we also want to store normalized amount in USD currency with exchange rate applied at the time of payment&rsquo;s creation. As this is a significant part of our domain, we want to add validation for <code>amount_in_usd</code> attribute. Our Payment model looks like this at the moment:</p>
-
-<p><code>rb
-class Payment &lt; ApplicationRecord
-  validates :amount, :currency, :amount_in_usd, presence :true
-end
-</code></p>
-
-<p>The question is: where do we get <code>amount_in_usd</code> from and how can we assign it?</p>
-
-<h2>The Solution</h2>
-
-<p>One way of solving that problem would be a direct assignment when populating all the attributes. In that case, it would look a bit like this:</p>
-
-<p><code>rb
-Payment.new(currency: currency, amount: amount, amount_in_usd: CurrencyExchanger.exchange(amount, from: currency, to: "USD"))
-</code></p>
-
-<p>The problem with that solution is that this logic would need to be repeated in every place where payment gets initialized. We could implement a factory class that would be reused in all scenarios to keep it DRY, but that&rsquo;s some extra overhead that is not popular in a Rails world. Also, this sounds like a responsibility of the Payment model itself as it is about managing its internal state.</p>
-
-<p>Here, we can&rsquo;t solve this by overriding writers as I suggested <a href="https://karolgalanciak.com/blog/2017/10/29/the-case-against-exotic-usage-of-before-validate-callbacks/">before</a> as <code>amount_in_usd</code> depends on two attributes: <code>currency</code> and <code>amount</code>, and we don&rsquo;t know in which sequence the attributes will be assigned.</p>
-
-<p>And this is exactly the case where <code>before_validation</code> is useful: for complex state normalization where multiple attributes are involved. With that callback, a solution looks quite elegant and just simpler:</p>
-
-<p>``` rb
-class Payment &lt; ApplicationRecord
-  validates :amount, :currency, :amount_in_usd, presence :true</p>
-
-<p>  before_validation :assign_amount_in_usd</p>
-
-<p>  private</p>
-
-<p>  def assign_amount_in_usd</p>
-
-<pre><code>if currency &amp;&amp; amount
-  self.amount_in_usd = CurrencyExchanger.exchange(amount, from: currency, to: "USD")
-end
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<h2>Alternative Solution</h2>
-
-<p>In the first paragraph, I mentioned that this solution could work especially well in Rails apps. What I meant by that is the fact that usually, the &ldquo;primitive&rdquo; attributes coming from HTTP params are mass-assigned to the model. Of course in Ruby, everything is an object, but to keep things simpler, let&rsquo;s treat numeric types and strings as primitives.</p>
-
-<p>What would be a non-primitive value though? In our case, we have something that is widely used as a typical example of a value object: <strong>Money</strong> object that is composed of <code>amount</code> and <code>currency</code>.  If the attributes before the assignment were mapped to some more domain-oriented objects, we would have an even simpler solution for our problem:</p>
-
-<p><code>rb
-money = Money.new(amount, currency)
-Payment.new(money: money)
-</code></p>
-
-<p>and the model would look like this:</p>
-
-<p>``` rb
-class Payment &lt; ApplicationRecord
-  validates :amount, :currency, :amount_in_usd, presence :true</p>
-
-<p>  def money=(money_object)</p>
-
-<pre><code>self.amount = money_object.amount
-self.currency = money_object.currency
-self.amount_in_usd = CurrencyExchanger.exchange_money(money_object, to: "USD")
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>It might look like extra overhead that is not necessary. However, value objects tend to simplify and DRY a lot of things in the code, so for more complex apps, using value objects will be worth that extra overhead.</p>
-
-<h2>Wrapping Up</h2>
-
-<p>There are some cases where <code>before_validation</code> callback might be useful. However, in more complex apps, using value object might be an alternative worth looking into.</p>
 ]]></content>
   </entry>
   
