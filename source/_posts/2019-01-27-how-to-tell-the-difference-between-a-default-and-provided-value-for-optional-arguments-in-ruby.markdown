@@ -8,7 +8,7 @@ categories: [Ruby, Quick Tips]
 
 It is sometimes required for the methods with optional arguments to be able to differentiate between its default value and the value passed from the caller. Passing `nil` might initially sound like a good idea since it represents "nothingness". However, it might turn out that `nil` is a legit value and there might be cases where it is desirable for the caller to pass `nil`. In such a case, we cannot use it as a default value if we want to implement a special logic for the case of not providing that value.
 
-Fortunately, there is an easy way to deal with it: use a special constant:
+Fortunately, there is an easy way to deal with it - use a special constant:
 
 ``` rb
 class SomeClass
