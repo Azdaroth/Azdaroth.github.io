@@ -59,6 +59,8 @@ Whoops! How did it happen? The method was defined in the superclass so it should
 
 Well, this is not really true. However, the problem is easy to fix.
 
+<!--more-->
+
 ## Anatomy Of The Problem
 
 The primary question we should answer in the first place is: where are all those new methods defined using `define_method` in that particular way? Is it a superclass?
