@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Chef | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/blog/categories/chef/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2019-01-27T18:30:24+01:00</updated>
+  <updated>2019-01-27T18:32:19+01:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -237,7 +237,7 @@ touch roles/nginx.json
 <p>``` ruby site-cookbooks/nginx/metadata.rb
 name              &ldquo;Nginx&rdquo;
 maintainer        &ldquo;Karol Galanciak&rdquo;
-maintainer_email  &ldquo;<a href="&#109;&#97;&#105;&#108;&#x74;&#111;&#58;&#107;&#97;&#x72;&#x6f;&#x6c;&#46;&#x67;&#97;&#x6c;&#97;&#110;&#99;&#105;&#97;&#107;&#64;&#x67;&#x6d;&#97;&#x69;&#x6c;&#x2e;&#99;&#111;&#x6d;">&#x6b;&#97;&#x72;&#111;&#108;&#x2e;&#103;&#97;&#108;&#x61;&#110;&#x63;&#x69;&#97;&#107;&#x40;&#103;&#109;&#x61;&#x69;&#108;&#x2e;&#99;&#x6f;&#109;</a>&rdquo;
+maintainer_email  &ldquo;<a href="&#x6d;&#x61;&#x69;&#108;&#x74;&#x6f;&#x3a;&#x6b;&#97;&#x72;&#111;&#108;&#x2e;&#103;&#97;&#108;&#97;&#x6e;&#x63;&#x69;&#97;&#107;&#64;&#103;&#109;&#x61;&#105;&#x6c;&#x2e;&#99;&#111;&#109;">&#x6b;&#x61;&#x72;&#111;&#x6c;&#46;&#103;&#x61;&#x6c;&#97;&#x6e;&#99;&#x69;&#97;&#107;&#x40;&#x67;&#x6d;&#97;&#x69;&#108;&#46;&#x63;&#111;&#x6d;</a>&rdquo;
 description       &ldquo;Installs Nginx&rdquo;
 version           &ldquo;0.0.1&rdquo;</p>
 

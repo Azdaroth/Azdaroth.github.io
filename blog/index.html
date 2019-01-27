@@ -317,125 +317,12 @@
 
 <p>Well, this is not really true. However, the problem is easy to fix.</p>
 
-<h2>Anatomy Of The Problem</h2>
-
-<p>The primary question we should answer in the first place is: where are all those new methods defined using <code>define_method</code> in that particular way? Is it a superclass?</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'> <span class="no">FormObject</span><span class="o">.</span><span class="n">instance_methods</span> <span class="o">-</span> <span class="no">Object</span><span class="o">.</span><span class="n">methods</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="o">[]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>It&rsquo;s definitely not a superclass &ndash; there are no any instance methods defined there, there are only the ones inherited from <code>Object</code>. What about <code>MyFormWithDefaultValue</code>?</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="o">&gt;</span> <span class="no">MyFormWithDefaultValue</span><span class="o">.</span><span class="n">instance_methods</span> <span class="o">-</span> <span class="no">Object</span><span class="o">.</span><span class="n">methods</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="o">[</span><span class="ss">:some_attribute</span><span class="p">,</span> <span class="ss">:some_attribute</span><span class="o">=]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now the error that we initially got makes way more sense. The entire issue is caused by the fact that the declaration of the attribute happens in <code>MyFormWithDefaultValue</code>, if it were defined in a base class, there would be no any issue. We can verify it with a simple example:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">MyForm</span> <span class="o">&lt;</span> <span class="no">FormObject</span>
-</span><span class='line'>  <span class="n">attribute</span> <span class="ss">:some_attribute</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">MyFormWithDefaultValue</span> <span class="o">&lt;</span> <span class="no">MyForm</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">some_attribute</span>
-</span><span class='line'>    <span class="k">super</span> <span class="o">||</span> <span class="s2">&quot;Default&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="o">&gt;</span> <span class="no">MyFormWithDefaultValueA</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">some_attribute</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="s2">&quot;Default&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Solution</h2>
-
-<p>Now that we fully understand the problem let&rsquo;s think about the solution. Ideally, about the one, that doesn&rsquo;t require defining explicitly an intermediate class that we can inherit from.</p>
-
-<p>How about defining a module instead? Modules are also included in the inheritance chain, and for using <code>super</code>, it doesn&rsquo;t matter if the method is defined in the class or a module.</p>
-
-<p>The exact solution to the problem would be wrapping the definition of new methods that happens in <code>FormObject</code> inside some module, it could be even an anonymous one, and including it right away:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">FormObject</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">attributes_registry</span>
-</span><span class='line'>    <span class="vi">@attributes_registry</span> <span class="o">||=</span> <span class="o">[]</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">attribute</span><span class="p">(</span><span class="n">attribute_name</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">attributes_registry</span> <span class="o">&lt;&lt;</span> <span class="n">attribute_name</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">wrapper</span> <span class="o">=</span> <span class="no">Module</span><span class="o">.</span><span class="n">new</span> <span class="k">do</span>
-</span><span class='line'>      <span class="n">define_method</span><span class="p">(</span><span class="n">attribute_name</span><span class="p">)</span> <span class="k">do</span>
-</span><span class='line'>        <span class="nb">instance_variable_get</span><span class="p">(</span><span class="s2">&quot;@</span><span class="si">#{</span><span class="n">attribute_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="n">define_method</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">attribute_name</span><span class="si">}</span><span class="s2">=&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">value</span><span class="o">|</span>
-</span><span class='line'>        <span class="nb">instance_variable_set</span><span class="p">(</span><span class="s2">&quot;@</span><span class="si">#{</span><span class="n">attribute_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>    <span class="kp">include</span> <span class="n">wrapper</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Let&rsquo;s verify if the new solution works:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="o">&gt;</span> <span class="no">MyFormWithDefaultValue</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">some_attribute</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="s2">&quot;Default&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Yay! It does exactly what we wanted to achieve.</p>
-
-<h2>Wrapping Up</h2>
-
-<p>Metaprogramming in Ruby is a powerful tool, however; it can lead to some issues that might not be obvious why they happen. Fortunately, with enough knowledge of the language, those problems can be solved elegantly.</p>
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2018/12/16/inheritance-and-define-method-how-to-make-them-work-together/">Read on &rarr;</a>
+    </footer>
   
 
 
