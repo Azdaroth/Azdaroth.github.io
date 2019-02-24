@@ -58,7 +58,7 @@
         "width": 1024
       },
       "datePublished": "",
-      "dateModified": "2019-01-27",
+      "dateModified": "2019-02-24",
       "author": {
         "@type": "Person",
         "name": "Karol Galanciak"
@@ -135,6 +135,47 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2019/02/24/messages-on-rails-part-1-introduction-to-kafka-and-rabbitmq/">Messages on Rails Part 1 - Introduction to Kafka and RabbitMQ</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2019-02-24T22:00:00+01:00" pubdate data-updated="true">Feb 24<span>th</span>, 2019</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>Microservices</strong>, <strong>Service-Oriented Architecture (SOA)</strong> and in general, <strong>distributed ecosystems</strong>, have been on hype in the last several years. And that&rsquo;s for a good reason! At certain point, The <strong>Majestic Monolith</strong> &ldquo;pattern&rdquo; might start causing issues, both from the purely technical reasons like scalability, tight coupling of the code if you don&rsquo;t follow <strong>Domain-Driven Design</strong> or some other practices <strong>improving modularity</strong>, maintenance overhead, and also from organizational perspective since working in smaller teams on smaller apps is more efficient than working with huge team on an even bigger monolith which suffers from tight coupling and low cohesion. However, this is only true if the overall architecture addresses the potential problems that are common in the micro/macro-services world. One of these problems I would like to focus on is communication between apps and how the data flows between them.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2019/02/24/messages-on-rails-part-1-introduction-to-kafka-and-rabbitmq/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -658,62 +699,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/">Rails Quick Tips: Temporarily Disabling Touching With ActiveRecord.no_touching</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2018-02-25T20:00:00+01:00" pubdate data-updated="true">Feb 25<span>th</span>, 2018</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><strong>Touching</strong> <strong>ActiveRecord models</strong> is quite a common thing in most of the <strong>Rails applications</strong>, especially useful for cache invalidation. By default, it updates <code>updated_at</code> timestamp with the current time, Here&rsquo;s a typical example of using <a href="https://apidock.com/rails/ActiveRecord/Persistence/touch">touch</a> in a model:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># app/models/photo.rb</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Photo</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
-</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:user</span><span class="p">,</span> <span class="ss">touch</span><span class="p">:</span> <span class="kp">true</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Whenever a new photo is created, or the existing one is updated/destroyed, the <code>updated_at</code> attribute of the associated user will be updated with the current time. In the majority of the cases, this is the desired behavior (it&rsquo;s one of those rare ActiveRecord callbacks that is not that bad ;)). However, it might happen that you may not want <code>touch</code> to be executed for some reason. Is there any built-in solution that could solve that problem?</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2018/02/25/rails-quick-tips-temporarily-disabling-touching-with-activerecord-dot-no-touching/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -744,6 +729,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/02/24/messages-on-rails-part-1-introduction-to-kafka-and-rabbitmq/">Messages on Rails Part 1 - Introduction to Kafka and RabbitMQ</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2019/01/27/how-to-tell-the-difference-between-a-default-and-provided-value-for-optional-arguments-in-ruby/">How to Tell the Difference Between a Default and a Provided Value for Optional Arguments in Ruby?</a>
       </li>
     
@@ -757,10 +746,6 @@
     
       <li class="post">
         <a href="/blog/2018/08/19/indexes-on-rails-how-to-make-the-most-of-your-postgres-database/">Indexes on Rails: How to Make the Most of Your Postgres Database</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/07/29/trolling-in-ruby-implementing-javascript-like-maths-with-implicit-conversion-hijacking/">Trolling in Ruby - Implementing JavaScript-like Maths With Implicit Conversion Hijacking</a>
       </li>
     
   </ul>
