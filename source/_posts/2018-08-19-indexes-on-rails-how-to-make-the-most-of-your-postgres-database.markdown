@@ -111,7 +111,7 @@ Imagine that you have some Articles in your application and you want to add `pub
 Fortunately, this is supported by Rails (although writing a SQL command wouldn't be that difficult), we just need to use `where` option for that:
 
 ``` rb
-add_column :articles, :author_id, where: "published_at IS NOT NULL"
+add_index :articles, :author_id, where: "published_at IS NOT NULL"
 ```
 
 ### Expression Indexes
