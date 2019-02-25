@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Database | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/blog/categories/database/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2019-02-24T22:10:12+01:00</updated>
+  <updated>2019-02-25T08:00:54+01:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -136,7 +136,7 @@
 <p>Fortunately, this is supported by Rails (although writing a SQL command wouldn&rsquo;t be that difficult), we just need to use <code>where</code> option for that:</p>
 
 <p><code>rb
-add_column :articles, :author_id, where: "published_at IS NOT NULL"
+add_index :articles, :author_id, where: "published_at IS NOT NULL"
 </code></p>
 
 <h3>Expression Indexes</h3>

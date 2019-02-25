@@ -4,7 +4,7 @@
   <title><![CDATA[Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2019-02-24T22:10:12+01:00</updated>
+  <updated>2019-02-25T08:00:54+01:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -570,7 +570,7 @@ the door to a holistic architectural approach where all parts of the domain fit 
 <p>Fortunately, this is supported by Rails (although writing a SQL command wouldn&rsquo;t be that difficult), we just need to use <code>where</code> option for that:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="n">add_column</span> <span class="ss">:articles</span><span class="p">,</span> <span class="ss">:author_id</span><span class="p">,</span> <span class="ss">where</span><span class="p">:</span> <span class="s2">&quot;published_at IS NOT NULL&quot;</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="n">add_index</span> <span class="ss">:articles</span><span class="p">,</span> <span class="ss">:author_id</span><span class="p">,</span> <span class="ss">where</span><span class="p">:</span> <span class="s2">&quot;published_at IS NOT NULL&quot;</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
