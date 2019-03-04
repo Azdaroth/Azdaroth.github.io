@@ -4,7 +4,7 @@
   <title><![CDATA[Category: BDD | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/blog/categories/bdd/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2019-03-04T15:26:44+01:00</updated>
+  <updated>2019-03-04T15:27:38+01:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -125,7 +125,7 @@ end
 <p>end</p>
 
 <p>def fill_form_with_valid_data(args={})
-  email = args.fetch(:email, &ldquo;<a href="&#109;&#97;&#x69;&#108;&#116;&#x6f;&#58;&#x65;&#109;&#x61;&#x69;&#x6c;&#x40;&#x65;&#x78;&#x61;&#x6d;&#x70;&#108;&#x65;&#46;&#99;&#111;&#109;">&#101;&#109;&#97;&#x69;&#108;&#x40;&#x65;&#120;&#x61;&#109;&#x70;&#x6c;&#101;&#x2e;&#99;&#111;&#109;</a>&rdquo;)
+  email = args.fetch(:email, &ldquo;<a href="&#109;&#x61;&#x69;&#108;&#116;&#x6f;&#58;&#101;&#109;&#x61;&#x69;&#x6c;&#x40;&#x65;&#120;&#97;&#109;&#x70;&#x6c;&#101;&#46;&#x63;&#x6f;&#109;">&#x65;&#x6d;&#x61;&#105;&#108;&#64;&#x65;&#120;&#x61;&#x6d;&#x70;&#108;&#101;&#x2e;&#99;&#111;&#109;</a>&rdquo;)
   fill_in &ldquo;email&rdquo;, with: email
   fill_in &ldquo;user_password&rdquo;, with: &ldquo;my-super-secret-password&rdquo;
   fill_in &ldquo;user_password_confirmation&rdquo;, with: &ldquo;my-super-secret-password&rdquo;
@@ -1246,7 +1246,7 @@ end
 
 <p>describe User do</p>
 
-<p>  subject { User.new(email: &ldquo;<a href="&#109;&#x61;&#x69;&#x6c;&#x74;&#x6f;&#58;&#101;&#x6d;&#97;&#105;&#x6c;&#64;&#x65;&#x78;&#x61;&#x6d;&#x70;&#x6c;&#101;&#46;&#99;&#111;&#109;">&#x65;&#x6d;&#97;&#105;&#108;&#x40;&#101;&#120;&#97;&#109;&#x70;&#x6c;&#x65;&#x2e;&#x63;&#111;&#x6d;</a>&rdquo;,</p>
+<p>  subject { User.new(email: &ldquo;<a href="&#x6d;&#x61;&#105;&#108;&#x74;&#111;&#58;&#101;&#x6d;&#x61;&#105;&#108;&#64;&#101;&#120;&#97;&#109;&#112;&#108;&#101;&#46;&#99;&#x6f;&#x6d;">&#x65;&#x6d;&#x61;&#105;&#x6c;&#x40;&#x65;&#120;&#97;&#x6d;&#x70;&#x6c;&#x65;&#x2e;&#99;&#111;&#109;</a>&rdquo;,</p>
 
 <pre><code>encrypted_password: "password") }
 </code></pre>
@@ -1405,7 +1405,7 @@ end
 
 <p>  class UserConfirmationMailer &lt; ActionMailer::Base</p>
 
-<p>  default from: &ldquo;<a href="&#109;&#x61;&#105;&#x6c;&#116;&#x6f;&#58;&#x63;&#111;&#x6e;&#x74;&#97;&#x63;&#116;&#x40;&#101;&#109;&#x61;&#105;&#x6c;&#46;&#99;&#111;&#109;">&#x63;&#x6f;&#x6e;&#x74;&#x61;&#x63;&#116;&#x40;&#101;&#109;&#97;&#105;&#x6c;&#46;&#99;&#111;&#x6d;</a>&rdquo;</p>
+<p>  default from: &ldquo;<a href="&#109;&#97;&#x69;&#x6c;&#116;&#x6f;&#x3a;&#x63;&#x6f;&#x6e;&#x74;&#x61;&#99;&#116;&#x40;&#101;&#x6d;&#x61;&#x69;&#108;&#46;&#99;&#111;&#x6d;">&#x63;&#x6f;&#110;&#116;&#x61;&#99;&#x74;&#64;&#x65;&#109;&#x61;&#x69;&#x6c;&#46;&#99;&#111;&#x6d;</a>&rdquo;</p>
 
 <p>  def send_confirmation_instructions(user)</p>
 
@@ -1556,7 +1556,7 @@ rails generate mailer NewUserAdminNotificationMailer notify
 
 <p>class NewUserAdminNotificationMailer &lt; ActionMailer::Base</p>
 
-<p>  default from: &ldquo;<a href="&#x6d;&#97;&#105;&#x6c;&#116;&#x6f;&#58;&#x63;&#x6f;&#x6e;&#x74;&#97;&#x63;&#x74;&#x40;&#x65;&#109;&#97;&#105;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;">&#x63;&#111;&#x6e;&#x74;&#97;&#x63;&#x74;&#x40;&#x65;&#x6d;&#x61;&#x69;&#108;&#x2e;&#x63;&#111;&#109;</a>&rdquo;</p>
+<p>  default from: &ldquo;<a href="&#x6d;&#x61;&#x69;&#x6c;&#116;&#x6f;&#58;&#99;&#x6f;&#110;&#116;&#x61;&#99;&#116;&#64;&#101;&#109;&#97;&#x69;&#x6c;&#x2e;&#x63;&#111;&#x6d;">&#99;&#x6f;&#110;&#116;&#97;&#99;&#x74;&#x40;&#101;&#x6d;&#x61;&#105;&#108;&#x2e;&#99;&#x6f;&#109;</a>&rdquo;</p>
 
 <p>  def notify(user)</p>
 
@@ -1698,7 +1698,7 @@ redirect_to root_path, notice: "You have confirmed you account. Now you can logi
 
 <p>describe User do</p>
 
-<p>  subject { User.new(email: &ldquo;<a href="&#109;&#97;&#105;&#108;&#x74;&#x6f;&#58;&#101;&#x6d;&#97;&#x69;&#108;&#x40;&#101;&#x78;&#x61;&#x6d;&#112;&#x6c;&#101;&#x2e;&#x63;&#111;&#x6d;">&#101;&#x6d;&#x61;&#x69;&#108;&#x40;&#x65;&#x78;&#x61;&#x6d;&#x70;&#x6c;&#101;&#x2e;&#x63;&#x6f;&#x6d;</a>&rdquo;,</p>
+<p>  subject { User.new(email: &ldquo;<a href="&#x6d;&#97;&#105;&#x6c;&#116;&#111;&#x3a;&#x65;&#109;&#97;&#105;&#x6c;&#64;&#101;&#120;&#97;&#109;&#112;&#108;&#x65;&#46;&#x63;&#x6f;&#x6d;">&#101;&#x6d;&#x61;&#105;&#108;&#x40;&#101;&#x78;&#x61;&#109;&#112;&#108;&#x65;&#x2e;&#x63;&#x6f;&#109;</a>&rdquo;,</p>
 
 <pre><code>encrypted_password: "password") }
 </code></pre>
