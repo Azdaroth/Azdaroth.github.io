@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Microservices | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/blog/categories/microservices/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2019-02-25T08:00:54+01:00</updated>
+  <updated>2019-03-04T15:26:44+01:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -57,7 +57,7 @@
 
 <p>This type of communication is arguably quite common in the microservices world, and the funny thing is that in some aspects it&rsquo;s no different than reimplementing messaging systems, but done in a less effective way.</p>
 
-<p>There is a more efficient way to solve deal with the communication between internal services: using asynchronous messaging.</p>
+<p>There is a more efficient way to deal with the communication between internal services: using asynchronous messaging.</p>
 
 <h3>Asynchronous Messaging</h3>
 
@@ -98,7 +98,7 @@
 </p>
 
 
-<p>Such a design opens a way to some interesting features. The log is persistent with configurable retention which can be based on the size or time how long the events should be kept in the log, which makes Kafka act like a circular buffer. To save some space, Kafka allows log compaction when the messages are sent with the same key, keeping only the last one as a result. If storage is not an issue, you might even decide never to never delete any messages!</p>
+<p>Such a design opens a way to some interesting features. The log is persistent with configurable retention which can be based on the size or time how long the events should be kept in the log, which makes Kafka act like a circular buffer. To save some space, Kafka allows log compaction when the messages are sent with the same key, keeping only the last one as a result. If storage is not an issue, you might even decide never to delete any messages!</p>
 
 <p>On top of that, Kafka can easily handle a massive throughput &ndash; 100 000 messages/second is not extraordinary, it&rsquo;s easy to scale, and there are <a href="https://events.static.linuxfound.org/sites/events/files/slides/Kafka%20At%20Scale.pdf">cases</a> of handling millions of messages per second.</p>
 
