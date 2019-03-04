@@ -44,7 +44,7 @@ It's great if your ecosystem offers this kind of features for limiting the numbe
 
 This type of communication is arguably quite common in the microservices world, and the funny thing is that in some aspects it's no different than reimplementing messaging systems, but done in a less effective way.
 
-There is a more efficient way to solve deal with the communication between internal services: using asynchronous messaging.
+There is a more efficient way to deal with the communication between internal services: using asynchronous messaging.
 
 ### Asynchronous Messaging
 
@@ -80,7 +80,7 @@ Kafka is a distributed streaming platform which takes a different approach than 
   <a href="/images/messages_on_rails_part_1/kafka.png" target="_blank">See in better quality</a>
 </p>
 
-Such a design opens a way to some interesting features. The log is persistent with configurable retention which can be based on the size or time how long the events should be kept in the log, which makes Kafka act like a circular buffer. To save some space, Kafka allows log compaction when the messages are sent with the same key, keeping only the last one as a result. If storage is not an issue, you might even decide never to never delete any messages!
+Such a design opens a way to some interesting features. The log is persistent with configurable retention which can be based on the size or time how long the events should be kept in the log, which makes Kafka act like a circular buffer. To save some space, Kafka allows log compaction when the messages are sent with the same key, keeping only the last one as a result. If storage is not an issue, you might even decide never to delete any messages!
 
 On top of that, Kafka can easily handle a massive throughput - 100 000 messages/second is not extraordinary, it's easy to scale, and there are [cases](https://events.static.linuxfound.org/sites/events/files/slides/Kafka%20At%20Scale.pdf) of handling millions of messages per second.
 
