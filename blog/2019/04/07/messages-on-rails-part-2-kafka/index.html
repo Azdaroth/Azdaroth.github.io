@@ -1,0 +1,787 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Messages on Rails Part 2: Kafka - Karol Galanciak - Ruby on Rails and Ember.js consultant</title>
+  <meta name="author" content="Karol Galanciak">
+
+  
+  <meta name="description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  
+  <meta name="keywords" content="Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps">
+
+  
+  
+
+  <meta property="og:title" value="Messages on Rails Part 2: Kafka - Karol Galanciak - Ruby on Rails and Ember.js consultant" />
+  <meta property="og:description" value="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications." />
+  <meta property="og:url" value="https://karolgalanciak.com/blog/2019/04/07/messages-on-rails-part-2-kafka/" />
+  <meta property="og:type" content="website" />
+  
+  <meta property="og:site_name" content="Karol Galanciak - Ruby on Rails and Ember.js consultant"/>
+  <meta property="og:locale" content="en_US" />
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@Azdaroth">
+  <meta name="twitter:creator" content="@Azdaroth">
+  <meta name="twitter:title" content="Messages on Rails Part 2: Kafka - Karol Galanciak - Ruby on Rails and Ember.js consultant">
+  <meta name="twitter:url" content="">
+  <meta name="twitter:description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="https://karolgalanciak.com/blog/2019/04/07/messages-on-rails-part-2-kafka">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Karol Galanciak - Ruby on Rails and Ember.js consultant" type="application/atom+xml">
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "BlogPosting",
+      "mainEntityOfPage": {
+        "@type":"WebPage",
+        "@id": "https://karolgalanciak.com/blog/2019/04/07/messages-on-rails-part-2-kafka"
+      },
+      "headline": "Messages on Rails Part 2: Kafka - Karol Galanciak - Ruby on Rails and Ember.js consultant",
+        "image": {
+        "@type": "ImageObject",
+        "url": "",
+        "height": 640,
+        "width": 1024
+      },
+      "datePublished": "2019-04-07",
+      "dateModified": "2019-04-07",
+      "author": {
+        "@type": "Person",
+        "name": "Karol Galanciak"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Karol Galanciak",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://karolgalanciak.com/images/me_formal.jpg",
+          "width": 600,
+          "height": 60
+        }
+      },
+      "description": "Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.",
+      "keywords": "Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps"
+    }
+  </script>
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-42570582-1', 'auto');
+    ga('send', 'pageview');
+    ga('set', 'anonymizeIp', true);
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Karol Galanciak - Ruby on Rails and Ember.js consultant</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:karolgalanciak.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">About Me</a></li>
+  <li><a href="/blog">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/test-driven-ember">Test-Driven Ember Book</a></li>
+  <li><a href="/presentations">Presentations</a></li>
+  <li><a href="/publications">Publications</a></li>
+  <li><a href="/open-source">Open Source</a></li>
+  <li><a href="/privacy-policy">Privacy Policy</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Messages on Rails Part 2: Kafka</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2019-04-07T20:00:00+02:00" pubdate data-updated="true">Apr 7<span>th</span>, 2019</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>In the <a href="https://karolgalanciak.com">first part</a> of this series, we were exploring some potential options for <strong>communication between services</strong> &ndash; what their advantages and disadvantages are, why <strong>HTTP API</strong> is not necessarily the best possible choice and suggesting that <strong>asynchronous messaging</strong> might be a better solution, using, e.g. <strong>RabbitMQ</strong> and <strong>Kafka</strong>. Let&rsquo;s focus this time entirely on the latter.</p>
+
+<!--more-->
+
+
+<h2>What Is Kafka?</h2>
+
+<p>Kafka is a distributed streaming platform which allows the implementation of a publish-subscribe model between producers and consumers. However, what is unique about Kafka, is the fact that it&rsquo;s somewhat closer to a storage system than a message queue. Unlike in a typical message queue, the messages are not removed once they are consumed, they are still kept there. But what exactly is that &ldquo;there&rdquo;? The events are stored in topics &ndash; the append-only logs in which messages are identified by &ldquo;offsets&rdquo;, which you could compare to array indexes. Topics can be split for parallelization by a specified key forming a partition.</p>
+
+<p><img src="/images/messages_on_rails_part_2/kafka_topics.png" title="Kafka Topics" alt="Kafka Topics"></p>
+
+<p class="center">
+  <a href="/images/messages_on_rails_part_2/kafka_topics.png" target="_blank">See in better quality</a>
+</p>
+
+
+<p>What is more, a broker is not responsible for delivering the messages to the consumers &ndash; it is a responsibility of the consumer to make sure they consume the messages and keep track of the offsets so that they can read messages one by one.</p>
+
+<p>There are notable side-effects of that design which gives a lot of options when it comes to taking advantage of Kafka. Since we deal with append-only logs, all the messages under a given partition in the topic are ordered. Also, as the messages are persistent and keeping track of the position in the log is on consumers, the events can be replayed by any consumer, including the new ones that have been just introduced to the ecosystem. When using a traditional message queue, there will be no way to access past messages when a new consumer joins, and you would need to do things like resending events manually or whatever else would make the most sense in that scenario, but with Kafka, this is something totally normal.</p>
+
+<p>Since the messages are persisted, storage can become an issue on its own, What if our producers publish a massive number of events and we are not interested in keeping all of them, or we want to limit somehow the number of events that will be consumed by future consumers without actually losing anything important?</p>
+
+<p>The first use case is quite simple &ndash; we may configure retention policy based on time (and, e.g., delete everything that is older than 30 days) or based on size (keep 1 TB of the logs). However, that might mean losing potentially valuable data.</p>
+
+<p>That issue can be addressed differently, using log compaction. Imagine that you are publishing the projections of the models after each change to Kafka topics. If you are not interested in how exactly you ended up with having records in a particular state but only their latest state, there is clearly no need to store anything that happened before the last update. In that case, you can decide to compact logs by a given key achieving precisely that result. Moreover, you can also get rid of the message under a given key altogether &ndash; just send a message with the null payload for a specific key, and that&rsquo;s it! No issues with storage and no need to consume messages in the future to figure out in the end that some record was deleted and a lot of processing went for nothing.</p>
+
+<h2>Modelling Kafka Topics</h2>
+
+<p>It seems like modeling topics shouldn&rsquo;t be rocket science as we have limited options &ndash; we have topics where we can publish messages, and those topics can be parallelized by partitioning. However, this issue might be quite complex.</p>
+
+<p>There are a couple of things that we need to take into consideration when designing topics:</p>
+
+<ul>
+<li>Messages are ordered within the same topic/partition</li>
+<li>The more partitions we have, the higher the throughput we can achieve</li>
+<li>The number of partitions per node has its limits which are determined by the number of file descriptors the operating system can handle since each partition is represented as a separate file. This value is configurable, yet, it is essential to keep that limit in mind and that you cannot increase it indefinitely, so having millions of partitions on a single node won&rsquo;t work</li>
+<li>Also, more partitions increase latency</li>
+<li>The number of topics is limited in the same way as the number of partitions. In that sense, 10 000 topics with a single partition will not be that different from 1 topic with 10 000 partitions</li>
+</ul>
+
+
+<p>A first idea that you might have in mind when designing topics is to have a topic per model, or generally speaking, a topic for events coming from the same model. That way, you might go with <code>orders</code> topic where you would publish events like <code>order_created</code>, <code>order_completed</code>, <code>order_canceled</code> etc.</p>
+
+<p>There are several problems with that approach though. What if you have an event-driven system, where a consumer immediately acts on the data it receives? Let&rsquo;s say that you have invoicing microservice that sends invoices to customers upon <code>order_completed</code> events. Obviously, besides the data from orders, it requires the data from customers. What if a customer changes the shipping addresses just before the completion of the order (resulting in publishing <code>customer_shipping_address_updated</code> event), yet, the <code>order_completed</code> event was processed before since the messages are published to different topics and they get processed independently? It might be the case that the address on the invoice will be incorrect! You might protect yourself against this kind of issues by assuming eventual consistency and, e.g., not acting on <code>order_completed</code> immediately but waiting 5 minutes instead, but this is not a solution that will work in all the cases and sometimes the cost of having issues like that might be too big, and you just can&rsquo;t afford this.</p>
+
+<p>In such case, if ordering matters, it is a better idea to publish events coming from different models to the same topic (and to the same partition!). In general, we can say that things that are needed together (order with their items and customer data) belong to the same topic/partition.</p>
+
+<p>What if different consumers have different needs as far as ordering goes and what things should go together? It is a more tricky scenario, and there is no one-size-fits-all solution, you would need to make some tradeoffs, either on a producer or consumer(s) side.</p>
+
+<p>Let&rsquo;s get back to our example and imagine that we have another service that is for some reason interested only in customers&#8217; data. Such an application would clearly be interested in <code>customer_shipping_address_updated</code> events, but they don&rsquo;t care at all about anything related to orders. That scenario is pretty simple as the solution might be just ignoring the events (i.e., doing nothing upon them) that the service is not interested in. However, what if that would mean ignoring 90% of the events from the topic? You may choose to publish the same kind of events to different topics, so that they are easier to consume by different consumers, so the extra overhead would be on the producer&rsquo;s side. There is a possibility of different scenario: another service has even more strict requirements about the ordering of more kinds of events. The solution would be no different though &ndash; either we could publish events to another topic, or we could use the same one and let the other consumers ignore even more events.</p>
+
+<p>There is one more possible scenario: what if <code>order_completed</code> and <code>customer_shipping_address_updated</code> are a result of the same request/transaction? In such case, we could have a single event, e.g., <code>order_completed_with_customer_address_change</code> that would have a more complex payload and later, that event could be decomposed to smaller ones like <code>order_completed</code> and <code>customer_shipping_address_changed</code> and published to separate topics using a stream processor. Maybe this is a bit contrived scenario, yet, it&rsquo;s worth keeping in mind that decomposition of events may also be a viable option, which is a much better choice than publishing split events and trying to reconstruct the original one.</p>
+
+<h2>Stream Processing With KSQL/Apache Spark/Apache Storm/Apache Samza/Apache Flink, oh my!</h2>
+
+<p>Even if you are not deep into data science, you&rsquo;ve probably heard about Hadoop, which is arguably a king of batch processing in a big data world. However, that is not necessarily the most optimal solution if you need an almost real-time data processing which ideally requires working with streams (or at least with micro-batches). And this is exactly what we have with Kafka!  There is a wide range of tools that can work with Kafka easily that could be used for ETL (Extract, Transform, Load), Data Enrichment, Machine Learning, Interactive Analysis or even as an extra component of Event Sourcing (e.g., building projections of the models from all the streams of events). Depending on the use case and requirements (e.g. very low latency, ease of use), you could go with <a href="https://kafka.apache.org/documentation/streams/">Kafka Streams</a>, <a href="https://www.confluent.io/product/ksql/">KSQL</a>, <a href="https://spark.apache.org">Apache Spark</a>, <a href="http://storm.apache.org">Apache Storm</a>, <a href="http://samza.apache.org">Apache Samza</a>, <a href="https://flink.apache.org">Apache Flink</a> or yet another solution. The list is quite long, and each of these tools deserves a separate article which is out of the scope of this one. Yet, it&rsquo;s good to be aware of how introducing Kafka opens the way to more possibilities that are data-oriented.</p>
+
+<h2>Building Example Producer and Consumer Apps With Karafka</h2>
+
+<p>Now, time for some practice! Let&rsquo;s build an example producer/consumer app that produces and consumes some event. To keep the example simple, let&rsquo;s just build a single application as it will be no different than having a producer and consumer as separation applications.</p>
+
+<p>We are going to use <a href="https://github.com/karafka/karafka">karafka</a> gem for that, which is a higher level framework that structures the way of producing and consuming events and allows to focus on the business logic instead of figuring out how to integrate Kafka with the rest of the application.</p>
+
+<h3>Getting Started</h3>
+
+<p>Let&rsquo;s generate a new application:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rails new karafka_example</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And add required gems to Gemile:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="n">gem</span> <span class="s2">&quot;waterdrop&quot;</span><span class="p">,</span> <span class="ss">git</span><span class="p">:</span> <span class="s2">&quot;https://github.com/karafka/waterdrop.git&quot;</span><span class="p">,</span> <span class="ss">branch</span><span class="p">:</span> <span class="s2">&quot;master&quot;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;karafka&quot;</span><span class="p">,</span> <span class="ss">git</span><span class="p">:</span> <span class="s2">&quot;https://github.com/karafka/karafka.git&quot;</span><span class="p">,</span> <span class="ss">branch</span><span class="p">:</span> <span class="s2">&quot;master&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Besides &ldquo;karafka&rdquo; gem, we also have &ldquo;waterdrop&rdquo; gem which is a dependency required for publishing events.</p>
+
+<p>Let&rsquo;s run a generator for all the things we need from &ldquo;karafka&rdquo;:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="n">bundle</span> <span class="nb">exec</span> <span class="n">karafka</span> <span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That command should generate a couple of interesting files: <code>karafka.rb</code> in a root directory, <code>app/consumers</code> with <code>application_consumer.rb</code> file and <code>app/</code>responders directory with <code>application_responder.rb</code> file.</p>
+
+<p>The first file is pretty much an initializer for Karafka application which is separated from Rails config and allows you to configure Karafka application and to draw routes, which is similar in terms of API as Rails application routes, but here, it&rsquo;s for topics and consumers.</p>
+
+<p><code>ApplicationConsumer</code> class is what you would expect that class to be &ndash; a base class for consumers. The interface is quite straight-forward for basic use cases: we define <code>consume</code> instance method inside which we have available <code>params</code> or <code>params_batch</code> (if we enabled batch fetching for that topic) that give access to event&rsquo;s payload. There are also some callbacks available for consumers which you can check in the <a href="https://github.com/karafka/karafka/wiki/Consumer-callbacks">docs</a>.</p>
+
+<p><code>ApplicationResponder</code> is a base class for producers. Why &ldquo;responder&rdquo; then and not a producer? Mostly due to the fact that they are quite similar to responders that you might have used in controllers as far as the intention goes. Usually, inside a responder, you declare a topic that you want to have registered so that you can send and consume events from it. Next, you define <code>respond</code> instance method which takes a single argument which is the event payload. From that method, you call <code>respond_with</code> method where you can provide topic name, a payload of the event and optionally, a partition key.</p>
+
+<h3>Initializer</h3>
+
+<p>Here&rsquo;s an initializer generated by <code>karafka</code> generator with some extra tweaks:</p>
+
+<figure class='code'><figcaption><span>karafka.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="c1"># frozen_string_literal: true</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;RAILS_ENV&#39;</span><span class="o">]</span> <span class="o">||=</span> <span class="s1">&#39;development&#39;</span>
+</span><span class='line'><span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;KARAFKA_ENV&#39;</span><span class="o">]</span> <span class="o">=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;RAILS_ENV&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="nb">require</span> <span class="o">::</span><span class="no">File</span><span class="o">.</span><span class="n">expand_path</span><span class="p">(</span><span class="s1">&#39;../config/environment&#39;</span><span class="p">,</span> <span class="bp">__FILE__</span><span class="p">)</span>
+</span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">eager_load!</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># This lines will make Karafka print to stdout like puma or unicorn</span>
+</span><span class='line'><span class="k">if</span> <span class="no">Rails</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">development?</span>
+</span><span class='line'>  <span class="no">Rails</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+</span><span class='line'>    <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:Logger</span><span class="o">.</span><span class="n">broadcast</span><span class="p">(</span>
+</span><span class='line'>      <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:Logger</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="vg">$stdout</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>  <span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">KarafkaApp</span> <span class="o">&lt;</span> <span class="ss">Karafka</span><span class="p">:</span><span class="ss">:App</span>
+</span><span class='line'>  <span class="n">setup</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">config</span><span class="o">.</span><span class="n">kafka</span><span class="o">.</span><span class="n">seed_brokers</span> <span class="o">=</span> <span class="sx">%w[kafka://127.0.0.1:9092]</span>
+</span><span class='line'>    <span class="n">config</span><span class="o">.</span><span class="n">client_id</span> <span class="o">=</span> <span class="s2">&quot;karafka_example&quot;</span>
+</span><span class='line'>    <span class="n">config</span><span class="o">.</span><span class="n">backend</span> <span class="o">=</span> <span class="ss">:inline</span>
+</span><span class='line'>    <span class="n">config</span><span class="o">.</span><span class="n">batch_fetching</span> <span class="o">=</span> <span class="kp">false</span>
+</span><span class='line'>    <span class="c1"># Uncomment this for Rails app integration</span>
+</span><span class='line'>    <span class="c1"># config.logger = Rails.logger</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># Comment out this part if you are not using instrumentation and/or you are not</span>
+</span><span class='line'>  <span class="c1"># interested in logging events for certain environments. Since instrumentation</span>
+</span><span class='line'>  <span class="c1"># notifications add extra boilerplate if you want to achieve max performance,</span>
+</span><span class='line'>  <span class="c1"># listen to only what you really need for a given environment.</span>
+</span><span class='line'>  <span class="no">Karafka</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="ss">Karafka</span><span class="p">:</span><span class="ss">:Instrumentation</span><span class="o">::</span><span class="no">StdoutListener</span><span class="p">)</span>
+</span><span class='line'>  <span class="no">Karafka</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="ss">Karafka</span><span class="p">:</span><span class="ss">:Instrumentation</span><span class="o">::</span><span class="no">ProctitleListener</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">consumer_groups</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">consumer_group</span> <span class="ss">:example</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">batch_fetching</span> <span class="kp">false</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">topic</span> <span class="ss">:users</span> <span class="k">do</span>
+</span><span class='line'>        <span class="n">consumer</span> <span class="no">UsersConsumer</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Karafka</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s1">&#39;app.initialized&#39;</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># Put here all the things you want to do after the Karafka framework</span>
+</span><span class='line'>  <span class="c1"># initialization</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">KarafkaApp</span><span class="o">.</span><span class="n">boot!</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The most interesting parts of that file are configuration and drawing the routes, so let&rsquo;s focus on them now.</p>
+
+<p>In the configuration block, we need to specify URI for Kafka, which is going to be kafka://127.0.0.1:9092 by default (assuming that you have Kafka installed in the first place). We also need <code>client_id</code> to identify the app in Kafka and provide the proper namespace. Another option is specifying <code>backend</code> which we have set to be <code>inline</code>. It means that the processing of the events will happen in the karafka&rsquo;s workers, which might not be an optimal solution, especially for heavy processing. Alternatively, we can use Sidekiq thanks to <a href="https://github.com/karafka/sidekiq-backend">karafka sidekiq-backend gem</a>. For the sake of simplicity and the demonstration purposes, <code>batch_processing</code> is set to false. In such case, instead of dealing with a batch of messages (that would be available under <code>params_batch</code> method), we are going to have just <code>params</code> representing a single message.</p>
+
+<p>In the next section, we are configuring the equivalent of routes for Kafka. We are registering <code>example</code> consumer group under which we specify that we want <code>UsersConsumer</code> class to be the consumer for <code>users</code> topic.</p>
+
+<p>Consumers group is a concept that allows having competing consumers pattern for messages, which is useful if you don&rsquo;t want to have a publish-subscribe pattern with all consumers receiving the same message but only a single consumer processing the event.</p>
+
+<p>There are a couple of more configuration options for topics that you can check in the <a href="https://github.com/karafka/karafka/wiki/Routing#topic-level-options">docs</a>.</p>
+
+<h3>Building a producer</h3>
+
+<p>Let&rsquo;s build the simplest possible producer that will merely take the payload and publish it to <code>users</code> topic:</p>
+
+<figure class='code'><figcaption><span>app/responders/users_responder.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">UsersResponder</span> <span class="o">&lt;</span> <span class="no">ApplicationResponder</span>
+</span><span class='line'>  <span class="n">topic</span> <span class="ss">:users</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">respond</span><span class="p">(</span><span class="n">event_payload</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">respond_to</span> <span class="ss">:users</span><span class="p">,</span> <span class="n">event_payload</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Building a consumer</h3>
+
+<p>And now, we can build a simple producer that will do nothing more than logging the params. As mentioned before, we have <code>params</code> method accessible on the instance level (or <code>params_batch</code> if batch fetching is enabled):</p>
+
+<figure class='code'><figcaption><span>app/consumers/users_consumers.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="k">class</span> <span class="nc">UsersConsumer</span> <span class="o">&lt;</span> <span class="no">ApplicationConsumer</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">consume</span>
+</span><span class='line'>    <span class="no">Karafka</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span> <span class="s2">&quot;New [User] event: </span><span class="si">#{</span><span class="n">params</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Seeing things in action</h3>
+
+<p>Let&rsquo;s start the server process:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='text'><span class='line'>bundle exec karafka server
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If everything goes fine, you should see an output like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='text'><span class='line'>I, [2019-04-07T10:30:41.517728 #83821]  INFO -- : Initializing Karafka server 83821
+</span><span class='line'>Karafka framework version: 1.3.0
+</span><span class='line'>Application client id: karafka_example
+</span><span class='line'>Backend: inline
+</span><span class='line'>Batch fetching: false
+</span><span class='line'>Batch consuming: false
+</span><span class='line'>Boot file: /path/to/app/karafka.rb
+</span><span class='line'>Environment: development
+</span><span class='line'>Kafka seed brokers: [&quot;kafka://127.0.0.1:9092&quot;]
+</span><span class='line'>I, [2019-04-07T10:30:41.602016 #83821]  INFO -- : Running Karafka server 83821
+</span><span class='line'>I, [2019-04-07T10:30:41.602870 #83821]  INFO -- : New topics added to target list: users
+</span><span class='line'>I, [2019-04-07T10:30:41.602948 #83821]  INFO -- : Fetching cluster metadata from kafka://127.0.0.1:9092
+</span><span class='line'>I, [2019-04-07T10:30:41.798673 #83821]  INFO -- : Discovered cluster metadata; nodes: your-machine-name.local:9092 (node_id=0)
+</span><span class='line'>I, [2019-04-07T10:30:41.798965 #83821]  INFO -- : [[karafka_example_example] {}:] Will fetch at most 1048576 bytes at a time per partition from users
+</span><span class='line'>I, [2019-04-07T10:30:41.799144 #83821]  INFO -- : [[karafka_example_example] {}:] Fetching cluster metadata from kafka://127.0.0.1:9092
+</span><span class='line'>I, [2019-04-07T10:30:41.799005 #83821]  INFO -- : [[karafka_example_example] {}:] Joining group `karafka_example_example`
+</span><span class='line'>I, [2019-04-07T10:30:41.801184 #83821]  INFO -- : [[karafka_example_example] {}:] Discovered cluster metadata; nodes: your-machine-name.local:9092 (node_id=0)
+</span><span class='line'>I, [2019-04-07T10:30:41.801287 #83821]  INFO -- : [[karafka_example_example] {}:] There are no partitions to fetch from, sleeping for 1s
+</span><span class='line'>I, [2019-04-07T10:30:42.047094 #83821]  INFO -- : [[karafka_example_example] {}:] Joined group `karafka_example_example` with member id `karafka_example-612b6612-26f1-41fe-95cd-49a52a6275c7`
+</span><span class='line'>I, [2019-04-07T10:30:42.047186 #83821]  INFO -- : [[karafka_example_example] {}:] Chosen as leader of group `karafka_example_example`
+</span><span class='line'>I, [2019-04-07T10:30:42.803209 #83821]  INFO -- : [[karafka_example_example] {}:] There are no partitions to fetch from, sleeping for 1s
+</span><span class='line'>I, [2019-04-07T10:30:43.050550 #83821]  INFO -- : [[karafka_example_example] {}:] Fetching cluster metadata from kafka://127.0.0.1:9092
+</span><span class='line'>I, [2019-04-07T10:30:43.052574 #83821]  INFO -- : [[karafka_example_example] {}:] Discovered cluster metadata; nodes: your-machine-name.local:9092 (node_id=0)
+</span><span class='line'>I, [2019-04-07T10:30:43.106051 #83821]  INFO -- : [[karafka_example_example] {}:] Partitions assigned for `users`: 0
+</span><span class='line'>I, [2019-04-07T10:30:43.805927 #83821]  INFO -- : [[karafka_example_example] {users: 0}:] Seeking users/0 to offset 0
+</span><span class='line'>I, [2019-04-07T10:30:43.806048 #83821]  INFO -- : [[karafka_example_example] {users: 0}:] New topics added to target list: users
+</span><span class='line'>I, [2019-04-07T10:30:43.806083 #83821]  INFO -- : [[karafka_example_example] {users: 0}:] Fetching cluster metadata from kafka://127.0.0.1:9092
+</span><span class='line'>I, [2019-04-07T10:30:43.807502 #83821]  INFO -- : [[karafka_example_example] {users: 0}:] Discovered cluster metadata; nodes: your-machine-name.local:9092 (node_id=0)
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And let&rsquo;s send some dummy event from the console using <code>UsersResponder</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='text'><span class='line'>rails console
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="no">UsersResponder</span><span class="o">.</span><span class="n">call</span><span class="p">({</span> <span class="n">event_name</span><span class="p">:</span> <span class="s2">&quot;user_created&quot;</span><span class="p">,</span> <span class="ss">payload</span><span class="p">:</span> <span class="p">{</span> <span class="nb">id</span><span class="p">:</span> <span class="mi">1</span> <span class="p">}</span> <span class="p">})</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The output of that command should be similar to the following one:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='text'><span class='line'>I, [2019-04-07T10:33:31.216585 #84497]  INFO -- : New topics added to target list: users
+</span><span class='line'>I, [2019-04-07T10:33:31.216940 #84497]  INFO -- : Fetching cluster metadata from kafka://localhost:9092
+</span><span class='line'>D, [2019-04-07T10:33:31.217337 #84497] DEBUG -- : [topic_metadata] Opening connection to localhost:9092 with client id delivery_boy...
+</span><span class='line'>D, [2019-04-07T10:33:31.220633 #84497] DEBUG -- : [topic_metadata] Sending topic_metadata API request 1 to localhost:9092
+</span><span class='line'>D, [2019-04-07T10:33:31.221051 #84497] DEBUG -- : [topic_metadata] Waiting for response 1 from localhost:9092
+</span><span class='line'>D, [2019-04-07T10:33:31.222211 #84497] DEBUG -- : [topic_metadata] Received response 1 from localhost:9092
+</span><span class='line'>I, [2019-04-07T10:33:31.222554 #84497]  INFO -- : Discovered cluster metadata; nodes: your-machine-name.local:9092 (node_id=0)
+</span><span class='line'>D, [2019-04-07T10:33:31.222818 #84497] DEBUG -- : Closing socket to localhost:9092
+</span><span class='line'>D, [2019-04-07T10:33:31.227719 #84497] DEBUG -- : Current leader for users/0 is node your-machine-name.local:9092 (node_id=0)
+</span><span class='line'>I, [2019-04-07T10:33:31.228077 #84497]  INFO -- : Sending 1 messages to your-machine-name.local:9092 (node_id=0)
+</span><span class='line'>D, [2019-04-07T10:33:31.228535 #84497] DEBUG -- : [produce] Opening connection to your-machine-name.local:9092 with client id delivery_boy...
+</span><span class='line'>D, [2019-04-07T10:33:31.445056 #84497] DEBUG -- : [produce] Sending produce API request 1 to your-machine-name.local:9092
+</span><span class='line'>D, [2019-04-07T10:33:31.452673 #84497] DEBUG -- : [produce] Waiting for response 1 from your-machine-name.local:9092
+</span><span class='line'>D, [2019-04-07T10:33:31.507604 #84497] DEBUG -- : [produce] Received response 1 from your-machine-name.local:9092
+</span><span class='line'>D, [2019-04-07T10:33:31.507995 #84497] DEBUG -- : Successfully appended 1 messages to users/0 on your-machine-name.local:9092 (node_id=0)
+</span><span class='line'> =&gt; {&quot;users&quot;=&gt;[[&quot;{\&quot;event_name\&quot;:\&quot;user_created\&quot;,\&quot;payload\&quot;:{\&quot;id\&quot;:1}}&quot;, {:topic=&gt;&quot;users&quot;}]]}
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And if you check the logs of the karafka server, you will see that the message was successfully processed, including logging the message:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='text'><span class='line'>I, [2019-04-07T10:33:33.348308 #83821]  INFO -- : [[karafka_example_example] {}:] New [User] event: {&quot;create_time&quot;=&gt;2019-04-07 10:33:31 +0200, &quot;headers&quot;=&gt;{}, &quot;is_control_record&quot;=&gt;false, &quot;key&quot;=&gt;nil, &quot;offset&quot;=&gt;0, &quot;deserializer&quot;=&gt;#&lt;Karafka::Serialization::Json::Deserializer:0x00007fd463e96dc8&gt;, &quot;partition&quot;=&gt;0, &quot;receive_time&quot;=&gt;2019-04-07 10:33:33 +0200, &quot;topic&quot;=&gt;&quot;users&quot;, &quot;payload&quot;=&gt;{&quot;event_name&quot;=&gt;&quot;user_created&quot;, &quot;payload&quot;=&gt;{&quot;id&quot;=&gt;1}}, &quot;deserialized&quot;=&gt;true}
+</span><span class='line'>I, [2019-04-07T10:33:33.348375 #83821]  INFO -- : [[karafka_example_example] {}:] Inline processing of topic users with 1 messages took 9 ms
+</span><span class='line'>I, [2019-04-07T10:33:33.348410 #83821]  INFO -- : [[karafka_example_example] {}:] 1 message on users topic delegated to UsersConsumer
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And that&rsquo;s it! That&rsquo;s all that it takes to use Kafka in your Rails application.</p>
+
+<h3>What about other features?</h3>
+
+<p>We only used a tiny part of the framework, which turned out to be sufficient for the demonstration purposes. However, there are <a href="https://github.com/karafka/karafka/wiki">way more features</a> that would be worth getting familiar with before using <code>karafka</code> in your application.</p>
+
+<h2>Summary</h2>
+
+<p>Kafka is a <strong>great tool</strong> if you want a <strong>reliable</strong> and <strong>performant</strong> way of <strong>sending events between applications</strong> where a <strong>persistent storage</strong> for a certain amount of time and an ability of <strong>replaying events</strong> is essential and/or if you plan to do heavy <strong>stream-processing</strong>. Thanks to frameworks like <a href="https://github.com/karafka/karafka">karafka</a>, it&rsquo;s quite simple to start using Kafka in Rails applications.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Karol Galanciak</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2019-04-07T20:00:00+02:00" pubdate data-updated="true">Apr 7<span>th</span>, 2019</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/architecture/'>Architecture</a>, <a class='category' href='/blog/categories/flink/'>Flink</a>, <a class='category' href='/blog/categories/kafka/'>Kafka</a>, <a class='category' href='/blog/categories/messages/'>Messages</a>, <a class='category' href='/blog/categories/microservices/'>Microservices</a>, <a class='category' href='/blog/categories/rest/'>REST</a>, <a class='category' href='/blog/categories/rails/'>Rails</a>, <a class='category' href='/blog/categories/ruby/'>Ruby</a>, <a class='category' href='/blog/categories/soa/'>SOA</a>, <a class='category' href='/blog/categories/samza/'>Samza</a>, <a class='category' href='/blog/categories/spark/'>Spark</a>, <a class='category' href='/blog/categories/storm/'>Storm</a>
+  
+</span>
+
+
+    </p>
+    <div class="meta top-line">
+      <div class="post-subscription">
+  <div id="mc_embed_signup">
+    <div id="mc_embed_signup_scroll">
+      <label for="mce-EMAIL">Do you want to take your developer skills to the next level? Subscribe to my newsletter and never miss another blog post!</label>
+      <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+      <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_62804f1b69c60e0c7966cddd6_7c71fb81df" tabindex="-1" value=""></div>
+      <div class="clear">
+      <a href="http://eepurl.com/duztq5" target="_blank" id="mc-embedded-subscribe" class="button">Yes, I want to be a better developer!</a>
+    </div>
+  </div>
+</div>
+
+    </div>
+    <div class="top-line">
+      
+        <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="https://karolgalanciak.com/blog/2019/04/07/messages-on-rails-part-2-kafka/" data-via="Azdaroth" data-counturl="https://karolgalanciak.com/blog/2019/04/07/messages-on-rails-part-2-kafka/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+      
+    </div>
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2019/02/24/messages-on-rails-part-1-introduction-to-kafka-and-rabbitmq/" title="Previous Post: Messages on Rails Part 1 -  Introduction to Kafka and RabbitMQ">&laquo; Messages on Rails Part 1 -  Introduction to Kafka and RabbitMQ</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <img class="left" src="/images/me_formal.jpg" title="me:)" alt="Karol Galanciak - photo">
+  <p>Hi, my name is Karol Galanciak, I'm a technical polyglot and domain expert in vacation rental industry, taking it to the next level as CTO of <a href="https://www.bookingsync.com">BookingSync</a></p>
+
+  <p>I specialize in building APIs, enterprise integration using message queues and distributed streaming, microservices architecture and working with legacy applications.</p>
+
+  <p id="email-me"></p>
+</section>
+
+<script type="text/javascript">
+  (function(d, id, lhs, rhs) {
+    d.getElementById(id).innerHTML = "You can reach me at <a rel='nofollow' href='mailto:" + lhs + "@" + rhs + "'>" + lhs + "@" + rhs + "</a>";
+  })(window.document, 'email-me', 'karol.galanciak', 'gmail.com');
+</script>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2019/04/07/messages-on-rails-part-2-kafka/">Messages on Rails Part 2: Kafka</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/02/24/messages-on-rails-part-1-introduction-to-kafka-and-rabbitmq/">Messages on Rails Part 1 - Introduction to Kafka and RabbitMQ</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/01/27/how-to-tell-the-difference-between-a-default-and-provided-value-for-optional-arguments-in-ruby/">How to Tell the Difference Between a Default and a Provided Value for Optional Arguments in Ruby?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/12/16/inheritance-and-define-method-how-to-make-them-work-together/">Inheritance and Define_method - How to Make Them Work Together</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/09/30/the-problems-with-validating-activerecord-models-and-why-state-validation-is-a-bad-idea/">The Problems With Validating ActiveRecord Models and Why State Validation Is a Bad Idea</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/Azdaroth">@Azdaroth</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'Azdaroth',
+            count: 6,
+            skip_forks: false,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+<section>
+   <h1>Twitter</h1>
+   <a class="twitter-timeline" href="https://twitter.com/Azdaroth" data-widget-id="357234540634329088">Tweets by @Azdaroth</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2019 - Karol Galanciak -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'karolgalanciak';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'https://karolgalanciak.com/blog/2019/04/07/messages-on-rails-part-2-kafka/';
+        var disqus_url = 'https://karolgalanciak.com/blog/2019/04/07/messages-on-rails-part-2-kafka/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
