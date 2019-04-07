@@ -334,7 +334,7 @@
 <p><p>Now we have our node, let&rsquo;s prepare it for running Chef (the command below must be run within main Chef project directory):</p></p>
 
 <p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>knife solo prepare <a href="&#x6d;&#97;&#105;&#108;&#116;&#111;&#x3a;&#118;&#97;&#103;&#114;&#x61;&#x6e;&#116;&#x40;&#x31;&#50;&#55;&#46;&#x30;&#46;&#x30;&#x2e;&#x31;">&#x76;&#97;&#103;&#114;&#x61;&#x6e;&#x74;&#64;&#x31;&#x32;&#55;&#46;&#x30;&#46;&#48;&#46;&#49;</a> -p 2222 -i ~/.vagrant.d/insecure_private_key
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>knife solo prepare <a href="&#109;&#x61;&#x69;&#108;&#116;&#111;&#58;&#118;&#97;&#103;&#x72;&#x61;&#x6e;&#x74;&#64;&#49;&#x32;&#55;&#x2e;&#48;&#x2e;&#48;&#x2e;&#x31;">&#x76;&#97;&#103;&#x72;&#x61;&#110;&#116;&#x40;&#49;&#x32;&#x37;&#46;&#x30;&#x2e;&#48;&#46;&#x31;</a> -p 2222 -i ~/.vagrant.d/insecure_private_key
 </span></code></pre></td></tr></table></div></figure></p>
 
 <p><p>Remember to use real system user name.</p></p>
@@ -740,7 +740,7 @@
 <p><p>So here is the final step &ndash; applying recipes on our node:</p></p>
 
 <p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>knife solo cook <a href="&#x6d;&#x61;&#x69;&#x6c;&#116;&#111;&#58;&#x76;&#97;&#x67;&#x72;&#97;&#110;&#116;&#x40;&#49;&#x32;&#x37;&#x2e;&#48;&#46;&#48;&#x2e;&#49;">&#118;&#x61;&#x67;&#114;&#97;&#x6e;&#x74;&#x40;&#x31;&#50;&#55;&#x2e;&#x30;&#46;&#48;&#x2e;&#49;</a> -p 2222 -i /Users/system_user_name/.vagrant.d/insecure_private_key
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>knife solo cook <a href="&#x6d;&#x61;&#x69;&#108;&#x74;&#x6f;&#x3a;&#x76;&#97;&#x67;&#114;&#x61;&#x6e;&#116;&#64;&#x31;&#50;&#x37;&#46;&#x30;&#46;&#x30;&#x2e;&#x31;">&#x76;&#x61;&#x67;&#114;&#97;&#x6e;&#116;&#x40;&#49;&#x32;&#55;&#x2e;&#48;&#x2e;&#x30;&#46;&#x31;</a> -p 2222 -i /Users/system_user_name/.vagrant.d/insecure_private_key
 </span></code></pre></td></tr></table></div></figure></p>
 
 <p><p>The great thing about Chef is that you can change the values of attributes, apply them on the node and the chef-client will pick that change up. Just change <code>worker_processes</code> to 3 and watch what happens &ndash; Chef client will change the value of the attribute and restart Nginx.</p></p>

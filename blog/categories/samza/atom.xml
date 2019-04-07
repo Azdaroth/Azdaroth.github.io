@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Samza | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/blog/categories/samza/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2019-04-07T20:03:46+02:00</updated>
+  <updated>2019-04-07T20:15:18+02:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -18,7 +18,7 @@
     <link href="https://karolgalanciak.com/blog/2019/04/07/messages-on-rails-part-2-kafka/"/>
     <updated>2019-04-07T20:00:00+02:00</updated>
     <id>https://karolgalanciak.com/blog/2019/04/07/messages-on-rails-part-2-kafka</id>
-    <content type="html"><![CDATA[<p>In the <a href="https://karolgalanciak.com">first part</a> of this series, we were exploring some potential options for <strong>communication between services</strong> &ndash; what their advantages and disadvantages are, why <strong>HTTP API</strong> is not necessarily the best possible choice and suggesting that <strong>asynchronous messaging</strong> might be a better solution, using, e.g. <strong>RabbitMQ</strong> and <strong>Kafka</strong>. Let&rsquo;s focus this time entirely on the latter.</p>
+    <content type="html"><![CDATA[<p>In the <a href="https://karolgalanciak.com/blog/2019/02/24/messages-on-rails-part-1-introduction-to-kafka-and-rabbitmq/">first part</a> of this series, we were exploring some potential options for <strong>communication between services</strong> &ndash; what their advantages and disadvantages are, why <strong>HTTP API</strong> is not necessarily the best possible choice and suggesting that <strong>asynchronous messaging</strong> might be a better solution, using, e.g. <strong>RabbitMQ</strong> and <strong>Kafka</strong>. Let&rsquo;s focus this time entirely on the latter.</p>
 
 <!--more-->
 
