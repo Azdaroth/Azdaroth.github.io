@@ -6,7 +6,7 @@ comments: true
 categories: [Ruby, Rails, Messages, REST, Kafka, Microservices, SOA, Architecture, Spark, Storm, Samza, Flink]
 ---
 
-In the [first part](https://karolgalanciak.com) of this series, we were exploring some potential options for **communication between services** - what their advantages and disadvantages are, why **HTTP API** is not necessarily the best possible choice and suggesting that **asynchronous messaging** might be a better solution, using, e.g. **RabbitMQ** and **Kafka**. Let's focus this time entirely on the latter.
+In the [first part](https://karolgalanciak.com/blog/2019/02/24/messages-on-rails-part-1-introduction-to-kafka-and-rabbitmq/) of this series, we were exploring some potential options for **communication between services** - what their advantages and disadvantages are, why **HTTP API** is not necessarily the best possible choice and suggesting that **asynchronous messaging** might be a better solution, using, e.g. **RabbitMQ** and **Kafka**. Let's focus this time entirely on the latter.
 
 <!--more-->
 
