@@ -191,12 +191,12 @@ end
 
 Let's start the server process:
 
-```
+``` text
 bundle exec karafka server
 ```
 
 If everything goes fine, you should see an output like this:
-```
+``` text
 I, [2019-04-07T10:30:41.517728 #83821]  INFO -- : Initializing Karafka server 83821
 Karafka framework version: 1.3.0
 Application client id: karafka_example
@@ -229,7 +229,7 @@ I, [2019-04-07T10:30:43.807502 #83821]  INFO -- : [[karafka_example_example] {us
 
 And let's send some dummy event from the console using `UsersResponder`:
 
-```
+``` text
 rails console
 ```
 
@@ -238,7 +238,7 @@ UsersResponder.call({ event_name: "user_created", payload: { id: 1 } })
 ```
 
 The output of that command should be similar to the following one:
-```
+``` text
 I, [2019-04-07T10:33:31.216585 #84497]  INFO -- : New topics added to target list: users
 I, [2019-04-07T10:33:31.216940 #84497]  INFO -- : Fetching cluster metadata from kafka://localhost:9092
 D, [2019-04-07T10:33:31.217337 #84497] DEBUG -- : [topic_metadata] Opening connection to localhost:9092 with client id delivery_boy...
@@ -259,7 +259,7 @@ D, [2019-04-07T10:33:31.507995 #84497] DEBUG -- : Successfully appended 1 messag
 
 And if you check the logs of the karafka server, you will see that the message was successfully processed, including logging the message:
 
-```
+``` text
 I, [2019-04-07T10:33:33.348308 #83821]  INFO -- : [[karafka_example_example] {}:] New [User] event: {"create_time"=>2019-04-07 10:33:31 +0200, "headers"=>{}, "is_control_record"=>false, "key"=>nil, "offset"=>0, "deserializer"=>#<Karafka::Serialization::Json::Deserializer:0x00007fd463e96dc8>, "partition"=>0, "receive_time"=>2019-04-07 10:33:33 +0200, "topic"=>"users", "payload"=>{"event_name"=>"user_created", "payload"=>{"id"=>1}}, "deserialized"=>true}
 I, [2019-04-07T10:33:33.348375 #83821]  INFO -- : [[karafka_example_example] {}:] Inline processing of topic users with 1 messages took 9 ms
 I, [2019-04-07T10:33:33.348410 #83821]  INFO -- : [[karafka_example_example] {}:] 1 message on users topic delegated to UsersConsumer
