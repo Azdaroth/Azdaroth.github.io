@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Samza | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/blog/categories/samza/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2019-04-07T20:15:18+02:00</updated>
+  <updated>2019-04-08T19:12:52+02:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -181,7 +181,7 @@ end</p>
 ```
 The most interesting parts of that file are configuration and drawing the routes, so let&rsquo;s focus on them now.</p>
 
-<p>In the configuration block, we need to specify URI for Kafka, which is going to be kafka://127.0.0.1:9092 by default (assuming that you have Kafka installed in the first place). We also need <code>client_id</code> to identify the app in Kafka and provide the proper namespace. Another option is specifying <code>backend</code> which we have set to be <code>inline</code>. It means that the processing of the events will happen in the karafka&rsquo;s workers, which might not be an optimal solution, especially for heavy processing. Alternatively, we can use Sidekiq thanks to <a href="https://github.com/karafka/sidekiq-backend">karafka sidekiq-backend gem</a>. For the sake of simplicity and the demonstration purposes, <code>batch_processing</code> is set to false. In such case, instead of dealing with a batch of messages (that would be available under <code>params_batch</code> method), we are going to have just <code>params</code> representing a single message.</p>
+<p>In the configuration block, we need to specify URI for Kafka, which is going to be kafka://127.0.0.1:9092 by default (assuming that you have Kafka installed in the first place). We also need <code>client_id</code> to identify the app in Kafka and provide the proper namespace. Another option is specifying <code>backend</code> which we have set to be <code>inline</code>. It means that the processing of the events will happen in the karafka&rsquo;s workers, which might not be an optimal solution, especially for heavy processing. Alternatively, we can use Sidekiq thanks to <a href="https://github.com/karafka/sidekiq-backend">karafka sidekiq-backend gem</a>. Keep in mind though that with Sidekiq backend the the messages might no longer be processed in the order they arrived! For the sake of simplicity and the demonstration purposes, <code>batch_processing</code> is set to false. In such case, instead of dealing with a batch of messages (that would be available under <code>params_batch</code> method), we are going to have just <code>params</code> representing a single message.</p>
 
 <p>In the next section, we are configuring the equivalent of routes for Kafka. We are registering <code>example</code> consumer group under which we specify that we want <code>UsersConsumer</code> class to be the consumer for <code>users</code> topic.</p>
 
