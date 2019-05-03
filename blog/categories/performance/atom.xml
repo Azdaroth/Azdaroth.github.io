@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Performance | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/blog/categories/performance/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2019-04-08T19:12:52+02:00</updated>
+  <updated>2019-05-03T15:11:55+02:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -80,6 +80,8 @@
    Index Cond: (customer_id = 1)
 (2 rows)
 ```</p></blockquote>
+
+<p>Unfortunately, <code>EXPLAIN ANALYZE</code>, which provides even more insight, as it performs a real query, is not supported out of the box by ActiveRecord. However, it can be added using an extra gem. You can check out <a href="https://pawelurbanek.com/slow-rails-queries">this blog post</a> to learn more about it.</p>
 
 <h3>How to tell a good query plan from a bad one?</h3>
 

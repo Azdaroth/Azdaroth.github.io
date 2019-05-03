@@ -58,7 +58,7 @@
         "width": 1024
       },
       "datePublished": "2018-08-19",
-      "dateModified": "2019-04-08",
+      "dateModified": "2019-05-03",
       "author": {
         "@type": "Person",
         "name": "Karol Galanciak"
@@ -225,6 +225,8 @@
 </span><span class='line'>   Index Cond: (customer_id = 1)
 </span><span class='line'>(2 rows)</span></code></pre></td></tr></table></div></figure>
 
+
+<p>Unfortunately, <code>EXPLAIN ANALYZE</code>, which provides even more insight, as it performs a real query, is not supported out of the box by ActiveRecord. However, it can be added using an extra gem. You can check out <a href="https://pawelurbanek.com/slow-rails-queries">this blog post</a> to learn more about it.</p>
 
 <h3>How to tell a good query plan from a bad one?</h3>
 

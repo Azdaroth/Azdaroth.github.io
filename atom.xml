@@ -4,7 +4,7 @@
   <title><![CDATA[Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2019-04-08T19:12:52+02:00</updated>
+  <updated>2019-05-03T15:11:55+02:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -909,6 +909,8 @@ the door to a holistic architectural approach where all parts of the domain fit 
 </span><span class='line'>   Index Cond: (customer_id = 1)
 </span><span class='line'>(2 rows)</span></code></pre></td></tr></table></div></figure>
 
+
+<p>Unfortunately, <code>EXPLAIN ANALYZE</code>, which provides even more insight, as it performs a real query, is not supported out of the box by ActiveRecord. However, it can be added using an extra gem. You can check out <a href="https://pawelurbanek.com/slow-rails-queries">this blog post</a> to learn more about it.</p>
 
 <h3>How to tell a good query plan from a bad one?</h3>
 
