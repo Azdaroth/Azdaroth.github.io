@@ -63,6 +63,7 @@ With enough experience and knowledge of your app, you will develop an intuition 
 (2 rows)
 ```
 
+Unfortunately, `EXPLAIN ANALYZE`, which provides even more insight, as it performs a real query, is not supported out of the box by ActiveRecord. However, it can be added using an extra gem. You can check out [this blog post](https://pawelurbanek.com/slow-rails-queries) to learn more about it.
 
 ### How to tell a good query plan from a bad one?
 
