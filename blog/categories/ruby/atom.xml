@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2019-06-23T18:13:53+02:00</updated>
+  <updated>2019-06-23T18:14:54+02:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Messages on Rails Part 3: RabbitMQ]]></title>
     <link href="https://karolgalanciak.com/blog/2019/06/23/messages-on-rails-part-3-rabbitmq/"/>
-    <updated>2019-06-23T20:00:00+02:00</updated>
+    <updated>2019-06-23T18:00:00+02:00</updated>
     <id>https://karolgalanciak.com/blog/2019/06/23/messages-on-rails-part-3-rabbitmq</id>
     <content type="html"><![CDATA[<p>In the <a href="https://karolgalanciak.com/blog/2019/02/24/messages-on-rails-part-1-introduction-to-kafka-and-rabbitmq/">first part</a> of this series, we were exploring some potential options for <strong>communication between services</strong> &ndash; what their advantages and disadvantages are, why <strong>HTTP API</strong> is not necessarily the best possible choice and suggesting that <strong>asynchronous messaging</strong> might be a better solution, using, e.g. <strong>RabbitMQ</strong> and <strong>Kafka</strong>. We&rsquo;ve already covered <strong>Kafka</strong> in the <a href="https://karolgalanciak.com/blog/2019/04/07/messages-on-rails-part-2-kafka/">part 2</a>, now it&rsquo;s the time for <strong>RabbitMQ</strong>.</p>
 
