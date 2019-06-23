@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
   <link href="https://karolgalanciak.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2019-05-03T15:11:55+02:00</updated>
+  <updated>2019-06-23T10:38:23+02:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -12,6 +12,329 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Messages on Rails Part 3: RabbitMQ]]></title>
+    <link href="https://karolgalanciak.com/blog/2019/06/23/messages-on-rails-part-3-rabbitmq/"/>
+    <updated>2019-06-23T20:00:00+02:00</updated>
+    <id>https://karolgalanciak.com/blog/2019/06/23/messages-on-rails-part-3-rabbitmq</id>
+    <content type="html"><![CDATA[<p>In the <a href="https://karolgalanciak.com/blog/2019/02/24/messages-on-rails-part-1-introduction-to-kafka-and-rabbitmq/">first part</a> of this series, we were exploring some potential options for <strong>communication between services</strong> &ndash; what their advantages and disadvantages are, why <strong>HTTP API</strong> is not necessarily the best possible choice and suggesting that <strong>asynchronous messaging</strong> might be a better solution, using, e.g. <strong>RabbitMQ</strong> and <strong>Kafka</strong>. We&rsquo;ve already covered <strong>Kafka</strong> in the <a href="https://karolgalanciak.com/blog/2019/04/07/messages-on-rails-part-2-kafka/">part 2</a>, now it&rsquo;s the time for <strong>RabbitMQ</strong>.</p>
+
+<!--more-->
+
+
+<h2>What is RabbitMQ, and how does it work?</h2>
+
+<p>RabbitMQ is a general purpose message broker supporting multiple protocols, yet, we are going to focus mostly on AMQP, which is the one that is the most typically used. It implements a smart broker/dumb consumer model. Unlike Kafka, it means that the broker is responsible for delivering messages to the right place. Also, the <code>queue</code> in Rabbit is what you would naturally consider being a queue &ndash; it&rsquo;s not database-like storage as Kafka topics are.</p>
+
+<p>So what does publishing and consuming a message actually mean?</p>
+
+<p>In the first step, a <code>producer</code> publishes a <code>message</code> &ndash; this can be a JSON message or whatever else that could be sent. This message is delivered to a <code>queue</code>, from which <code>consumers</code> can read it and process it. After the message is consumed, it&rsquo;s gone from the queue.</p>
+
+<p>If this sounds to you like Redis and Sidekiq, you would be quite right. Actually, Redis could also be used as a message queue for communication between apps, although that might not be necessarily the best idea as being a message queue is not its primary purpose.</p>
+
+<p>Why is RabbitMQ is so unique though, and what can it do that Redis or even Kafka can&rsquo;t do?</p>
+
+<p>One of the key characteristics of RabbitMQ is that producers don&rsquo;t push messages directly to the queues. Instead, producers send messages to another layer called <code>exchanges</code>. This has quite profound consequences on the way RabbitMQ can be used and the features it offers:</p>
+
+<ul>
+<li>Producers don&rsquo;t need to be aware of all the queues where the message should be delivered, which means excellent decoupling between producers and consumers and ease of use</li>
+<li>Without exchanges, it would not be possible to easily implement a publish-subscribe pattern where multiple consumers need to process a given message. Instead, you would have pretty much something like in Sidekiq &ndash; when the message is pushed to the queue, the workers compete for it, and it gets processed only once, there is no case of multiple workers handling the same message. However, competing consumers pattern is still possible in RabbitMQ (we will see it later but rather as something to avoid in that particular case).</li>
+<li>Having extra layer in-between allows flexible routing and the implementation of some rules telling how and under what conditions consumers want to have messages delivered.</li>
+</ul>
+
+
+<p>In general, we could visualize the flow in RabbitMQ in the following way:</p>
+
+<p class="img-center-wrapper">
+  <img class="img-center" src="/images/messages_on_rails_part_3/rabbitmq_generalization.png" title="RabbitMQ" alt="RabbitMQ">
+</p>
+
+
+
+
+<p class="center">
+  <a href="https://karolgalanciak.com/images/messages_on_rails_part_3/rabbitmq_generalization.png" target="_blank">See in better quality</a>
+</p>
+
+
+<h2>Publishing/Receiving messages and exchanges</h2>
+
+<p>Ability to implement a publish-subscribe pattern is a natural consequence of having exchanges. As we could see on the graph above, the producer is not aware of all of the queues to which the messages will be delivered. It might be even the case that there are no queues at all that would be interested in any message!</p>
+
+<p>For the queues to receive messages, we need to create a relationship between that queue and the exchange. In RabbitMQ it&rsquo;s called a <code>binding</code>.</p>
+
+<p>So far, we know that the publisher sends a message to the exchange and exchange delivers the messages to queues that are bound to it. But what are the rules here that would determine to which queues exactly the message should be delivered to (besides the fact that the queues must have established a binding with the exchange)?</p>
+
+<p>To achieve that, we have four types of exchange types that have a bit different behavior:</p>
+
+<ol>
+<li><code>fanout</code> exchange &ndash; it just delivers a message to all the queues that are bound to it.</li>
+<li><code>direct</code> &ndash; a given queue might be only interested in some particular type of messages that could be filtered out by some criteria. E.g., you might be publishing logs with different levels, just like in <code>Rails.logger</code> where you have <code>debug</code>, <code>info</code>, <code>fatal</code> etc. severity levels. In that case, there might be a queue that wants to receive only <code>fatal</code> logs, and another one might want to receive just <code>debug</code> logs. Instead of letting the consumer do the filtering itself, we can let RabbitMQ do it by specifying a <code>routing key</code> in the message. We could publish logs with routing keys such as <code>log.debug</code> and <code>log.fatal</code> and let the queues bind accordingly using that routing key as a <code>binding key</code>. That&rsquo;s exactly what a <code>direct</code> exchange is about. However, what if we want to have a third queue that would be interested in all types of logs? In that case, we would need to use another kind of exchange:</li>
+<li><code>topic</code> &ndash; it&rsquo;s the exchange that allows receiving messages based on the patterns. In case of the example of logs, the queue that would be interested in all kinds of logs could create a binding with <code>log.*</code> routing key. And what if it were interested in receiving all messages (i.e., work as a <code>fanout</code> exchange, even though we are using <code>topic</code> exchange here)? RabbitMQ has us covered, we could use a special routing key: <code>#</code> and that would be enough. Also, the <code>topic</code> exchange can also act as a <code>direct</code> one &ndash; there is nothing preventing a queue from binding with a full routing key name, so using more &ldquo;advanced&rdquo; exchange type is only adding more options and flexibility, it doesn&rsquo;t take away the features of &ldquo;simpler&rdquo; ones.</li>
+<li><code>headers</code> exchange type &ndash; arguably a less common one, it&rsquo;s quite similar to <code>topic</code> exchange, although the filtering is performed based on the values of the headers instead of routing keys.</li>
+</ol>
+
+
+<h2>Using RabbitMQ in Ruby/Rails apps</h2>
+
+<h3>RPC with RabbitMQ</h3>
+
+<p>There is one somewhat unexpected feature of RabbitMQ (at least if you focus on async messaging) &ndash; Remote Procedure Call (RPC). That way you can implement synchronous request-reply flow, just like with HTTP APIs. So if it&rsquo;s just like good ol' HTTP API, why would you even consider RPCs via RabbitMQ?</p>
+
+<p>Sometimes you might not need REST API as you might be interested only in executing a specific set of commands/procedures in another service that don&rsquo;t easily map to resources that you would expose in REST API. It is especially true if you develop a private API which is not going to be exposed to Third Party Users, so there is little concern for &ldquo;externalization&rdquo;.</p>
+
+<p>Let&rsquo;s check a quick example to see it in action. To make RPC with RabbitMQ what we need to do is to publish a message and specify a reply-to (callback) queue to which the server will reply.</p>
+
+<p>Let&rsquo;s implement a classic: a Fibonacci sequence server to which the clients will be sending the numbers and expecting the result in the response. One of the super simple ways to implement RPCs in Ruby is to do it via <a href="https://github.com/peejaybee/bunny_burrow">bunny_borrow gem</a>. To see it almost right away in action, you could add it to a Gemfile of any Rails application, open two Rails console processes, execute this code in the first one:</p>
+
+<p>``` rb
+class Fibonacci
+  def self.calculate(number, accum = {})</p>
+
+<pre><code>return number if number == 0 || number == 1
+accum[number] ||= calculate(number - 1, accum) + calculate(number-2, accum)
+</code></pre>
+
+<p>  end
+end</p>
+
+<p>rpc_server = BunnyBurrow::Server.new do |server|
+  server.rabbitmq_url = &ldquo;amqp://guest:guest@localhost:5672&rdquo;
+  server.rabbitmq_exchange = &ldquo;fibonacci_sequence&rdquo;
+  server.logger = Logger.new(STDOUT)
+end</p>
+
+<p>rpc_server.subscribe(&ldquo;fibonacci.route&rdquo;) do |payload|
+  BunnyBurrow::Server.create_response.tap do |response|</p>
+
+<pre><code>response[:result] = Fibonacci.calculate(JSON.parse(payload).fetch("number"))
+</code></pre>
+
+<p>  end
+end</p>
+
+<p>rpc_server.wait
+```</p>
+
+<p>and this in the second one:</p>
+
+<p>``` rb
+rpc_client = BunnyBurrow::Client.new do |client|
+  client.rabbitmq_url =  &ldquo;amqp://guest:guest@localhost:5672&rdquo;
+  client.rabbitmq_exchange = &ldquo;fibonacci_sequence&rdquo;
+  client.logger = Logger.new(STDOUT)
+end</p>
+
+<p>payload = { &ldquo;number&rdquo; => 10 }</p>
+
+<p>response = rpc_client.publish(payload, &ldquo;fibonacci.route&rdquo;)
+puts JSON.parse(response)[&ldquo;result&rdquo;]
+```</p>
+
+<p>Just don&rsquo;t forget to install RabbitMQ before ;).</p>
+
+<p>And that&rsquo;s it! You will see the result of <code>55</code> getting printed. RPC with <code>bunny_borrow</code> merely requires binding to the right exchange, agreeing on the routing key we are going to use and publishing a message!</p>
+
+<h3>Background jobs with Sneakers &ndash; Redis/Sidekiq replacement</h3>
+
+<p>As already mentioned before, RabbitMQ can be a bit like Redis for background processing purposes. And it turns out that we even have a reliable replacement for Sidekiq that is backed by RabbitMQ! We can easily implement workers with <a href="https://github.com/jondot/sneakers">sneakers gem</a>, especially if you use ActiveJob as we have already adapter for Sneakers! But even if you use Sneakers standalone, you shouldn&rsquo;t expect too many surprises there. It looks like a regular worker class. The only difference is that it requires manual acknowledgment of having the message processed:</p>
+
+<p>``` rb
+class MySneakersWorker
+  include Sneakers::Worker
+  from_queue :queue_name</p>
+
+<p>  def work(payload)</p>
+
+<pre><code>Rails.logger.info "From Sneakers: #{payload}"
+
+ack!
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>If you are curious why you might want to prefer Sneaker over Sidekiq, I would recommend reading the <a href="https://github.com/jondot/sneakers/wiki/Why-i-built-it">docs</a>.</p>
+
+<h3>Event-Driven Applications with Hutch</h3>
+
+<p>The case where RabbitMQ really will shine in our Rails applications is for event-driven architecture or in general, publish-subscribe use cases. It happens quite often in communication between microservices that we don&rsquo;t necessarily need synchronous calls between two or more apps and making it async will improve the efficiency, scalability and also will allow making the apps more independent, coherent and less coupled to each other. For example, if one application is down, we don&rsquo;t need to worry about this as our message will be processed eventually when the app is back. For synchronous flow, that would be very different as we would need to implement error handling and simply be prepared for that kind of scenario. Also, quite often, there is a clear distinction between primary logic behind some use cases and secondary logic.</p>
+
+<p>Consider the following scenario: you have a checkout page in your e-commerce system where a user can enter credit card data and pay for the order. Are all the following &ldquo;features&rdquo; equally important?</p>
+
+<ul>
+<li>executing the charge and confirming the order</li>
+<li>sending an email notification to the buyer</li>
+<li>sending WhatsApp message someone who will be responsible for delivering this order</li>
+<li>updating some internal stats about the orders</li>
+</ul>
+
+
+<p>The first one is clearly the critical part of the logic, and the rest looks like some extra aspects that happen after the order is paid. Should they be called from the same place? And how does it go with the Single Responsibility Principle?</p>
+
+<p>Let&rsquo;s visualize this scenario with the following pseudocode:</p>
+
+<p>``` rb
+class Order::ConfirmByPayment
+  def call(order, payment)</p>
+
+<pre><code>order.confirm!(payment)
+send_notification_to_the buyer(order)
+send_whatsapp_message_for_delivery(order)
+update_stats_for_orders(order)
+update_stats_for_payment(payment)
+</code></pre>
+
+<p>  end</p>
+
+<p>  # private methods go here
+end
+```</p>
+
+<p>Certainly, this class looks too busy as it is now. And what if we introduced some extra notifications or other aspects? Would we add just another private method? It doesn&rsquo;t sound exactly like something compliant with SRP.</p>
+
+<p>So what options do we have? One way to deal with it is to go with publish-subscribe pattern &ndash; publish some domain event and implement subscribers that would react to this event. It is doable in Rails apps without too much hassle with <a href="https://github.com/krisleech/wisper">wisper</a> gem. Explaining how to use <code>wisper</code> is outside the scope of this article, but to cut a long story short, that&rsquo;s what this service would look like after a rewrite to event-driven architecture:</p>
+
+<p>``` rb
+class Order::ConfirmByPayment
+  include Wisper::Publisher</p>
+
+<p>  def call(order, payment)</p>
+
+<pre><code>order.confirm!(payment)
+broadcast(:order_confirmed_by_payment, order.as_json, payment.as_json)
+</code></pre>
+
+<p>  end
+  # private methods go here
+end
+```</p>
+
+<p>Each of the notification could be extracted to a separate class that is subscribed to <code>order_confirmed_by_payment</code> event. And that way, we would get clean and decoupled classes where the logic is easy to extend.</p>
+
+<p>What does it have to do with RabbitMQ though?</p>
+
+<p>In the code we&rsquo;ve just gone through, everything is implemented within the same application. However, this is not really necessary. Sending notifications can be async, and it&rsquo;s not needed to be done from the same application, we could have a separate service for stats, for sending email notifications, for sending WhatsApp messages etc. And for that, we need some simple way how to inform all the applications that they should do something. And that&rsquo;s where we will need RabbitMQ and one of the Ruby &ldquo;frameworks&rdquo; that is built for this kind of use cases.</p>
+
+<h4>Building Example Producer and Consumer With RabbitMQ and Hutch</h4>
+
+<p>We are going to use <a href="https://github.com/gocardless/hutch">hutch</a> gem to publish event <code>order.confirmed_by_payment</code> event so that some consumers (either within the same app or from apps, it doesn&rsquo;t make much difference) can do something upon it.</p>
+
+<p>Hutch itself is quite opinionated, so there is not much left for us to figure out, yet, it&rsquo;s good to keep in mind that it uses <code>topic</code> exchanges.</p>
+
+<p>Let&rsquo;s get back to our <code>Order::ConfirmByPayment</code> and publish a message with Hutch from there:</p>
+
+<p>``` rb
+class Order::ConfirmByPayment
+  def call(order, payment)</p>
+
+<pre><code>order.confirm!(payment)
+
+Hutch.connect
+Hutch::Config.set(:force_publisher_confirms, true)
+
+Hutch.publish("order.confirmed_by_payment", payment: payment.as_json, order: order.as_json)
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>The logic is quite simple: first, we need to connect Hutch. That&rsquo;s probably not the place where it should be executed, some initializer might be a better idea, but it&rsquo;s in this class to keep the example simpler. It&rsquo;s the same thing with <code>force_publisher_confirms</code> option (that should be moved to some initializer as well) which we use here for extra durability and better guarantees as we require the publisher to wait for the confirmation that the message was published. And then, we publish our message with <code>payment</code> and <code>order</code> keys and their serialized projections as values under <code>order.confirmed_by_payment</code> routing key.</p>
+
+<p>To consume the messages that are published by this class, we need some consumer classes:</p>
+
+<p>``` rb
+class Order::ConfirmedByPaymentStatsUpdaterConsumer
+  include Hutch::Consumer
+  consume &ldquo;order.confirmed_by_payment&rdquo;</p>
+
+<p>  def process(message)</p>
+
+<pre><code>do_something_with_payment_and_order(message.body[:payment], message.body[:order])
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>``` rb
+class Order::ConfirmedByPaymentWhatsAppNotifierConsumer
+  include Hutch::Consumer
+  consume &ldquo;order.confirmed_by_payment&rdquo;</p>
+
+<p>  def process(message)</p>
+
+<pre><code>do_something_with_payment(message.body[:payment])
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>``` rb
+class Order::ConfirmedByPaymentEmailNotifierConsumer
+  include Hutch::Consumer
+  consume &ldquo;order.confirmed_by_payment&rdquo;</p>
+
+<p>  def process(message)</p>
+
+<pre><code>do_something_with_order(message.body[:order])
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>And that&rsquo;s it! What we need to do is to define consumer classes that include <code>Hutch::Consumer</code> module, define the routing key under which we are going to consume messages and implement <code>process</code> method that will deal with the <code>message</code> that we get and do something with its <code>body</code> that contains what we published via publisher.</p>
+
+<p>Optionally, we may want to specify <code>queue_name</code> explicitly, which is by default generated based on the class name. It will work without an explicit declaration for the majority of the cases, but what is going to happen if we have a consumer with the same class name in more than one application? Instead of having a publish-subscribe pattern, we are going to end up with competing consumers as having the same queue names is the way to do in RabbitMQ! In that case, it&rsquo;s worth prefixing queue name with the app&rsquo;s name or something else that would make it unique in your ecosystem:</p>
+
+<p>``` rb
+class Order::ConfirmedByPaymentWhatsAppNotifierConsumer
+  include Hutch::Consumer
+  consume &ldquo;order.confirmed_by_payment&rdquo;
+  queue_name &ldquo;notifs_app_order_confirmed_by_payments_whats_app_notifier&rdquo;</p>
+
+<p>  def process(message)</p>
+
+<pre><code>do_something_with_payment(message.body[:payment])
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>The last thing to do is to start the worker process that will consume the messages:</p>
+
+<p><code>
+bundle exec hutch
+</code></p>
+
+<p>You should see an output that looks like this:</p>
+
+<p><code>
+2019-06-15T19:27:52Z 84284 INFO -- hutch booted with pid 84284
+2019-06-15T19:27:52Z 84284 INFO -- found rails project (.), booting app in development environment
+2019-06-15T19:27:57Z 84284 INFO -- connecting to rabbitmq (amqp://guest@127.0.0.1:5672/)
+2019-06-15T19:27:57Z 84284 INFO -- connected to RabbitMQ at 127.0.0.1 as guest
+2019-06-15T19:27:57Z 84284 INFO -- opening rabbitmq channel with pool size 1, abort on exception false
+2019-06-15T19:27:57Z 84284 INFO -- using topic exchange 'hutch'
+2019-06-15T19:27:57Z 84284 INFO -- HTTP API use is enabled
+2019-06-15T19:27:57Z 84284 INFO -- connecting to rabbitmq HTTP API (http://guest@127.0.0.1:15672/)
+2019-06-15T19:27:57Z 84284 INFO -- tracing is disabled
+2019-06-15T19:27:57Z 84284 INFO -- setting up queues
+</code></p>
+
+<p>And you can enjoy using RabbitMQ in your apps and having the logic nicely decoupled with a little cost ;)</p>
+
+<h2>Wrapping Up</h2>
+
+<p><strong>RabbitMQ</strong> is an excellent choice if you need <strong>multiple applications</strong> to talk to each other via events instead of HTTP requests/responses and should you ever need <strong>synchronous</strong> calls, you could take advantage of its <strong>RPC</strong> capabilities. It&rsquo;s a mature <strong>message broker</strong> with well-established Ruby gems that will make it simple to introduce it in your Rails apps.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Messages on Rails Part 2: Kafka]]></title>
@@ -609,70 +932,6 @@ end
 <h2>Wrapping Up</h2>
 
 <p>Metaprogramming in Ruby is a powerful tool, however; it can lead to some issues that might not be obvious why they happen. Fortunately, with enough knowledge of the language, those problems can be solved elegantly.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[The Problems With Validating ActiveRecord Models And Why State Validation Is a Bad Idea]]></title>
-    <link href="https://karolgalanciak.com/blog/2018/09/30/the-problems-with-validating-activerecord-models-and-why-state-validation-is-a-bad-idea/"/>
-    <updated>2018-09-30T20:00:00+02:00</updated>
-    <id>https://karolgalanciak.com/blog/2018/09/30/the-problems-with-validating-activerecord-models-and-why-state-validation-is-a-bad-idea</id>
-    <content type="html"><![CDATA[<p>In the typical <strong>Rails application</strong>, you can find the most of the validations in the <strong>ActiveRecord models</strong>, which is nothing surprising &ndash; ActiveRecord models are used for multiple things. Whether it is a good thing, or a bad thing (in most cases it&rsquo;s the latter) deserves a separate book or at least blog post-series as it&rsquo;s not a simple problem, there is one specific thing that can cause <strong>a lot of issues</strong> that are <strong>difficult to solve</strong> and go beyond <strong>design decisions</strong> and ease of maintenance of the application, something that impacts the behavior of the model &ndash; <strong>the validations</strong>.</p>
-
-<p>Just to give you a real-world example of what validation in ActiveRecord model looks like (as impossible as it seems, it really did happen) &ndash; when updating the check-in time of the reservation, which is a simple attribute on Reservation model, the record turned out to be invalid because&hellip; the format of guest&rsquo;s phone didn&rsquo;t match some regexp.</p>
-
-<p>There are multiple ways to bypass this problem: use <code>validate: false</code> flag with <code>save</code> method: <code>save(validate: false)</code> or use <code>update_columns</code> method, but this is definitely not something that can be applied in a &ldquo;normal&rdquo; use case. In a typical scenario, this will be the error message displayed in the UI/returned to API consumer, and it will be confusing.</p>
-
-<p>However, this is the expected behavior of ActiveRecord (or in general, ActiveModel-style) validations, which is <strong>a validation of the state</strong> of the model. And judging from this example, it&rsquo;s evident that it leads to <strong>problematic scenarios</strong>. What kind of design then would be the most appropriate to <strong>prevent such issues</strong>?</p>
-
-<!--more-->
-
-
-<h2>Forget State Validation</h2>
-
-<p>Based on the previous example, it&rsquo;s clear that the real problem is the idea of a model&rsquo;s state validation. And the more complex state of the models can be (especially if there are some cross-validations between several models, which is not uncommon in complex applications), the more problems you will get.</p>
-
-<p>Just wanted to update some <code>notes</code> attribute to add some quick info about something? Forget it &ndash; you will get three different validation errors that will tell you that someone&rsquo;s email has an invalid format, description is too short, a discount amount of something is invalid.</p>
-
-<p>Sadly, this is the typical Rails Way of handling validations. In the initial phase of the application, this is certainly convenient &ndash; adding new validations is super easy, there is no need to discuss the design of potential alternatives and how it fits the bigger picture, and there is very little overhead. Unless you are ok with such problems, at some point, you will probably need to migrate validations to some other solution. What would be the potential alternative for validations?</p>
-
-<h2>Validate The Actual Use Case</h2>
-
-<p>The answer to that question is straight-forward (although it doesn&rsquo;t mean that achieving it will be simple) &ndash; just validate the thing you are doing, the actual use case. If you want to update <code>description</code>, you should only be concerned with the description &ndash; if it&rsquo;s present or not, it&rsquo;s length, etc., whether <code>headline</code> is too short or not (this can happen when you change the validation rules and don&rsquo;t somehow migrate the data) is not the subject of that use case.</p>
-
-<p>There are a lot of implications of such approach &ndash; indeed, it will result in different sets of validators per creation and per update, since for creation we usually need way more data, and for an update, we may merely want to update a single attribute. Effectively, it will result in different validation pipelines for create and update actions. For creating, we may always need to apply specific validators (e.g., presence validators for some attributes), but for updating it will make more sense to apply only the validators for what we are trying to do &ndash; when we want to update email, we apply the presence and format validation for an email, if we want to update a description, we apply presence and length validators for a description.</p>
-
-<h2>Potential Implementation</h2>
-
-<p>What would be the way to implement it? The specific design is out of the scope of this article as it might require building mini-framework for validations and consider some design implications on the entire application (especially if we are escaping the traditional Rails Way). However, one thing is sure here &ndash; there will be dedicated validator objects, probably different for create and update action, and the validations will need to be removed from ActiveRecord models.</p>
-
-<p>A potential way of interacting with such objects could look like this:</p>
-
-<p><code>rb
-validation_result = Reservation::CreateValidator.call(params)
-if validation_result.success?
-  # handle happy path here
-else
-  puts validation_result.errors.messages # for convenience and familiarity, `errors` object could have a similar interface to ActiveModel::Errors
-end
-</code></p>
-
-<p>What if we need the model itself in the validator due to some complex business rules, like cross-model validation? We could either reuse <code>id</code> from <code>params</code> or just provide <code>model</code> as an argument:</p>
-
-<p><code>rb
-validation_result = Reservation::CreateValidator.call(record, params)
-</code></p>
-
-<h2>Side-Effects Of Such Design</h2>
-
-<p>The implications of such design go far deeper than just moving things from one place to another to prevent some edge cases (and naturally increasing the complexity of the design, but it seems to be a fair price to pay for what we get as a result). Since it would make the most sense to have validations per use case, then&hellip; maybe we can have use case as objects that would expose their constraints, and the validators would take the rules from those objects and apply some specific logic on top of it to achieve the desired result? Maybe we could even create value objects composed of a single or multiple attributes, e.g. <code>Client::Email</code> object that would enforce its constraints and also, move some logic specific to the email itself in the context of a hypothetical <code>Client</code> model? And if we can identify the use cases themselves, aren&rsquo;t they domain events? And how hard would it be to build event-based architecture, or even apply Event Sourcing?</p>
-
-<p>These are not trivial questions, however, doing one change in the design opens
-the door to a holistic architectural approach where all parts of the domain fit together and the interaction between them is way more intentional comparing to ad hoc duct-tape-like solutions.</p>
-
-<h2>Wrapping Up</h2>
-
-<p>Putting <strong>too much logic</strong> in <strong>ActiveRecord models</strong> has a lot of disadvantages, most of them being problematic on the <strong>design level</strong>. However, things like validations can result in some nasty issues that go beyond the maintenance and cause actual business problems. Fortunately, by keeping that in mind and putting the <strong>validation logic</strong> in a <strong>separate object(s)</strong>, we can easily avoid such issues and as a nice side-effect, have a design that is way more flexible, extendible and eventually simpler to maintain.</p>
 ]]></content>
   </entry>
   

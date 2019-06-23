@@ -58,7 +58,7 @@
         "width": 1024
       },
       "datePublished": "",
-      "dateModified": "2019-05-03",
+      "dateModified": "2019-06-23",
       "author": {
         "@type": "Person",
         "name": "Karol Galanciak"
@@ -135,6 +135,47 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2017/05/28/ruby-memoization-%7C%7C-equals-vs-defined-syntax/">Ruby Memoization: ||= vs. Defined? Syntax</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-05-28T22:00:00+02:00" pubdate data-updated="true">May 28<span>th</span>, 2017</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>In the majority of the <strong>Rails applications</strong> or even <strong>Ruby gems</strong> you can find a lot of use cases where you need to <strong>memoize</strong> a result of some computation for performance benefits and to not compute it again if this result has already been computed. Seems like doing the assignment to some instance variable with <code>||=</code> operator is the most commonly used solution for this purpose, e.g. <code>@result ||= do_some_heavy_computation</code>. However, there are some cases where it might not produce the expected outome and you should actually use <code>defined?</code> operator instead.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2017/05/28/ruby-memoization-%7C%7C-equals-vs-defined-syntax/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -523,50 +564,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/07/31/decoding-rails-magic-how-does-calling-class-methods-on-mailers-work/">Decoding Rails Magic: How Does Calling Class Methods on Mailers Work</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-07-31T21:15:00+02:00" pubdate data-updated="true">Jul 31<span>st</span>, 2016</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Have you ever wondered how it is possible that calling <strong>class methods</strong> on <strong>mailers</strong> work in Rails, even though you only define some instance methods in those classes? It seems like it’s quite common question, especially when you see the mailers in action for the first time. Apparently, there is some Ruby &#8220;magic&#8221; involved here, so let’s try to <b>decode</b> it and check what happens under the hood.</p>
-
-
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/07/31/decoding-rails-magic-how-does-calling-class-methods-on-mailers-work/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/4/">&larr; Older</a>
@@ -599,6 +596,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/06/23/messages-on-rails-part-3-rabbitmq/">Messages on Rails Part 3: RabbitMQ</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2019/04/07/messages-on-rails-part-2-kafka/">Messages on Rails Part 2: Kafka</a>
       </li>
     
@@ -612,10 +613,6 @@
     
       <li class="post">
         <a href="/blog/2018/12/16/inheritance-and-define-method-how-to-make-them-work-together/">Inheritance and Define_method - How to Make Them Work Together</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/09/30/the-problems-with-validating-activerecord-models-and-why-state-validation-is-a-bad-idea/">The Problems With Validating ActiveRecord Models and Why State Validation Is a Bad Idea</a>
       </li>
     
   </ul>
