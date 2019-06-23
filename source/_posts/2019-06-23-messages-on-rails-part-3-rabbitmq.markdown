@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Messages on Rails Part 3: RabbitMQ"
-date: 2019-06-23 20:00
+date: 2019-06-23 18:00
 comments: true
 categories: [Ruby, Rails, Messages, REST, RabbitMQ, Microservices, SOA, Architecture]
 ---
