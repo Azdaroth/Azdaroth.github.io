@@ -22,7 +22,7 @@ If this sounds to you like Redis and Sidekiq, you would be quite right. Actually
 
 Why is RabbitMQ is so unique though, and what can it do that Redis or even Kafka can't do?
 
-One of the key characteristics of RabbitMQ is that producers don't push messages directly to the queues. Instead, producers send messages to another layer called `exchanges`. This has quite profound consequences on the way RabbitMQ can be used and the feature it offers:
+One of the key characteristics of RabbitMQ is that producers don't push messages directly to the queues. Instead, producers send messages to another layer called `exchanges`. This has quite profound consequences on the way RabbitMQ can be used and the features it offers:
 
 - Producers don't need to be aware of all the queues where the message should be delivered, which means excellent decoupling between producers and consumers and ease of use
 - Without exchanges, it would not be possible to easily implement a publish-subscribe pattern where multiple consumers need to process a given message. Instead, you would have pretty much something like in Sidekiq - when the message is pushed to the queue, the workers compete for it, and it gets processed only once, there is no case of multiple workers handling the same message. However, competing consumers pattern is still possible in RabbitMQ (we will see it later but rather as something to avoid in that particular case).
@@ -46,18 +46,18 @@ For the queues to receive messages, we need to create a relationship between tha
 
 So far, we know that the publisher sends a message to the exchange and exchange delivers the messages to queues that are bound to it. But what are the rules here that would determine to which queues exactly the message should be delivered to (besides the fact that the queues must have established a binding with the exchange)?
 
-The answer is "yes"! To achieve that, we have four types of exchange types that have a bit different behavior:
+To achieve that, we have four types of exchange types that have a bit different behavior:
 
 1. `fanout` exchange - it just delivers a message to all the queues that are bound to it.
 2. `direct` - a given queue might be only interested in some particular type of messages that could be filtered out by some criteria. E.g., you might be publishing logs with different levels, just like in `Rails.logger` where you have `debug`, `info`, `fatal` etc. severity levels. In that case, there might be a queue that wants to receive only `fatal` logs, and another one might want to receive just `debug` logs. Instead of letting the consumer do the filtering itself, we can let RabbitMQ do it by specifying a `routing key` in the message. We could publish logs with routing keys such as `log.debug` and `log.fatal` and let the queues bind accordingly using that routing key as a `binding key`. That's exactly what a `direct` exchange is about. However, what if we want to have a third queue that would be interested in all types of logs? In that case, we would need to use another kind of exchange:
-3. `topic` - it's the exchange that allows receiving messages based on the patterns. In case of the example of logs, the queue that would be interested in all kinds of logs could create a binding with `log.*` routing key. And what if it were interested in received all messages (i.e., work as a `fanout` exchange, even though we are using `topic` exchange here)? RabbitMQ has us covered, we could use a special routing key: `#` and that would be enough. Also, the `topic` exchange can also act as a `direct` one - there is nothing preventing a queue from binding with a full routing key name, so using more "advanced" exchange type is only adding more options and flexibility, it doesn't take away the features of "simpler" ones.
+3. `topic` - it's the exchange that allows receiving messages based on the patterns. In case of the example of logs, the queue that would be interested in all kinds of logs could create a binding with `log.*` routing key. And what if it were interested in receiving all messages (i.e., work as a `fanout` exchange, even though we are using `topic` exchange here)? RabbitMQ has us covered, we could use a special routing key: `#` and that would be enough. Also, the `topic` exchange can also act as a `direct` one - there is nothing preventing a queue from binding with a full routing key name, so using more "advanced" exchange type is only adding more options and flexibility, it doesn't take away the features of "simpler" ones.
 4. `headers` exchange type - arguably a less common one, it's quite similar to `topic` exchange, although the filtering is performed based on the values of the headers instead of routing keys.
 
 ## Using RabbitMQ in Ruby/Rails apps
 
 ### RPC with RabbitMQ
 
-There is one somewhat unexpected feature of RabbitMQ - Remote Procedure Call (RPC). That way you can implement synchronous request-reply flow, just like with HTTP APIs. So if it's just like good ol' HTTP API, why would you even consider RPCs via RabbitMQ?
+There is one somewhat unexpected feature of RabbitMQ (at least if you focus on async messaging) - Remote Procedure Call (RPC). That way you can implement synchronous request-reply flow, just like with HTTP APIs. So if it's just like good ol' HTTP API, why would you even consider RPCs via RabbitMQ?
 
 Sometimes you might not need REST API as you might be interested only in executing a specific set of commands/procedures in another service that don't easily map to resources that you would expose in REST API. It is especially true if you develop a private API which is not going to be exposed to Third Party Users, so there is little concern for "externalization".
 
@@ -198,7 +198,7 @@ class Order::ConfirmByPayment
 end
 ```
 
-The logic is quite simple: first, we need to connect Hutch. That's probably not the place where it should be executed, some initializer might be a better idea, but it's in this class to keep the example simpler. It's the same thing with `force_publisher_confirms` option that should be moved to some initializer which we use here for extra durability and better guarantees as we require the publisher to wait for the confirmation that the message was published. And then, we publish our message with `payment` and `order` keys and their serialized projections as values under `order.confirmed_by_payment` routing key.
+The logic is quite simple: first, we need to connect Hutch. That's probably not the place where it should be executed, some initializer might be a better idea, but it's in this class to keep the example simpler. It's the same thing with `force_publisher_confirms` option (that should be moved to some initializer as well) which we use here for extra durability and better guarantees as we require the publisher to wait for the confirmation that the message was published. And then, we publish our message with `payment` and `order` keys and their serialized projections as values under `order.confirmed_by_payment` routing key.
 
 To consume the messages that are published by this class, we need some consumer classes:
 
