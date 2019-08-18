@@ -58,7 +58,7 @@
         "width": 1024
       },
       "datePublished": "",
-      "dateModified": "2019-06-23",
+      "dateModified": "2019-08-18",
       "author": {
         "@type": "Person",
         "name": "Karol Galanciak"
@@ -135,6 +135,49 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2017/06/25/ember-tips-testing-outgoing-http-requests/">Ember Tips: Testing Outgoing HTTP Requests</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-06-25T22:00:00+02:00" pubdate data-updated="true">Jun 25<span>th</span>, 2017</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>Ember.js</strong> is a web frontend framework and it&rsquo;s no surprise that majority of the applications deal with a lot of <strong>HTTP requests</strong>. But such fact has a lot of implications on the process of development of the Ember apps, especially when it comes to <strong>testing</strong>. For basic <code>GET</code> requests which don&rsquo;t include any query params or don&rsquo;t deal with pagination it&rsquo;s quite straight-forward &ndash; for those we just want to fetch some data, so we can check if proper objects are present as a side-effect of these requests. What about <code>POST</code>, <code>PATCH</code> or <code>DELETE</code> requests, where we can&rsquo;t easily test the side effects?</p>
+
+<p>Fortunately, thanks to the awesome tools such as <a href="https://github.com/pretenderjs/pretender" target="_blank">pretender</a> and <a href="https://github.com/samselikoff/ember-cli-mirage" target="_blank">ember-cli-mirage</a>, it&rsquo;s not a big problem.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2017/06/25/ember-tips-testing-outgoing-http-requests/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -520,50 +563,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/08/30/little-known-but-useful-rails-features-activerecord-querymethods-dot-extending/">Little-known but Useful Rails Features: ActiveRecord.extending</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-08-30T12:00:00+02:00" pubdate data-updated="true">Aug 30<span>th</span>, 2016</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Every now and then I discover some features in <strong>Rails</strong> that are not that (arguably) commonly used, but there are some use cases when they turn out to be super useful and the <strong>best tool</strong> for the job. One of them would definitely be a nice addition to <code>ActiveRecord::QueryMethods</code> - <code>extending</code> method. Let’s see how it could be used in the <strong>Rails apps</strong>.</p>
-
-
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/08/30/little-known-but-useful-rails-features-activerecord-querymethods-dot-extending/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/4/">&larr; Older</a>
@@ -596,6 +595,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/08/18/durable-sidekiq-jobs-how-to-maximize-reliability-of-sidekiq-and-redis/">Durable Sidekiq Jobs: How to Maximize Reliability of Sidekiq and Redis</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2019/06/23/messages-on-rails-part-3-rabbitmq/">Messages on Rails Part 3: RabbitMQ</a>
       </li>
     
@@ -609,10 +612,6 @@
     
       <li class="post">
         <a href="/blog/2019/01/27/how-to-tell-the-difference-between-a-default-and-provided-value-for-optional-arguments-in-ruby/">How to Tell the Difference Between a Default and a Provided Value for Optional Arguments in Ruby?</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/12/16/inheritance-and-define-method-how-to-make-them-work-together/">Inheritance and Define_method - How to Make Them Work Together</a>
       </li>
     
   </ul>

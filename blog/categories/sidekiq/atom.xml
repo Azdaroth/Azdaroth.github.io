@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Sidekiq | Karol Galanciak - Ruby on Rails and Ember.js consultant]]></title>
+  <link href="https://karolgalanciak.com/blog/categories/sidekiq/atom.xml" rel="self"/>
+  <link href="https://karolgalanciak.com/"/>
+  <updated>2019-08-18T11:17:07+02:00</updated>
+  <id>https://karolgalanciak.com/</id>
+  <author>
+    <name><![CDATA[Karol Galanciak]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Durable Sidekiq jobs: how to maximize reliability of Sidekiq and Redis]]></title>
+    <link href="https://karolgalanciak.com/blog/2019/08/18/durable-sidekiq-jobs-how-to-maximize-reliability-of-sidekiq-and-redis/"/>
+    <updated>2019-08-18T20:00:00+02:00</updated>
+    <id>https://karolgalanciak.com/blog/2019/08/18/durable-sidekiq-jobs-how-to-maximize-reliability-of-sidekiq-and-redis</id>
+    <content type="html"><![CDATA[<p><strong>Sidekiq</strong> is one of the most popular (if not the most popular one) background job framework in Ruby world, which is not a big surprise: it allows to achieve a decent throughput, is stable and well-maintained, has some great features (including also all the gems extending its built-in functionality) and is easy to get started with. It seems like you could simply install <strong>Redis</strong>, add <strong>Sidekiq</strong> to your application and you are good to go!</p>
+
+<p>That would work if you didn&rsquo;t have any <strong>business-critical background jobs</strong> where <strong>reliability</strong> doesn&rsquo;t matter that much. However, if you cannot afford to <strong>lose jobs</strong> every now and then, there are some things that are absolutely critical to review in your configuration and infrastructure.</p>
+
+<h2>How can you lose a Sidekiq job?</h2>
+
+<p>There are multiple scenarios of how you can lose a Sidekiq job without preventive measures. Some of them are quite obvious; some of them are not.</p>
+
+<p>One obvious way would be having Redis down and trying to enqueue a job. This one is pretty intuitive as there is no way of pushing something to Redis if there is no connection to Redis in the first place. From the less obvious scenarios, what is going to happen when Redis crashes while processing a job, due to, e.g., Out Of Memory exception? In &ldquo;standard&rdquo; Sidekiq (although not in Sidekiq Pro), processing a job means that the data is dequeued from Redis and if the worker is interrupted and killed, the job will be lost.</p>
+
+<p>To make the matter worse, there are even more ways how to lose jobs. Imagine that Redis has been working just fine so far, there are some jobs enqueued to be processed in the future, nothing is getting processed at the moment and&hellip; the server gets restarted. Depending on your setup and how much data is stored in memory before it gets &ldquo;persisted&rdquo;, it might turn out that all (or at least some of them) the enqueued jobs are lost!</p>
+
+<p>As terrible as it sounds, there are some relatively quick fixes to these problems. Even though it might be still possible to lose jobs under <a href="https://subscription.packtpub.com/book/big_data_and_business_intelligence/9781783280216/1/ch01lvl1sec16/dealing-with-aof-corruption-intermediate">extreme circumstances</a>, these solutions will significantly minimize the likelihood of critical problems.</p>
+
+<h2>Sidekiq Pro and its reliability features</h2>
+
+<p>The very first thing that would be worth doing would be buying a license for <a href="https://sidekiq.org/products/pro.html">Sidekiq Pro</a> which is a low hanging-fruit, and you can quickly add it to your applications.</p>
+
+<p>Sidekiq Pro, unlike &ldquo;standard&rdquo; Sidekiq, offers extra server reliability by using <a href="https://redis.io/commands/rpoplpush">Redis&rsquo;s RPOPLPUSH</a>. Thanks to that, the job is not entirely removed from Redis once it starts being processed. Rather, it is atomically moved to &ldquo;processing list&rdquo; and is removed from there only after it&rsquo;s processed. In that sense, we can be confident that if the job ended up in Redis, it would almost certainly be processed by Sidekiq workers, even if there will be multiple Out Of Memory exceptions and the Sidekiq processes will be killed multiple times. Enabling it is as easy as enabling <code>super_fetch</code> in Sidekiq config. If you want to learn more about Sidekiq Pro Reliability Server, you can check <a href="https://github.com/mperham/sidekiq/wiki/Pro-Reliability-Server">the docs</a>.</p>
+
+<p>What is more, Sidekiq Pro also brings some <a href="https://github.com/mperham/sidekiq/wiki/Pro-Reliability-Client">client reliability features</a>, although they are more limited. The scenario where it&rsquo;s supposed to help is when Redis is down. When calling <code>MyJob.perform_async</code>, we usually assume that things will just work. Sadly, it might sometimes happen that Redis will be down or there will be some network issue, and we will see a nasty 500 error. Sidekiq Pro tries to mitigate this problem by keeping the jobs locally and enqueuing them once the connection with Redis is reestablished. However, the queue where the jobs are stored is an in-memory one, and there is a limitation on how many jobs are stored there, so this solution is not perfect. If you don&rsquo;t find this solution reliable enough for your needs, you can establish a process for recovery from Redis outages, like storing the jobs in the database when rescuing from exceptions and enqueuing them later once Redis is back.</p>
+
+<p>The only issue with Sidekiq Pro is that it&rsquo;s not that cheap. If you don&rsquo;t require strong guarantees and reliability, &ldquo;standard&rdquo; Sidekiq will probably be enough, but for processing business-critical jobs, Sidekiq Pro will be a great addition.</p>
+
+<h2>Redis and its persistence modes</h2>
+
+<p>Another scenario that can cause jobs to be lost is a crash or a restart of Redis process. To understand the potential consequences of these scenarios, we need to take a look at the persistence modes that are available.</p>
+
+<p>Redis offers two strategies that can be used as standalone modes or be combined:</p>
+
+<ol>
+<li><strong>RDB</strong> (<strong>Redis Database Backup</strong>) &ndash; when using that mode, Redis will periodically create snapshots allowing point-in-time recovery. What it means is that if the snapshots are created every 5 minutes, you can lose the jobs from the maximum last 5 minutes. And in case of recovery, you might get some jobs that have been already processed within the last 5 minutes.</li>
+<li><strong>AOF</strong> (<strong>Append Only File</strong>) &ndash; when using that mode, Redis will log all the operations using <code>fsync</code>. It can happen for every write operation, every 1 second or not at all.</li>
+</ol>
+
+
+<p>As you might have guessed, using <code>AOF</code> is necessary for reasonable durability. However, the exact config (i.e., whether <code>fsync</code> should happen every second or on every write) is highly dependent on the throughput and acceptable performance in your applications, since those operations add extra overhead. If the performance is good enough with <code>fsync</code> on every write, by all means go for that. But if the throughput suffers significantly, you might consider going with <code>fsync</code> every second and establishing a process of what to do if Redis goes down and some jobs are lost. This is again highly dependent on your applications and needs but usually logging jobs and what exactly gets enqueued is a good idea, including the name of the worker&rsquo;s class, its arguments, and timestamps. That way, you can predict which jobs might have been lost and enqueue them manually. You risk that some jobs might be processed more than once, so idempotency of the jobs would greatly help.</p>
+
+<p>What about RDB? It would still be a good idea to have it enabled &ndash; <a href="https://redis.io/topics/persistence#ok-so-what-should-i-use">Redis&rsquo;s docs</a> recommend it in case there is a bug in the AOF engine, which sounds scary, but it&rsquo;s worth keeping in mind that durability is not the primary focus of Redis.</p>
+
+<h2>Wrapping Up</h2>
+
+<p>Even though getting started with <strong>Sidekiq</strong> is not rocket science, and it might initially seem like everything is fine, it won&rsquo;t be enough for an application processing business-critical backgrounds jobs. If you want to make sure you won&rsquo;t be <strong>losing jobs</strong>, you should consider buying <strong>Sidekiq Pro</strong> license and make sure <strong>Redis</strong> persistence is configured optimally (ideally, <strong>AOF</strong> persistence with <strong>fsync</strong> on every write).</p>
+]]></content>
+  </entry>
+  
+</feed>
