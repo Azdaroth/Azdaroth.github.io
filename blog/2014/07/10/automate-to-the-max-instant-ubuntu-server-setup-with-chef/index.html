@@ -5,32 +5,32 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Automate to the max: instant Ubuntu Server setup with Chef - Karol Galanciak - Ruby on Rails and Ember.js consultant</title>
+  <title>Automate to the max: instant Ubuntu Server setup with Chef - Karol Galanciak - Distributed Systems Architect and Ruby on Rails expert</title>
   <meta name="author" content="Karol Galanciak">
 
   
-  <meta name="description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+  <meta name="description" content="Karol Galanciak - Distributed Systems Architect and Ruby on Rails expert">
 
   
-  <meta name="keywords" content="Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps">
+  <meta name="keywords" content="Ruby on Rails, RabbitMQ, Kafka, Microservices, Distributed Systems, Architecture, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps">
 
   
   
 
-  <meta property="og:title" value="Automate to the max: instant Ubuntu Server setup with Chef - Karol Galanciak - Ruby on Rails and Ember.js consultant" />
-  <meta property="og:description" value="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications." />
+  <meta property="og:title" value="Automate to the max: instant Ubuntu Server setup with Chef - Karol Galanciak - Distributed Systems Architect and Ruby on Rails expert" />
+  <meta property="og:description" value="Karol Galanciak - Distributed Systems Architect and Ruby on Rails expert" />
   <meta property="og:url" value="https://karolgalanciak.com/blog/2014/07/10/automate-to-the-max-instant-ubuntu-server-setup-with-chef/" />
   <meta property="og:type" content="website" />
   
-  <meta property="og:site_name" content="Karol Galanciak - Ruby on Rails and Ember.js consultant"/>
+  <meta property="og:site_name" content="Karol Galanciak - Distributed Systems Architect and Ruby on Rails expert"/>
   <meta property="og:locale" content="en_US" />
 
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@Azdaroth">
   <meta name="twitter:creator" content="@Azdaroth">
-  <meta name="twitter:title" content="Automate to the max: instant Ubuntu Server setup with Chef - Karol Galanciak - Ruby on Rails and Ember.js consultant">
+  <meta name="twitter:title" content="Automate to the max: instant Ubuntu Server setup with Chef - Karol Galanciak - Distributed Systems Architect and Ruby on Rails expert">
   <meta name="twitter:url" content="">
-  <meta name="twitter:description" content="Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.">
+  <meta name="twitter:description" content="Karol Galanciak - Distributed Systems Architect and Ruby on Rails expert">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -41,7 +41,7 @@
   <link rel="canonical" href="https://karolgalanciak.com/blog/2014/07/10/automate-to-the-max-instant-ubuntu-server-setup-with-chef">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="Karol Galanciak - Ruby on Rails and Ember.js consultant" type="application/atom+xml">
+  <link href="/atom.xml" rel="alternate" title="Karol Galanciak - Distributed Systems Architect and Ruby on Rails expert" type="application/atom+xml">
   <script type="application/ld+json">
     {
       "@context": "http://schema.org",
@@ -50,7 +50,7 @@
         "@type":"WebPage",
         "@id": "https://karolgalanciak.com/blog/2014/07/10/automate-to-the-max-instant-ubuntu-server-setup-with-chef"
       },
-      "headline": "Automate to the max: instant Ubuntu Server setup with Chef - Karol Galanciak - Ruby on Rails and Ember.js consultant",
+      "headline": "Automate to the max: instant Ubuntu Server setup with Chef - Karol Galanciak - Distributed Systems Architect and Ruby on Rails expert",
         "image": {
         "@type": "ImageObject",
         "url": "",
@@ -58,7 +58,7 @@
         "width": 1024
       },
       "datePublished": "2014-07-10",
-      "dateModified": "2019-08-18",
+      "dateModified": "2019-09-08",
       "author": {
         "@type": "Person",
         "name": "Karol Galanciak"
@@ -73,8 +73,8 @@
           "height": 60
         }
       },
-      "description": "Karol Galanciak - Ruby on Rails and Ember.js consultant, building ambitious and high performant web applications.",
-      "keywords": "Ruby on Rails, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps"
+      "description": "Karol Galanciak - Distributed Systems Architect and Ruby on Rails expert",
+      "keywords": "Ruby on Rails, RabbitMQ, Kafka, Microservices, Distributed Systems, Architecture, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps"
     }
   </script>
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -102,7 +102,7 @@
 
 <body   >
   <header role="banner"><hgroup>
-  <h1><a href="/">Karol Galanciak - Ruby on Rails and Ember.js consultant</a></h1>
+  <h1><a href="/">Karol Galanciak - Distributed Systems Architect and Ruby on Rails expert</a></h1>
   
 </hgroup>
 
@@ -334,7 +334,7 @@
 <p><p>Now we have our node, let&rsquo;s prepare it for running Chef (the command below must be run within main Chef project directory):</p></p>
 
 <p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>knife solo prepare <a href="&#x6d;&#97;&#x69;&#108;&#x74;&#111;&#x3a;&#118;&#97;&#x67;&#x72;&#97;&#110;&#116;&#64;&#x31;&#x32;&#55;&#46;&#48;&#x2e;&#48;&#46;&#x31;">&#118;&#97;&#x67;&#114;&#97;&#110;&#116;&#x40;&#49;&#50;&#x37;&#46;&#48;&#46;&#48;&#46;&#49;</a> -p 2222 -i ~/.vagrant.d/insecure_private_key
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>knife solo prepare <a href="&#x6d;&#97;&#x69;&#x6c;&#x74;&#111;&#x3a;&#118;&#x61;&#103;&#x72;&#x61;&#110;&#x74;&#x40;&#x31;&#50;&#55;&#46;&#x30;&#46;&#48;&#x2e;&#x31;">&#118;&#97;&#103;&#114;&#x61;&#110;&#116;&#x40;&#49;&#x32;&#55;&#46;&#x30;&#x2e;&#48;&#46;&#49;</a> -p 2222 -i ~/.vagrant.d/insecure_private_key
 </span></code></pre></td></tr></table></div></figure></p>
 
 <p><p>Remember to use real system user name.</p></p>
@@ -740,7 +740,7 @@
 <p><p>So here is the final step &ndash; applying recipes on our node:</p></p>
 
 <p><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>knife solo cook <a href="&#x6d;&#97;&#105;&#x6c;&#116;&#x6f;&#58;&#118;&#x61;&#x67;&#x72;&#x61;&#x6e;&#x74;&#x40;&#x31;&#50;&#55;&#46;&#48;&#46;&#x30;&#x2e;&#49;">&#x76;&#x61;&#103;&#x72;&#x61;&#110;&#x74;&#64;&#49;&#x32;&#x37;&#46;&#48;&#x2e;&#48;&#x2e;&#49;</a> -p 2222 -i /Users/system_user_name/.vagrant.d/insecure_private_key
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>knife solo cook <a href="&#x6d;&#97;&#105;&#108;&#x74;&#x6f;&#x3a;&#118;&#x61;&#103;&#114;&#x61;&#110;&#x74;&#64;&#49;&#50;&#55;&#x2e;&#48;&#x2e;&#48;&#46;&#49;">&#x76;&#97;&#103;&#114;&#97;&#110;&#116;&#64;&#49;&#50;&#55;&#46;&#x30;&#x2e;&#48;&#x2e;&#49;</a> -p 2222 -i /Users/system_user_name/.vagrant.d/insecure_private_key
 </span></code></pre></td></tr></table></div></figure></p>
 
 <p><p>The great thing about Chef is that you can change the values of attributes, apply them on the node and the chef-client will pick that change up. Just change <code>worker_processes</code> to 3 and watch what happens &ndash; Chef client will change the value of the attribute and restart Nginx.</p></p>
@@ -905,9 +905,9 @@
     <section>
   <h1>About Me</h1>
   <img class="left" src="/images/me_formal.jpg" title="me:)" alt="Karol Galanciak - photo">
-  <p>Hi, my name is Karol Galanciak, I'm a technical polyglot and domain expert in vacation rental industry, taking it to the next level as CTO of <a href="https://www.bookingsync.com">BookingSync</a></p>
+  <p>Hi, I'm Karol Galanciak, I'm a distributed systems architect and a domain expert in vacation rental industry, taking it to the next level as CTO of <a href="https://www.bookingsync.com">BookingSync</a></p>
 
-  <p>I specialize in building APIs, enterprise integration using message queues and distributed streaming, microservices architecture and working with legacy applications.</p>
+  <p>I specialize in distributed systems and microservices architecture, working with message queues, distributed streaming platforms, designing APIs and working with legacy applications.</p>
 
   <p id="email-me"></p>
 </section>
