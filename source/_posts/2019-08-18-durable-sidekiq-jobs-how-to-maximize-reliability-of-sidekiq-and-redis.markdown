@@ -10,6 +10,8 @@ categories: ["Redis", "Sidekiq"]
 
 That would work if you didn't have any **business-critical background jobs** where **reliability** doesn't matter that much. However, if you cannot afford to **lose jobs** every now and then, there are some things that are absolutely critical to review in your configuration and infrastructure.
 
+<!--more-->
+
 ## How can you lose a Sidekiq job?
 
 There are multiple scenarios of how you can lose a Sidekiq job without preventive measures. Some of them are quite obvious; some of them are not.
