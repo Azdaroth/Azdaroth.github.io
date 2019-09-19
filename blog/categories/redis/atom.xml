@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Redis | Karol Galanciak - Distributed Systems Architect and Ruby on Rails expert]]></title>
   <link href="https://karolgalanciak.com/blog/categories/redis/atom.xml" rel="self"/>
   <link href="https://karolgalanciak.com/"/>
-  <updated>2019-09-08T08:40:20+02:00</updated>
+  <updated>2019-09-19T16:55:53+02:00</updated>
   <id>https://karolgalanciak.com/</id>
   <author>
     <name><![CDATA[Karol Galanciak]]></name>
@@ -21,6 +21,9 @@
     <content type="html"><![CDATA[<p><strong>Sidekiq</strong> is one of the most popular (if not the most popular one) background job framework in Ruby world, which is not a big surprise: it allows to achieve a decent throughput, is stable and well-maintained, has some great features (including also all the gems extending its built-in functionality) and is easy to get started with. It seems like you could simply install <strong>Redis</strong>, add <strong>Sidekiq</strong> to your application and you are good to go!</p>
 
 <p>That would work if you didn&rsquo;t have any <strong>business-critical background jobs</strong> where <strong>reliability</strong> doesn&rsquo;t matter that much. However, if you cannot afford to <strong>lose jobs</strong> every now and then, there are some things that are absolutely critical to review in your configuration and infrastructure.</p>
+
+<!--more-->
+
 
 <h2>How can you lose a Sidekiq job?</h2>
 
