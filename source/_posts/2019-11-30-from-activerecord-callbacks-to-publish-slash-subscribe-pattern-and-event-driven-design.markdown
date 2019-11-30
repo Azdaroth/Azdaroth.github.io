@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "From ActiveRecord callbacks to Publish/Subscribe pattern and event-driven design"
-date: 2019-10-30 8:00
+date: 2019-11-30 8:00
 comments: true
 categories: ["Ruby", "Rails", "Wisper", "design", "architecture"]
 ---
@@ -214,7 +214,7 @@ Not really. This is definitely a step forward comparing to keeping all the logic
 
 However, this could be considered a step forward, especially if you get used to thinking about the separation of primary logic and its side-effects. With the event-based design, you can quickly check the potential side-effects in the Wisper subscriptions. Want to know what happens when you create a user? Just check what subscribes to `user_created` event, which seems to be more readable than checking the callbacks in the model. Another great advantage of that approach is that models will have way more limited responsibilities. No more executing tons of use cases around persistence, using dirty tracking to decide whether something should be executed or not, etc., models will be just publishing the events, and something else is going to decide what to do about it.
 
-Also, by using events, we make it easier to have more definite boundaries between contexts in your domain. For example, sending notifications could happen in a dedicated application consuming events via RabbitMQ, and the "primary" application would publish the events to Rabbit in one of the Wisper listeners. With that kind of design, it would be easy to move the notifiers into a new application, and we would only need to add some extra layer that would take the serialized event from the queue, turn the serialized payload it into a proper event class, like `UserSuspendedEvent`, and then just execute `User::SuspendedNotifier`. There would be no change in the business logic or in the layers that are close to the business logic. It would be only about the "infrastructure" layer.
+Also, by using events, we make it easier to have more definite boundaries between contexts in your domain. For example, sending notifications could happen in a dedicated application consuming events via RabbitMQ, and the "primary" application would publish the events to Rabbit in one of the Wisper listeners. With that kind of design, it would be easy to move the notifiers into a new application, and we would only need to add some extra layer that would take the serialized event from the queue, turn the serialized payload it into a proper event, like `UserSuspendedEvent`, and then just execute `User::SuspendedNotifier`. There would be no change in the business logic or in the layers that are close to the business logic. It would be only about the "infrastructure" layer.
 
 On the other hand, there is one huge issue with what we did - the CRUD mindset and using `save` method from ActiveRecord as the interface. This is particularly visible in the case of suspending the user. Technically, it is an update, but it doesn't mean we should treat it just like this. We implemented an event splitter that somehow tries to isolate and cover the mess, but this comes down to the problem of using ActiveRecord as an interface for everything around the domain, instead of using it for what it is supposed to be used: persistence, like inserting stuff to "users" table, not persisting five other unrelated objects after performing some operations on them in the callbacks.
 
