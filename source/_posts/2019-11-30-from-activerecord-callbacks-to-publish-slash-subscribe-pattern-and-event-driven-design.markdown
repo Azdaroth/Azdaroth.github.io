@@ -165,7 +165,7 @@ Rails.application.config.to_prepare do
   Wisper.clear if Rails.env.development? || Rails.env.test?
 
   Wisper.subscribe(User::NewRewRegistrationNotifier, on: :user_created, with: :call)
-  Wisper.subscribe(User::EventSplitter.new, on: :user_updated, with: :call) #
+  Wisper.subscribe(User::EventSplitter.new, on: :user_updated, with: :call)
   Wisper.subscribe(User::SuspendedNotifier, on: :user_suspended, with: :call)
 end
 ```
