@@ -124,6 +124,7 @@ class ExampleConsumer
   def process(message)
     do_something_fancy_with_the_message_and_finish_here(message)
   end
+end
 ```
 
 That would totally work for async messaging as we don't need to return any response, and we might not necessarily need to publish another event either. But how do we send the response back to the client?
