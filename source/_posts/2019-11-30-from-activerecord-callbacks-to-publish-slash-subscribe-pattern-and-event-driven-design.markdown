@@ -10,6 +10,8 @@ Imagine that you are working on a large **legacy application** that also contain
 
 Does it mean the application is doomed? Not necessarily. There are some ways how you could introduce meaningful changes under these circumstances with a minimum effort. The result will not be perfect, but it could be good enough for some time and might also be a transition between the old dirty way and a new clean design. The solution would be to move to **Publish/Subscribe pattern** and in general, to take advantage of **event-driven design**.
 
+<!--more-->
+
 ## Advantages of Publish/Subscribe pattern
 
 There are multiple advantages of pub/sub pattern (and some disadvantages as well! Like increased complexity). Still, I want to focus on the two of them that make the most difference in this context: Single Responsibility Principle and having a clearer idea about what is a primary purpose of a given use case and what are its side-effects (which also helps with cohesion and separation of concerns). Let's examine each of these advantages.
