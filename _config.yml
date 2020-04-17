@@ -8,7 +8,7 @@
 # For technical reasons, this file is *NOT* reloaded automatically when you use
 # 'bundle exec jekyll serve'. If you change this file, please restart the server process.
 #
-# If you need help with YAML syntax, here are some quick references for you: 
+# If you need help with YAML syntax, here are some quick references for you:
 # https://learn-the-web.algonquindesign.ca/topics/markdown-yaml-cheat-sheet/#yaml
 # https://learnxinyminutes.com/docs/yaml/
 #
@@ -18,21 +18,94 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: Your awesome title
-email: your-email@example.com
+
+
+url: https://karolgalanciak.com
+legacy_url: http://karolgalanciak.com
+title: Karol Galanciak - Distributed Systems Architect and Ruby on Rails expert
+main_header: Karol Galanciak - Distributed Systems Architect and Ruby on Rails expert
+author: Karol Galanciak
+simple_search: https://google.com/search
+description: Karol Galanciak - Distributed Systems Architect and Ruby on Rails expert
+keywords: Ruby on Rails, RabbitMQ, Kafka, Microservices, Distributed Systems, Architecture, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps
+
+source: source
+destination: _site
+sass:
+  sass_dir: _sass
+  style: compressed # expanded
+
+title: Karol Galanciak - Distributed Systems Architect and Ruby on Rails expert
+email: karol.galanciak@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
-  Write an awesome description for your new site here. You can edit this
-  line in _config.yml. It will appear in your document head meta (for
-  Google search results) and in your feed.xml site description.
+  ""
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: jekyllrb
-github_username:  jekyll
+excerpt_link: "Read on &rarr;"  # "Continue reading" link text at the bottom of excerpted articles
+
+twitter_username: Azdaroth
+github_username:  Azdaroth
+
+google_analytics: UA-42570582-1
+disqus_shortname: "karolgalanciak"
+disqus_short_name: "karolgalanciak"
+disqus_show_comment_count: false
+disqus_site_shortname: "karolgalanciak"
+
+comments: true
+
+repository: https://github.com/Azdaroth/Azdaroth.github.io
 
 # Build settings
-theme: minima
+# theme: plainwhite
 plugins:
   - jekyll-feed
+  - jekyll-sitemap
+
+feed:
+  path: atom.xml
+
+pagination:
+  enabled: true
+  per_page: 10
+  permalink: "/page/:num/"
+  sort_field: "date"
+  sort_reverse: true
+
+permalink: /blog/:year/:month/:day/:title/
+
+author:
+  name: Karol Galanciak
+  job: Distributed Systems Architect, Ruby on Rails expert, CTO at BookingSync
+  bio: ""
+  thumb: /assets/images/me_formal_thumb.jpg
+  email: karol.galanciak@gmail.com
+  url: https://karolgalanciak.com/
+  github: https://github.com/Azdaroth
+  twitter: https://twitter.com/Azdaroth
+  linkedin: https://www.linkedin.com/in/karol-galanciak-64b25381/
+
+navbar:
+  - slug: about
+    title: About
+  - slug: contact
+    title: Contact
+  - slug: blog
+    title: Blog
+  - slug: blog/archives
+    title: Archives
+  - slug: test-driven-ember
+    title: Test-Driven Ember Book
+  - slug: presentations
+    title: Presentations
+  - slug: publications
+    title: Publications
+  - slug: open-source
+    title: Open Source
+
+getformID: 6871b8f1-dfe1-45d6-811d-e57c576652eb
+
+recaptcha:
+  site_key: 6LdoSeoUAAAAAJB5Lr4zt-8J6twWRtJ05B6pDiId
 
 # Exclude from processing.
 # The following items will not be processed, by default.
@@ -42,14 +115,27 @@ plugins:
 # Excluded items can be processed by explicitly listing the directories or
 # their entries' file path in the `include:` list.
 #
-# exclude:
-#   - .sass-cache/
-#   - .jekyll-cache/
-#   - gemfiles/
-#   - Gemfile
-#   - Gemfile.lock
-#   - node_modules/
-#   - vendor/bundle/
-#   - vendor/cache/
-#   - vendor/gems/
-#   - vendor/ruby/
+exclude:
+  - .sass-cache/
+  - .jekyll-cache/
+  - gemfiles/
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+
+
+
+
+# # Build settings
+# permalink: /blog/:year/:title/
+# markdown: kramdown
+# highlighter: pygments
+# plugins: [jekyll-paginate-v2]
+
+
+
+# exclude: ["config.rb", "src", "Gemfile", "Gemfile.lock", "package.json","README.md", "Rakefile"]
