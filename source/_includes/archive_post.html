@@ -8,5 +8,11 @@
     <em class="post-meta">
       <time>{{ post.date | date: "%b %-d, %Y" }}</time>
     </em>
+    <p>
+      {{ post.excerpt }}
+      <a href="{{ post.url | prepend: site.baseurl }}" title="Permalink to: {{ post.title }}">
+        <span class="read-more">{{ site.excerpt_link }}</span>
+      </a>
+    </p>
   </header>
 </div>
