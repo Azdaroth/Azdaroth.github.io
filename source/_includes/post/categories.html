@@ -1,0 +1,11 @@
+<section class="post-categories">
+  <b>posted in:</b>
+
+  {% for category in categories %}
+    <span>
+      <a href="{{ category | slugify | prepend: '/blog/categories/' | prepend: site.baseurl | prepend: site.url}}">
+        {{ category }}{% if category != categories.last  %},{% endif %}
+      </a>
+    </span>
+  {% endfor %}
+</section>
