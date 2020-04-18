@@ -14,7 +14,7 @@ categories: [PostgreSQL, databases, Ruby, Ruby on Rails, Scaling, Performance, A
 
 <p>It turns out there's no built-in support for table partitioning in ActiveRecord. Fortunately, there's a gem that makes it pretty straight-forward to apply this concept to your models: <a href="https://github.com/fiksu/partitioned" target="_blank">partitioned</a>. Not only does it have several strategies for partitioning (e.g. by foreign key or by yearly / weekly / monthly and you can easily create custom ones by subclassing base class and defining proper methods) making it easy to perform <strong>CRUD</strong> operations when dealing with multiple tables, but it also provides some methods to create and destroy infrastructure (separate schema for partitioned tables) and some helper methods for generating tables based on partitioning criteria, even with indexes and constraints! Let's get back to example from previous the blog post with orders. Firstly, add <code>partitioned</code> gem to the Gemfile. Unfortunately, there are some issues with compatibility with Rails 4.2 at the time I was experimenting with it, so it might be necessary to use some forks. The following combination should work with Rails 4.2.6:</p>
 
-```
+``` rb
 gem 'activerecord-redshift-adapter',  git: "git@github.com:arp/activerecord-redshift-adapter.git", branch: "rails4-compatibility"
 gem 'partitioned', git: "git@github.com:dkhofer/partitioned.git", branch: "rails-4-2"
 ```
@@ -27,7 +27,8 @@ rails generate model Order
 
 <p>Firstly, let's set up the partitioned Order model. To handle partitioning strategy for separate tables for every year based on <code>created_at</code> column, we could define the following base class:</p>
 
-``` ruby app/models/partitioned_by_created_at_yearly.rb
+``` ruby
+# app/models/partitioned_by_created_at_yearly.rb
 class PartitionedByCreatedAtYearly < Partitioned::ByYearlyTimeField
   self.abstract_class = true
 
@@ -43,7 +44,8 @@ end
 
 <p>This class inherits from <code>Partitioned::ByYearlyTimeField</code> to handle exactly the strategy we need for orders. We set this class to be an abstract one to make it clear it's not related to any table in the database. We also need to provide <code>partition_time_field</code>, in our case it's <code>created_at</code> column. In <code>partitioned</code> block we can define some extra constraints and indexes that will be used when creating children tables. The next thing would be to make it a parent class for <code>Order</code> model:</p>
 
-``` ruby app/models/order.rb
+``` ruby
+# app/models/order.rb
 class Order < PartitionedByCreatedAtYearly
 end
 ```
@@ -53,11 +55,10 @@ end
 <p>Let's get back to our migration. What we want to do is to create <code>orders</code> table, a schema for children partitioned tables of orders and the tables themselves for the next several years. We could do it the following way:</p>
 
 
-``` sql
+``` rb
 class CreateOrders < ActiveRecord::Migration
   def up
     create_table :orders do |t|
-
       t.timestamps null: false
     end
 

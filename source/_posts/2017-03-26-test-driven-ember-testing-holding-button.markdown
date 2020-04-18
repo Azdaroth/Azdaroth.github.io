@@ -29,7 +29,8 @@ ember install ember-hold-button
 
 and assume that we already have some component for displaying a single item with `destroy` action:
 
-``` javascript app/components/display-todo-item.js
+``` javascript
+// app/components/display-todo-item.js
 import Ember from 'ember';
 
 const {
@@ -48,7 +49,8 @@ export default Ember.Component.extend({
 ```
 
 {% raw %}
-``` html app/templates/components/display-todo-item.hbs
+``` html
+// app/templates/components/display-todo-item.hbs
 {{item.name}}
 <button {{action "destroy"}} data-test="destroy-item-btn">Destroy</button>
 ```
@@ -57,7 +59,8 @@ export default Ember.Component.extend({
 and that the component was test-driven with the following test written before the actual implementation (TDD for FTW!):
 
 {% raw %}
-``` javascript tests/integration/components/display-todo-item-test.js
+``` javascript
+// tests/integration/components/display-todo-item-test.js
 import Ember from 'ember';
 import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
@@ -103,7 +106,8 @@ Basically this test verifies that the `destroyRecord` method will be called on i
 Let's add `hold-button` which will trigger `destroy` action after holding it for 3 seconds:
 
 {% raw %}
-``` html app/templates/components/display-todo-item.hbs
+``` html
+// app/templates/components/display-todo-item.hbs
 {{item.name}}
 {{#hold-button type="rectangle" action="destroy" delay=3000 data-test="destroy-item-btn"}}
   Destroy
@@ -130,7 +134,8 @@ After checking <a href="https://github.com/AddJam/ember-hold-button/blob/master/
 Here's our new test:
 
 {% raw %}
-``` javascript tests/integration/components/display-todo-item-test.js
+``` javascript
+// tests/integration/components/display-todo-item-test.js
 import Ember from 'ember';
 import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
@@ -183,7 +188,8 @@ Nice! Our test is passing again. However, there is one serious problem: this tes
 The answer is: yes. We just need to provide a way to make `delay` configurable from the outside. This can be simply done by introducing `destroyActionDelay` property with default value equal `3000` and allowing it to be modified. Let's start with applying this little change to the test:
 
 {% raw %}
-``` javascript tests/integration/components/display-todo-item-test.js
+``` javascript
+// tests/integration/components/display-todo-item-test.js
 // the rest of the tests
 this.render(hbs`{{display-todo-item item=item destroyActionDelay=0}}`);
 ```
@@ -193,7 +199,8 @@ We don't care about waiting for 3 seconds in the tests, we just want to test if 
 
 And let's change few things in our component:
 
-``` javascript app/components/display-todo-item.js
+``` javascript
+// app/components/display-todo-item.js
 import Ember from 'ember';
 
 const {
@@ -214,7 +221,8 @@ export default Ember.Component.extend({
 ```
 
 {% raw %}
-``` html app/templates/components/display-todo-item.hbs
+``` html
+// app/templates/components/display-todo-item.hbs
 {{item.name}}
 {{#hold-button type="rectangle" action="destroy" delay=destroyActionDelay data-test="destroy-item-btn"}}
   Destroy

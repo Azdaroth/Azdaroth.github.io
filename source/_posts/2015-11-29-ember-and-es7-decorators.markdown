@@ -75,7 +75,7 @@ function mixin(functions) {
 
 <p>And that's how we can use it:</p>
 
-```
+``` javascript
 let mixinFunctions = {
   displayName: function() {
     console.log(`My name is ${this.name}`);

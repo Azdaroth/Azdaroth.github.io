@@ -20,7 +20,8 @@ For dealing with HTTP requests and/or implementing a backend mock, <a href="http
 
 Let's assume that we have a proper route generated for the signup, let it be a `signup` route, a corresponding `signup` controller already handling a logic for the registration in one of its actions and that we have a `User` model with `email` and `password` attributes. Our scenario will be pretty simple: we want to make sure that after filling in `email` and `password` fields and clicking the `submit` button the request will be performed to `/api/users` with the right params. Here's our test for the signup feature:
 
-``` javascript my-awesome-app/tests/acceptance/sign-up.js
+``` javascript
+// my-awesome-app/tests/acceptance/sign-up.js
 /* global server */
 import { test } from 'qunit';
 import moduleForAcceptance from 'book-me/tests/helpers/module-for-acceptance';
@@ -62,7 +63,8 @@ For this scenario imagine that we want to have a feature of deleting some tasks 
 
 For this use case we will do something a bit different than the last time. First, let's add the right config for the `ember-cli-mirage` to handle CRUD actions for `tasks` using `resource` helper:
 
-``` javascript my-awesome-app/mirage/config.js
+``` javascript
+// my-awesome-app/mirage/config.js
 export default function() {
   this.namespace = 'api';
 
@@ -72,7 +74,8 @@ export default function() {
 
 And that's how our test could look like:
 
-``` javascript my-awesome-app/tests/acceptance/delete-task.js
+``` javascript
+// my-awesome-app/tests/acceptance/delete-task.js
 /* global server */
 import { test } from 'qunit';
 import moduleForAcceptance from 'book-me/tests/helpers/module-for-acceptance';

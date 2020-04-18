@@ -30,9 +30,8 @@ One of the key characteristics of RabbitMQ is that producers don't push messages
 
 In general, we could visualize the flow in RabbitMQ in the following way:
 
-<p class="img-center-wrapper">
-  ![RabbitMQ](/assets/images/messages_on_rails_part_3/rabbitmq_generalization.png)
-</p>
+
+![RabbitMQ](/assets/images/messages_on_rails_part_3/rabbitmq_generalization.png)
 
 <p class="center">
   <a href="/assets/images/messages_on_rails_part_3/rabbitmq_generalization.png" target="_blank">See in better quality</a>

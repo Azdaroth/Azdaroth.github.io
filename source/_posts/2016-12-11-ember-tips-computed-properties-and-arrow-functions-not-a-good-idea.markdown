@@ -92,7 +92,8 @@ Order.prototype.logItems = function() {
 
 <p>Recently I was doing some refactoring in one Ember app. The syntax in one of the models was a bit mixed and there were some <strong>function expressions</strong> and <strong>arrow function expressions</strong> which looked a bit like this:</p>
 
-``` js app/models/user.js
+``` js
+// app/models/user.js
 import Ember from "ember";
 import Model from 'ember-data/model';
 
@@ -117,7 +118,8 @@ export default Model.extend({
 
 <p>So I decided ES6-ify entire syntax here and ended up with the following code:</p>
 
-``` js app/models/user.js
+``` js
+// app/models/user.js
 import Ember from "ember";
 import Model from 'ember-data/model';
 
@@ -144,7 +146,8 @@ export default Model.extend({
 
 <p>The first one would be to simply use good ol' <strong>function expressions</strong>:</p>
 
-``` js app/models/user.js
+``` js
+// app/models/user.js
 import Ember from "ember";
 import Model from 'ember-data/model';
 
@@ -157,7 +160,8 @@ export default Model.extend({
 
 <p>But if you don't really like it, you may define <strong>explicit getter</strong>:</p>
 
-``` js app/models/user.js
+``` js
+// app/models/user.js
 import Ember from "ember";
 import Model from 'ember-data/model';
 
@@ -172,7 +176,8 @@ export default Model.extend({
 
 <p>And the last option, my preferred one: unleashing the power of <a href="https://karolgalanciak.com/blog/2015/12/02/ember-and-es7-decorators/" target="_blank">ES7 decorators</a> and using <a href="https://github.com/rwjblue/ember-computed-decorators" target="_blank">ember-computed-decorators</a> addon. That way we could define <code>fullName</code> computed property in the following way:</p>
 
-``` js app/models/user.js
+``` js
+// app/models/user.js
 import Ember from "ember";
 import Model from 'ember-data/model';
 import computed from 'ember-computed-decorators';

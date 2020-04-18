@@ -105,7 +105,7 @@ How about defining a module instead? Modules are also included in the inheritanc
 
 The exact solution to the problem would be wrapping the definition of new methods that happens in `FormObject` inside some module, it could be even an anonymous one, and including it right away:
 
-```
+``` rb
 class FormObject
   def self.attributes_registry
     @attributes_registry ||= []

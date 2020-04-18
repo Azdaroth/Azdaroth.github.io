@@ -60,9 +60,7 @@ RabbitMQ is a general purpose message broker supporting multiple protocols from 
 
 The essential design decision in RabbitMQ is that the producers shouldn't directly push messages to the queues, from which the consumers can read messages and process them. Instead, producers send messages to exchanges, and the queues are connected to these exchanges. That way, the producer doesn't know where exactly the message will be delivered and how many consumers are going to do anything with it if any! This kind of decoupling not only allows implementation of the publish-subscribe pattern, where multiple consumers using different queues bind to the same exchange and process the same message, but it also opens the way to quite a flexible routing (which we will cover in more details in the next part of this series). Once the consumer acknowledges the message, it is removed from the queue. Multiple producers can also subscribe to the same queue which will make them compete for the messages. The communication in a simple scenario as described above is illustrated in the following diagram:
 
-<p class="img-center-wrapper">
-  ![RabbitMQ](/assets/images/messages_on_rails_part_1/rabbitmq.png)
-</p>
+![RabbitMQ](/assets/images/messages_on_rails_part_1/rabbitmq.png)
 
 <p class="center">
   <a href="/assets/images/messages_on_rails_part_1/rabbitmq.png" target="_blank">See in better quality</a>

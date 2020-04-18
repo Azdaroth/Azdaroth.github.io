@@ -803,7 +803,7 @@ select_random_order:           3655.0 i/s - 21.17x slower
 |        8,75         |                       0,960                            |
 |       10,00         |                       0,962                            |
 ```
-![2019_p_to_np_graph](/assets/images/partitioned_benchmark_graphs/2019_p_to_np_graph.png )
+![select_2016-2019_p_to_np_graph](/assets/images/partitioned_benchmark_graphs/select_2016-2019_p_to_np_graph.png )
 
 <p class="center">
   <a href="/assets/images/partitioned_benchmark_graphs/select_2016-2019_p_to_np_graph.png" target="_blank">See in better quality</a>
@@ -818,7 +818,7 @@ select_random_order:           3655.0 i/s - 21.17x slower
 |        8,75         |                            1,000                             |
 |       10,00         |                            1,000                             |
 ```
-![2019_p_to_np_graph](/assets/images/partitioned_benchmark_graphs/2019_p_to_np_graph.png )
+![select_2016-2019_count_p_to_np_graph](/assets/images/partitioned_benchmark_graphs/select_2016-2019_count_p_to_np_graph.png )
 
 <p class="center">
   <a href="/assets/images/partitioned_benchmark_graphs/select_2016-2019_count_p_to_np_graph.png" target="_blank">See in better quality</a>
@@ -834,7 +834,7 @@ select_random_order:           3655.0 i/s - 21.17x slower
 |        8,75         |                          0,970                                   |
 |       10,00         |                          0,938                                   |
 ```
-![2020_p_to_np_graph](/assets/images/partitioned_benchmark_graphs/2020_p_to_np_graph.png )
+![select_2018-2020_p_to_np_graph](/assets/images/partitioned_benchmark_graphs/select_2018-2020_p_to_np_graph.png )
 
 <p class="center">
   <a href="/assets/images/partitioned_benchmark_graphs/select_2018-2020_p_to_np_graph.png" target="_blank">See in better quality</a>

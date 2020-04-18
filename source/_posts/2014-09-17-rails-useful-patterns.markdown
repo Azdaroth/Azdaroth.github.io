@@ -8,7 +8,7 @@ categories: [OOP, Rails, Design Patterns, Refactoring]
 
 <p>There've been a lot of discussions for several months about "The Rails Way" and problems associated with it - huge models with several thousands lines of code and no distinguishable responsibilities (User class which does everything related to users doesn't tell much what the app does), unmaintainable callback hell and no domain objects at all. Fortunately, service objects (or usecases) and other forms of extracting logic from models have become quite mainstream recently. However, it's not always clear how to use them all together without creating huge classes with tens of private methods and too many responsibilities. Here are some strategies you can use to solve these problems.</p>
 
-<!--more--> 
+<!--more-->
 
 <h2>Pass form objects as data aggregates to service objects</h2>
 
@@ -16,7 +16,6 @@ categories: [OOP, Rails, Design Patterns, Refactoring]
 
 ``` ruby
 class UsersController < ApplicationController
-
   def create
     user = User.new
     form = User::RegistrationForm.new(user)
@@ -28,11 +27,10 @@ class UsersController < ApplicationController
       # failure path
     end
   end
-
 end
 ```
 
-<p>The <code>UsersController</code> is responsible here for control flow, form aggregates and validates data and <code>User::Registration</code> does some domain business logic and assumes it operates on valid data. Looks and feels great, it's easy to test and the responsibilities are clear. I also inject some dependencies in the constructor of <code>User::Registration</code> to make it even more testable and extensible.</p> 
+<p>The <code>UsersController</code> is responsible here for control flow, form aggregates and validates data and <code>User::Registration</code> does some domain business logic and assumes it operates on valid data. Looks and feels great, it's easy to test and the responsibilities are clear. I also inject some dependencies in the constructor of <code>User::Registration</code> to make it even more testable and extensible.</p>
 
 <p>The only problem with such an approach is lack of compatibility or difficulties with customization with some gems (like <code>inherited_resources</code>). But gems shouldn't force you to write code in a particular way and it would be probably better to give up on them and enjoy a clean code.</p>
 
@@ -41,9 +39,7 @@ end
 <p>Let's consider previous usecase: registration. Imagine situation where you need three types of user registration: “normal” one like when you enter the page and want to create an account,  registration by admin and registering new users by non-admin within some kind of groups. The core of registration process remains the same in all cases. However, there will be slight differences between the usesaces, eg. there won't be any notification sent to admin when user is being registered by admin. One way would be to create service object for each usecase and encapsulate entire logic within them. But it may lead to code that is not DRY and these classes may be unnecessary. If the core of the registration process doesn't change, we can create interface flexible enough to handle all cases by passing listeners that are being notified after registration process. Our service object could look like this:</p>
 
 ``` ruby
-
 class User::Registration
-    
   attr_reader :logger, :listeners
   private :logger, :listeners
 
@@ -59,10 +55,10 @@ class User::Registration
 
   private
 
-    def notify_listeners(aggregate)
-      listeners.each { |listener| listener.notify(aggregate) }
-    end
-
+  def notify_listeners(aggregate)
+    listeners.each { |listener| listener.notify(aggregate) }
+  end
+end
 ```
 
 <p>We can pass any number of listeners to the constructor and inject dependencies if required. All listeners have to implement the same interface: <code>notify</code> method which takes one argument. The controller action for registering new user may look like this:</p>
@@ -71,7 +67,6 @@ class User::Registration
 
 ``` ruby
 class UsersController < ApplicationController
-
   def create
     user = User.new
     form = User::RegistrationForm.new(user)
@@ -87,7 +82,6 @@ class UsersController < ApplicationController
       # failure path
     end
   end
-
 end
 ```
 
@@ -100,35 +94,25 @@ end
 
 ``` ruby
 class Seller < SimpleDelegator
-
   def rating
     # instead of rating_as_seller method in User class
     positive_opinions_from_bought_items.to_f / opinions_from_bought_items.to_f
-  end 
-
-
+  end
 end
-
 ```
 
 ``` ruby
 class Buyer < SimpleDelegator
-
-
   def rating
     # instead of rating_as_buyer method in User class
     positive_opinions_from_seld_items.to_f / opinions_from_sold_items.to_f
   end
-
-
 end
-
 ```
 <p>We can also implement some convenience methods in <code>User</code> class to get user in approperiate context:</p>
 
 ``` ruby
 class User < ActiveRecord::Base
-
   def to_buyer
     Buyer.new(self)
   end
@@ -136,7 +120,6 @@ class User < ActiveRecord::Base
   def to_seller
     Seller.new(self)
   end
-
 end
 ```
 
@@ -146,7 +129,6 @@ end
 
 ``` ruby
 class User::SellerStatus
-
   attr_reader :user
   private :user
 
@@ -163,52 +145,49 @@ class User::SellerStatus
 
   private
 
-    def statuses_conditions
-      {
-        super_seller: [
-          :has_more_than_1000_opinions?,
-          :has_more_than_95_percent_positive_opinions_as_seller?
-        ],
-        blacklisted_seller: [ 
-          :has_at_least_10_opinion_as_seller?,
-          :has_more_than_50_precent_or_equal_negative_opinions_as_seller?
-        ],
-        new: [
-          :has_less_than_10_opinion_as_seller?,
-        ],
-        no_status: []
-      }
-    end
+  def statuses_conditions
+    {
+      super_seller: [
+        :has_more_than_1000_opinions?,
+        :has_more_than_95_percent_positive_opinions_as_seller?
+      ],
+      blacklisted_seller: [
+        :has_at_least_10_opinion_as_seller?,
+        :has_more_than_50_precent_or_equal_negative_opinions_as_seller?
+      ],
+      new: [
+        :has_less_than_10_opinion_as_seller?,
+      ],
+      no_status: []
+    }
+  end
 
-    def has_more_than_1000_opinions?
-      # some code
-    end
+  def has_more_than_1000_opinions?
+    # some code
+  end
 
-    def has_more_than_95_percent_positive_opinions_as_seller?
-      # some code
-    end
+  def has_more_than_95_percent_positive_opinions_as_seller?
+    # some code
+  end
 
-    def has_at_least_10_opinion_as_seller?
-      # some code
-    end
+  def has_at_least_10_opinion_as_seller?
+    # some code
+  end
 
-    def has_more_than_50_precent_or_equal_negative_opinions_as_seller?
-      # some code
-    end
+  def has_more_than_50_precent_or_equal_negative_opinions_as_seller?
+    # some code
+  end
 
-    def has_less_than_10_opinion_as_seller?
-      # some code
-    end
-
+  def has_less_than_10_opinion_as_seller?
+    # some code
+  end
 end
-
 ```
 <p>The <code>detect</code> enumerator (aliased also as <code>find</code>) will return the first element for which the block returns true. In this case all the conditions must be satisfied to return true.</p>
 
 <p>Instead of using bunch of private methods, you can move these methods to policy objects and change the receiver of the message to be the policy, not <code>self</code>:</p>
 
 ``` ruby
-
 def call
   policy = User::SellerPolicy.new(user)
   statuses_conditions.detect do |aggregate|
@@ -216,7 +195,6 @@ def call
     conditions.all? { |condition| policy.public_send(condition) }
   end.first
 end
-
 ```
 
 <p>I like the clarity of this approach - you can immediately say what are the necessary conditions for each status without multiple <code>&&</code> operators in case statement which would make it harder to read.</p>

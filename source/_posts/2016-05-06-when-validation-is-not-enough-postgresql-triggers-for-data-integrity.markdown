@@ -41,7 +41,7 @@ where event can be one of:
 
 <p>What about <code>function_name</code>? It's a user-defined function returning <code>trigger</code>. Here's a dummy example to give an idea about the syntax for defining functions:</p>
 
-```
+``` sql
 CREATE FUNCTION dummy() RETURNS trigger AS $$
 DECLARE
     some_integer_variable int;
@@ -141,4 +141,3 @@ ActiveRecord::StatementInvalid: PG::RaiseException: ERROR:  Period between 2016-
 <h2>Wrapping up</h2>
 
 <p>PostgreSQL triggers and procedures are not something that you will often want to use in Rails applications, but sometimes there's no other solution, especially when you have more complex rules for data integrity. In such cases, triggers and procedures are the right tool for the job.</p>
-

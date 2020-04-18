@@ -16,7 +16,7 @@ categories: [Ruby, Rails, Rails on Rails, ActiveRecord, ActiveModel]
 
 <p>For default values, one option would be to add <code>after_initialize</code> callbacks which would assign the given defaults unless the values were already set in the initializer. For <code>price</code> we can simply override the attribute writer which is <code>Reservation#price=</code> method. We would most likely end up with something looking like this:</p>
 
-``` rb app/models/reservation.rb
+``` rb
 class Reservation < ApplicationRecord
   after_initialize :set_default_start_date
   after_initialize :set_default_end_date
@@ -50,7 +50,7 @@ end
 
 <p>For our <code>Reservation</code> model, we could apply the following refactoring with <strong>Attributes API</strong>:</p>
 
-``` rb app/models/reservation.rb
+``` rb
 class Reservation < ApplicationRecord
   attribute :start_date, :date, default: -> { 1.day.from_now }
   attribute :end_date, :date, default: -> { 8.days.from_now }
@@ -81,7 +81,7 @@ end
 
 <p>That's exactly what we needed. What about our conversion for <code>price</code>? As we can specify the type for given attribute, we may expect that it would be possible to define our own types. Turns out it is possible and quite simple actually. Just create a class inheriting from <code>ActiveRecord::Type::Value</code> or already existing type, e.g. <code>ActiveRecord::Type::Integer</code>, define <code>cast</code> method and register the new type. In our use case let's register a new <code>price</code> type:</p>
 
-``` rb app/types/price_type.rb
+``` rb
 class PriceType < ActiveRecord::Type::Integer
   def cast(value)
     return super if value.kind_of?(Numeric)
@@ -93,13 +93,14 @@ class PriceType < ActiveRecord::Type::Integer
 end
 ```
 
-``` rb config/initializers/types.rb
+``` rb
+# inside some initializer, e.g.config/initializers/types.rb
 ActiveRecord::Type.register(:price, PriceType)
 ```
 
 <p>Let's use Attributes API for <code>price</code> attribute:</p>
 
-``` ruby app/models/reservation.rb
+``` ruby
 class Reservation < ApplicationRecord
   attribute :start_date, :date, default: -> { 1.day.from_now }
   attribute :end_date, :date, default: -> { 8.days.from_now }
@@ -122,7 +123,7 @@ end
 
 <p>Attributes API comes also with some other features, you could e.g. provide <code>array</code> or range <code>option</code> and work with arrays and ranges for given type:</p>
 
-``` rb app/models/reservation.rb
+``` rb
 class Reservation < ApplicationRecord
   attribute :start_date, :date, default: -> { 1.day.from_now }
   attribute :end_date, :date, default: -> { 8.days.from_now }
@@ -143,7 +144,7 @@ end
 
 <p>Attributes API is already looking great, but it's not the end of the story. You can use your custom types for querying a database, you just need to define <code>serialize</code> method for your own types:</p>
 
-``` rb app/types/price_type.rb
+``` rb
 class PriceType < ActiveRecord::Type::Integer
   def cast(value)
     return super if value.kind_of?(Numeric)
@@ -180,7 +181,7 @@ Reservation.where(price: "$100.12")
 
 <p>Just define your <strong>ActiveModel model</strong>, include <code>ActiveModel::Model</code> and ActiveModelAttributes</code> modules and define attributes and their types using <code>attribute</code> class method:</p>
 
-``` rb app/models/my_awesome_model.rb
+``` rb 
 class MyAwesomeModel
   include ActiveModel::Model
   include ActiveModelAttributes
@@ -192,7 +193,7 @@ end
 
 <p>You can also add your custom types. Just create a class inheriting from <code>ActiveModel::Type::Value</code> or already existing type, e.g. <code>ActiveModel::Type::Integer</code>, define <code>cast</code> method and register the new type:</p>
 
-``` rb app/types/money_type.rb
+``` rb
 class MoneyType < ActiveModel::Type::Integer
   def cast(value)
     return super if value.kind_of?(Numeric)
@@ -204,11 +205,12 @@ class MoneyType < ActiveModel::Type::Integer
 end
 ```
 
-``` rb config/initializers/types.rb
+``` rb
+# inside some initializer, e.g. config/initializers/types.rb
 ActiveModel::Type.register(:money, MoneyType)
 ```
 
-``` rb app/models/my_awesome_model.rb
+``` rb
 class MyAwesomeModel
   include ActiveModel::Model
   include ActiveModelAttributes

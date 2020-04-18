@@ -15,7 +15,8 @@ categories: [Ruby, Ruby on Rails, Design Patterns, Architecture, ActiveJob]
 <p>Let’s start with some simple job class, let it be <code>MyAwesomeJob</code>:</p>
 
 
-``` ruby app/jobs/my_awesome_job.rb
+``` ruby
+# app/jobs/my_awesome_job.rb
 class MyAwesomeJob < ActiveJob::Base
   def perform(user)
     User::DoSomethingAwesome.call(user)
@@ -30,7 +31,8 @@ end
 <p>To answer this question, let’s take a look at the <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/base.rb" target="_blank">ActiveJob::Base class</a>:</p>
 
 
-``` ruby active_job/base.rb
+``` ruby
+# active_job/base.rb
 module ActiveJob
   class Base
     include Core
@@ -51,7 +53,8 @@ end
 <p>There are some interesting modules included in this class, which we will get to know in more details later, but let’s focus on the core API for now. Most likely this kind of logic would be defined in, well, <code>Core</code> module. Indeed, the <code>set</code> method is <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/core.rb#L59" target="_blank">there:</a></p>
 
 
-``` ruby active_job/core.rb
+``` ruby
+# active_job/core.rb
 module ActiveJob
   module Core
     module ClassMethods
@@ -66,7 +69,8 @@ end
 <p>It returns an instance of <code>ConfiguredJob</code> passing the job instance itself and arguments to the constructor. Let’s check what <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/configured_job.rb" target="_blank">ConfiguredJob</a> class is responsible for:</p>
 
 
-``` ruby active_job/configured_job.rb
+``` ruby
+# active_job/configured_job.rb
 module ActiveJob
   class ConfiguredJob #:nodoc:
     def initialize(job_class, options={})
@@ -90,7 +94,8 @@ end
 <p>Let’s go deeper and start with <code>perform_now</code> method: it’s defined inside <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/execution.rb#L15" target="_blank">Execution</a> module, which basically comes down to deserializing arguments if needed (there is <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/core.rb#L116" target="_blank">nothing</a> to deserialize when calling <code>perform_now</code> directly), and calling our <code>perform</code> method, which we defined in the job class. This logic is wrapped in <code>run_callbacks</code> block, which lets you define callbacks <code>before</code>, <code>around</code> and <code>after</code> the execution of <code>perform</code> method.</p>
 
 
-``` ruby active_job/execution.rb
+``` ruby
+# active_job/execution.rb
 module ActiveJob
   module Execution
     module ClassMethods
@@ -116,7 +121,8 @@ end
 <p>These callbacks are defined inside <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/callbacks.rb" target="_blank">Callbacks</a> module, but its only responsibility is defining callbacks for <code>perform</code> and <code>enqueue</code> method, which help extend the behaviour of the jobs in a pretty unobtrusive manner. For example, if we wanted to log when the job is finished, we could add the following <code>after_perform</code> callback:</p>
 
 
-``` ruby app/jobs/my_awesome_job.rb
+``` ruby
+# app/jobs/my_awesome_job.rb
 class MyAwesomeJob < ActiveJob::Base
   after_perform do |job|
     Rails.logger.info "#{Time.current}: finished execution of the job: #{job.inspect}"
@@ -131,7 +137,8 @@ end
 <p>Let’s get back to <code>perform_later</code> method from <code>ConfiguredJob</code>. We could expect <code>enqueue</code> method to be defined  in <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/enqueuing.rb">Enqueuing</a> module, which seems to be the case here as well:</p>
 
 
-``` ruby active_job/enqueuing.rb
+``` ruby
+# active_job/enqueuing.rb
 module ActiveJob
   module Enqueuing
     def enqueue(options={})
@@ -157,7 +164,8 @@ end
 <p>In <code>Enqueueing</code> module we can also find  <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/enqueuing.rb#L17" target="_blank">perform_later</a> method, which is the part of most basic API of <strong>ActiveJob</strong> and it basically comes down to calling <code>enqueue</code> method without any extra <code>options</code> arguments.</p>
 
 
-``` ruby active_job/enqueuing.rb
+``` ruby
+# active_job/enqueuing.rb
 module ActiveJob
   module Enqueuing
     extend ActiveSupport::Concern
@@ -181,7 +189,8 @@ end
 <p>What is this <code>queue_adapter</code> to which we delegate the enqueueing? Let’s take a look at <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/queue_adapter.rb">QueueAdapter</a> module. Its responsibility is exposing reader and writer for <code>queue_adapter</code> accessor, which by default is <code>async</code> adapter. Assigning adapter is quite <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/queue_adapter.rb#L33" target="_blank">flexible</a> and we can pass here a string or a symbol (which will be used for the lookup of the proper adapter), instance of adapter itself or the class of the adapter (which is <a href="https://github.com/rails/rails/blob/5-0-stable/activejob/lib/active_job/queue_adapter.rb#L41" target="_blank">deprecated</a>).</p>
 
 
-``` ruby active_job/queue_adapter.rb
+``` ruby
+# active_job/queue_adapter.rb
 module ActiveJob
   module QueueAdapter #:nodoc:
     extend ActiveSupport::Concern
@@ -242,7 +251,8 @@ end
 <p>Let’s start with <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/queue_adapters/async_adapter.rb" target="_blank">AsyncAdapter</a> which is the default one. What is really interesting about this queue adapter is that it doesn’t use any extra services but runs jobs with an in-process thread pool. Under the hood it uses <a href="https://github.com/ruby-concurrency/concurrent-ruby" target="_blank">Concurrent Ruby</a>, which is a collection of modern tools for writing concurrent code, I highly recommend to check it further. We can pass <code>executor_options</code> to constructor, which are then used to create a new instance of <code>Scheduler</code>.</p>
 
 
-``` ruby active_job/queue_adapters/async_adapter.rb
+``` ruby
+# active_job/queue_adapters/async_adapter.rb
 module ActiveJob
   module QueueAdapters
     class AsyncAdapter
@@ -288,7 +298,8 @@ end
 <p>Remember how we could assign <code>queue adapter</code> for ActiveJob in multiple ways? That’s exactly the use case for assigning specific instance of the queue adapter, besides just passing a string / symbol (or class, but that way is deprecated). The <code>Scheduler</code> instance acts in fact like a queue backend and but specifics of how it works are beyond the scope of this article. Nevertheless, the thing to keep in mind is that it exposes two important methods: <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/queue_adapters/async_adapter.rb#L90">enqueue</a> and <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/queue_adapters/async_adapter.rb#L94" target="_blank">enqueue_at</a>:</p>
 
 
-``` ruby active_job/queue_adapters/async_adapter.rb
+``` ruby
+# active_job/queue_adapters/async_adapter.rb
 module ActiveJob
   module QueueAdapters
     class AsyncAdapter
@@ -342,7 +353,8 @@ end
 <p>Let’s get back to top-level <code>AsyncAdapter</code> class. The primary interface that is required for all queue adapters to implement is two methods: <code>enqueue</code> and <code>enqueue_at</code>. For <code>Async</code> adapter, these methods simply pass instance of <code>JobWrapper</code> with <code>queue_name</code> and <code>timestamp</code> (only for <code>enqueue_at</code>):</p>
 
 
-``` ruby active_job/queue_adapters/async_adapter.rb
+``` ruby
+# active_job/queue_adapters/async_adapter.rb
 module ActiveJob
   module QueueAdapters
     class AsyncAdapter
@@ -365,7 +377,8 @@ end
 <p>And what is this <code>JobWrapper</code>? It’s a simple abstraction for passing something that can serialize jobs and knows how to execute them:</p>
 
 
-``` ruby active_job/queue_adapters/async_adapter.rb
+``` ruby
+# active_job/queue_adapters/async_adapter.rb
 module ActiveJob
   module QueueAdapters
     class AsyncAdapter
@@ -390,7 +403,8 @@ end
 <p>Let’s take a closer look how it works: <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/execution.rb#L20" target="_blank">execute</a> method is defined in <code>Execution</code> module and it basically comes down to deserializing job data (which was serialized in <code>JobWrapper</code> so that it can be enqueued)  and calling <code>perform_now</code>. This logic is wrapped with <code>run_callbacks</code> block so we can extend this logic by performing some action <code>before</code>, <code>around</code> or <code>after</code> execution logic:</p>
 
 
-``` ruby active_job/execution.rb
+``` ruby
+# active_job/execution.rb
 module ActiveJob
   module Execution
     module ClassMethods
@@ -408,7 +422,8 @@ end
 <p><code>deserialize</code> class method is defined inside <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/core.rb#L35" target="_blank">Core</a> module and what it does is creating a new instance of the job, deserializing data and returning the job:</p>
 
 
-``` ruby active_job/core.rb
+``` ruby
+# active_job/core.rb
 module ActiveJob
   module Execution
     module ClassMethods
@@ -426,7 +441,8 @@ end
 <p>Before explaining what happens during the deserialization we should know how the serialized data look like -  it’s a hash containing name of the job class, job id, queue name, priority, locale and serialized arguments:</p>
 
 
-``` ruby active_job/core.rb
+``` ruby
+# active_job/core.rb
 module ActiveJob
   module Core
     def serialize
@@ -445,7 +461,8 @@ end
 
 <p><code>serialize_arguments</code> method delegates the serialization process to <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/arguments.rb#L43" target="_blank">ActiveJob::Arguments.serialize</a> method, which is mainly responsible for mapping ActiveRecord models from arguments to global ids:</p>
 
-``` ruby active_job/core.rb
+``` ruby
+# active_job/core.rb
 module ActiveJob
   module Core
     private
@@ -472,7 +489,8 @@ end
 <p>Remember how I mentioned before that there is nothing to be deserialized when using <code>perform_now</code> directly? In this case it will be a bit different as we operate on serialized arguments. Deserialization happens just before executing <code>perform</code> method in <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/core.rb#L115" target="_blank">deserialize_arguments_if_needed</a>.</p>
 
 
-``` ruby activejob/lib/active_job/core.rb
+``` ruby
+# activejob/lib/active_job/core.rb
 module ActiveJob
   module Core
     private
@@ -496,7 +514,8 @@ end
 <p>Let’s explore some more adapters. Most likely you were using <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/queue_adapters/inline_adapter.rb">InlineAdapter</a> in integration tests for testing the side effects of executing some job. Its logic is very limited: since it’s for the inline execution, it doesn’t support enqueueing jobs for the future execution and <code>enqueue</code> method for performing logic merely calls <code>execute</code> method with serialized arguments:</p>
 
 
-``` ruby activejob/queue_adapters/inline_adapter.rb
+``` ruby
+# activejob/queue_adapters/inline_adapter.rb
 class InlineAdapter
   def enqueue(job) #:nodoc:
     Base.execute(job.serialize)
@@ -513,7 +532,8 @@ end
 <p>Let’s check a queue adapter for one of the most commonly used frameworks for background processing - <a href="https://github.com/mperham/sidekiq" target="_blank">Sidekiq</a>. Sidekiq requires defining a class implementing <code>perform</code> instance method executing the logic of the job and inclusion of <code>Sidekiq::Worker</code> module to be enqueued in its queue. Just like <code>AsyncAdapter</code>, <code>SidekiqAdapter</code> uses internal <code>JobWrapper</code> class, which includes <code>Sidekiq::Worker</code> and implements <code>perform</code> method taking <code>job_data</code> as an argument and its logic is limited to delegating execution of the logic to <code>ActiveJob::Base.execute</code> method:</p>
 
 
-``` ruby activejob/queue_adapters/sidekiq_adapter.rb
+``` ruby
+# activejob/queue_adapters/sidekiq_adapter.rb
 class SidekiqAdapter
   def enqueue(job) #:nodoc:
     #Sidekiq::Client does not support symbols as keys
@@ -550,7 +570,8 @@ end
 <p>Let’s take a look at adapter for arguably most common choice backed by application’s database - DelayedJob. The pattern is exactly the same as for Sidekiq Adapter: We have <code>enqueue</code> and <code>enqueue_at</code> methods and both of them push the job to the queue with extra info about queue name, priority and, for <code>enqueue_at</code> method, the time to run the job at. Just like <code>SidekiqAdapter</code>, it wraps serialized job with internal <code>JobWrapper</code> instance which delegates execution of the logic to <code>ActiveJob::Base.execute</code>. At the end, the internal job id from DelayedJob’s queue is assigned to <code>provider_job_id</code> attribute:</p>
 
 
-``` ruby activejob/queue_adatpers/delayed_job_adapter.rb
+``` ruby
+# activejob/queue_adatpers/delayed_job_adapter.rb
 class DelayedJobAdapter
   def enqueue(job) #:nodoc:
     delayed_job = Delayed::Job.enqueue(JobWrapper.new(job.serialize), queue: job.queue_name, priority: job.priority)
@@ -583,7 +604,8 @@ end
 <p>Have you ever needed to test which jobs were enqueued or performed when executing some specs? There’s a good change you were using test helpers provided by ActiveJob or <a href="https://github.com/gocardless/rspec-activejob" target="_blank">rspec-activejob</a> for that. All these assertions are quite easy to handle thanks to <a href="https://github.com/rails/rails/blob/v5.0.0/activejob/lib/active_job/queue_adapters/test_adapter.rb" target="_blank">TestAdapter</a> which exposes some extra API for keeping track of enqueued and performed jobs adding <code>enqueued_jobs</code> and <code>peformed_jobs</code> attributes, which are populated when calling <code>enqueue</code> and <code>enqueue_at</code> methods. You can also configure if the jobs should be actually executed by changing <code>perform_enqueued_jobs</code> and <code>perform_enqueued_at_jobs</code> flags.  You can also whitelist which jobs could be enqueued with <code>filter</code> attribute.</p>
 
 
-``` ruby activejob/queue_adapters/test_adapter.rb
+``` ruby
+# activejob/queue_adapters/test_adapter.rb
 class TestAdapter
   attr_accessor(:perform_enqueued_jobs, :perform_enqueued_at_jobs, :filter)
   attr_writer(:enqueued_jobs, :performed_jobs)

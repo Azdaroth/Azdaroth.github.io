@@ -76,7 +76,7 @@ Fortunately, Ruby has got our back, and we can take advantage of [Module.class_e
 Here is a potential implementation:
 
 ``` rb
-payload =  { ruby: "is freakin' awesome!" }
+payload = { ruby: "is freakin' awesome!" }
 magic_drop_class = Class.new(Liquid::Drop)
 magic_drop_class.class_exec(payload) do |payload|
   payload.each do |key, value|

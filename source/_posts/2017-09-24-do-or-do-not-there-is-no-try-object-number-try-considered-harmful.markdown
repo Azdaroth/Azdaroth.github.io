@@ -18,7 +18,7 @@ The idea behind `Object#try` is simple: instead of raising `NoMethodError` excep
 
 Imagine that you want to grab the email of the first user. To make sure it won't blow up when there are no users, you could write it the following way:
 
-```
+``` rb
 user.first.try(:email)
 ```
 
@@ -313,7 +313,6 @@ class MyService
   end
 end
 
-
 Service.new.call(object, mailer: nil)
 ```
 
@@ -363,7 +362,7 @@ Nevertheless, I think there is a case where the lonely operator is not that bad.
 Comment.create!(
   content: content,
   author: current_user,
-  group_id: current_user&.group_id,
+  group_id: current_user&.group_id
 )
 ```
 

@@ -16,7 +16,7 @@ Data formatting is something pretty common in the majority of the applications, 
 
 One way would be to use `before_validate` callback, especially if you have some format validations:
 
-``` ruby app/models/my_model.rb
+``` ruby
 class MyModel
   before_validate :strip_url
 
@@ -30,7 +30,7 @@ end
 
 It gets the job done. However, how would you test it? You would need to call `valid?` method on the model to check that... `URL` is stripped? Sounds quite funny and is even better when you look at the potential spec:
 
-``` ruby spec/models/my_model_spec.rb
+``` ruby
 require "rails_helper"
 
 RSpec.describe MyModel, type: :model do
@@ -48,7 +48,7 @@ It's quite unlikely that this would be the result of **TDD** though ;). What's t
 
 How about just using attribute writer for that? So something like this:
 
-``` ruby app/models/my_model.rb
+``` ruby
 class MyModel
   def url=(val)
     super(val.to_s.strip)
@@ -58,7 +58,7 @@ end
 
 And here is a potential spec for this feature:
 
-``` ruby spec/models/my_model_spec.rb
+``` ruby
 require "rails_helper"
 
 RSpec.describe MyModel, type: :model do
@@ -83,7 +83,7 @@ Comment.create!(
 )
 ```
 
-``` ruby app/models/my_model.rb
+``` ruby
 class MyModel
   before_validate :assign_group
 

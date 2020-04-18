@@ -129,6 +129,8 @@ exclude:
 
 
 
+markdown: redcarpet
+
 
 # # Build settings
 # permalink: /blog/:year/:title/

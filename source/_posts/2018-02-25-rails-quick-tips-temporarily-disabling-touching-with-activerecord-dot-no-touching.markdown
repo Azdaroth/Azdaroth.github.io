@@ -10,7 +10,6 @@ categories: [Rails, Database, ActiveRecord, Quick Tips]
 
 ``` ruby
 # app/models/photo.rb
-
 class Photo < ApplicationRecord
   belongs_to :user, touch: true
 end
@@ -67,4 +66,3 @@ And that's it!
 ## Summary
 
 [`ActiveRecord.no_touching`](http://api.rubyonrails.org/classes/ActiveRecord/NoTouching/ClassMethods.html) is certainly a quick solution to a potentially tricky issue. However, it is also a dirty hack that indicates a potential problem with the design of the application that should be addressed sooner than later.
-

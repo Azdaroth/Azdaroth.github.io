@@ -35,9 +35,7 @@ categories: [TDD, BDD, Testing, Ruby on Rails, Rails]
 Before discussing arguments for and against mocks and stubs, I should explain differences between them - stubs are fake objects with predetermined responses and mocks are about expectations and collaboration. Take a look at the following example:</p>
 
 ``` ruby
-
 describe SomeUsecase do
-
 # some code with initializing object under the test and setting collaborators
 
   context “user is an admin “ do
@@ -55,9 +53,7 @@ describe SomeUsecase do
       usecase.call
     end
   end
-
 end
-
 ```
 <p>In this usecase, a <code>user</code> has predetermined response when the <code>:admin?</code> message is sent – this is stub. Depending on the response, the  <code>:deliver</code> message is sent to the<code>notifier</code> or not – which is a mock. By using mocks, you discover how the objects interact with its’ collaborators and ensure that proper expectations are met.</p>
 
@@ -82,23 +78,17 @@ end
 <p>This may seem strange at first, but I’ve seen many tests having no real value and seemed as if ActiveRecord or ActiveModel cannot be trusted. Consider the following <code>User</code> model example:</p>
 
 ``` ruby
-
 describe User do
-
   subject {  User.new }
-
   specify “user without name is not valid” do
     expect(subject).not_to be_valid
   end
-
 end
-
-
 ```
 <p>What kind of value does this test provide? The only scenario when this test might fail is when the model lacks of presence validation for name attribute. So either you are writing test for <code>ActiveModel::Validations</code> (believe me, it is already tested) or for the presence of the line of code with:</p>
 
 ``` ruby
-  validates :name, presence: true
+validates :name, presence: true
 ```
 
 <p>This test is even pretty useless as a spec for the model, because reading model itself is much more descriptive.</p>
@@ -106,13 +96,9 @@ end
 <p>What else falls into this category? Testing associations and relations – it is all about using them properly, there is no other way the test may fail. Do not test simple scopes as well, consider the following:</p>
 
 ``` ruby
-
 class User < ActiveRecord::Base
-
   scope :active, -> { where(active: true) }
-
 end
-
 ```
 
 <p>Does it really make sense to write test for such code? What kind of value does it provide and how do you expect it to fail? ActiveRecord API is stable and can be trusted that it won’t change and <code>where</code> method will behave exactly the same.</p>
@@ -123,9 +109,7 @@ end
 
 
 ``` ruby
-
 class ArticlesController < ApplicationController
-
   def index
     @articles = Article.all
   end
@@ -172,21 +156,16 @@ class ArticlesController < ApplicationController
 
   private
 
-    def article_params
-      params.require(:article).permit(:title, :content)
-    end
-
+  def article_params
+    params.require(:article).permit(:title, :content)
+  end
 end
-
 ```
 <p>It’s a typical easy CRUD Rails controller, where you don’t even need to read the code to know, what it does. It is so generic that you could DRY it up with some metaprogramming and naming conventions, or simply use <a href="https://github.com/josevalim/inherited_resources" target="_blank">Inherited Resources</a> gem. In many Rails testing tutorials you can find a section with controllers’ testing, which look basically like that:</p>
 
 ``` ruby
-
 describe "#create" do
-
   context "valid attributes" do
-
     it "saves article" do
       expect do
         post :create, params: { title: "Article title", content: "Some content" }
@@ -212,11 +191,8 @@ describe "#create" do
       post :create, params: { title: "Article title" }
       expect(response).to render_template "new"
     end
-
   end
-
 end
-
 ```
 
 <p>And add tests for the remaining six actions. How much value do these tests provide? It does everything what is expected from simple controller and the only reason it may fail is making a typo. The same thing applies to tests with mocks and stubs in controllers testing. Basically I see no point at all in writing tests for CRUD controllers. To make things easier and make sure it works, you can provide some generic solution like <a href="https://github.com/josevalim/inherited_resources" target="_blank">Inherited Resources</a> gem or use Rails scaffolding.</p>
@@ -228,13 +204,11 @@ end
 <p>Helpers should be used in most cases for providing some generic HTML markup, for example:</p>
 
 ``` ruby
-
 def main_menu_link_to(title, path, options={})
   content_tag(:li, class: ”main-menu”) do
     link_to(title, path, options)
   end
 end
-
 ```
 <p>It probably doesn’t require test coverage. If you think about putting some model presentation logic in helpers, then you are doing it wrong and should look at presenters (e.g. <a href="https://github.com/drapergem/draper" target="_blank">Draper</a> gem).</p>
 
@@ -261,28 +235,21 @@ end
 <p>Write tests for some domain methods  - when you have for instance User model, with attribute :active which can be either false or true, you can provide the following method:</p>
 
 ``` ruby
-
 def activate
   update(active: true)
 end
-
 ```
 
 <p>and test for it:</p>
 
 ``` ruby
-
 let(:user) { FactoryGirl.create(:inactive_user) }
 
 describe “#activate” do
-
   it “makes user active” do
     expect(user.activate).to change { user.active }.from(false).to(true)
   end
-
 end
-
-
 ```
 
 <h3>Controllers</h3>
@@ -290,9 +257,7 @@ end
 <p>Basically everything beyond the CRUD requires testing, especially some authorization-related logic. Consider the <code>ArticlesController</code> and the feature, when we don’t want to render inactive article for non-admin user:</p>
 
 ``` ruby
-
 class ArticlesController < ApplicationController
-
   before_filter :allow_only_admin_for_inactive, only: [:show]
 
   # some code
@@ -306,20 +271,15 @@ class ArticlesController < ApplicationController
       redirect_to articles_path
     end
   end
-
 end
-
 ```
 <p>Test for this before_filter should look like the following:</p>
 
 ``` ruby
-
 require 'spec_helper'
 
 describe ArticlesController do
-
   describe "inactive article" do
-
     let(:article) { double(:article, active?: false, id: 1) }
 
     before(:each) do
@@ -327,9 +287,7 @@ describe ArticlesController do
     end
 
     describe "user is logged in" do
-
       context "user is an admin" do
-
         let(:user) { double(:user, admin?: true) }
 
         it "renders article" do
@@ -340,7 +298,6 @@ describe ArticlesController do
       end
 
       context "user is not an admin" do
-
         let(:user) { double(User, admin?: false) }
 
         it "redirects to articles path" do
@@ -351,7 +308,6 @@ describe ArticlesController do
       end
 
       context "user is not logged in" do
-
         before(:each) do
           allow(controller).to receive(:current_user).and_return(nil)
         end
@@ -365,7 +321,6 @@ describe ArticlesController do
     end
   end
 end
-
 ```
 <p>And that should be sufficient. If you have some complex authorization logic, then you should move it to separate class and write tests for this class, not test in controllers.</p>
 
@@ -380,36 +335,28 @@ end
 <p>I wouldn’t write test for the following usecase:</p>
 
 ``` ruby
-
 class InvestmentDecorator < ApplicationDecorator
-
   # assuming that draper gem is used here
   # every investment has statistic_profile
 
   def display_areas_range
     “Apartments’ areas from #{statistic_profile.minimum_apartments_area} to #{statistic_profile.maximum_apartments_area} “
   end
-
 end
-
 ```
 
 <p>However, this may require testing:</p>
 
 ``` ruby
-
 class UserDecorator < ApplicationDecorator
-
   def display
     if model.firstname.present? and model.surname.present?
-      “#{model.firstname} #{model.surname}”
+      "#{model.firstname} #{model.surname}"
     else
       model.email
     end
   end
-
 end
-
 ```
 <p>Business logic - usecases, services, policy objects, value objects etc.</p>
 

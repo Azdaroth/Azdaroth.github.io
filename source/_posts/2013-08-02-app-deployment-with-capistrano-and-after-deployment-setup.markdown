@@ -9,7 +9,7 @@ categories: [Capistrano, Deployment]
 
 <p>You've just setup your production server, but still haven't deployed your app? Then this the right place for you. You are going to learn how to deploy your app to remote server, deal with some config files, create staging environment and setup monitoring tools.</p>
 
-<!--more--> 
+<!--more-->
 
 <h2>Introducing Capistrano</h2>
 
@@ -25,7 +25,8 @@ rails new dummy_app
 
 <p>add <code>capistrano</code>, <code>capistrano-ext</code>, <code>rvm-capistrano</code> (for RVM integration) and <code>pg</code> gems(for Postgres database) to your Gemfile:</p>
 
-``` ruby Gemfile
+``` ruby
+# Gemfile
 gem 'pg'
 gem 'capistrano'
 gem 'rvm-capistrano'
@@ -36,7 +37,8 @@ gem 'capistrano-ext'
 
 <p>You should also uncomment this line: </p>
 
-``` ruby Gemfile
+``` ruby
+# Gemfile
 gem 'therubyracer', platforms: :ruby
 ```
 
@@ -48,11 +50,11 @@ gem 'therubyracer', platforms: :ruby
 
 ``` bash
 git init
-``` 
+```
 
 <p>And add to your <code>.gitignore</code> file the following line:</p>
 
-``` bash .gitignore
+```
 /config/initializers/secret_token.rb
 ```
 
@@ -60,7 +62,7 @@ git init
 
 <p>Now, edit database configuration file (<code>config/database.yml</code>), so it looks similar to this:</p>
 
-``` yaml config/database.yml
+``` yaml
 development:
   adapter: postgresql
   host: localhost
@@ -95,13 +97,13 @@ staging:
 
 <p>You should also exclude <code>database.yml</code> from your code repository, not only for keeping your passwords secret, but also to prevent overriding local configuration when fetching code from repository - add to <code>.gitignore</code> file:</p>
 
-``` bash
+```
 /config/database.yml
 ```
 
 <p>Staging environment should be close to production as much as possible, so copy the production.rb file and rename it to staging.rb: </p>
 
-``` bash
+```
 cp config/environments/production.rb config/environments/staging.rb
 ```
 
@@ -109,19 +111,20 @@ cp config/environments/production.rb config/environments/staging.rb
 
 <p>To create configuration files, run</p>
 
-``` bash
+```
 capify .
 ```
 
 <p>It will create two files: <code>config/deploy.rb</code> and <code>Capfile</code>. Start with editing <code>Capfile</code> and uncomment this line:</p>
 
-``` ruby Capfile
+``` ruby
 load 'deploy/assets'
 ```
 
 <p>Next, open the <code>deploy.rb</code> remove the default content, copy & paste the script below and adjust it according to the comments.</p>
 
-``` ruby config/deploy.rb
+``` ruby
+# config/deploy.rb
 require "bundler/capistrano"
 require 'capistrano/ext/multistage'
 require "rvm/capistrano"
@@ -172,10 +175,10 @@ end
 
 namespace :deploy do
   task :symlink_db, :roles => :app do
-    run "ln -nfs #{deploy_to}/shared/config/database.yml #{release_path}/config/database.yml" # This file is not included repository, so we will create a symlink 
+    run "ln -nfs #{deploy_to}/shared/config/database.yml #{release_path}/config/database.yml" # This file is not included repository, so we will create a symlink
   end
   task :symlink_secret_token, :roles => :app do
-    run "ln -nfs #{deploy_to}/shared/config/initializers/secret_token.rb #{release_path}/config/initializers/secret_token.rb" # This file is not included repository, so we will create a symlink 
+    run "ln -nfs #{deploy_to}/shared/config/initializers/secret_token.rb #{release_path}/config/initializers/secret_token.rb" # This file is not included repository, so we will create a symlink
   end
 end
 
@@ -185,14 +188,16 @@ after "deploy", "deploy:cleanup" # delete old releases
 ```
 <p>Now, create <code>deploy</code> directory in <code>config</code> directory and add <code>production.rb</code> and <code>staging.rb</code> files there. You have to specify paths, where the production and staging app instance will be deployed. Let's edit the <code>production.rb</code> file:</p>
 
-``` ruby config/deploy/production.rb
+``` ruby
+# config/deploy/production.rb
 set :deploy_to, "/home/deploy/rails_projects/dummy_app"
 ```
 
 <p>and <code>staging.rb</code>:</p>
 
 
-``` ruby config/deploy/production.rb
+``` ruby
+# config/deploy/production.rb
 set :deploy_to, "/home/deploy/rails_projects/dummy_app_staging"
 ```
 
@@ -202,7 +207,7 @@ set :deploy_to, "/home/deploy/rails_projects/dummy_app_staging"
 
 <p>Before deploying your app, you have to setup git repository. We will create just an empty repo in <code>/home/deploy/repos</code> directory on remote server: </p>
 
-``` bash 
+```
 ssh your-server "mkdir /home/deploy/repos && mkdir /home/deploy/repos/dummy_app.git  && git init --bare /home/deploy/repos/dummy_app.git"
 ```
 
@@ -210,7 +215,7 @@ ssh your-server "mkdir /home/deploy/repos && mkdir /home/deploy/repos/dummy_app.
 
 <p>Now we can commit all changes and deploy our application:</p>
 
-``` bash 
+```
 git add --all
 git commit -am "Setup deployment configuration"
 git remote add origin ssh://deploy@your.ip.goes.here:port/home/deploy/repos/dummy_app.git
@@ -219,13 +224,13 @@ git push origin master
 
 <p>You are ready to deploy our application, but before that you need to setup databases and http server configuration. If you have any problem, check <a href="http://karolgalanciak.com/blog/2013/07/19/centos-6-4-server-setup-with-ruby-on-rails-nginx-and-postgresql/" target="_blank">this one</a> out (remember about specifying appropriate rails_env). Firstly, let the Capistrano deal with creating all the neccessary directories in both staging and production environments:</p>
 
-``` bash
+```
 cap deploy:setup
 cap production deploy:setup
 ```
 <p>Then check if directory permissions, utilities and other dependencies are correct:</p>
 
-``` bash
+```
 cap deploy:check
 cap production deploy:check
 ```
@@ -234,7 +239,7 @@ cap production deploy:check
 
 <p>The last thing before deployment: we haven't included <code>secret_token.rb</code> and <code>database.yml</code> files in repo, so we have to copy them on remote server:</p>
 
-``` bash
+```
 scp config/database.yml you-server:/home/deploy && scp config/initializers/secret_token.rb your-server:/home/deploy
 ssh your_server "mkdir /home/deploy/rails_projects/dummy_app/shared/config && mkdir /home/deploy/rails_projects/dummy_app_staging/shared/config"
 ssh your_server "mkdir /home/deploy/rails_projects/dummy_app/shared/config/initializers && mkdir /home/deploy/rails_projects/dummy_app_staging/shared/config/initializers"
@@ -244,7 +249,7 @@ ssh you_server "cp /home/deploy/secret_token.rb /home/deploy/rails_projects/dumm
 
 <p>And you can deploy your application. Instead of <code>cap deploy</code>, use <code>cap deploy:cold</code> and <code>cap production deploy:cold</code> - it will deploy the app, run all migrations and run deploy start instead of <code>cap:restart</code>.</p>
 
-``` bash
+```
 cap deploy:cold
 cap production deploy:cold
 ```
@@ -255,19 +260,18 @@ cap production deploy:cold
 
 <p>How do you know if everything is running correctly after deployment? Well, you don't know, unless you install a monitoring tool. Monit is a great and easy to configure utility for managing and monitoring processes. Let's start with installing Monit on remote server (I use CentOS Linux, there are some differences between distros, so the location of the files might be diffrent, e.g. on Debian, the configuration file is in <code>/etc/monit/monit.rc</code>):</p>
 
-``` bash
+```
 sudo yum install monit
 ```
 
 <p>and edit the configuration file:</p>
 
-``` bash
+```
 sudo vi /etc/monit.conf
 ```
 <p>Read carefully all the comments to get familiar with Monit. Then specify your configuration, e.g.:</p>
 
-``` bash
-
+```
 # check services every minute
 set daemon 60
 
@@ -292,25 +296,25 @@ set httpd port 2812 and
 
 <p>There are a lot of available Monit recipies, e.g. <a href="http://mmonit.com/wiki/Monit/ConfigurationExamples" target="_blank">here</a>, so it is quite easy to setup. When you finish, restart Monit:</p>
 
-``` bash
+```
 sudo monit reload
 ```
 
 <p>Or if you haven't started it yet:</p>
 
-``` bash
+```
 sudo monit
 ```
 
 <p>To check status of processes being monitored, run: </p>
 
-``` bash
+```
 sudo monit status
 ```
 
 <p>You don't have to ssh on your server everytime you want to check the status, Monit comes with a very nice web interface. Here is a simple Nginx configuration, so that you will be able to access Monit via your-ip:1111/monit address:</p>
 
-``` bash
+```
 server {
   listen 1111;
   server_name localhost;
@@ -321,7 +325,7 @@ server {
     proxy_set_header X-Real-IP $remote_addr;
   }
 }
-``` 
+```
 
 <p>Use password and username specified in Monit configuration.</p>
 
@@ -330,11 +334,8 @@ server {
 
 <p>After some time your Rails app logs and especially Nginx logs might be really large, so it is a good idea to somehow manage them. Fortunately, you can use system-built utility called Logrotate. Just open <code>/etc/logrotate.conf</code> and paste the configuration below (remember about changing path to your application):</p>
 
-
-``` bash
-
-
-/home/deploy/rails_projects/your_app_name/shared/log/*.log { 
+```
+/home/deploy/rails_projects/your_app_name/shared/log/*.log {
   daily
   rotate 30
   missingok
@@ -346,7 +347,7 @@ server {
 }
 ￼￼￼￼￼￼￼￼￼￼￼￼
 
-/opt/nginx/logs/*.log { 
+/opt/nginx/logs/*.log {
   daily
   rotate 30
   compress
@@ -358,7 +359,6 @@ server {
   postrotate
     [ ! -f /var/run/nginx.pid ] || kill -USR1 `cat /var/run/nginx.pid`
   endscript }
-
 ```
 
 <p>Here is the options explanation:</p>
@@ -376,6 +376,3 @@ server {
 </ul>
 
 <p>And that's is it! Cron by default runs logrotate every day.</p>
-
-
-

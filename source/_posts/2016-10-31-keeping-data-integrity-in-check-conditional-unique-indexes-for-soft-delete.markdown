@@ -18,13 +18,15 @@ categories: [PostgreSQL, Database, ActiveRecord, Quick Tips, Patterns]
 
 <p>Obviously, we don't want to have any duplicated <code>daily_prices</code> for any rental, so we need to add a uniqueness validation for <code>rental_id</code> and <code>date</code> attributes:</p>
 
-``` ruby app/models/daily_price.rb
+``` ruby
+# app/models/daily_price.rb
 validates :rental_id, presence: true, uniqueness: { scope: :date }
 ```
 
 <p>To ensure <strong>integrity of the data</strong> and that we are protected against race conditions and potental validation bypassing, we need to add a <strong>unique index</strong> on the database level:</p>
 
-``` ruby db/migrate/20161030120000_add_unique_index_for_daily_prices.rb
+``` ruby
+# db/migrate/20161030120000_add_unique_index_for_daily_prices.rb
   add_index :daily_prices, [:rental_id, :date], unique: true
 ```
 
@@ -34,13 +36,15 @@ validates :rental_id, presence: true, uniqueness: { scope: :date }
 
 <p>To implement this feature we could add <code>deleted_at</code> column, drop the previous index and a new one which will respect the new column. We should also update the validation in model in such case:</p>
 
-``` ruby app/models/daily_price.rb
+``` ruby
+# app/models/daily_price.rb
 validates :rental_id, presence: true, uniqueness: { scope: [:date, :deleted_at] }
 ```
 
 <p>And the migration part:</p>
 
-``` ruby db/migrate/20161030120000_add_deleted_at_to_daily_prices.rb
+``` ruby
+# db/migrate/20161030120000_add_deleted_at_to_daily_prices.rb
   remove_index :daily_prices, [:rental_id, :date], unique: true
   add_column :daily_prices, :deleted_at, :datetime
   add_index :daily_prices, [:rental_id, :date, :deleted_at], unique: true
@@ -88,7 +92,8 @@ add_index :nightly_rates, [:rental_id, :date], unique: true, where: "deleted_at 
 
 <p>We could optionally improve the validation in our model to make it look much closer to what we have in database and use <code>conditions</code> option:</p>
 
-``` ruby app/models/daily_price.rb
+``` ruby
+# app/models/daily_price.rb
 validates :rental_id, presence: true, uniqueness: { scope: :date, conditions: -> { where(deleted_at: nil) } }
 ```
 

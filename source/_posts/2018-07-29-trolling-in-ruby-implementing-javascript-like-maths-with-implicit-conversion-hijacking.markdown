@@ -50,7 +50,7 @@ Let's get back to the original problem which was: how to get the following resul
 ```
 Based on what we've just learned about implicit conversion, we just need to make sure that integers become somehow string-like objects. Let's monkey patch `Integer` class and add `to_str` method that would be an alias to `to_s`:
 
-```
+``` ruby
 class Integer
   def to_str
     to_s

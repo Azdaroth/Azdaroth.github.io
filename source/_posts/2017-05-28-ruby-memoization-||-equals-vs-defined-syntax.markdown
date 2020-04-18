@@ -19,10 +19,10 @@ Let's get back to the example from the introduction: `@result ||= do_some_heavy_
 We can do that by using `defined?` opeator, which returns `nil` if its argument is not defined or, if it is defined, the description of that argument. Thanks to that behaviour, we can easily check if some instance variable has already been set or not:
 
 ``` ruby
-defined?(@result) // => nil
+defined?(@result) # => nil
 
 @result = nil
-defined?(@result) // => "instance-variable"
+defined?(@result) # => "instance-variable"
 ```
 
 ## Memoization gotcha

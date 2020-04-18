@@ -15,7 +15,7 @@ categories: [Server, Chef, Deployment]
 
 <p>We will also be using some other utilities - <strong>Knife</strong> (solo) which is a command line utility helpings us interact with server and <strong>Berkshelf</strong> - a bundler-like utility for Chef recipes.</p>
 
-<p>I'm not going to write another tutorial explaining every possible detail of entire Chef DSL. The <a href="http://docs.opscode.com" target="_blank">documentation</a> is pretty good and there are also plenty of other resources you can learn from. I'd rather like to explain the most important terms, show basic configuration, demonstrate how to write very simple recipe and at the end I am going to introduce my own cookbook that I use for servers' setup with <strong>Ubuntu Server 14.04</strong>. Why Ubuntu? Well, sysadministration is not my main responsibility and it's much easier to find solutions (or Chef cookbooks) for Ubuntu than any other distribution.
+<p>I'm not going to write another tutorial explaining every possible detail of entire Chef DSL. The <a href="http://docs.opscode.com" target="_blank">documentation</a> is pretty good and there are also plenty of other resources you can learn from. I'd rather like to explain the most important terms, show basic configuration, demonstrate how to write very simple recipe and at the end I am going to introduce my own cookbook that I use for servers' setup with <strong>Ubuntu Server 14.04</strong>. Why Ubuntu? Well, sysadministration is not my main responsibility and it's much easier to find solutions (or Chef cookbooks) for Ubuntu than any other distribution.</p>
 
 <p>After reading this post you should be able to setup every server instantly and have some basic understanding of what's going on.</p>
 
@@ -122,14 +122,14 @@ berks install --path cookbooks
 
 <p>Firstly, let's create directory for our server:</p>
 
-``` bash
+```
 mkdir ubuntu-server-14-04
 cd ubuntu-server-14-04
 ```
 
 <p>and install Ubuntu Server 14-04:</p>
 
-``` bash
+```
 vagrant init ubuntu-server-14-04 https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box
 ```
 
@@ -204,7 +204,8 @@ touch roles/nginx.json
 
 <p>Out metadata.rb can look like that:</p>
 
-``` ruby site-cookbooks/nginx/metadata.rb
+``` ruby
+# site-cookbooks/nginx/metadata.rb
 name              "Nginx"
 maintainer        "Karol Galanciak"
 maintainer_email  "karol.galanciak@gmail.com"
@@ -227,7 +228,6 @@ pid /var/run/nginx.pid;
 events {
   worker_connections 768;
 }
-
 
 http {
 
@@ -254,14 +254,16 @@ http {
 
 <p>Just to keep it as simple as possible let's assume that we will want only <code>user</code> and <code>worker_processes</code> attributes to be customizable and <code>www-data</code> user will be our default with 4 worker processes. We can achieve that using <strong>erb</strong> templates and specifying default attributes for our <code>default.rb</code> recipe. Using attributes is pretty straight-forward: we need to create file for our recipe (in that case<code>default.rb</code>) file in attributes directory and use hash syntax on <code>default</code> object where <code>nginx</code> will be our namespace:</p>
 
-``` ruby attributes/default.rb
+``` ruby
+# attributes/default.rb
 default['nginx']['user']      = 'www-data'
 default['nginx']['worker_processes'] = '4'
 ```
 
 <p>And how to access these values within our <code>nginx.conf.erb</code> template? The same way, hash syntax but with <code>node</code> object. So our template will look like this:</p>
 
-``` ruby templates/default/nginx.conf.erb
+``` ruby
+# templates/default/nginx.conf.erb
 user <%= node['nginx']['user'] %>;
 worker_processes <%= node['nginx']['worker_processes'] %>;
 
@@ -270,7 +272,6 @@ pid /var/run/nginx.pid;
 events {
   worker_connections 768;
 }
-
 
 http {
 
@@ -298,8 +299,8 @@ http {
 
 <p>So we are left with the last part of installing Nginx: the recipe itself. Let's think how we want to this: we probably want to install <strong>Nginx</strong> - before that we may add <strong>ppa:nginx/stable</strong> repository to download the latest version, extract our template for configuration file and restart Nginx to use the new configuration. Fortunately, it looks very similar in Chef DSL:</p>
 
-``` ruby recipes/default.rb
-
+``` ruby
+# recipes/default.rb
 bash 'add repo for Nginx' do
   user 'root'
   code <<-CODE
@@ -342,13 +343,14 @@ cookbook 'monit-tlq', git: 'git@github.com:TalkingQuickly/monit-tlq.git', branch
 
 <p>And run:</p>
 
-``` bash
+```
 berks install
 ```
 
 <p>Let's get back to our <code>nginx.json</code> role definition. We need to specify attributes for nginx namespace: the default <code>user</code> as www-data is ok, so we will just set <code>worker_processes</code> to 2 and also add Monit configuration for Nginx. At the end the role will look like that:</p>
 
-``` json roles/nginx.json
+``` 
+// roles/nginx.json
 {
   "name": "nginx-server",
   "description": "Nginx server",
@@ -368,7 +370,8 @@ berks install
 
 <p>We will also need to install Monit itself. To check if everything works as it should, we will include email notifications. Let's define <code>monit</code> role:</p>
 
-``` json roles/monit.json
+```
+// roles/monit.json
 {
   "name": "monit",
   "description": "Monit",
@@ -397,7 +400,8 @@ berks install
 
 <p>We have our roles defined, the last thing we need to do is to include them in node definition:</p>
 
-``` json nodes/127.0.0.1.json
+``` json
+// nodes/127.0.0.1.json
 {
   "run_list": [
     "role[monit]",
@@ -411,7 +415,7 @@ berks install
 
 <p>So here is the final step - applying recipes on our node:</p>
 
-``` bash
+```
 knife solo cook vagrant@127.0.0.1 -p 2222 -i /Users/system_user_name/.vagrant.d/insecure_private_key
 ```
 
@@ -433,14 +437,8 @@ knife solo cook root@ip
 <ul>
   <li><strong>authorization</strong> - these attributes are related to <code>sudo</code> recipe - we assume that we are going to use <strong>deploy</strong> user which is going to have sudo access enabled. Also, the entire <strong>sysadmin</strong> group is going to have sudo access. We set <code>passwordless</code> to be false - the password will alwaus be required.</li>
   <li><strong>monit</strong> - configuration for Monit concerning sending notifications and accessing via web interface. I would suggest having them enabled. However, if you decide not to enable them, just delete this section.</li>
-  <li><strong>postgresql</strong> - you must specify password hash for <code>postgres</code> user. You can generate it easily using openssl:</li>
-``` bash
-  openssl passwd -1 "yourpassword"
-```
-  <li><strong>security</strong> - we can set ssh port here. The important thing is that you will have to restart ssh service, even if you don't change the value. Restarting using Chef caused some exceptions that I couldn't handle so far, so remember to restart the service while sshing on your server after running Chef for the first time:</li>
-``` bash
-  /etc/init.d/ssh restart
-```
+  <li><strong>postgresql</strong> - you must specify password hash for <code>postgres</code> user. You can generate it easily using openssl: <code>openssl passwd -1 "yourpassword"</code></li>
+  <li><strong>security</strong> - we can set ssh port here. The important thing is that you will have to restart ssh service, even if you don't change the value. Restarting using Chef caused some exceptions that I couldn't handle so far, so remember to restart the service while sshing on your server after running Chef for the first time: <code>/etc/init.d/ssh restart</code></li>
 </ul>
 
 <p>And the last thing is <code>run_list</code>:</p>
@@ -459,7 +457,7 @@ knife solo cook root@ip
 
 <p>One more thing before we move to more detailed description of the roles: <code>data_bags</code> directory. It will be used for creating user (<strong>deploy</strong>), setting up password (again, password hash, not the plain password) and uploading ssh key. The <strong>deploy</strong> user is already specified in <code>deploy.json</code> file, so just paste your ssh key from <code>id_rsa.pub</code> and the password hash generated by:</p>
 
-``` bash
+```
 openssl passwd -1 "yourpassword"
 ```
 
@@ -485,7 +483,6 @@ openssl passwd -1 "yourpassword"
 <p>Next three roles are quite similar: they install Redis, Memcached and Elasticsearch and set up Monit configuration for each of them. Also, in case of Elasticsearch, it installs OpenJDK and gives possibility to customize the amount of allocated memory - you will probably  want to remove it, I keep it in a template, just to remember that it's a customizable attribute.</p>
 
 <p>And the last one role: Nginx role, which installs Nginx with Passenger and sets up monitoring with Monit. There were some problems with using RVM Ruby when dealing with Passenger so it required helper recipe for <code>rake</code> package. There are a lot of hardcoded values (Ruby version, Passenger version) so make sure they match the ones specified in Rails App role. If you want more customization, refer to the <a href="https://github.com/miketheman/nginx" target="_blank">docs</a>.</p>
-
 
 <h2>Wrapping up</h2>
 

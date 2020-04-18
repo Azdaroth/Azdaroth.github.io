@@ -16,7 +16,8 @@ Imagine you are implementing a todo-list and want to add a **destroy item featur
 
 A great news is that there is already an addon solving such problem: <a href="https://www.npmjs.com/package/ember-hold-button" target="_blank">ember-hold-button</a>. Let's create a very simple component handling the logic of displaying the item and deleting it after holding a button for 3 seconds using `ember-hold-button`:
 
-``` javascript app/components/display-todo-item.js
+``` javascript
+// app/components/display-todo-item.js
 import Ember from 'ember';
 
 const {
@@ -35,7 +36,8 @@ export default Ember.Component.extend({
 ```
 
 {% raw %}
-``` html app/templates/components/display-todo-item.hbs
+``` html
+// app/templates/components/display-todo-item.hbs
 {{item.name}}
 {{#hold-button type="rectangle" action="destroy" delay=3000 data-test="destroy-item-btn"}}
   Destroy
@@ -51,7 +53,8 @@ Ok, cool, so the feature is done. What about integrations tests verifying that t
 One way to fix this problem would be moving `delay` to computed property which would be configurable and by default make it equal to 3 seconds. The component would look like this in such case:
 
 
-``` javascript app/components/display-todo-item.js
+``` javascript
+// app/components/display-todo-item.js
 import Ember from 'ember';
 
 const {
@@ -72,7 +75,8 @@ export default Ember.Component.extend({
 ```
 
 {% raw %}
-``` html app/templates/components/display-todo-item.hbs
+``` html
+// app/templates/components/display-todo-item.hbs
 {{item.name}}
 {{#hold-button type="rectangle" action="destroy" delay=destroyActionDelay data-test="destroy-item-btn"}}
   Destroy
@@ -84,7 +88,8 @@ export default Ember.Component.extend({
 To make integration tests fast, we would simply override the default value of `destroyActionDelay` and render the component in the test the following way:
 
 {% raw %}
-``` javascript tests/integration/components/display-todo-item-test.js
+``` javascript
+// tests/integration/components/display-todo-item-test.js
 // the rest of the tests
 
 this.render(hbs`{{display-todo-item item=item destroyActionDelay=0}}`);
@@ -98,7 +103,8 @@ This surely solves the problem for **integration tests**, but what about the **a
 For this purpose we could add a special function which would return the value for the delay **based on the environment**. For **non-test** we may want to return a provided value and for test environment some other value, which by default would be equal to 0 to make the tests fast. Let's add such a utility function and call it `timeoutForEnv`:
 
 
-``` javascript my-app/app/utils/timeout-for-env.js
+``` javascript
+// my-app/app/utils/timeout-for-env.js
 import config from 'my-app/config/environment';
 
 export default function timeoutForEnv(timeout, timeoutForTestEnv = 0) {
@@ -113,7 +119,8 @@ export default function timeoutForEnv(timeout, timeoutForTestEnv = 0) {
 And update the component:
 
 
-``` javascript app/components/display-todo-item.js
+``` javascript
+// app/components/display-todo-item.js
 import Ember from 'ember';
 import timeoutForEnv from 'my-app/utils/timeout-for-env';
 
@@ -136,7 +143,8 @@ export default Ember.Component.extend({
 
 If we wanted for some reason to have a delay different than `0` for the test env, we could simply provide the value of the second argument:
 
-``` javascript app/components/display-todo-item.js
+``` javascript
+// app/components/display-todo-item.js
 import Ember from 'ember';
 import timeoutForEnv from 'my-app/utils/timeout-for-env';
 
