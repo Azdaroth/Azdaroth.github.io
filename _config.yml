@@ -95,7 +95,7 @@ navbar:
   - slug: blog/archives
     title: Archives
   - slug: test-driven-ember
-    title: Test-Driven Ember Book
+    title: Test Driven Ember Book
   - slug: presentations
     title: Presentations
   - slug: publications
