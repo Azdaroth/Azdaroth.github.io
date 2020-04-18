@@ -71,7 +71,7 @@ pagination:
   sort_field: "date"
   sort_reverse: true
 
-permalink: /blog/:year/:month/:day/:title/
+permalink: /blog/:year/:month/:day/:title
 
 author:
   name: Karol Galanciak
@@ -79,10 +79,10 @@ author:
   bio: ""
   thumb: /assets/images/me_formal_thumb.jpg
   email: karol.galanciak@gmail.com
-  url: https://karolgalanciak.com/
+  url: https://karolgalanciak.com
   github: https://github.com/Azdaroth
   twitter: https://twitter.com/Azdaroth
-  linkedin: https://www.linkedin.com/in/karol-galanciak-64b25381/
+  linkedin: https://www.linkedin.com/in/karol-galanciak-64b25381
 
 navbar:
   - slug: about
