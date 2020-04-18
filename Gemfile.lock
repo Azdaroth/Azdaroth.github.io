@@ -259,7 +259,6 @@ PLATFORMS
 DEPENDENCIES
   bourbon (~> 4.3)
   github-pages
-  jekyll (~> 3)
   jekyll-compose
   jekyll-feed (~> 0.12)
   jekyll-paginate-v2
