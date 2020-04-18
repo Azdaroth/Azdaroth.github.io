@@ -60,6 +60,7 @@ repository: Azdaroth/Azdaroth.github.io
 plugins:
   - jekyll-feed
   - jekyll-sitemap
+  - jekyll-paginate-v2
 
 feed:
   path: atom.xml
@@ -129,7 +130,7 @@ exclude:
 
 
 
-markdown: redcarpet
+markdown: kramdown
 
 
 # # Build settings
