@@ -6,7 +6,7 @@ comments: true
 categories: [Ember, JavaScript, Testing, TDD, Quick Tips]
 ---
 
-Thanks to the awesome tools in **Ember ecosystem** such as <a href="http://github.com/samselikoff/ember-cli-mirage/" target="_blank">ember-cli-mirage</a>, <a href="https://github.com/emberjs/ember-test-helpers" target="_blank">ember-qunit</a> or <a href="https://github.com/emberjs/ember-test-helpers" target"_blank">ember-test-helpers</a> writing majority of the tests is pretty straight-forward. Nevertheless, there are quite a few cases where **simulating user's interaction** is not that simple. An example of such use case would be **holding a button** for particular period of time triggering some side effect.
+Thanks to the awesome tools in **Ember ecosystem** such as <a href="http://github.com/samselikoff/ember-cli-mirage/" target="_blank">ember-cli-mirage</a>, <a href="https://github.com/emberjs/ember-test-helpers" target="_blank">ember-qunit</a> or <a href="https://github.com/emberjs/ember-test-helpers" target="_blank">ember-test-helpers</a> writing majority of the tests is pretty straight-forward. Nevertheless, there are quite a few cases where **simulating user's interaction** is not that simple. An example of such use case would be **holding a button** for particular period of time triggering some side effect.
 
 <!--more-->
 
