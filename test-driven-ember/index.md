@@ -33,11 +33,9 @@ I would suggest reading it from the beginning till the end in chronological orde
 
 #### Download 1.0
 
-<a href="http://download.karolgalanciak.com/test-driven-ember.pdf" target="_blank">Download in PDF</a>
+<a href="https://github.com/Azdaroth/test-driven-ember-book-snapshot/raw/master/test-driven-ember.pdf" target="_blank">Download in PDF</a>
 
-<a href="http://download.karolgalanciak.com/test-driven-ember.epub" target="_blank">Download in EPUB</a>
-
-<a href="http://download.karolgalanciak.com/test-driven-ember.html" target="_blank">Download in HTML</a>
+<a href="https://github.com/Azdaroth/test-driven-ember-book-snapshot/raw/master/test-driven-ember.epub" target="_blank">Download in EPUB</a>
 
 <a href="https://github.com/Azdaroth/book-me" target="_blank">Github Repo of the application developer in the book</a>
 
