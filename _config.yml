@@ -102,6 +102,8 @@ navbar:
     title: Publications
   - slug: open-source
     title: Open Source
+  - slug: privacy-policy
+    title: Privacy Policy
 
 getformID: 6871b8f1-dfe1-45d6-811d-e57c576652eb
 
