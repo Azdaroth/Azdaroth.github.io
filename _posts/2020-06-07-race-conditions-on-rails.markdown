@@ -80,14 +80,14 @@ Any idea what is going to happen is some user clicks the button quickly three ti
 
 One critical thing to understand here is that a uniqueness validation doesn't ensure uniqueness at all - it's rather for displaying a helpful validation error in the absence of race conditions. When clicking the button three times quickly in a row, we are quite likely to have the following scenario:
 
-Request 1 - check if a user exists, and proceed as no user with that email is found.
-Request 2 - check if a user exists, and proceed as no user with that email is found.
-Request 3 - check if a user exists, and proceed as no user with that email is found.
-Request 1 - arrive at the code that inserts data into the database. A new user record gets created.
-Request 2 - arrive at the code that inserts data into the database. A new user record gets created.
-Request 3 - arrive at the code that inserts data into the database. A new user record gets created.
+- Request 1 - check if a user exists, and proceed as no user with that email is found.
+- Request 2 - check if a user exists, and proceed as no user with that email is found.
+- Request 3 - check if a user exists, and proceed as no user with that email is found.
+- Request 1 - arrive at the code that inserts data into the database. A new user record gets created.
+- Request 2 - arrive at the code that inserts data into the database. A new user record gets created.
+- Request 3 - arrive at the code that inserts data into the database. A new user record gets created.
 
-The only way to protect ourselves against this kind of race condition in all scenarios would be adding a unique index on the database level. Or you could prevent concurrent execution of that code with an advisory lock (which covered later in the article).
+The only way to protect ourselves against this kind of race condition in all scenarios would be adding a unique index on the database level. Or you could prevent concurrent execution of that code with an advisory lock (which is covered later in the article).
 
 There is one more variation of this problem, that can also be caused by a race condition, but this time a lack of proper database constraint would be an issue. Imagine that Traveller A wants to book a stay between 3rd of June 2021 and 10th of June 2021, and Traveller B wants to book a stay between 2nd od June 2021 and 7th of June 2021, and they create a reservation, roughly at the same time - making a validation that checks if the dates are available useless as far as data integrity goes.
 
@@ -119,10 +119,10 @@ Well, we have some method that finds a user and order, subtracts credits from th
 
 The problem here is the result of `-=` operation. We might expect it to be 0 after paying for both orders, but with concurrent execution of the code, it's quite likely that the following scenario will happen:
 
-Request A: load User and Order
-Request B: load User and Order
-Request A: set user's credits to 100 - 75 and persist the change
-Request B: set user's credits to 100 - 25 and persist the change
+- Request A: load User and Order
+- Request B: load User and Order
+- Request A: set user's credits to 100 - 75 and persist the change
+- Request B: set user's credits to 100 - 25 and persist the change
 
 And that's exactly how we can end up with having both orders paid and 75 credits available.
 
@@ -145,7 +145,7 @@ What happens under the hood is that ActiveRecord will perform `SELECT FOR UPDATE
 
 ## Advisory lock
 
-It often happens that we need to prevent concurrent execution of the code, but it's not the database table or a database row that we need to have locked. Instead, we need something like Ruby `Mutex` that would be applicable to multiple processes, not to just threads within the same process, so that the same code would be executed sequentially.
+It often happens that we need to prevent concurrent execution of the code, but it's not the database table or a database row that we need to have locked. Instead, we need something like Ruby `Mutex` that would be applicable to multiple processes, not to just threads within the same process, so that the  code will be executed sequentially.
 
 Fortunately, PostgresSQL offers a great feature for precisely this purpose - [advisory locks](https://www.postgresql.org/docs/12/explicit-locking.html#ADVISORY-LOCKS). What is more, there is [with_advisory_lock](https://github.com/ClosureTree/with_advisory_lock) gem that simplifies using advisory locks.
 
@@ -165,7 +165,7 @@ end
 
 What's going to happen if this code is executed concurrently by 5 workers? Depending on when the file fetching and uploading happens, we can get very different results, but we will surely have a huge inconsistency in the end. And the result would be very different comparing to having the jobs executed one by one.
 
-It sounds like a significant potential issue, but fortunately, advisory locks can easily prevent the concurrent execution of the workers. That's how the code could look like with a little help coming from [with_advisory_lock](https://github.com/ClosureTree/with_advisory_lock) gem:
+It sounds like a significant potential issue, but fortunately, advisory locks can easily prevent the concurrent execution of the code. That's what the code could look like with a little help coming from [with_advisory_lock](https://github.com/ClosureTree/with_advisory_lock) gem:
 
 ```  ruby
 class S3Worker
@@ -181,11 +181,11 @@ class S3Worker
 end
 ```
 
-Once a lock with `S3Worker-Lock` gets acquired, every process trying to acquire the same lock will need to wait until the existing one is released. And that's how we can ensure the sequential execution of the jobs, despite the concurrency coming from having multiple processes.
+Once a lock with `S3Worker-Lock` is acquired, every process trying to acquire the same lock will need to wait until the existing one is released. And that's how we can ensure the sequential execution of the jobs, despite the concurrency coming from having multiple processes.
 
 What is also interesting is that we could replace pessimistic locks with advisory locks, which might make sense in some circumstances. One example could be a high frequency of updates of the same row within the different transactions that take a considerable amount of time, and waiting until each of them finishes might not be an option, which would be especially desired if the different updates have nothing in common.
 
-This could even be the case for our previous example with credits. This is how we could rewrite the code to use an advisory lock instead of a row-level lock:
+This could even be the case in our previous example with credits. This is how we could rewrite the code to use an advisory lock instead of a row-level lock:
 
 ``` rb
 def charge_user_for_order(user_id, order_id)
@@ -225,16 +225,16 @@ Both `order` and `user` are materialized before acquiring the advisory lock, so 
 
 What if you don't use PostgreSQL but still need a distributed lock/mutex for the use case like with S3 operations? If you use Redis, that shouldn't be a problem. You could use some solution implementing [Redlock](https://redis.io/topics/distlock) - an algorithm implementing a distributed lock.
 
-It turns that there is a solid gem: [redlock-rb](https://github.com/leandromoreira/redlock-rb), which makes it easy to use in the Rails apps as we don't need to figure it out on our own. However, it is not a replacement for an advisory lock, as it needs to be used a bit differently. Check the following example out:
+It turns that there is a solid gem for that purpose: [redlock-rb](https://github.com/leandromoreira/redlock-rb), which makes it easy to use in the Rails apps as we don't need to figure it out on our own. However, it is not a replacement for an advisory lock, as it needs to be used a bit differently. Check the following example out:
 
 ``` rb
 redlock = Redlock::Client.new(["redis://localhost:6379"])
 expiration_time_in_milliseconds = 60_000
 
 first_lock = lock_manager.lock("S3Worker-Lock", expiration_time_in_milliseconds)
-# => immediately returns a hash containing data about the lock
+# => almost immediately returns a hash containing data about the lock
 second_lock = lock_manager.lock("S3Worker-Lock", expiration_time_in_milliseconds)
-# => immediately returns `false`
+# => almost immediately returns `false`
 ```
 
 If we used an advisory lock (at least via `with_advisory_lock` method, there is also `with_advisory_lock_result` method, which works a bit differently), the second job would be waiting until the first lock is released and then execute the logic. With Redlock, the second job would return immediately without executing the logic. That could actually be the desired behavior, as maybe there is no need to execute the same thing twice. Still, if we wanted to have the same behavior as in the original example, we would need to take care of it on our own, e.g., by retrying the job later.
@@ -252,11 +252,11 @@ user_1_b = User.find(1)
 
 user_1_a.credits += 100
 user_1_a.save!
-# works just fine
+# => works just fine
 
 user_1_b.credits += 100
 user_1_b.save!
-# raises ActiveRecord::StaleObjectError
+# => raises ActiveRecord::StaleObjectError
 ```
 
 ## Wrapping up
