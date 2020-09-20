@@ -97,7 +97,7 @@ And here is the server middleware:
 ``` rb
 class SetCorrelationUuidMiddleware
   def call(_worker, job, _queue)
-    PaperTrail::CorrelationUuid.uuid = job.fetch("correlation_uuid", RequestCorrelationUuidGenerator.uuid)
+    RequestCorrelationUuidGenerator.uuid = job.fetch("correlation_uuid", RequestCorrelationUuidGenerator.uuid)
     yield
   end
 end
