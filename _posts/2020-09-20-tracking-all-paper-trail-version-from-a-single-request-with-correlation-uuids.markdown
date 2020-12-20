@@ -12,6 +12,8 @@ However, storing versions is just one thing. The other one is using them later, 
 
 Fortunately, there is an easy solution to this problem, which is also quite simple to implement - it's adding a `correlation UUID`.
 
+<!--more-->
+
 ## What Is Correlation UUID?
 
 Correlation UUID is a value in UUID format that is used for grouping *things* (events, logs...) that have the same origin (e.g., a specific action) that helps establish the causality (how exactly you ended up with something and what events lead to it). Thanks to that, you can easily figure out what happened during a specific request by assigning the same value of correlation UUID to all PaperTrailVersion records that got created. Furthermore, you can also track its side effects by reusing the same value in background jobs, e.g., in Sidekiq.
