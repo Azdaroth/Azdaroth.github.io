@@ -36,7 +36,10 @@ This course consists of 5 blocks (including intro):
   - [Video](https://www.youtube.com/watch?v=wpRIpuG8EF4)
   - [Slides](https://speakerdeck.com/azdaroth/kafka-for-rubyists-monitoring)
 
-### 2. Consumers and Their Performance [To be released]
+### 2. Consuming and Performance
+
+- [Video](https://www.youtube.com/watch?v=-MG9Qf-WJrA)
+- [Slides](https://speakerdeck.com/azdaroth/kafka-for-rubyists-consuming-and-performance)
 
 ### 3. Advanced Kafka [To be released]
 
