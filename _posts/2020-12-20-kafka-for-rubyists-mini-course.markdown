@@ -46,6 +46,9 @@ This course consists of 5 blocks (including intro):
 - [Video](https://www.youtube.com/watch?v=Lw5lmxhctgQ)
 - [Slides](https://speakerdeck.com/azdaroth/kafka-for-rubyists-advanced-kafka)
 
-### 4. Advanced Karafka [To be released]
+### 4. Advanced Karafka
+
+- [Video](https://www.youtube.com/watch?v=ZCZYbCOUDYI)
+- [Slides](https://speakerdeck.com/azdaroth/kafka-for-rubyists-advanced-karafka)
 
 That's the plan for this mini-course, and hopefully, you will learn a lot from it, and have an enjoyable experience.

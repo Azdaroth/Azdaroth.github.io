@@ -10,7 +10,7 @@ This is the third part of the Kafka For Rubyists mini course. If you are interes
 
 <!--more-->
 
-### 2. Advanced Kafka
+### 3. Advanced Kafka
 
 - [Video](https://www.youtube.com/watch?v=Lw5lmxhctgQ)
 - [Slides](https://speakerdeck.com/azdaroth/kafka-for-rubyists-advanced-kafka)
