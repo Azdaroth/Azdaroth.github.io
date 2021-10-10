@@ -1,12 +1,12 @@
 ---
 layout: post
 title: "The Story of a Critical Issue With Kafka"
-date: 2021-10-10 10:00
+date: 2021-10-10 08:00
 comments: true
 categories: [Kafka, Ruby on Rails, Ruby, Rails]
 ---
 
-Recently, I've had an unfortunate opportunity to deal with a very unexpected issue with Kafka that had quite terrible consequences. The exact origin of the issue is yet to be discovered; nevertheless, the process leading to the final solution to the problem and the solution was interesting enough that I decided to write a quick blog post about it as it might be potentially valuable to someone who also encounters a similar problem.
+Recently, I've had an unfortunate opportunity to deal with a very unexpected issue with Kafka that had quite terrible consequences. The exact origin of the issue is yet to be discovered; nevertheless, the process leading to the final solution to the problem and the fix itself were interesting enough that I decided to write a quick blog post about it as it might be potentially valuable to someone who also encounters a similar problem.
 
 <!--more-->
 
@@ -28,7 +28,7 @@ cg.subscribe("some_example_topic")
 cg.join
 ```
 
-It's super hacky and dirty (especially using `instance_variable_get`), but it did the job. The result was that it was possible to join all the consumer groups from a different application except this problematic one! That meant the issue was not with the application but something on the Kafka cluster side. As the cluster is not a self-hosted one but an AWS MSK service, we had limited capabilities to debug the problem. However, we needed the fix as soon as possible.
+It's super hacky and dirty (especially using `instance_variable_get`), but it did the job. The result was that it was possible to join all the consumer groups from the different applications except this problematic one! That meant the issue was not with the application but something on the Kafka cluster side. As the cluster is not a self-hosted one but an AWS MSK service, we had limited capabilities to debug the problem. However, we needed the fix as soon as possible.
 
 Well, if the problem is just with one consumer group, why not create the new one? And manually set the offset for every topic/partition just like in the original consumer group so that we don't need to reprocess all the events?
 
@@ -56,24 +56,23 @@ What I had to do in the next step was to extract TOPIC/PARTITION/CURRENT-OFFSET 
 
 To set the offset for a given topic/partition for the new consumer group, it turned out that it needed to be done in 2 steps:
 
-1. Reset the offset (set to beginning):
+-  Reset the offset (set to beginning):
 
 ```
 kafka-consumer-groups.sh --bootstrap-server KAFKA_SERVER_URI --group the_name_of_the_consumer_group_2 --reset-offsets --to-earliest --topic TOPIC_WITH_PARTITIONS --execute
 ```
 
-The expected for of `TOPIC_WITH_PARTITIONS` is e.g. `topic_name:1`.
+The expected format of `TOPIC_WITH_PARTITIONS` is e.g. `topic_name:1`.
 
-2. Shift offset (from 0) by a given value:
+- Shift offset (from 0) by a given value:
 
 ```
 kafka-consumer-groups.sh --bootstrap-server KAFKA_SERVER_URI --group the_name_of_the_consumer_group_2 --reset-offsets --shift-by OFFSET --topic TOPIC_WITH_PARTITIONS --execute
 ```
 
-
 To prepare the script with interpolated `TOPIC_WITH_PARTITIONS` and `OFFSET` values, I performed the following steps:
 
-1. Assign output to the `config` variable:
+-  Assign output to the `config` variable (excluding the headers):
 
 
 ``` rb
@@ -81,7 +80,7 @@ config = "the_name_of_the_consumer_group       topic_name     1          123    
 the_name_of_the_consumer_group       topic_name     2          100             200             100             -               -               -"
 ```
 
-2. Build the commands
+- Build the commands:
 
 ``` rb
 commands = config.split("\n").map do |line|
