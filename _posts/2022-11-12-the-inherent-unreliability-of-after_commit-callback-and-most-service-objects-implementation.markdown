@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "The inherent unreliability of after_commit callbacks and most service objects' implementation"
-date: 2022-11-13 18:00
+date: 2022-11-12 8:00
 comments: true
 categories: [Ruby, Ruby on Rails, Architecture, Design, Transactional Outbox]
 ---
@@ -54,7 +54,7 @@ Fortunately, there is a well-established pattern precisely to this problem. It's
 
 The transactional outbox pattern is based on the atomicity of the transactions (and no, we don't need a distributed transaction here) - either everything fails or everything succeeds.
 
-To apply this pattern, we need to create something extra in the transaction - a dedicated Outbox Entry record that will stand for the execution of some side effects. Then, some external process will fetch it, execute the side effects, and mark the entry as processed ( or destroy the record to not re-execute it again in the future.)
+To apply this pattern, we need to create something extra in the transaction - a dedicated Outbox Entry record that will stand for the execution of some side effects. Then, some external process will fetch it, execute the side effects, and mark the entry as processed (or destroy the record to not re-execute it again in the future).
 
 Essentially, it would be using an ACID database as a temporary message queue.
 
@@ -87,9 +87,9 @@ Using events might be a bit more complex, but it can sometimes be worth it. One 
 
 We've managed to cover service objects, but what about `after_commit` callbacks? Ideally, you would not use them at all. However, if there are already there in the app and the refactoring/rewrite is not feasible, there are some things that you could do that are not that complex.
 
-First, you would need to use some other dedicated callback that would work like `after_commit` but would not be a part of `ActiveRecord`, for example, a custom `reliable_after_commit` that would have the same interface as `after_commit`. The next step would be to keep these callbacks in some registry accessible from the outside (like `Model.reliable_after_callbacks`) so that the worker can easily execute each of them. And since `after_commit` callbacks often contain some logic taking advantage of dirty-tracking (`previous_changes`), you would also need to store such changeset with the Outbox Entry and bring back that state in the Outbox worker when materializing when model record.
+First, you would need to use some other dedicated callback that would work like `after_commit` but would not be a part of `ActiveRecord`, for example, a custom `reliable_after_commit` that would have the same interface as `after_commit`. The next step would be to keep these callbacks in some registry accessible from the outside (like `Model.reliable_after_callbacks`) so that the worker can easily execute each of them. And since `after_commit` callbacks often contain some logic taking advantage of dirty-tracking (`previous_changes`), you would also need to store such changeset with the Outbox Entry and bring back that state in the Outbox worker when materializing the model record.
 
-Sounds complex? Fortunately, you don't need to implement this logic or even the worker itself. You can take us [rails-transactional-outbox gem](https://github.com/BookingSync/rails-transactional-outbox) that I extracted from one of the [BookingSync](https://www.bookingsync.com)  projects as an experimental way of addressing reliability concerns.
+Sounds complex? Fortunately, you don't need to implement this logic or even the worker itself. You can use [rails-transactional-outbox gem](https://github.com/BookingSync/rails-transactional-outbox) that I extracted from one of the [BookingSync](https://www.bookingsync.com)  projects as an experimental way of addressing reliability concerns.
 
 ## Conclusions
 
