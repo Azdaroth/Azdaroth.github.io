@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "An alternative approach to custom partition assignment strategy for Kafka consumers with Karafka"
-date: 2022-12-11 12:00
+date: 2022-12-11 13:00
 comments: true
 categories: [Ruby, Ruby on Rails, Kafka, Karafka]
 ---
@@ -21,13 +21,13 @@ Most of our Kafka topics didn't have a very high throughput of the messages, so 
 
 This solution was exactly what we needed to solve our problem with a huge lag. Unfortunately, the custom partition assignment strategy is no longer supported in Karafa 2.0 (because internally, Karafka 2.0 uses [librdkafka](https://github.com/edenhill/librdkafka), which doesn't support it, Karafka 1.4 used [ruby-kafka](https://github.com/zendesk/ruby-kafka) under the hood), so we had to find some alternative solution.
 
-It turned out that there was even a better, more flexible, and more straightforward solution that would work with both Karafka 1.4 and 2.0.
+It turned out that there was even a better, more flexible, and more straightforward solution introduced in Karafka 2.0.
 
 ## The solution
 
 One thing that is easy to spot in the original solution is the fact that we were still using a round-robin strategy; it was just "partitioned" into three independent scenarios. That also implies that we might not need a custom partition assignment strategy at all; we just need to find a way to achieve this kind of partitioning in some alternative way. And we can do that by using three different processes that consume from different topics.
 
-Apparently, there is no out-of-box way to limit the topics to some specific ones, but there is a simple workaround for this - use ENV variables and pass them when running the actual process.
+Apparently, there is an out-of-box way to limit the topics to some specific ones, as documented [here](https://karafka.io/docs/CLI/#running-particular-topics-per-process).
 
 Here is what our example routing might look like:
 
@@ -39,22 +39,17 @@ class KarafkaApp < Karafka::App
 
   routes.draw do
     consumer_group :group_name do
-      if ENV.fetch("ENABLE_EXAMPLE_TOPIC", "false") == "true"
-        topic :example do
-          consumer ExampleConsumer
-        end
+      topic :example do
+        consumer ExampleConsumer
       end
 
-      if ENV.fetch("ENABLE_EXAMPLE_TOPIC2", "false") == "true"
-        topic :example2 do
-          consumer ExampleConsumer2
-        end
+      topic :example2 do
+        consumer ExampleConsumer2
       end
 
-      if ENV.fetch("ENABLE_EXAMPLE_TOPIC3", "false") == "true"
-        topic :example3 do
-          consumer ExampleConsumer3
-        end
+
+      topic :example3 do
+        consumer ExampleConsumer3
       end
     end
   end
@@ -63,9 +58,9 @@ end
 
 And then, we could run three different processes the following way:
 
-1. `ENABLE_EXAMPLE_TOPIC=true bundle exec karafka server`
-2. `ENABLE_EXAMPLE_TOPIC2=true bundle exec karafka server`
-3. `ENABLE_EXAMPLE_TOPIC3=true bundle exec karafka server`
+1. `bundle exec karafka server --topics example`
+2. `bundle exec karafka server --topics example2`
+3. `bundle exec karafka server --topics example3`
 
 
 As a bonus, it turns out that this solution provides more flexibility in at least two aspects:
