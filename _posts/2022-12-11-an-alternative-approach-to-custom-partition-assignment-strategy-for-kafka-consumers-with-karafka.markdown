@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "An alternative approach to custom partition assignment strategy for Kafka consumers with Karafka"
-date: 2022-12-11 13:00
+date: 2022-12-11 14:00
 comments: true
 categories: [Ruby, Ruby on Rails, Kafka, Karafka]
 ---
@@ -70,4 +70,4 @@ As a bonus, it turns out that this solution provides more flexibility in at leas
 
 ## Conclusions
 
-Thanks to some creative ideas for using multiple types of processes with different **ENV variables**, the lack of a **custom partition assignment strategy for consumers** should not be a blocker for migrating to [Karafka](http://github.com/karafka/karafka) 2.0. Being a **more flexible solution** that is also **easier to implement** is also a significant advantage compared to the **custom partition assignment strategy**.
+Thanks to some new additions, the lack of a **custom partition assignment strategy for consumers** should not be a blocker for migrating to [Karafka](http://github.com/karafka/karafka) 2.0. Being a **more flexible solution** that is also **easier to implement** is also a significant advantage compared to the **custom partition assignment strategy**.
