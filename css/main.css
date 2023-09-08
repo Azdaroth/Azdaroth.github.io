@@ -21,3 +21,8 @@
     display: none !important;
   }
 }
+
+.force-link-color {
+  color: #337ab7 !important;
+  text-decoration: none;
+}
