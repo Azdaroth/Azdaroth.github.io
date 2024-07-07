@@ -57,3 +57,5 @@ Speaking the language of whomever we are talking with and appreciating their per
 **Technical debt** is **not only an engineering problem** — it's a complex issue that **impacts the business on many levels**. While various tactics exist for reducing accrued technical debt and minimizing its future growth, none of them will matter without a critical skill on the engineering executive's side: **effective communication**. By effectively communicating its impact and addressing tech debt strategically, tech executives can ensure their companies remain competitive and healthy.
 
 In the upcoming articles, I'll focus more on the perspective and collaboration with other business leaders. In the end, I'll get to the actual tactics of conquering the tech debt on the engineering side, so stay tuned!
+
+How do you communicate technical debt issues with other business leaders? Do you have any recent success stories with this problem? Please share them in the comments!
