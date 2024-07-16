@@ -22,12 +22,12 @@
 
 url: https://karolgalanciak.com
 legacy_url: http://karolgalanciak.com
-title: Karol Galanciak - Distributed Systems Architect and Ruby on Rails expert
-main_header: Karol Galanciak - Distributed Systems Architect and Ruby on Rails expert
+title: Karol Galanciak - CTO and co-founder of Smily, Distributed Systems Architect and Ruby on Rails expert
+main_header: Karol Galanciak - CTO and co-founder of Smily, Distributed Systems Architect and Ruby on Rails expert
 author: Karol Galanciak
 simple_search: https://google.com/search
-description: Karol Galanciak - Distributed Systems Architect and Ruby on Rails expert
-keywords: Ruby on Rails, RabbitMQ, Kafka, Microservices, Distributed Systems, Architecture, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps
+description: Karol Galanciak - CTO and co-founder of Smily, Distributed Systems Architect and Ruby on Rails expert
+keywords: Ruby on Rails, CTO, VPoE, Executive, RabbitMQ, Kafka, Microservices, Distributed Systems, Architecture, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps
 
 # source: source
 destination: _site
@@ -35,7 +35,7 @@ sass:
   sass_dir: _sass
   style: compressed # expanded
 
-title: Karol Galanciak - Distributed Systems Architect and Ruby on Rails expert
+title: Karol Galanciak - CTO and co-founder of Smily, Distributed Systems Architect and Ruby on Rails expert
 email: karol.galanciak@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   ""
@@ -76,7 +76,7 @@ permalink: /blog/:year/:month/:day/:title/
 
 author:
   name: Karol Galanciak
-  job: Distributed Systems Architect, Ruby on Rails expert, CTO at BookingSync
+  job:  CTO and co-founder of Smily, Distributed Systems Architect and Ruby on Rails expert
   bio: ""
   thumb: /assets/images/me_formal_thumb.jpg
   email: karol.galanciak@gmail.com
