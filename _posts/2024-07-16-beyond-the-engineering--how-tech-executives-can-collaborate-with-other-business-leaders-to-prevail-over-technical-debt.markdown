@@ -9,7 +9,7 @@ categories: [Technical Debt, Leadership, Business Impact]
 
 In the [previous article](https://karolgalanciak.com/blog/2024/07/07/beyond-the-engineering-the-business-risks-of-ignoring-technical-debt/), I focused on **technical debt** as a crucial concept not merely in the engineering domain but in **multiple business areas** and how **effective communication** and **speaking the language of other stakeholders** is critical for successfully dealing with it. This time, let's dedicate more time to collaborating with other executives and business leaders and how they could get a solid understanding of the subject and contribute substantially to the resolution of the problem and even become advocates of the initiative.
 
-To avoid generalization and be more specific, let's pick the CFO as the example hero executive for this article. Many KPIs can be translated to financial metrics with extra effort, and money is the common "language" for all business stakeholders, so the same reasoning and principles demonstrated in this article can be applied when discussing the matter with the rest of the leaders. Also, since we are talking about debt, who else would be a better partner on such a matter than a CFO? 
+To avoid generalization and be more specific, let's pick the CFO as the example hero executive for this article. Many KPIs can be translated to financial metrics with extra effort, and money is the common "language" for all business stakeholders, so the same reasoning and principles demonstrated in this article can be applied when discussing the matter with the rest of the leaders. Also, since we are talking about debt, who else would be a better partner on such a matter than a CFO?
 
 
 <!--more-->
@@ -61,7 +61,7 @@ Going from technical debt straight to accounting might be a bit of a stretch, ye
 
 ## Wrapping Up
 
-As demonstrated, **technical debt** is not only an engineering problem but a **complex issue impacting multiple business areas**. It resembles real financial debt, sometimes even with even more sneaky installments. 
+As demonstrated, **technical debt** is not only an engineering problem but a **complex issue impacting multiple business areas**. It resembles real financial debt, sometimes even with even more sneaky installments.
 
 Addressing it appropriately **requires effective communications** from the CTOs and close collaboration with other business leaders.
 
