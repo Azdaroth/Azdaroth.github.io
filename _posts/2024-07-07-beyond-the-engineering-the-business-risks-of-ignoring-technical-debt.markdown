@@ -4,6 +4,7 @@ title: "Beyond the Engineering: The Business Risks of Ignoring Technical Debt"
 date: 2024-07-07 8:00
 comments: true
 categories: [Technical Debt, Leadership, Business Impact]
+published: false
 ---
 
 
