@@ -280,6 +280,7 @@ DEPENDENCIES
   jekyll-compose
   jekyll-feed (~> 0.12)
   jekyll-paginate-v2
+  jekyll-seo-tag
   jekyll-sitemap
   kramdown
   minima (~> 2.5)

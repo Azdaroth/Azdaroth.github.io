@@ -61,6 +61,7 @@ plugins:
   - jekyll-feed
   - jekyll-sitemap
   - jekyll-paginate-v2
+  - jekyll-seo-tag
 
 feed:
   path: atom.xml
