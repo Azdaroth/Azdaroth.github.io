@@ -1,18 +1,25 @@
 ---
-layout: page
-title: Blog Archive
+layout: pages
+title: Archive
 footer: false
 ---
 
-<section class="post-list">
-  {% for post in site.posts %}
-    {% capture this_year %}{{ post.date | date: "%Y" }}{% endcapture %}
-    {% unless year == this_year %}
-      {% assign year = this_year %}
-      <h2>{{ year }}</h2>
-    {% endunless %}
-    <article class="post">
-      {% include archive_post.html %}
-    </article>
-  {% endfor %}
+<div class="page">
+  <header class="post-header">
+    <h1 class="post-title">Archive</h1>
+    <span class="post-meta">{{ site.posts | size }} articles &middot; {{ site.posts.last.date | date: "%Y" }}&ndash;{{ site.posts.first.date | date: "%Y" }}</span>
+  </header>
+
+  <section class="post-list">
+    {% for post in site.posts %}
+      {% capture this_year %}{{ post.date | date: "%Y" }}{% endcapture %}
+      {% unless year == this_year %}
+        {% assign year = this_year %}
+        <h2 class="post-list-year">{{ year }}</h2>
+      {% endunless %}
+      <article class="post">
+        {% include archive_post.html %}
+      </article>
+    {% endfor %}
+  </section>
 </div>

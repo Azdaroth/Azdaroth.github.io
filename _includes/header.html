@@ -1,18 +1,39 @@
 <header class="site-header">
   <div class="container">
-    <input type="checkbox" id="toggleNavbar">
-    <label for="toggleNavbar" role="button" class="toggle-navbar-button">
-      <i class="icon icon-menu"></i>
-      <i class="icon icon-cross"></i>
+    <p class="logo"><a href="{{ '/' | prepend: site.baseurl }}">Karol&nbsp;Galanciak</a></p>
+
+    <input type="checkbox" id="toggleNavbar" aria-hidden="true" tabindex="-1">
+    <label for="toggleNavbar" class="toggle-navbar-button" role="button" aria-controls="site-nav" aria-expanded="false" tabindex="0">
+      <span class="visually-hidden">Menu</span>
+      <svg class="icon-menu" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+      <svg class="icon-cross" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7l1.4-1.4 6.3 6.3 6.3-6.3z"/></svg>
     </label>
-    <nav class="navbar">
+
+    <nav class="navbar" id="site-nav">
       <ul>
-        <li><a href="{{ '/' | prepend: site.baseurl }}" title="Home">Home</a></li>
         {% for item in site.navbar %}
-          <li><a href="{{ '/' | prepend: site.baseurl }}{{ item.slug }}" title="{{ item.title }}">{{ item.title }}</a></li>
+          <li><a href="{{ '/' | prepend: site.baseurl }}{{ item.slug }}">{{ item.title }}</a></li>
         {% endfor %}
-        <li><a href="{{ "/feed.xml" | prepend: site.baseurl }}" target="_blank"><i class="icon icon-rss"></i></a></li>
+        <li><a href="{{ "/feed.xml" | prepend: site.baseurl }}" title="RSS feed"><span class="visually-hidden">RSS</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 11a9 9 0 0 1 9 9h-2.5A6.5 6.5 0 0 0 4 13.5zm0-6a15 15 0 0 1 15 15h-2.5A12.5 12.5 0 0 0 4 7.5zM5.8 17.2a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/></svg>
+        </a></li>
       </ul>
     </nav>
   </div>
 </header>
+
+<script>
+  // Keeps the disclosure state announced to assistive technology.
+  // The menu works without this; only the ARIA state depends on it.
+  (function () {
+    var box = document.getElementById('toggleNavbar');
+    var btn = document.querySelector('.toggle-navbar-button');
+    if (!box || !btn) return;
+    box.addEventListener('change', function () {
+      btn.setAttribute('aria-expanded', box.checked ? 'true' : 'false');
+    });
+    btn.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); box.checked = !box.checked; box.dispatchEvent(new Event('change')); }
+    });
+  })();
+</script>

@@ -1,17 +1,53 @@
 ---
-layout: default
+layout: pages
 ---
 
-<section class="hero">
-  <div class="hero-inner">
-    <div class="container">
-      <img src="{{ site.author.thumb | prepend: site.baseurl }}" alt="author thumb" class="dot">
-      <h3>I'm <strong itemprop="name">{{ site.author.name }}</strong>, a <em itemprop="jobTitle">{{ site.author.job }}</em>.</h3>
-      <h3>{{ site.author.bio }}</h3>
-      <a href="{{ '/about' | prepend: site.baseurl }}" class="button button-ghost" title="about">about</a>
-      <a href="{{ '/contact' | prepend: site.baseurl }}" class="button button-ghost" title="about">contact</a>
-      <a href="{{ '/blog' | prepend: site.baseurl }}" class="button button-ghost" title="blog">blog</a>
-      {% include social.html %}
-    </div>
+<section class="page home-intro">
+  <figure class="home-portrait rail">
+    <img src="{{ site.author.thumb | prepend: site.baseurl }}" alt="Karol Galanciak" class="dot">
+  </figure>
+
+  <h1 class="home-statement">I'm <strong itemprop="name">{{ site.author.name }}</strong>, a <em itemprop="jobTitle">{{ site.author.job }}</em>.</h1>
+
+  <div class="home-body">
+    <p>
+      Thanks to over 10 years of experience, working on difficult challenges and being committed to
+      learning new things every day, I've had a chance to solve a variety of problems: Kafka-based
+      Change Data Capture, event-based architecture over RabbitMQ, a PCI DSS compliant platform for
+      credit card data, and migrations off self-hosted Kubernetes, PostgreSQL and Redis onto AWS.
+      <a href="{{ '/about' | prepend: site.baseurl }}">More about me &rarr;</a>
+    </p>
+
+    <p>
+      I strongly believe in <strong>always giving back</strong>. That's why I've been involved in
+      <a href="{{ '/open-source' | prepend: site.baseurl }}">many open source projects</a>, wrote
+      <a href="{{ '/test-driven-ember' | prepend: site.baseurl }}">a book</a> and released it for free,
+      spoken at <a href="{{ '/presentations' | prepend: site.baseurl }}">conferences</a> and written for
+      <a href="{{ '/publications' | prepend: site.baseurl }}">other blogs</a>.
+    </p>
+  </div>
+
+  {% if site.posts.size > 0 %}
+    <section class="home-recent">
+      <h2 class="home-recent-title">Recent writing</h2>
+      <ul class="home-recent-list">
+        {% for post in site.posts limit: 3 %}
+          <li>
+            <span class="post-meta"><time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%-d %b %Y" }}</time></span>
+            <a href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+      <p class="home-recent-all"><a href="{{ '/blog' | prepend: site.baseurl }}" class="read-more">All writing &rarr;</a></p>
+    </section>
+  {% endif %}
+
+  <div class="home-foot">
+    <p class="home-actions">
+      <a href="{{ '/about' | prepend: site.baseurl }}" class="button button-ghost">About</a>
+      <a href="{{ '/blog' | prepend: site.baseurl }}" class="button button-ghost">Blog</a>
+      <a href="{{ '/contact' | prepend: site.baseurl }}" class="button button-ghost">Contact</a>
+    </p>
+    {% include social.html %}
   </div>
 </section>

@@ -37,8 +37,7 @@ sass:
 
 title: Karol Galanciak - CTO and co-founder of Smily, Distributed Systems Architect and Ruby on Rails expert
 email: karol.galanciak@gmail.com
-description: >- # this means to ignore newlines until "baseurl:"
-  ""
+description: Karol Galanciak - CTO and co-founder of Smily, Distributed Systems Architect and Ruby on Rails expert
 baseurl: "" # the subpath of your site, e.g. /blog
 excerpt_link: "Read on &rarr;"  # "Continue reading" link text at the bottom of excerpted articles
 
@@ -86,25 +85,17 @@ author:
   twitter: https://twitter.com/Azdaroth
   linkedin: https://www.linkedin.com/in/karol-galanciak-64b25381
 
+# Primary navigation. Nine items wrapped onto 2-3 rows at every desktop width.
+# The remaining six destinations (archives, book, presentations, publications,
+# open source, privacy) moved to the footer nav in _includes/footer.html and are
+# still linked from /about/. Nothing became unreachable.
 navbar:
   - slug: about
     title: About
-  - slug: contact
-    title: Contact
   - slug: blog
     title: Blog
-  - slug: blog/archives
-    title: Archives
-  - slug: test-driven-ember
-    title: Test Driven Ember Book
-  - slug: presentations
-    title: Presentations
-  - slug: publications
-    title: Publications
-  - slug: open-source
-    title: Open Source
-  - slug: privacy-policy
-    title: Privacy Policy
+  - slug: contact
+    title: Contact
 
 getformID: 6871b8f1-dfe1-45d6-811d-e57c576652eb
 

@@ -1,15 +1,16 @@
 <footer class="site-footer">
   <div class="container">
     {% include social.html %}
-    <p class="txt-medium-gray">
-      <small>&copy;{{ site.time | date: '%Y' }} All rights reserved. Made with <a href="http://jekyllrb.com/" target="_blank">Jekyll</a> and ♥</small>
-    </p>
-
-    <p class="txt-medium-gray">
-      <small>Singularity Labs Karol Galanciak</small>
-    </p>
-    <p class="txt-medium-gray">
-      <small>VAT-EU: 7262655705</small>
-    </p>
+    <nav class="footer-nav" aria-label="Secondary">
+      <ul>
+        <li><a href="{{ '/test-driven-ember' | prepend: site.baseurl }}">Book</a></li>
+        <li><a href="{{ '/presentations' | prepend: site.baseurl }}">Talks</a></li>
+        <li><a href="{{ '/publications' | prepend: site.baseurl }}">Publications</a></li>
+        <li><a href="{{ '/open-source' | prepend: site.baseurl }}">Open source</a></li>
+        <li><a href="{{ '/blog/archives' | prepend: site.baseurl }}">Archive</a></li>
+        <li><a href="{{ '/privacy-policy' | prepend: site.baseurl }}">Privacy</a></li>
+      </ul>
+    </nav>
+    <p><small>&copy; {{ site.time | date: '%Y' }} Karol Galanciak</small></p>
   </div>
 </footer>
