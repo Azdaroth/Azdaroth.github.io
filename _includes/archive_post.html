@@ -12,3 +12,4 @@
     <a href="{{ post.url | prepend: site.baseurl }}" title="Permalink to: {{ post.title }}"><span class="read-more">{{ site.excerpt_link }}</span></a>
   </p>
 </div>
+{% if page.canonical_url or post.canonical_url %}<span class="post-origin">Smily Engineering Blog</span>{% endif %}

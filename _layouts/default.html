@@ -4,7 +4,9 @@
   {% include head.html %}
   {% seo %}
 </head>
-<body>
+<body{% if page.practice %} class="practice-site"{% endif %}>
   {{ content }}
+  {% include consent.html %}
+  {% if page.practice %}<script src="{{ '/assets/js/practice-motion.js' | relative_url }}" defer></script>{% endif %}
 </body>
 </html>

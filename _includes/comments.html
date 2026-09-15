@@ -1,22 +1,50 @@
 {% if page.comments %}
 <aside id="comments" class="disqus">
   <h3>Comments</h3>
+
+  <div id="disqus_placeholder" class="comments-placeholder">
+    <p>
+      Comments are hosted by <a href="https://disqus.com" rel="noopener">Disqus</a>, which
+      sets its own cookies and receives your IP address. Disqus may use data for advertising.
+      Nothing loads until you ask for it. See its
+      <a href="https://help.disqus.com/en/articles/1717103-disqus-privacy-policy" rel="noopener">privacy policy</a>.
+    </p>
+    <p>
+      <button type="button" class="button button-ghost" id="disqus_load">Load comments</button>
+    </p>
+  </div>
+
   <div id="disqus_thread"></div>
-  <script type="text/javascript">
-    var disqus_shortname = '{{ site.disqus_short_name }}';
-    {% if page.comments == true %}
-      var disqus_identifier = '{{ site.url }}{{ page.url }}';
-      var disqus_url = '{{ site.url }}{{ page.url }}';
-      var disqus_script = 'embed.js';
-    {% else %}
-      var disqus_script = 'count.js';
-    {% endif %}
+
+  <script>
   (function () {
-    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-    dsq.src = 'https://' + disqus_shortname + '.disqus.com/' + disqus_script;
-    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-  }());
+    var loaded = false;
+    function loadDisqus() {
+      if (loaded) return;
+      loaded = true;
+      window.__kgDisqusLoaded = true;
+      var ph = document.getElementById('disqus_placeholder');
+      if (ph) ph.hidden = true;
+      window.disqus_shortname  = '{{ site.disqus_short_name }}';
+      window.disqus_identifier = '{{ site.url }}{{ page.url }}';
+      window.disqus_url        = '{{ site.url }}{{ page.url }}';
+      var dsq = document.createElement('script');
+      dsq.async = true;
+      dsq.src = 'https://{{ site.disqus_short_name }}.disqus.com/embed.js';
+      (document.head || document.body).appendChild(dsq);
+    }
+
+    // Already consented on a previous visit, or consented in this session.
+    try {
+      if (window.localStorage.getItem('kg-consent') === 'granted') loadDisqus();
+    } catch (e) {}
+    window.addEventListener('kg:consent-granted', loadDisqus);
+
+    var btn = document.getElementById('disqus_load');
+    if (btn) btn.addEventListener('click', loadDisqus);
+  })();
   </script>
-  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+  <noscript>Comments need JavaScript. They are hosted on <a href="https://disqus.com/?ref_noscript" rel="nofollow noopener">Disqus</a>.</noscript>
 </aside>
 {% endif %}

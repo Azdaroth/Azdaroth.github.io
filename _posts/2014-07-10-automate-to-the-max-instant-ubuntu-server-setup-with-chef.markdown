@@ -208,7 +208,7 @@ touch roles/nginx.json
 # site-cookbooks/nginx/metadata.rb
 name              "Nginx"
 maintainer        "Karol Galanciak"
-maintainer_email  "karol.galanciak@gmail.com"
+maintainer_email  "maintainer@example.com"
 description       "Installs Nginx"
 version           "0.0.1"
 

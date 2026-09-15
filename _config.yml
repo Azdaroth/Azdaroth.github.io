@@ -14,7 +14,7 @@
 #
 # Site settings
 # These are used to personalize your new site. If you look in the HTML files,
-# you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
+# you will see them accessed via {{ site.title }}, {{ site.url }}, and so on.
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
@@ -22,12 +22,17 @@
 
 url: https://karolgalanciak.com
 legacy_url: http://karolgalanciak.com
-title: Karol Galanciak - CTO and co-founder of Smily, Distributed Systems Architect and Ruby on Rails expert
-main_header: Karol Galanciak - CTO and co-founder of Smily, Distributed Systems Architect and Ruby on Rails expert
+title: Karol Galanciak
+main_header: Karol Galanciak
+tagline: Build the product. Grow the team. Move the business forward.
 author: Karol Galanciak
 simple_search: https://google.com/search
-description: Karol Galanciak - CTO and co-founder of Smily, Distributed Systems Architect and Ruby on Rails expert
-keywords: Ruby on Rails, CTO, VPoE, Executive, RabbitMQ, Kafka, Microservices, Distributed Systems, Architecture, Ember.js, PostgreSQL, JavaScript, Consulting, MVP, post MVP, legacy apps
+description: >-
+  I help founders turn growth plans into product direction, the right team, and working software - and lead the changes alongside them.
+keywords: >-
+  product and engineering leadership, product strategy, engineering economics, team development,
+  hands-on engineering, AI-native workflows, cloud cost
+  optimisation, product engineering leadership, Ruby on Rails, Kafka, distributed systems
 
 # source: source
 destination: _site
@@ -35,16 +40,18 @@ sass:
   sass_dir: _sass
   style: compressed # expanded
 
-title: Karol Galanciak - CTO and co-founder of Smily, Distributed Systems Architect and Ruby on Rails expert
-email: karol.galanciak@gmail.com
-description: Karol Galanciak - CTO and co-founder of Smily, Distributed Systems Architect and Ruby on Rails expert
+title: Karol Galanciak
+description: >-
+  I help founders turn growth plans into product direction, the right team, and working software - and lead the changes alongside them.
 baseurl: "" # the subpath of your site, e.g. /blog
 excerpt_link: "Read on &rarr;"  # "Continue reading" link text at the bottom of excerpted articles
 
 twitter_username: Azdaroth
 github_username:  Azdaroth
 
-google_analytics: UA-42570582-1
+# Universal Analytics stopped collecting in 2023. GA4 replaces it and only loads
+# after the visitor consents (_includes/consent.html).
+google_analytics: "G-9TED91E6TB"
 disqus_shortname: "karolgalanciak"
 disqus_short_name: karolgalanciak
 disqus_show_comment_count: false
@@ -74,26 +81,33 @@ pagination:
 
 permalink: /blog/:year/:month/:day/:title/
 
+# Every post defaults to the engineering archive. This is what keeps the split
+# free of URL changes: /engineering/ and /blog/ are VIEWS over the same posts,
+# so all 75 permalinks and every inbound link survive untouched.
+# A new essay opts out with `section: essays` in its own front matter.
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      section: engineering
+
 author:
   name: Karol Galanciak
-  job:  CTO and co-founder of Smily, Distributed Systems Architect and Ruby on Rails expert
+  job:  co-founder and CPTO
   bio: ""
   thumb: /assets/images/me_formal_thumb.jpg
-  email: karol.galanciak@gmail.com
   url: https://karolgalanciak.com
   github: https://github.com/Azdaroth
   twitter: https://twitter.com/Azdaroth
   linkedin: https://www.linkedin.com/in/karol-galanciak-64b25381
 
-# Primary navigation. Nine items wrapped onto 2-3 rows at every desktop width.
-# The remaining six destinations (archives, book, presentations, publications,
-# open source, privacy) moved to the footer nav in _includes/footer.html and are
-# still linked from /about/. Nothing became unreachable.
+# Primary navigation. Writing is deferred to the local Website V2 plan.
 navbar:
+  - slug: assessment/
+    title: Assessment
   - slug: about
     title: About
-  - slug: blog
-    title: Blog
   - slug: contact
     title: Contact
 
@@ -136,3 +150,5 @@ markdown: kramdown
 
 
 # exclude: ["config.rb", "src", "Gemfile", "Gemfile.lock", "package.json","README.md", "Rakefile"]
+
+booking_url: "https://cal.com/karol-galanciak-fkbcn1/introductory-conversation-with-karol"

@@ -1,0 +1,136 @@
+<div id="consent-banner" class="consent-banner" role="dialog" aria-modal="false"
+     aria-labelledby="consent-title" aria-describedby="consent-text" hidden>
+  <div class="consent-inner">
+    <p class="consent-title" id="consent-title">Cookies</p>
+    <p class="consent-text" id="consent-text">
+      This site loads analytics and comments only if you say yes. Everything needed to
+      read the page works either way, and you can change your mind at any time.
+      Disqus, the comments provider, may also use data for advertising.
+      <a href="{{ '/privacy-policy' | prepend: site.baseurl }}">What is collected &rarr;</a>
+    </p>
+    <div class="consent-actions">
+      <button type="button" class="button" data-consent="granted">Accept</button>
+      <button type="button" class="button button-ghost" data-consent="denied">Reject</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var KEY = 'kg-consent';
+  var banner = document.getElementById('consent-banner');
+  var GA_ID = {{ site.google_analytics | default: '' | jsonify }};
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { window.dataLayer.push(arguments); }
+  window.gtag = gtag;
+  gtag('consent', 'default', {
+    analytics_storage: 'denied', ad_storage: 'denied',
+    ad_user_data: 'denied', ad_personalization: 'denied'
+  });
+
+  function read() {
+    try { return window.localStorage.getItem(KEY); } catch (e) { return null; }
+  }
+  function write(v) {
+    try { window.localStorage.setItem(KEY, v); } catch (e) {}
+  }
+
+  function loadAnalytics() {
+    if (!GA_ID) return;
+    if (window.__kgGaLoaded) return;
+    window.__kgGaLoaded = true;
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(GA_ID);
+    document.head.appendChild(s);
+    gtag('js', new Date());
+    gtag('config', GA_ID, {
+      allow_google_signals: false,
+      allow_ad_personalization_signals: false,
+      cookie_expires: 63072000
+    });
+  }
+
+  function loadDeferred() {
+    // Anything tagged data-consent-src is a third party held back until now.
+    var nodes = document.querySelectorAll('script[type="text/plain"][data-consent-src]');
+    for (var i = 0; i < nodes.length; i++) {
+      var old = nodes[i];
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = old.getAttribute('data-consent-src');
+      if (old.getAttribute('data-consent-charset')) s.charset = old.getAttribute('data-consent-charset');
+      old.parentNode.replaceChild(s, old);
+    }
+    document.documentElement.setAttribute('data-consent', 'granted');
+    window.dispatchEvent(new Event('kg:consent-granted'));
+  }
+
+  function clearAnalyticsCookies() {
+    var names = document.cookie.split(';').map(function (c) { return c.split('=')[0].trim(); });
+    var domains = window.location.hostname.split('.');
+    var paths = window.location.pathname.split('/');
+    var cookiePaths = ['/'];
+    for (var p = 1; p < paths.length; p++) {
+      var path = paths.slice(0, p + 1).join('/');
+      cookiePaths.push(path, path + '/');
+    }
+    names.forEach(function (name) {
+      if (!/^(_ga($|_)|_gid$|_gat($|_))/.test(name)) return;
+      cookiePaths.forEach(function (path) {
+        var expired = name + '=; Max-Age=0; path=' + path;
+        document.cookie = expired;
+        for (var i = 0; i < domains.length; i++) {
+          document.cookie = expired + '; domain=' + domains.slice(i).join('.');
+        }
+      });
+    });
+  }
+
+  function apply(v) {
+    if (v === 'granted') {
+      if (GA_ID) window['ga-disable-' + GA_ID] = false;
+      gtag('consent', 'update', { analytics_storage: 'granted' });
+      loadAnalytics(); loadDeferred();
+    } else {
+      var needsReload = window.__kgGaLoaded || window.__kgDisqusLoaded;
+      if (GA_ID) window['ga-disable-' + GA_ID] = true;
+      gtag('consent', 'update', { analytics_storage: 'denied' });
+      clearAnalyticsCookies();
+      document.documentElement.setAttribute('data-consent', 'denied');
+      if (needsReload) window.location.reload();
+    }
+  }
+
+  function show() { if (banner) banner.hidden = false; }
+  function hide() { if (banner) banner.hidden = true; }
+
+  var current = read();
+  apply(current);
+  if (current !== 'granted' && current !== 'denied') show();
+
+  if (banner) {
+    banner.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-consent]');
+      if (!btn) return;
+      var choice = btn.getAttribute('data-consent');
+      write(choice);
+      hide();
+      apply(choice);
+    });
+  }
+
+  window.addEventListener('storage', function (e) {
+    if (e.key !== KEY && e.key !== null) return;
+    apply(read());
+  });
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-consent-reopen]');
+    if (!t) return;
+    e.preventDefault();
+    show();
+    if (banner) banner.scrollIntoView({ block: 'center' });
+  });
+})();
+</script>

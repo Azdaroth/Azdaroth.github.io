@@ -1,4 +1,13 @@
 <section class="share-buttons">
   <h4 class="share-this-article">Share this article</h4>
-  <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-size="large" data-show-count="false">Tweet</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+  {% comment %}
+    A plain link, not the Twitter widget. The widget loaded platform.twitter.com on
+    every article and set third-party cookies to render one button.
+  {% endcomment %}
+  <a class="button button-ghost"
+     href="https://twitter.com/intent/tweet?url={{ page.url | prepend: site.url | uri_escape }}&amp;text={{ page.title | uri_escape }}"
+     target="_blank" rel="noopener">Share on X</a>
+  <a class="button button-ghost"
+     href="https://www.linkedin.com/sharing/share-offsite/?url={{ page.url | prepend: site.url | uri_escape }}"
+     target="_blank" rel="noopener">Share on LinkedIn</a>
 </section>

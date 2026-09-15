@@ -1,0 +1,5 @@
+{% if site.booking_url and site.booking_url != "" %}
+<a href="{{ site.booking_url | escape }}" class="button" rel="noopener">Book an introductory call <span aria-hidden="true">&rarr;</span></a>
+{% else %}
+<a href="{{ '/contact/' | relative_url }}" class="button">{{ include.label | default: 'Discuss your situation' }} <span aria-hidden="true">&rarr;</span></a>
+{% endif %}

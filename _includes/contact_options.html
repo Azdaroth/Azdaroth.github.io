@@ -1,0 +1,14 @@
+<div class="contact-panel">
+  <p class="practice-eyebrow">Start with a conversation</p>
+  <h2>What do you want to move forward?</h2>
+  <p>Tell me about your company or prototype, the decision you’re facing, and where you need help.</p>
+  {% if site.booking_url and site.booking_url != "" %}
+  <p><a href="{{ site.booking_url | escape }}" class="button" rel="noopener">Choose a time to talk <span aria-hidden="true">&rarr;</span></a></p>
+  <p class="contact-note">Book a 30-minute introductory conversation.</p>
+  {% else %}
+  <p><a href="{{ site.author.linkedin }}" rel="noopener" class="button">Message me on LinkedIn <span aria-hidden="true">&rarr;</span></a></p>
+  <p class="contact-note">Drop me a message on LinkedIn with a short introduction and a few times that work for you.</p>
+  {% endif %}
+  <p>We’ll discuss the outcome you need, whether I can help, and the likely scope and fee.</p>
+</div>
+<p>Want to get in touch? <a href="{{ site.author.linkedin }}" rel="noopener">Message me on LinkedIn.</a></p>

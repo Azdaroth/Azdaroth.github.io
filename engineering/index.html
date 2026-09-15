@@ -1,0 +1,55 @@
+---
+layout: pages
+title: Engineering
+permalink: /engineering/
+description: >-
+  Distributed systems work in public - Kafka change data capture,
+  event-driven architecture, PCI DSS, and a full migration onto AWS.
+footer: false
+---
+
+{% assign eng = site.posts | where: "section", "engineering" %}
+
+<div class="page">
+  <header class="post-header">
+    <h1 class="post-title">Engineering</h1>
+    <span class="post-meta">{{ eng | size }} articles &middot; {{ eng.last.date | date: "%Y" }} - {{ eng.first.date | date: "%Y" }}</span>
+  </header>
+
+  <div class="post-content">
+    <p>I still write code. This archive is about how software is actually built.</p>
+
+    <h2>What I built as the CTO of Smily</h2>
+
+    <ul>
+      <li>Managed an ecosystem of 27 distributed applications, plus several Ember applications</li>
+      <li>A <strong>350&times; improvement in data synchronization speed</strong> between services, replacing HTTP API polling with Kafka-based Change Data Capture through <a href="https://github.com/BookingSync/dionysus-rb">a custom framework</a> - average latency fell from over 30 minutes to under 5 seconds, while consumers used less than 30% of the CPU and memory the previous architecture needed</li>
+      <li>Event-based architecture and inter-service communication over RabbitMQ, through <a href="https://github.com/BookingSync/hermes-rb">a second custom framework</a></li>
+      <li>A PCI DSS compliant platform for credit card data processing, and the compliance maintained across multiple years</li>
+      <li>A migration off legacy <a href="https://github.com/teamhephy/workflow">Hephy Workflow PaaS</a> and self-hosted Kubernetes onto AWS EKS, Helm, ArgoCD and Jenkins</li>
+      <li>Five self-managed PostgreSQL clusters migrated to AWS RDS using AWS DMS</li>
+      <li>Three self-managed Redis clusters migrated to AWS ElastiCache</li>
+      <li>The <a href="https://queue.acm.org/detail.cfm?id=3454124">SPACE framework</a> introduced as the way we measured engineering, instead of counting output</li>
+    </ul>
+
+    <h2>The archive</h2>
+
+    <p>
+      Writing since {{ eng.last.date | date: "%Y" }}, oldest at the bottom. Some of it has aged well and some of it
+      has not. I have left it as it was.
+    </p>
+  </div>
+
+  <section class="post-list">
+    {% for post in eng %}
+      {% capture this_year %}{{ post.date | date: "%Y" }}{% endcapture %}
+      {% unless year == this_year %}
+        {% assign year = this_year %}
+        <h2 class="post-list-year">{{ year }}</h2>
+      {% endunless %}
+      <article class="post">
+        {% include archive_post.html %}
+      </article>
+    {% endfor %}
+  </section>
+</div>

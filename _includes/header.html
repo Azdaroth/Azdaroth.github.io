@@ -11,14 +11,15 @@
 
     <nav class="navbar" id="site-nav">
       <ul>
+        <li><a href="{{ "/work-with-me/" | relative_url }}">Work with me</a></li>
         {% for item in site.navbar %}
-          <li><a href="{{ '/' | prepend: site.baseurl }}{{ item.slug }}">{{ item.title }}</a></li>
+          {% unless item.slug == 'assessment/' %}
+            <li><a href="{{ '/' | prepend: site.baseurl }}{{ item.slug }}">{{ item.title }}</a></li>
+          {% endunless %}
         {% endfor %}
-        <li><a href="{{ "/feed.xml" | prepend: site.baseurl }}" title="RSS feed"><span class="visually-hidden">RSS</span>
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 11a9 9 0 0 1 9 9h-2.5A6.5 6.5 0 0 0 4 13.5zm0-6a15 15 0 0 1 15 15h-2.5A12.5 12.5 0 0 0 4 7.5zM5.8 17.2a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/></svg>
-        </a></li>
       </ul>
     </nav>
+    <a href="{{ site.booking_url | default: '/contact/' }}" class="button header-cta">{% if site.booking_url and site.booking_url != "" %}Book a call{% else %}Let’s talk{% endif %} <span aria-hidden="true">&rarr;</span></a>
   </div>
 </header>
 

@@ -1,4 +1,4 @@
-<form action="https://getform.io/f/{{site.getformID}}" method="POST">
+<form action="https://getform.io/f/{{site.getformID}}" method="POST" id="contact-form">
   <div class="form-group">
     <label for="email" required="required">Email address</label>
     <input type="email" name="email" class="form-control" id="email" required="required">
@@ -11,13 +11,40 @@
     <label for="message">Message</label>
     <textarea class="form-control" name="message" id="message" rows="7" required="required"></textarea>
   </div>
+
+  {% comment %}
+    reCAPTCHA is a Google third party that sets cookies. It used to load on every
+    page that carried this form, so a reader who never touched the form still got
+    it. It now loads on the first interaction with the form, which is the point at
+    which it becomes necessary to the thing the visitor asked for.
+  {% endcomment %}
   <div class="g-recaptcha" data-sitekey="{{site.recaptcha.site_key}}"></div>
 
-  <p>
-    By submitting this form, you are accepting the <a href="/privacy-policy" target="_blank">Privacy Policy</a>
-  <p>
+  <p class="form-note">
+    By submitting this form you accept the
+    <a href="{{ '/privacy-policy' | prepend: site.baseurl }}">Privacy Policy</a>. The form is
+    protected by Google reCAPTCHA, which loads when you start typing.
+  </p>
 
   <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script>
+(function () {
+  var form = document.getElementById('contact-form');
+  if (!form) return;
+  var loaded = false;
+  function loadRecaptcha() {
+    if (loaded) return;
+    loaded = true;
+    var s = document.createElement('script');
+    s.src = 'https://www.google.com/recaptcha/api.js';
+    s.async = true;
+    s.defer = true;
+    document.head.appendChild(s);
+  }
+  ['focusin', 'input', 'submit'].forEach(function (evt) {
+    form.addEventListener(evt, loadRecaptcha, { once: true });
+  });
+})();
+</script>

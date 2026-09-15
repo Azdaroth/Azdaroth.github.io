@@ -1,53 +1,40 @@
 ---
 layout: pages
+practice: true
 ---
+<section class="practice-home">
+  <section class="practice-hero">
+    <div>
+      <p class="practice-eyebrow">Product strategy · Team leadership · Hands-on engineering</p>
+      <h1>Build the product. Grow the team. Move the business forward.</h1>
+      <p class="lede">I help founders turn growth plans into product direction, the right team, and working software - and lead the changes alongside them.</p>
+      <p class="practice-signature">Ultra-lean and AI-native.</p>
+      <p class="offer-actions"><a href="{{ '/work-with-me/' | relative_url }}" class="button">Work with me &rarr;</a><a href="{{ site.booking_url | default: '/contact/' }}" class="home-contact-link">Book an introductory call &rarr;</a></p>
+    </div>
+    <figure class="practice-portrait">
+      <img src="{{ site.author.thumb | relative_url }}" alt="Karol Galanciak" fetchpriority="high">
+      <figcaption>Karol Galanciak<span>Business judgment. Builder’s instinct.</span></figcaption>
+    </figure>
+  </section>
 
-<section class="page home-intro">
-  <figure class="home-portrait rail">
-    <img src="{{ site.author.thumb | prepend: site.baseurl }}" alt="Karol Galanciak" class="dot">
-  </figure>
+  <section class="practice-section practice-start">
+    <div class="section-intro"><p class="practice-eyebrow">Where we begin</p><h2>Where do you need help?</h2><p>For founders of growing product companies, from a validated prototype to an established product and engineering team.</p></div>
+    <div>
+      {% include offer_chooser.html %}
+    </div>
+  </section>
 
-  <h1 class="home-statement">I'm <strong itemprop="name">{{ site.author.name }}</strong>, a <em itemprop="jobTitle">{{ site.author.job }}</em>.</h1>
+  {% include practice_process.html %}
 
-  <div class="home-body">
-    <p>
-      Thanks to over 10 years of experience, working on difficult challenges and being committed to
-      learning new things every day, I've had a chance to solve a variety of problems: Kafka-based
-      Change Data Capture, event-based architecture over RabbitMQ, a PCI DSS compliant platform for
-      credit card data, and migrations off self-hosted Kubernetes, PostgreSQL and Redis onto AWS.
-      <a href="{{ '/about' | prepend: site.baseurl }}">More about me &rarr;</a>
-    </p>
+  <section class="practice-section practice-experience">
+    <div><p class="practice-eyebrow">The person doing the work</p><h2>A business perspective, with the ability to build.</h2></div>
+    <div><p class="lede">I’m Karol Galanciak. Over eleven years at Smily (formerly BookingSync), I went from senior engineer to CTO, then co-founder and CPTO.</p><p>I helped build a larger organisation, then had to rebuild it smaller. My work spans business and product decisions, building and leading teams, and hands-on engineering.</p><a href="{{ '/about/' | relative_url }}">Read the full story &rarr;</a></div>
+  </section>
 
-    <p>
-      I strongly believe in <strong>always giving back</strong>. That's why I've been involved in
-      <a href="{{ '/open-source' | prepend: site.baseurl }}">many open source projects</a>, wrote
-      <a href="{{ '/test-driven-ember' | prepend: site.baseurl }}">a book</a> and released it for free,
-      spoken at <a href="{{ '/presentations' | prepend: site.baseurl }}">conferences</a> and written for
-      <a href="{{ '/publications' | prepend: site.baseurl }}">other blogs</a>.
-    </p>
-  </div>
+  {% include recommendations.html %}
 
-  {% if site.posts.size > 0 %}
-    <section class="home-recent">
-      <h2 class="home-recent-title">Recent writing</h2>
-      <ul class="home-recent-list">
-        {% for post in site.posts limit: 3 %}
-          <li>
-            <span class="post-meta"><time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%-d %b %Y" }}</time></span>
-            <a href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-          </li>
-        {% endfor %}
-      </ul>
-      <p class="home-recent-all"><a href="{{ '/blog' | prepend: site.baseurl }}" class="read-more">All writing &rarr;</a></p>
-    </section>
-  {% endif %}
+  <section class="practice-closing">
+    <div><p class="practice-eyebrow">Your next decision</p><h2>What do you want to move forward?</h2><p>Bring the product, team or growth decision you’re facing.  We will figure out the next steps.</p><p>{% include conversation_cta.html %}</p></div>
+  </section>
 
-  <div class="home-foot">
-    <p class="home-actions">
-      <a href="{{ '/about' | prepend: site.baseurl }}" class="button button-ghost">About</a>
-      <a href="{{ '/blog' | prepend: site.baseurl }}" class="button button-ghost">Blog</a>
-      <a href="{{ '/contact' | prepend: site.baseurl }}" class="button button-ghost">Contact</a>
-    </p>
-    {% include social.html %}
-  </div>
 </section>
