@@ -69,7 +69,7 @@ Founders of growing product companies, from a validated prototype to organisatio
 
 You’re open to testing your assumptions and giving me access to the people and work needed to understand the situation. Existing product and engineering leaders are part of the engagement.
 
-My path at Smily has spanned business and product decisions, people management, organisational change and hands-on engineering.
+My path at Smily has spanned business and product decisions, people management, organisational change, hands-on engineering and acquisition diligence.
 
 [Read about my experience &rarr;]({{ '/about/' | relative_url }})
 
