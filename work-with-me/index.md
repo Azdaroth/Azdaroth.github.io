@@ -38,14 +38,14 @@ This is a standalone, fixed-fee review. We agree scope, inputs and schedule befo
 
 I take responsibility for agreed work alongside you and your team: product priorities, people management and hiring, architecture and hands-on implementation, or improving how discovery and delivery connect. We select the priorities your business needs.
 
-We begin with a defined outcome and a bounded piece of work. You see the decisions, what has shipped or changed, and what the evidence says. That review sets the next priorities.
+This engagement focuses on a specific change with a defined outcome and a bounded piece of work. You see the decisions, what has shipped or changed, and what the evidence says. We review progress against that outcome and agree any further work separately.
 
 <details class="engagement-details" markdown="1">
 <summary>How we agree scope, responsibility and fees</summary>
 
 Before starting, we agree the changes I will lead, the decisions I can make and those that remain with you or existing leaders. We set my involvement, your team's responsibilities and the cadence for reviewing progress.
 
-Ongoing work has its own scope and monthly fee, separate from the assessment. Duration and review points are agreed for your situation. As the changes take hold, we review what support remains useful and transfer responsibility to your team where appropriate.
+Implementation has its own scope and monthly fee, separate from the assessment. Duration and review points are agreed for your situation. As the changes take hold, we review what support remains useful and transfer responsibility to your team where appropriate.
 
 If you already have a clear plan, an assessment is not a prerequisite.
 
@@ -58,6 +58,14 @@ You’ve validated an idea with a working prototype, perhaps built with AI. I wo
 We review product and customer evidence first, then agree scope and fee. You can start without an existing engineering team.
 
 [Explore From prototype to production &rarr;]({{ '/prototype-to-production/' | relative_url }})
+
+## Fractional CTO & CPTO engagement
+
+Your company needs ongoing product and technology leadership, with someone taking responsibility for agreed decisions, teams and delivery.
+
+I work alongside you and your existing leaders, connecting product direction, team leadership and hands-on engineering. The engagement covers an ongoing leadership responsibility as priorities evolve. We agree the scope, decision authority, involvement and monthly fee before starting.
+
+[Explore fractional CTO & CPTO engagement &rarr;]({{ '/fractional-cto-cpto/' | relative_url }})
 
 {% include practice_process.html %}
 
