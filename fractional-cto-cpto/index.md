@@ -60,15 +60,24 @@ We select the responsibilities that matter for your situation. The aim is to lea
 
 We begin with the leadership responsibility you need and the outcomes it should support. Before starting, we agree scope, decision authority, access to people and evidence, my involvement, and the responsibilities that stay with you and your existing leaders.
 
+I work with a founder or executive sponsor who can resolve priorities and enable the agreed work, alongside your existing product and engineering leaders.
+
 ### Establish priorities and start the work
 
-The first phase gives us a shared view of the constraints, an initial set of priorities, named owners and a way to judge progress. I work alongside the team to put those decisions into practice.
+The first phase produces a practical starting point:
+
+- **Agreed priorities:** the outcomes that matter and the constraints we need to address.
+- **Clear decision ownership:** what I own, what stays with you and where existing leaders take responsibility.
+- **An initial action plan:** the work to start, its owners and the dependencies to resolve.
+- **Evidence of progress:** what we will look at to judge whether the work is helping.
+
+I work alongside the team to put those decisions into practice. We agree the timing and level of detail around your situation.
 
 ### Review progress and build ownership
 
-At agreed review points, we examine what has shipped or changed, what the evidence says and what needs attention next. We adjust the priorities and my involvement as the work develops, and transfer responsibility to your team where appropriate.
+We agree a rhythm of working sessions and progress reviews that fits the engagement. At each review, we examine what has shipped or changed, what the evidence says and what needs attention next. We adjust priorities and my involvement as the work develops.
 
-I work remotely. We agree regular working sessions, how we communicate between them and the time-zone overlap the engagement needs.
+We keep decisions, responsibilities and the context behind them documented. As ownership moves to your team, we agree who takes over each responsibility and work through the handover together.
 
 ## Experience behind the work
 
@@ -88,6 +97,18 @@ Two examples from that work:
 ### Do we need an assessment first?
 
 No. If you already have a clear plan, we can agree the engagement directly. If the main question is what should change, the [product and engineering assessment]({{ '/assessment/' | relative_url }}) provides an independent view and a plan your team can implement with or without me.
+
+### How would you work with our existing CTO or product leader?
+
+We agree the gap I’m filling and who owns which decisions. Existing leaders remain involved, and responsibilities are explicit from the start.
+
+### How much involvement do you need from us?
+
+I need an internal sponsor who can resolve priorities and give me access to the relevant people and evidence. We agree your participation and the team’s involvement before starting.
+
+### How does remote collaboration work?
+
+We combine scheduled working sessions with written decisions and asynchronous communication. Working-hour overlap and communication expectations are agreed upfront.
 
 ### What does it cost, and how long does it last?
 

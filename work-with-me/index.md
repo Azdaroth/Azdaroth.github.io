@@ -81,6 +81,12 @@ My path at Smily has spanned business and product decisions, people management, 
 
 [Read about my experience &rarr;]({{ '/about/' | relative_url }})
 
+## From first conversation to working together
+
+1. **Discuss the situation.** We explore what you need, what you have tried and whether I’m a useful fit.
+2. **Agree the engagement.** If there is a fit, I propose the scope, responsibilities, involvement and fee. We work through those details together.
+3. **Confirm the start.** We agree when to begin, the initial priorities and what we need from each other to get started.
+
 ## Tell me what needs to change
 
 You don’t need to choose an offering first.
