@@ -10,13 +10,14 @@ description: >-
 
 <p class="lede">A clear plan for your next stage of growth.</p>
 
-Your product is growing, and you need to decide what comes next: more people, different skills, better ways of working, or more funding. You want to understand what will make a difference before committing.
+For founders deciding where to invest next in their product and engineering: priorities, people or the way work gets done.
 
-I assess product and engineering together - from deciding what to build through delivering it and learning from the results. You leave with an evidence-based view of what is holding you back and a prioritised plan you and your team can act on.
+- **What you receive:** a concise decision document explaining what is limiting progress, what your team needs and a prioritised action plan. We work through it together.
+- **What I need from you:** your goals and existing working evidence, a short team questionnaire and selected conversations. You and the relevant leaders join the opening discussion and final working session.
+- **How we work:** remotely, with working-hour overlap and participation agreed around your team and the decision.
+- **Scope and fee:** we agree the scope, schedule and fixed fee before starting. You can implement the plan with your own team or arrange a separate implementation engagement.
 
 <p>{% include conversation_cta.html %}</p>
-
-We’ll discuss the decision you’re facing, whether an assessment would help, and the scope and fee.
 
 Prefer to message me? [Drop me a message on LinkedIn]({{ site.author.linkedin }}).
 

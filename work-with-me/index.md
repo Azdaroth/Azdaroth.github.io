@@ -10,6 +10,8 @@ description: >-
 
 <p class="lede">I help founders turn growth plans into product direction, the right team, and working software - and lead the changes alongside them.</p>
 
+<p>I work remotely, with working-hour overlap agreed for each engagement.</p>
+
 Choose the situation closest to yours. We’ll agree the scope around the decision or change you need to make.
 
 {% include offer_chooser.html %}
