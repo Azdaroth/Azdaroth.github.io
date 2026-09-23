@@ -83,6 +83,10 @@ My path at Smily has spanned business and product decisions, people management, 
 
 [Read about my experience &rarr;]({{ '/about/' | relative_url }})
 
+## How we work together
+
+We work from shared evidence and keep important decisions in writing. Each piece of work has a clear owner, and we agree which decisions and implementation responsibilities I take on and which stay with you or your team. Scheduled working sessions and progress reviews keep us aligned; between them, we use written updates to move the work forward.
+
 ## From first conversation to working together
 
 1. **Discuss the situation.** We explore what you need, what you have tried and whether I’m a useful fit.
