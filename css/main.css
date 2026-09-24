@@ -1062,3 +1062,33 @@ iframe, embed, object, video { max-width: 100%; }
 .practice-proof blockquote { margin: 0; padding: 0; border: 0; font-style: normal; }
 .practice-proof blockquote p { max-width: 62ch; margin: 0 0 1rem; font-size: 1.15rem; }
 .practice-proof figcaption { color: var(--muted); font-size: .9rem; }
+
+.recommendation-grid { grid-template-columns: 1fr; gap: 0; }
+.recommendation { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.5rem; padding: clamp(1.5rem, 4vw, 2.5rem); border-top: 1px solid var(--rule); background: none; }
+.recommendation-person { align-items: center; align-self: start; margin: 0; padding: 0; }
+.recommendation-text { margin: 0; }
+.recommendation-featured { margin: 1.5rem 0 0; padding: clamp(1.5rem, 4vw, 2.5rem); border-top: 3px solid var(--accent); background: var(--paper); }
+.recommendation-featured blockquote { margin: 0; padding: 0; border: 0; font-style: normal; }
+.recommendation-featured blockquote p { max-width: 68ch; font-size: 1rem; line-height: 1.65; }
+.recommendation-featured blockquote p:first-child { font-size: 1.25rem; line-height: 1.4; }
+.recommendation-featured blockquote p:last-child { margin-bottom: 0; }
+@media (min-width: 900px) {
+  .recommendation { grid-template-columns: 14rem minmax(0, 1fr); gap: 2rem; }
+  .recommendation .recommendation-person img { width: 56px; height: 56px; flex-basis: 56px; }
+}
+
+.recommendation { padding: 1.5rem; gap: 1.25rem; }
+.recommendation-copy { min-width: 0; }
+.recommendation .recommendation-excerpt,
+.recommendation .recommendation-full { margin: 0; padding: 0; border: 0; font-style: normal; }
+.recommendation .recommendation-excerpt p,
+.recommendation .recommendation-full p { font-size: 1rem; line-height: 1.6; }
+.recommendation .recommendation-excerpt p { margin: 0 0 .75rem; }
+.recommendation-details summary { cursor: pointer; color: var(--accent); font-size: .9rem; text-decoration: underline; text-underline-offset: .2em; }
+.recommendation-details summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.recommendation-details[open] summary { margin-bottom: 1rem; }
+.recommendation-collapse,
+.recommendation-details[open] .recommendation-expand { display: none; }
+.recommendation-details[open] .recommendation-collapse { display: inline; }
+.recommendation-copy:has(.recommendation-details[open]) > .recommendation-excerpt { display: none; }
+.recommendation-full p:last-child { margin-bottom: 0; }

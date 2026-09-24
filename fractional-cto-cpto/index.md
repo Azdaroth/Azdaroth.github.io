@@ -16,6 +16,14 @@ I help founders connect what the business needs with what the team builds, how i
 
 <p>{% include conversation_cta.html %}</p>
 
+<figure class="practice-proof">
+  <blockquote>
+    <p>“He can sit in a strategy conversation about commercial value, then go all the way down into product discovery, delivery, how to architect it, build it with his own hands, and lead a team to build it with him.</p>
+    <p>… If you can get him as a fractional CPTO, on your board or in your investor committee, take it.”</p>
+  </blockquote>
+  <figcaption><strong>Sébastien Grosjean</strong> · CEO - Smily<br><a href="{{ '/#seb-recommendation' | relative_url }}">Read the full recommendation &rarr;</a></figcaption>
+</figure>
+
 ## When this is useful
 
 **“I’m still the person everyone comes to for product and technical decisions.”**
@@ -90,7 +98,6 @@ Two examples from that work:
 
 [More about my experience &rarr;]({{ '/about/' | relative_url }})
 
-{% include recommendations.html %}
 
 ## Practical questions
 
