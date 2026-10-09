@@ -3,7 +3,7 @@ layout: post
 title: "Introduction to ActiveRecord and ActiveModel Attributes API"
 date: 2016-12-04 22:00
 comments: true
-categories: [Ruby, Rails, Rails on Rails, ActiveRecord, ActiveModel]
+categories: [Ruby, Rails, Ruby on Rails, ActiveRecord, ActiveModel]
 ---
 
 <p><strong>Rails 5.0</strong> is without a doubt a great release with plenty of useful changes and additions. The most notable change was probably <strong>ActionCable</strong> - the layer responsible for integrating your app with websockets. However, there were also other additions that could bring some <strong>substantial improvements</strong> to your Rails apps, but were a bit outshined by bigger changes. One of such features is <strong>Attributes API</strong>.</p>

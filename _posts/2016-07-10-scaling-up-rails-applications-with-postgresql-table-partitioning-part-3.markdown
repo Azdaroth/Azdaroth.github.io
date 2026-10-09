@@ -3,7 +3,7 @@ layout: post
 title: "Scaling Up Rails Applications With PostgreSQL Table Partitioning - Part 3"
 date: 2016-07-10 23:50
 comments: true
-categories: [PostgreSQL, databases, Ruby, Ruby on Rails, Scaling, Performance, Architecture]
+categories: [PostgreSQL, Databases, Ruby, Ruby on Rails, Scaling, Performance, Architecture]
 ---
 
 <p>After publishing recent blog posts about table partitioning - its <a href="https://karolgalanciak.com/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/" target="_blank">SQL basics part</a> and <a href="https://karolgalanciak.com/blog/2016/06/12/scaling-up-rails-applications-with-postgresql-table-partitioning-part-2/" target="_blank">how to use in in Rails application</a> I was asked quite a few times what is the real <b>performance gain</b> when using <strong>table partitioning</strong>. This is a great question, so let's answer it by performing some benchmarks.</p>

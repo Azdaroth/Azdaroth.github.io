@@ -3,7 +3,7 @@ layout: post
 title: "Multiple databases in a single query in your Rails apps - Postgres Foreign Data Wrappers to the rescue"
 date: 2021-06-27 7:00
 comments: true
-categories: [Ruby on Rails, Ruby, Postgres, databases]
+categories: [Ruby on Rails, Ruby, PostgreSQL, Databases]
 ---
 
 Imagine that you are building a separate application for your e-commerce system dedicated to business intelligence. In other words, you want to calculate some stats for the orders. So you are going to create some new model, like OrderStat(s), and have a **separate Postgres database** for a new app. Sounds trivial so far.

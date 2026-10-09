@@ -3,7 +3,7 @@ layout: post
 title: "Scaling Up Rails Applications With PostgreSQL Table Partitioning - Part 2"
 date: 2016-06-12 22:45
 comments: true
-categories: [PostgreSQL, databases, Ruby, Ruby on Rails, Scaling, Performance, Architecture]
+categories: [PostgreSQL, Databases, Ruby, Ruby on Rails, Scaling, Performance, Architecture]
 ---
 
 <p>In the previous <a href="https://karolgalanciak.com/blog/2016/06/05/scaling-up-rails-applications-with-postgresql-table-partitioning-part-1/" target="_blank">blog post</a> we learned some basics about <strong>table partitioning</strong>: how it works and what kind of problems it solves. So far we've been discussing mostly basic concepts with raw <strong>SQL</strong> examples. But the essential question in our case would be: how to make it work inside <strong>Rails application</strong> then? Let's see what we can do about it.</p>

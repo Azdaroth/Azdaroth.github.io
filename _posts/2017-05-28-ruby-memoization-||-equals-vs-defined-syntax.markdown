@@ -4,6 +4,8 @@ title: "Ruby Memoization: ||= vs. defined? syntax"
 date: 2017-05-28 22:00
 comments: true
 categories: [Ruby, Quick Tips]
+redirect_from:
+  - /blog/2017/05/28/ruby-memoization-||-equals-vs-defined-syntax/
 ---
 
 In the majority of the **Rails applications** or even **Ruby gems** you can find a lot of use cases where you need to **memoize** a result of some computation for performance benefits and to not compute it again if this result has already been computed. Seems like doing the assignment to some instance variable with `||=` operator is the most commonly used solution for this purpose, e.g. `@result ||= do_some_heavy_computation`. However, there are some cases where it might not produce the expected outome and you should actually use `defined?` operator instead.

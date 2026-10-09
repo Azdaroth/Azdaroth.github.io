@@ -66,6 +66,7 @@ repository: Azdaroth/Azdaroth.github.io
 plugins:
   - jekyll-feed
   - jekyll-sitemap
+  - jekyll-redirect-from
   - jekyll-paginate-v2
   - jekyll-seo-tag
 
@@ -125,6 +126,7 @@ recaptcha:
 # their entries' file path in the `include:` list.
 #
 exclude:
+  - script/
   - .sass-cache/
   - .jekyll-cache/
   - gemfiles/

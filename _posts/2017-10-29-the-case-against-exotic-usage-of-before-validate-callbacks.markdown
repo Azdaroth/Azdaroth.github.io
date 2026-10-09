@@ -3,7 +3,7 @@ layout: post
 title: "The Case Against Exotic Usage of :before_validate Callbacks"
 date: 2017-10-29 22:00
 comments: true
-categories: [Ruby, Rails, Rails on Rails, ActiveRecord Architecture, ActiveRecord, Architecture]
+categories: [Ruby, Rails, Ruby on Rails, ActiveRecord Architecture, ActiveRecord, Architecture]
 ---
 
 It's nothing new that **ActiveRecord callbacks** are abused in many projects and used for the wrong reasons for many use cases where they can be **easily avoided** in favor of a much better alternative, like service objects. There is one callback though that is special and quite often used for pretty **exotic reasons** that have nothing to do with the process when it gets executed - it's the `before_validate` callback.
